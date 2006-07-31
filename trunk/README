@@ -1,0 +1,8 @@
+CoMap version 1.0
+A program for susbtitution mapping and co-evolution detection.
+
+This package contains:
+- the CoMap executable,
+- an example option file, names Template.coe,
+- 2 R scripts for computing p-values and format the output of the program,
+- help files describing the program options.

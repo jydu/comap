@@ -1,0 +1,532 @@
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename comap.info
+@settitle CoMap Manual 1.0
+@afourpaper
+@c %**end of header
+
+@include version.texi
+
+@copying
+This is the manual of CoMap, version @value{VERSION}, @value{UPDATED}.
+
+Copyright @copyright{} 2006 Julien Dutheil
+@end copying
+
+@titlepage
+@title CoMap Manual
+@author Julien Dutheil
+@author @email{julien.dutheil@@univ-montp2.fr}
+
+@c The following two commands start the copyright page.
+@page
+@vskip 0pt plus 1fill1
+@insertcopying
+@end titlepage
+
+@c Output the table of contents at the beginning.
+@contents
+
+@ifnottex
+@node Top, Introduction, (dir), (dir)
+@top CoMap Manual
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Introduction::                Introducing the CoMap program and this manual.                
+* Data::                        How to import data into CoMap, file format, etc.                        
+* Model::                       Markov model specification.                     
+* Estimation::                  How to estimate parameters before an analysis.                 
+* Mapping::                     Compute the substitution mapping.                   
+* Pairwise::                    Performing the pairwise analysis of Dutheil et al. (2005).                 
+* Clustering::                  Performing the clustering analysis of Dutheil et al. (2006).              
+* Pvalue::                      Using the R scripts to compute p-values.                            
+@end menu
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Introduction, Data, Top, Top
+@chapter Introduction
+
+CoMap performs two kinds of tasks:
+@table @emph
+@item (Weighted) Probabilistic substitution mapping
+Compute all (weighted) number of subsitutions occuring on each branch of a tree,
+for each site of an alignment.
+
+@item Co-evolution analysis
+Using the substitution mapping, look for significantly groups of sites
+departing the null hypothesis of independance.
+Two kind of analyses are provided: a pairwise analysis, presented in
+Dutheil et al. (2005), and a clustering analysis in Dutheil ang Galtier (2006).
+In both cases, a parametric bootstrap approach is used to evaluate the
+significance of groups. Simulation results are written to separate
+files, a statistics software like R is required to look for the
+significancy.
+For the clustering analysis, we provide R script to perform theses
+computations.
+No preliminary knowledge of the R language is required, although it is recommanded.
+
+@end table
+
+CoMap is a command line program, written in C++ using the Bio++
+libraries. It uses the Bio++ syntaxe, so that arguments may be passed
+as parameter=value options, either directly to the command line or
+using an option file:
+@cartouche
+@example
+comap parameter1=value1 parameter2=value2 ... parameterN=valueN
+@end example
+@end cartouche
+or
+@cartouche
+@example
+comap param=option_file.
+@end example
+@end cartouche
+Option files are a list of parameter=value lines, with only one
+parameter per line. Extra-space may however be included between
+parameter name, equal sign and value:
+@cartouche
+@example
+first_parameter   = value1
+second_parameter  = value2
+@end example
+@end cartouche
+Comment may also be included, in either script format
+@cartouche
+@example
+# This is a comment
+@end example
+@end cartouche
+or C format
+@cartouche
+@example
+/* This is a comment
+*/
+@end example
+@end cartouche
+or C++ format
+@cartouche
+@example
+// This is a comment
+@end example
+@end cartouche
+Command line and file options may be combined:
+@cartouche
+@example
+comap param=option_file parameterX=valueX
+@end example
+@end cartouche
+In case of parameterX is specified in both option file and command
+line, the command line value will be used.
+This allows to run CoMap several time by changing a single option,
+like the kind of mapping for instance.
+
+The next chapters describes the whole set of options available in CoMap.
+The type of parameter value expected is defined as:
+@table @command
+@item [chars]
+A character chain
+
+@item [path]
+A file path, may be absolute or related to the current directory
+
+@item [int]
+An integer
+
+@item [int], [int>0], [int>=0], [int[2,10]]
+An integer, a positive integer, a positive non-null integet, an
+integer folling between 2 and 10
+
+@item [real], [real>0], etc
+A real number, a positive real number, etc.
+
+@item [boolean]
+A boolean value, may be one of 'yes', 'no', 'true' or 'false'
+
+@item [xxx|xxx|xxx]
+A set of allowed values
+
+@item list[type]
+A list of values of specified type, separated by comas.
+
+@end table
+ 
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Data, Model, Introduction, Top
+@chapter Data loading
+
+@table @command
+@item alphabet = [DNA|RNA|Protein]
+The alphabet to use when reading sequence.
+
+@item sequence.file=[path]
+The sequence file to use (sequences must be aligned!)
+
+@item sequence.format = [Mase|Fasta|Phylip|Clustal|DCSE]
+The alignment file format.
+
+@item sequence.format_mase.site_selection = [chars]
+Meaningful only for mase format.
+Specify a name for a site set to use.
+
+
+@item sequence.format_phylip.order = [interleaved|sequential]
+Meaningful only for phylip format.
+Tells if sequences are interleave or sequential format.
+
+@item sequence.format_phylip.ext = [classic|extended]
+Meaningful only for phylip format.
+The @option{classic} option corresponds to old phylip format, with
+names up to ten characters.
+The @option{extended} option corresponds to the behaviour of PAML,
+which allows sequence name of any size, separated from the sequence
+with at least two spaces. 
+
+@item sequence.sites_to_use = [all|nogap|complete]
+Tells wich sites to use.
+The @option{nogap} option removes all sites containing at least one
+gap, and the @option{complete} option removes all sites containing at
+least one gap or one generic character, as 'X' for instance.
+
+@item sequence.max_gap_allowed=101%
+Only works when the @option{all} option is selected.
+specify the maximum amount of gap allowed by site, given as a number
+of sequence or a percentage.
+Sites not succeeding the criterion will not be included in the analysis.
+
+@item tree.file = [path]
+The phylogenetic tree file to use.
+Branch lengths are optional.
+Only newick format is supported for now.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Model, Estimation, Data, Top
+@chapter Model specification
+
+@table @command
+
+@item model = [JCnuc|K80|T92|HKY85|F84|TN93|GTR|JCprot|DSO78|JTT92|empirical]
+Specify the substitution model to use.
+For proteins, the DCmutt method is used for JTT92 and DSO78.
+You can use the @option{empirical} option to specify another model, as
+a text file in PAML format.
+
+@item kappa=[real>0]
+Initial value or fixed value for parameter kappa
+(transition/transversion ratio) in models K80, T92, HKY85 and F84
+
+@item kappa1=[real>0]
+Initial value or fixed value for parameter kappa1 in model TN93
+
+@item kappa2=[real>0]
+Initial value or fixed value for parameter kappa2 in model TN93
+
+@item theta=[real[0,1]]
+Initial value or fixed value for parameter theta (GC content) in model
+T92
+
+@item piA,piC,piG,piT = [real[0,1]]
+Equilibrium frequencies of nucleotides A, C, G and T/U in models
+HKY85, F84, TN93 and GTR
+
+@item a,b,c,d,e = [real>0]
+Parameters of the GTR model
+
+@item model.use_observed_freq = [boolean]
+Tell if we have to use observed frequencies as parameter values (for @command{piA}, @command{piT}, @command{piG}, @command{piC} and @command{theta}).
+For proteins, this is equivalent to the -F model family.
+
+@item model_empirical.file = [path]
+Meaningful only if the @option{empirical} option is selected.
+Specify the path where to find the model (in PAML format).
+
+@item rate_distribution = [constant|gamma]
+Specify the rate across sites distribution, as constant or gamma.
+
+@item rate_distribution_gamma.alpha = [real>0]
+The gamma distribution's shape parameter
+
+@item rate_distribution.classes_number = [int>=2]
+The number of classes to use in discretization.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Estimation, Mapping, Model, Top
+@chapter Numerical parameters estimation
+
+CoMap can (re-)estimate numerical parameters for you before any
+analysis.
+These parameters include
+@itemize @bullet
+@item
+Branch lengths
+
+@item
+Entries of the substitution matrices, excepted base frequencies (piA,
+piC, piG and piT parameters, which must be taken as there observed
+values)
+
+@item
+Parameters of the rate distribution (currently only the shape
+parameter of the gamma law)
+
+@end itemize
+
+@table @command
+
+@item optimization = [boolean]
+Tells if numerical  parameters should be estimated.
+Topology estimation is not supported.
+
+@item optimization.profiler = [[path]|std]|none
+A file where to dump optimization steps (a file path or std for
+standard output or none for no output).
+
+@item optimization.message_handler = [[path]|std|none]
+A file where to dump warning messages.
+
+@item optimization.max_number_f_eval = [int<0]
+The maximum number of likelihood evaluation to perform.
+
+@item optimization.ignore_parameter = list[float[0,1]
+A list of parameters to ignore during the estimation process.
+
+@item optimization.tolerance = [float>0]
+The precision on the log-likelihood to reach.
+
+@item output.tree.file = [[path]|none]
+File path where to write the optimized tree.
+
+@item output.infos = [[path]|none]
+A text file containing several statistics for each site in the
+alignment.
+These statistics include posterior rate, rate class with maximum
+posterior probability and whether the site is conserved or not.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Mapping, Pairwise, Estimation, Top
+@chapter Substitution mapping
+
+Options in this chapter are for substitution vectors computation.
+
+@table @command
+
+@item input.vectors.file = [[path]|none]
+Restart an analysis by specifying the already computed vectors.
+Otherwise, compute vectors using the following options.
+
+@item nijt = [laplace|simple|aadist]
+The kind of mapping to perform.
+@option{laplace} option perform exact mapping, as in Dutheil et
+al. (2005).
+@option{simple} performs a naive mapping, as in Tufféry and Darlu
+(2000).
+@option{aadist} performs a weighted mapping, as in Dutheil and Galtier
+(2006). Currently available only for proteins.
+
+@item nijt_aadist.type = [grantham|grantham.volume|grantham.polarity|charge|klein.charge]
+Specify the type of weight to use.
+
+@item output.vectors.file = [[path]|none]
+Where to write the substitution mapping.
+
+@item output.tags.file = [[path]|none]
+A tree file in newick format, with node ids instead of bootstrap
+values.
+The node ids are the same as in the the vector file. 
+
+@item output.tags.translation = [[path]|none]
+Write a file whith the correspondance between leaf names and ids.
+
+@end table
+
+@section Optional commands
+
+@table @command
+@item nijt_laplace.trunc = [int>0]
+Where to trunc the series when estimating exact number of
+substitutions. A value of 10 should be fine.
+
+@item nijt_aadist.sym = [boolean]
+[untested] Tell if symetric matrices must be used.
+Should be left to ``yes''.
+
+# Should we average over all ancestral state (yes) or use ancestral states reconstruction (no) ?
+@item nijt.average = [boolean]
+Tell if mapping should be averaged over all ancestral states
+(probabilistic mapping).
+Otherwise use ancestral states reconstruction (naive mapping).
+In most case, you should leave the default value (yes).
+NB: only marginal ancestral state reconstruction is implemented. 
+
+@item nijt.joint = [boolean]
+Tell if joint probabilities are to be use, otherwise us emarginal
+probabilities.
+This option is for method comparisons, a 'yes' value is suitable in
+most cases.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Pairwise, Clustering, Mapping, Top
+@chapter Pairwise analysis
+
+@table @command
+
+@item statistic = [correlation|none]
+If @option{none} is selected, no pairwise analysis is performed.
+
+@item statistic.output.file = [path]
+Where to write the statistic value for each pair of sites.
+
+@item statistic.null = [boolean]
+Tell is the null distribution of the statistic must be computed, using
+parametric bootstrap.
+The number of simulations performed is the product of two numbers,
+adjusting the amount of CPU and RAM to use.
+
+@item statistic.null.nb_rep_CPU = [int>0]
+Increase this parameter to take less memory (slow the program)
+
+@item statistic.null.nb_rep_RAM = [int>0]
+Increase this parameter to speed the program (need more memory)
+
+@item statistic.null.output_file = [path]
+Where to write the null distribution
+
+@end table
+
+@section Performing inter-gene comparisons
+
+It is possible to compare all sites from one data set with all sites
+from a second data set (inter-gene analysis).
+
+@table @command
+
+@item sequence.file2 = [[path]|none]
+The path toward the second file. 
+All previous options can be set up for second file, just append '2' at option names.
+The default is to use options of file1 for file2.
+
+@end table
+
+@section Optional commands
+
+@table @command
+@item statistic.min = [float]
+Write only pairs with a statistic greater or equal to this value.
+
+@item statistic.min_rate = [float>0]
+Write only pairs with a posterior rate greater or equal to this value.
+
+@item statistic.min_rate_class = [int>0]
+Write only pairs with a minimum rate class greater or equal to this
+value (first class is 0).
+
+@item statistic.max_rate_diff = [float]
+Write only pairs with rates that do not differ more than this value  (-1 ->
+write all pairs).
+
+@item statistic.max_rate_class_diff = [int]
+Write only pairs with rate classes that do not differ more than this
+value (-1 -> write all pairs).
+
+@item statistic.null.cumul = [bool]
+[deprecated] Tell if an histogram of the distribution should be returned instead of
+printing all simulated pairs.
+
+@item statistic.null.lower = [float]
+[deprecated] Lower bound of histogram.
+
+@item statistic.null.upper = [float]
+[deprecated] Upper bound of histogram.
+
+@item statistic.null.nb_int = [int<0]
+[deprecated] Number of intervals in histogram.
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Clustering, Pvalue, Pairwise, Top
+@chapter Clustering analysis
+
+@table @command
+
+@item clustering.distance = [cor|euclidian|none]
+Distance to use: cor (correlation) or euclidian or none (no clustering).
+
+@item clustering.scale = [boolean]
+Tell is mapping should be normalized (each row (=branch) will be
+divided by its sum.
+
+@item clustering.method = complete
+Clustering algorithm: only complete is supported for now.
+
+@item clustering.output.matrix.file = [[path]|none]
+Where to write the distance matrix (in phylip format).
+
+@item clustering.output.tree.file = [[path]|none]
+Where to write the clustering tree (newick format).
+
+@item clustering.output.groups.file = [[path]|none]
+Where to write the clusters (CSV format).
+
+@item clustering.null = [boolean]
+Tell if the null distribution of clusters must be computed.
+
+@item clustering.null.number = [int>0]
+Number of data sets to simulate.
+
+@item clustering.null.output.file = [path]
+Where to write the simulated clusters (CSV format).
+
+@end table
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Pvalue,  , Clustering, Top
+@chapter P-value computation
+
+CoMap do not compute p-values from the simulation.
+This goal is achieved by two R scripts, distributed along with the
+program.
+The script @file{CoMapFunctions.R} contains several functions
+performing the computation.
+The script @file{computePValues.R} is the one to launch.
+It calls the previous one, so they must be in the same directory.
+
+Edit the first section of the @file{computePValues.R} so that is
+matches your files, and then run it with the command
+@cartouche
+@example
+R --vanilla < computePValues.R
+@end example
+@end cartouche
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+
+@c ------------------------------------------------------------------------------------------------------------------
+@c end of document
+
+@c @node Index,  , Pvalue, Top
+@c @unnumbered Index
+@c
+@c @printindex cp
+
+@bye
