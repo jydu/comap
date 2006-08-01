@@ -1,5 +1,5 @@
-%define name Coe
-%define version 0.2.1
+%define name CoMap
+%define version 1.0.0
 %define release 1
 %define _prefix /usr/local
 
@@ -48,6 +48,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/bin/coe
 
 %changelog
+* Mon Jul 31 2006 Julien Dutheil <Julien.Dutheil@univ-montp2.fr>
+- CoMap 1.0.0 release
 * Fri Nov 16 2005 Julien Dutheil <Julien.Dutheil@univ-montp2.fr>
 - First draft of the spec file
 
