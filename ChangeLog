@@ -1,2 +1,9 @@
+- 29/08/06 -*- Version 1.0.1 -*-
+
+- 25/08/06 Julien Dutheil
+* Update for compatibility with PhylLib 1.2.
+* Removed garbage output when simulating.
+* New method for detecting compensatory mutations (beta).
+
 - 26/07/06 Julien Dutheil
 * Version 1.0.0 (first public release).
