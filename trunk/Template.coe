@@ -72,6 +72,16 @@ rate_distribution.classes_number = 4
 # (recommanded)
 optimization = yes
 
+# Method to use for optimizing numerical parameters:
+# -NB (default) Newton-Raphson for branch lengths + Brent for other parameters
+# -NND Newton-Raphson for all parameters, using numerical derivatives for non-branch lengths parameters.
+
+optimization.method=NB
+
+# Number of progressive steps to use in NB optimization (a value of 5 is often fine).
+# 1 means no progressive optimization.
+optimization_NB.nstep=1
+
 # A file where to dump optimization steps (a file path or std for standard output)
 optimization.profiler = myfile.profile
 # idem for error or warning messages:

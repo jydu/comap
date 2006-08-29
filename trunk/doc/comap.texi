@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename comap.info
-@settitle CoMap Manual 1.0
+@settitle CoMap Manual 1.0.1
 @afourpaper
 @c %**end of header
 
@@ -287,6 +287,19 @@ parameter of the gamma law)
 @item optimization = [boolean]
 Tells if numerical  parameters should be estimated.
 Topology estimation is not supported.
+
+@item optimization.method=[NB|NND]
+The optimization method to use.
+NB (default) stands for Newton-Raphson for branch lengths + Brent for
+other parameters, and
+the NND options uses Newton-Raphson for all parameters, with numerical derivatives for non-branch lengths parameters.
+
+@item optimization_NB.nstep=[int>=1]
+Number of progressive steps to perform during optimization.
+If nstep=3 and precision=E-6, a first optimization with precision =
+E-2, will be performed, then a round with precision set to E-4 and
+finally precision will be set to E-6. This approcah generally saves
+significant computation time.
 
 @item optimization.profiler = [[path]|std]|none
 A file where to dump optimization steps (a file path or std for
