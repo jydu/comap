@@ -1,5 +1,5 @@
 //
-// File: TestTools.cpp
+// File: ClusterTools.cpp
 // Created by: Julien Dutheil
 // Created on: Thu Mar 2 2006
 //
@@ -204,10 +204,11 @@ void ClusterTools::computeGlobalDistanceDistribution(
 
   for(unsigned int k = 0; k < nrep; k++)
   {
+    cout << "*"; cout.flush();
     SiteContainer * sites = simulator.simulate(sizeOfDataSet);
     drhtl.setData(*sites);
     drhtl.computeTreeLikelihood();
-    ProbabilisticSubstitutionMapping * mapping = SubstitutionMappingTools::computeSubstitutionVectors(drhtl, nijt, true);
+    ProbabilisticSubstitutionMapping * mapping = SubstitutionMappingTools::computeSubstitutionVectors(drhtl, nijt, false);
     unsigned int nbBranches = mapping->getNumberOfBranches();
     
     //Mean vector:

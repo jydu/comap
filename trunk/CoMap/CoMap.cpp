@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 	cout << endl;
 	cout << endl;
 	cout << "***********************************************************" << endl;
-	cout << "* This is CoMap       version 1.0.0      date: 25/07/2006 *" << endl;
+	cout << "* This is CoMap       version 1.0.1      date: 25/07/2006 *" << endl;
 	cout << "*     A C++ shell program to detect co-evolving sites.    *" << endl;
 	cout << "***********************************************************" << endl;
 	cout << endl;
@@ -406,6 +406,16 @@ int main(int argc, char *argv[])
     else if(distanceMethod == "cor")
     {
 		  dist = new CorrelationDistance();
+    }
+    else if(distanceMethod == "comp")
+    {
+      string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", "", true);
+      bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", params, true, "", true); 
+      if(nijtOption != "aadist" || sym) {
+        throw Exception("Compensation distance must be used with 'nijt=aadist' and 'nijt_aadist.sym=no' options.");
+      } else {
+		    dist = new CompensationDistance();
+      }
     }
     else
     {

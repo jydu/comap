@@ -184,5 +184,49 @@ class SquareCorrelationDistance: public CorrelationDistance
 
 };
 
+class CompensationDistance: public AbstractDistance
+{
+
+	public:
+		CompensationDistance() {}
+		virtual ~CompensationDistance() {}
+
+	public:
+		double d(const vector<double> & v1, const vector<double> & v2) const
+			throw (DimensionException)
+		{
+      return (_weights == NULL) ? getCompensation(v1, v2) : getWeightedCompensation(v1, v2);
+		}
+
+  protected:
+    double getCompensation(const vector<double> & v1, const vector<double> & v2) const
+			throw (DimensionException)
+    {
+			if(v1.size() != v2.size()) throw DimensionException("CompensationDistance::getCompensation(...).", v2.size(), v1.size());
+			double sumsq = 0.;
+      for(unsigned int i = 0; i < v1.size(); i++)
+      {
+			  sumsq += pow(v1[i] + v2[i], 2.);
+			}
+			double n = (double)v1.size();
+			return sumsq / n;
+    }
+    
+    double getWeightedCompensation(const vector<double> & v1, const vector<double> & v2) const
+			throw (DimensionException)
+    {
+			if(v1.size() != v2.size()) throw DimensionException("CompensationDistance::getWeightedCompensation(...).", v2.size(), v1.size());
+			double wsumsq = 0.;
+      for(unsigned int i = 0; i < v1.size(); i++)
+      {
+			  wsumsq += (*_weights)[i] * pow(v1[i] + v2[i], 2.);
+			}
+			return wsumsq;
+    }
+
+};
+
+
+
 #endif //_DISTANCE_H_
 

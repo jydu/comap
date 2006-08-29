@@ -82,102 +82,102 @@ using namespace std;
 /******************************************************************************/
 
 void CoETools::readData(
-	TreeTemplate<Node> *        &tree,
-	Alphabet *                  &alphabet,
-	VectorSiteContainer *       &allSites,
-	VectorSiteContainer *       &sites,
-	SubstitutionModel *         &model,
-	DiscreteDistribution *      &rDist,
-	HomogeneousTreeLikelihood * &tl,
-	map<string, string>         &params,
-	const string                &suffix)
+  TreeTemplate<Node> *        &tree,
+  Alphabet *                  &alphabet,
+  VectorSiteContainer *       &allSites,
+  VectorSiteContainer *       &sites,
+  SubstitutionModel *         &model,
+  DiscreteDistribution *      &rDist,
+  HomogeneousTreeLikelihood * &tl,
+  map<string, string>         &params,
+  const string                &suffix)
 {
-	alphabet = SequenceApplicationTools::getAlphabet(params, suffix, true);
-	allSites = SequenceApplicationTools::getSiteContainer(alphabet, params, suffix, false);
-	sites    = SequenceApplicationTools::getSitesToAnalyse(*allSites, params, suffix, true, true, true);
-	model    = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, sites, params, suffix, true);
-	rDist    = PhylogeneticsApplicationTools::getRateDistribution(params, suffix, true);
-	
-	ApplicationTools::displayTask("Initializing likelihood");
-	tl = new HomogeneousTreeLikelihood(
-		tree,
-		*sites,
-		model,
-		rDist, true);
+  alphabet = SequenceApplicationTools::getAlphabet(params, suffix, true);
+  allSites = SequenceApplicationTools::getSiteContainer(alphabet, params, suffix, false);
+  sites    = SequenceApplicationTools::getSitesToAnalyse(*allSites, params, suffix, true, true, true);
+  model    = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, sites, params, suffix, true);
+  rDist    = PhylogeneticsApplicationTools::getRateDistribution(params, suffix, true);
+  
+  ApplicationTools::displayTask("Initializing likelihood");
+  tl = new HomogeneousTreeLikelihood(
+    tree,
+    *sites,
+    model,
+    rDist, true);
 
-	ApplicationTools::displayTask("Tree likelihood");
-	double ll = tl -> getValue();
+  ApplicationTools::displayTask("Tree likelihood");
+  double ll = tl -> getValue();
   if(isinf(ll))
   {
     ApplicationTools::error << "!!! Unexpected initial likelihood == 0." << endl;
     ApplicationTools::error << "!!! You should consider reestimating all branch lengths parameters." << endl;
     exit(-1);
   }
-	ApplicationTools::message << setprecision(20) << ll << endl;
-	
-	bool optimize = ApplicationTools::getBooleanParameter("optimization", params, true, suffix, true, false);
-	if(optimize)
+  ApplicationTools::message << setprecision(20) << ll << endl;
+  
+  bool optimize = ApplicationTools::getBooleanParameter("optimization", params, true, suffix, true, false);
+  if(optimize)
   {
 
-		ApplicationTools::displayResult("Optimization", "");
-		//ApplicationTools::optimizeParameters(tl, params, "");
+    ApplicationTools::displayResult("Optimization", "");
+    PhylogeneticsApplicationTools::optimizeParameters(tl, params, suffix, true, true);
 
-		string mhPath = ApplicationTools::getAFilePath("optimization.message_handler", params, false, false, suffix, true);
-		ostream * messageHandler = 
-			(mhPath == "none") ? NULL :
-				(mhPath == "std") ? &cout :
-					new ofstream(mhPath.c_str(), ios::out);
-		ApplicationTools::displayResult("Message handler", mhPath);
-
-		string prPath = ApplicationTools::getAFilePath("optimization.profiler", params, false, false, suffix, false);
-		ostream * profiler = 
-			(prPath == "none") ? NULL :
-				(prPath == "std") ? &cout :
-					new ofstream(prPath.c_str(), ios::out);
-		if(profiler != NULL) (*profiler) << setprecision(20);
-		ApplicationTools::displayResult("Profiler", prPath);
-
-		// Should I ignore some parameters?
-		string paramListDesc = ApplicationTools::getStringParameter("optimization.ignore_parameter", params, "", suffix, false, true);
-		StringTokenizer st(paramListDesc, ",");
-		while(st.hasMoreToken()) {
-			try {
-				dynamic_cast<HomogeneousTreeLikelihood *>(tl) -> ignoreParameter(st.nextToken());
-			} catch(ParameterNotFoundException pnfe) {
-				ApplicationTools::displayError("Parameter '" + pnfe.getParameter() + "' not found, and so can't be ignored!");
-			} catch(exception e) {
-				cerr << "DEBUB: ERROR!!! This functionality can only be used with HomogeneousTreeLikelihood for now." << endl;
-			}
-		}
-	
-		int nbEvalMax = ApplicationTools::getIntParameter("optimization.max_number_f_eval", params, 1000000, suffix, true);
-		ApplicationTools::displayResult("Max # ML evaluations", TextTools::toString(nbEvalMax));
-	
-		double tolerance = ApplicationTools::getDoubleParameter("optimization.tolerance", params, .000001, suffix, true);
-		ApplicationTools::displayResult("Tolerance", TextTools::toString(tolerance));
-	
-		int n = OptimizationTools::optimizeNumericalParameters(
-			tl,
-			tolerance,
-			nbEvalMax,
-			messageHandler,
-			profiler,
-			2);
-		ApplicationTools::displayResult("Performed", TextTools::toString(n) + " function evaluations.");
-	
-		TreeTemplate<Node> *treeOpt = dynamic_cast<TreeTemplate<Node> *>(tl -> getTree());
-		PhylogeneticsApplicationTools::writeTree(*treeOpt, params, suffix);
-	
-		// Actualize tree.
-		// Substitution model and rate distribution are actualized automatically by
-		// the likelihood function.
-		tree  = treeOpt;
-		
-		// Print parameters:
-		ApplicationTools::displayResult("Final likelihood, -lnL =", TextTools::toString(tl -> getLogLikelihood(), 20));
-		model -> getParameters().printParameters(ApplicationTools::message);
-		rDist -> getParameters().printParameters(ApplicationTools::message);
-	}
+//    string mhPath = ApplicationTools::getAFilePath("optimization.message_handler", params, false, false, suffix, true);
+//    ostream * messageHandler = 
+//      (mhPath == "none") ? NULL :
+//        (mhPath == "std") ? &cout :
+//          new ofstream(mhPath.c_str(), ios::out);
+//    ApplicationTools::displayResult("Message handler", mhPath);
+//
+//    string prPath = ApplicationTools::getAFilePath("optimization.profiler", params, false, false, suffix, false);
+//    ostream * profiler = 
+//      (prPath == "none") ? NULL :
+//        (prPath == "std") ? &cout :
+//          new ofstream(prPath.c_str(), ios::out);
+//    if(profiler != NULL) (*profiler) << setprecision(20);
+//    ApplicationTools::displayResult("Profiler", prPath);
+//
+//    // Should I ignore some parameters?
+//    string paramListDesc = ApplicationTools::getStringParameter("optimization.ignore_parameter", params, "", suffix, false, true);
+//    StringTokenizer st(paramListDesc, ",");
+//    while(st.hasMoreToken()) {
+//      try {
+//        dynamic_cast<HomogeneousTreeLikelihood *>(tl) -> ignoreParameter(st.nextToken());
+//      } catch(ParameterNotFoundException pnfe) {
+//        ApplicationTools::displayError("Parameter '" + pnfe.getParameter() + "' not found, and so can't be ignored!");
+//      } catch(exception e) {
+//        cerr << "DEBUB: ERROR!!! This functionality can only be used with HomogeneousTreeLikelihood for now." << endl;
+//      }
+//    }
+//  
+//    int nbEvalMax = ApplicationTools::getIntParameter("optimization.max_number_f_eval", params, 1000000, suffix, true);
+//    ApplicationTools::displayResult("Max # ML evaluations", TextTools::toString(nbEvalMax));
+//  
+//    double tolerance = ApplicationTools::getDoubleParameter("optimization.tolerance", params, .000001, suffix, true);
+//    ApplicationTools::displayResult("Tolerance", TextTools::toString(tolerance));
+//  
+//    int n = OptimizationTools::optimizeNumericalParameters(
+//      tl,
+//      tolerance,
+//      nbEvalMax,
+//      messageHandler,
+//      profiler,
+//      2);
+//    ApplicationTools::displayResult("Performed", TextTools::toString(n) + " function evaluations.");
+//  
+    TreeTemplate<Node> *treeOpt = dynamic_cast<TreeTemplate<Node> *>(tl -> getTree());
+    PhylogeneticsApplicationTools::writeTree(*treeOpt, params, suffix);
+  
+    // Actualize tree.
+    // Substitution model and rate distribution are actualized automatically by
+    // the likelihood function.
+    tree  = treeOpt;
+    
+    // Print parameters:
+    ApplicationTools::displayResult("Final likelihood, -lnL =", TextTools::toString(tl -> getLogLikelihood(), 20));
+    model->getParameters().printParameters(ApplicationTools::message);
+    rDist->getParameters().printParameters(ApplicationTools::message);
+  }
   string tags = ApplicationTools::getAFilePath("output.tags.file", params, false, false, suffix, false);
   if(tags != "none")
   {
@@ -212,518 +212,518 @@ void CoETools::readData(
     newick.write(treeCopy, tags, true);
   }
 }
-	
+  
 /******************************************************************************/
-	
+  
 ProbabilisticSubstitutionMapping * CoETools::getVectors(
-	const Alphabet * alphabet,
-	      TreeTemplate<Node> & tree,
-	const SiteContainer & completeSites,
-	const SiteContainer & sites,
-	      SubstitutionModel & model,
-	      DiscreteDistribution & rDist,
-	const SubstitutionCount & substitutionCount,
-	map<string, string> & params,
-	const string & suffix)
+  const Alphabet * alphabet,
+        TreeTemplate<Node> & tree,
+  const SiteContainer & completeSites,
+  const SiteContainer & sites,
+        SubstitutionModel & model,
+        DiscreteDistribution & rDist,
+  const SubstitutionCount & substitutionCount,
+  map<string, string> & params,
+  const string & suffix)
 {
-	ProbabilisticSubstitutionMapping * substitutions = NULL;
-	string inputVectorsFilePath = ApplicationTools::getAFilePath("input.vectors.file", params, false, false, suffix, false);
+  ProbabilisticSubstitutionMapping * substitutions = NULL;
+  string inputVectorsFilePath = ApplicationTools::getAFilePath("input.vectors.file", params, false, false, suffix, false);
 
-	if(inputVectorsFilePath != "none")
+  if(inputVectorsFilePath != "none")
   {
-		//We try to load the substitution vector directly from file:
-		int nbSites = completeSites.getNumberOfSites();
-		ApplicationTools::displayResult("Substitution mapping in file:", inputVectorsFilePath);
-		ifstream sc(inputVectorsFilePath.c_str(), ios::in);
-		substitutions = new ProbabilisticSubstitutionMapping(tree, nbSites);
+    //We try to load the substitution vector directly from file:
+    int nbSites = completeSites.getNumberOfSites();
+    ApplicationTools::displayResult("Substitution mapping in file:", inputVectorsFilePath);
+    ifstream sc(inputVectorsFilePath.c_str(), ios::in);
+    substitutions = new ProbabilisticSubstitutionMapping(tree, nbSites);
     SubstitutionMappingTools::readFromStream(sc, *substitutions);
-	}
+  }
   else
   {
-		//We compute the substitutions vector:
+    //We compute the substitutions vector:
 
-		string outputVectorsFilePath = ApplicationTools::getAFilePath("output.vectors.file", params, true, false, suffix, false);
-		ApplicationTools::displayResult("Output mapping to file" + suffix, outputVectorsFilePath);
+    string outputVectorsFilePath = ApplicationTools::getAFilePath("output.vectors.file", params, true, false, suffix, false);
+    ApplicationTools::displayResult("Output mapping to file" + suffix, outputVectorsFilePath);
 
-		ApplicationTools::displayMessage("Compute all substitution numbers for each site.");
-		
-		bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
-		bool joint   = ApplicationTools::getBooleanParameter("nijt.joint"  , params, true);
-		DRHomogeneousTreeLikelihood drhtl(&tree, completeSites, &model, &rDist, true);
-		if(average)
+    ApplicationTools::displayMessage("Compute all substitution numbers for each site.");
+    
+    bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
+    bool joint   = ApplicationTools::getBooleanParameter("nijt.joint"  , params, true);
+    DRHomogeneousTreeLikelihood drhtl(&tree, completeSites, &model, &rDist, true);
+    if(average)
     {
-			if(joint)
+      if(joint)
       {
-				substitutions = SubstitutionMappingTools::computeSubstitutionVectors(drhtl, substitutionCount);
-			}
+        substitutions = SubstitutionMappingTools::computeSubstitutionVectors(drhtl, substitutionCount);
+      }
       else
       {
-				substitutions = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drhtl, substitutionCount);
-			}
-		}
+        substitutions = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drhtl, substitutionCount);
+      }
+    }
     else
     {
-			if(joint)
+      if(joint)
       {
-				substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drhtl, substitutionCount);
-			}
+        substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drhtl, substitutionCount);
+      }
       else
       {
-				substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drhtl, substitutionCount);
-			}
-		}
-		if(outputVectorsFilePath != "none")
+        substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drhtl, substitutionCount);
+      }
+    }
+    if(outputVectorsFilePath != "none")
     {
-			ofstream outputVectors(outputVectorsFilePath.c_str(), ios::out);
-			SubstitutionMappingTools::writeToStream(*substitutions, completeSites, outputVectors);
-			outputVectors.close();
-		}
+      ofstream outputVectors(outputVectorsFilePath.c_str(), ios::out);
+      SubstitutionMappingTools::writeToStream(*substitutions, completeSites, outputVectors);
+      outputVectors.close();
+    }
 
-	}
-	return substitutions;
+  }
+  return substitutions;
 }
 
 /******************************************************************************/
 
 int CoETools::getMinRateClass(map<string, string> & params, string suffix)
 {
-	int minRateClass = ApplicationTools::getIntParameter("statistic.min_rate_class", params, 0, suffix, true);
-	if(minRateClass > 0)
-		ApplicationTools::displayMessage(
-				"Only sites with posterior rate class >= " +
-				TextTools::toString(minRateClass) +
-				" will be compared.");
-	return minRateClass;	
+  int minRateClass = ApplicationTools::getIntParameter("statistic.min_rate_class", params, 0, suffix, true);
+  if(minRateClass > 0)
+    ApplicationTools::displayMessage(
+        "Only sites with posterior rate class >= " +
+        TextTools::toString(minRateClass) +
+        " will be compared.");
+  return minRateClass;  
 }
 
 /******************************************************************************/
 
 double CoETools::getMinRate(map<string, string> & params, string suffix)
 {
-	double minRate = ApplicationTools::getDoubleParameter("statistic.min_rate", params, 0., suffix, true);
-	if(minRate > 0.)
-		ApplicationTools::displayMessage(
-				"Only sites with posterior rate > = " +
-				TextTools::toString(minRate) +
-				" will be compared.");
-	return minRate;
+  double minRate = ApplicationTools::getDoubleParameter("statistic.min_rate", params, 0., suffix, true);
+  if(minRate > 0.)
+    ApplicationTools::displayMessage(
+        "Only sites with posterior rate > = " +
+        TextTools::toString(minRate) +
+        " will be compared.");
+  return minRate;
 }
 
 /******************************************************************************/
 
 int CoETools::getMaxRateClassDiff(map<string, string> & params)
 {
-	int maxRateClassDiff = ApplicationTools::getIntParameter("statistic.max_rate_class_diff", params, -1);
-	if(maxRateClassDiff >= 0) 
-		ApplicationTools::displayMessage(
-			"Only pairs of sites with difference in posterior rate class <= " +
-			TextTools::toString(maxRateClassDiff) +
-			" will be compared.");
-	return maxRateClassDiff;	
+  int maxRateClassDiff = ApplicationTools::getIntParameter("statistic.max_rate_class_diff", params, -1);
+  if(maxRateClassDiff >= 0) 
+    ApplicationTools::displayMessage(
+      "Only pairs of sites with difference in posterior rate class <= " +
+      TextTools::toString(maxRateClassDiff) +
+      " will be compared.");
+  return maxRateClassDiff;  
 }
 
 /******************************************************************************/
 
 double CoETools::getMaxRateDiff(map<string, string> & params)
 {
-	double maxRateDiff = ApplicationTools::getDoubleParameter("statistic.max_rate_diff", params, -1.);
-	if(maxRateDiff >= 0.)
-		ApplicationTools::displayMessage(
-				"Only pairs of sites with difference in posterior rate <= " +
-				TextTools::toString(maxRateDiff) +
-				" will be compared.");
-	return maxRateDiff;
+  double maxRateDiff = ApplicationTools::getDoubleParameter("statistic.max_rate_diff", params, -1.);
+  if(maxRateDiff >= 0.)
+    ApplicationTools::displayMessage(
+        "Only pairs of sites with difference in posterior rate <= " +
+        TextTools::toString(maxRateDiff) +
+        " will be compared.");
+  return maxRateDiff;
 }
 
 /******************************************************************************/
 
 double CoETools::getStatisticMin(map<string, string> & params)
 {
-	double minStatistic = ApplicationTools::getDoubleParameter("statistic.min", params, 0);
-	if(minStatistic > 0)
-		ApplicationTools::displayMessage(
-			"Only pairs of sites with abs(statistic) >= " +
-			TextTools::toString(minStatistic) +
-			" will be written.");
-	return minStatistic;
+  double minStatistic = ApplicationTools::getDoubleParameter("statistic.min", params, 0);
+  if(minStatistic > 0)
+    ApplicationTools::displayMessage(
+      "Only pairs of sites with abs(statistic) >= " +
+      TextTools::toString(minStatistic) +
+      " will be written.");
+  return minStatistic;
 }
 
 /******************************************************************************/
 
 bool CoETools::haveToPerformIndependantComparisons(map<string, string> & params) {
-	bool indepComp = ApplicationTools::getBooleanParameter("independant_comparisons", params, false);
-	if(indepComp)
-		ApplicationTools::displayMessage(
-			"Only independant comparisons will be performed.");
-	return indepComp;
+  bool indepComp = ApplicationTools::getBooleanParameter("independant_comparisons", params, false);
+  if(indepComp)
+    ApplicationTools::displayMessage(
+      "Only independant comparisons will be performed.");
+  return indepComp;
 }
 
 /******************************************************************************/
 
 void CoETools::writeInfos(
-	const SiteContainer & completeSites,
-	const DiscreteRatesAcrossSitesTreeLikelihood & ras,
-	map<string, string> & params,
-	const string & suffix)
+  const SiteContainer & completeSites,
+  const DiscreteRatesAcrossSitesTreeLikelihood & ras,
+  map<string, string> & params,
+  const string & suffix)
 {
-	string outFile = ApplicationTools::getAFilePath("output.infos", params, false, false, suffix, true);
-	if(outFile == "none") return;
+  string outFile = ApplicationTools::getAFilePath("output.infos", params, false, false, suffix, true);
+  if(outFile == "none") return;
 
-	// Get the rate class with maximum posterior probability:
-	vector<unsigned int> classes = ras.getRateClassWithMaxPostProbOfEachSite();
-	// Get the posterior rate, i.e. rate averaged over all posterior probabilities:
-	Vdouble rates = ras.getPosteriorRateOfEachSite();
+  // Get the rate class with maximum posterior probability:
+  vector<unsigned int> classes = ras.getRateClassWithMaxPostProbOfEachSite();
+  // Get the posterior rate, i.e. rate averaged over all posterior probabilities:
+  Vdouble rates = ras.getPosteriorRateOfEachSite();
   Vdouble logLn = ras.getLogLikelihoodForEachSite();
 
-	ApplicationTools::displayResult("Alignment information logfile", outFile);
+  ApplicationTools::displayResult("Alignment information logfile", outFile);
 
-	ofstream out(outFile.c_str(), ios::out);
-	out << "is.complete\tis.constant\trc\tpr\tlogLn" << endl;
+  ofstream out(outFile.c_str(), ios::out);
+  out << "is.complete\tis.constant\trc\tpr\tlogLn" << endl;
 
-	for(unsigned int i = 0; i < completeSites.getNumberOfSites(); i++) {
-		const Site * currentSite = completeSites.getSite(i);
-		int currentSitePosition = currentSite -> getPosition();
-		int isCompl = (SiteTools::isComplete(* currentSite) ? 1 : 0);
-		int isConst = (SiteTools::isConstant(* currentSite, true) ? 1 : 0);
-		out << "[" << currentSitePosition << "]\t";
-		out << isCompl << "\t";
-		out << isConst << "\t";
-		out << classes[i] << "\t";
-		out << rates[i] << "\t";
+  for(unsigned int i = 0; i < completeSites.getNumberOfSites(); i++) {
+    const Site * currentSite = completeSites.getSite(i);
+    int currentSitePosition = currentSite -> getPosition();
+    int isCompl = (SiteTools::isComplete(* currentSite) ? 1 : 0);
+    int isConst = (SiteTools::isConstant(* currentSite, true) ? 1 : 0);
+    out << "[" << currentSitePosition << "]\t";
+    out << isCompl << "\t";
+    out << isConst << "\t";
+    out << classes[i] << "\t";
+    out << rates[i] << "\t";
     out << logLn[i] << endl;
-	}
+  }
 }
 
 /******************************************************************************/
 
 const Statistic * CoETools::getStatistic(map<string, string> & params)
 {
-	string statistic = ApplicationTools::getStringParameter("statistic", params, "none");
-	if(statistic == "cosinus") {
-		return new CosinusStatistic();
-	} else if(statistic == "correlation") {
-		return new CorrelationStatistic();
-	} else if(statistic == "covariance") {
-		return new CovarianceStatistic();
-	} else if(statistic == "cosubstitution") {
-		return new CosubstitutionNumberStatistic();
-	} else {
-		return NULL;
-	}
+  string statistic = ApplicationTools::getStringParameter("statistic", params, "none");
+  if(statistic == "cosinus") {
+    return new CosinusStatistic();
+  } else if(statistic == "correlation") {
+    return new CorrelationStatistic();
+  } else if(statistic == "covariance") {
+    return new CovarianceStatistic();
+  } else if(statistic == "cosubstitution") {
+    return new CosubstitutionNumberStatistic();
+  } else {
+    return NULL;
+  }
 }
 
 /******************************************************************************/
 
 SubstitutionCount * CoETools::getSubstitutionCount(
-	const Alphabet * alphabet,
-	const TreeTemplate<Node> & tree,
-	const MutationProcess & process,
-	const DiscreteDistribution & rDist,
-	map<string, string> & params,
-	string suffix)
+  const Alphabet * alphabet,
+  const TreeTemplate<Node> & tree,
+  const MutationProcess & process,
+  const DiscreteDistribution & rDist,
+  map<string, string> & params,
+  string suffix)
 {
-	SubstitutionCount * substitutionCount = NULL;
-	string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", suffix, true);
+  SubstitutionCount * substitutionCount = NULL;
+  string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", suffix, true);
 
- 	if(nijtOption == "laplace")
+   if(nijtOption == "laplace")
   {
-		int trunc = ApplicationTools::getIntParameter("nijt_laplace.trunc", params, 10, suffix, true);
-		substitutionCount = new AnalyticalSubstitutionCount(process.getSubstitutionModel(), trunc);
-	}
+    int trunc = ApplicationTools::getIntParameter("nijt_laplace.trunc", params, 10, suffix, true);
+    substitutionCount = new AnalyticalSubstitutionCount(process.getSubstitutionModel(), trunc);
+  }
   else if(nijtOption == "simple")
   {
-		substitutionCount = new SimpleSubstitutionCount(alphabet);
-	}
+    substitutionCount = new SimpleSubstitutionCount(alphabet);
+  }
   else if(nijtOption == "aadist")
   {
-		if(alphabet->getAlphabetType() != "Proteic alphabet")
+    if(alphabet->getAlphabetType() != "Proteic alphabet")
     {
-			ApplicationTools::displayError("Chemical distance can only be used with protein data.");
-			exit(-1);
-		}
-		string dist = ApplicationTools::getStringParameter("nijt_aadist.type", params, "grantham", suffix, true);
-		bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", params, true, suffix, true);
-		if(dist == "grantham")
+      ApplicationTools::displayError("Chemical distance can only be used with protein data.");
+      exit(-1);
+    }
+    string dist = ApplicationTools::getStringParameter("nijt_aadist.type", params, "grantham", suffix, true);
+    bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", params, true, suffix, true);
+    if(dist == "grantham")
     {
-			GranthamAAChemicalDistance * M = new GranthamAAChemicalDistance();
-			M -> setSymmetric(sym);
-			substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
-		}
+      GranthamAAChemicalDistance * M = new GranthamAAChemicalDistance();
+      M -> setSymmetric(sym);
+      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+    }
     else if(dist == "miyata")
     {
-			MiyataAAChemicalDistance * M = new MiyataAAChemicalDistance();
-			M->setSymmetric(sym);
-			substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
-		}
+      MiyataAAChemicalDistance * M = new MiyataAAChemicalDistance();
+      M->setSymmetric(sym);
+      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+    }
     else if(dist == "grantham.polarity")
     {
-			GranthamAAPolarityIndex I;
-			SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
-			M->setSymmetric(sym);
-			substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
-		}
+      GranthamAAPolarityIndex I;
+      SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
+      M->setSymmetric(sym);
+      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+    }
     else if(dist == "grantham.volume")
     {
-			GranthamAAVolumeIndex I;
-			SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
-			M->setSymmetric(sym);
-			substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
-		}
+      GranthamAAVolumeIndex I;
+      SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
+      M->setSymmetric(sym);
+      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+    }
     else if(dist == "klein.charge")
     {
-			KleinAANetChargeIndex I;
-			SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
-			M->setSymmetric(sym);
-			substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
-		}
+      KleinAANetChargeIndex I;
+      SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
+      M->setSymmetric(sym);
+      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+    }
     else if(dist == "charge")
     {
-			AAChargeIndex I;
-			SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
-			M->setSymmetric(sym);
-			substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
-		}
+      AAChargeIndex I;
+      SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
+      M->setSymmetric(sym);
+      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+    }
     else
     {
-			ApplicationTools::displayError("Invalid distance '" + dist + ", in 'nijt_aadist' parameter.");
-			exit(-1);
-		}
-	}
+      ApplicationTools::displayError("Invalid distance '" + dist + ", in 'nijt_aadist' parameter.");
+      exit(-1);
+    }
+  }
   else
   {
-		ApplicationTools::displayError("Invalid option '" + nijtOption + ", in 'nijt' parameter.");
-		exit(-1);
-	}
+    ApplicationTools::displayError("Invalid option '" + nijtOption + ", in 'nijt' parameter.");
+    exit(-1);
+  }
 
-	// Send results:
-	return substitutionCount;
+  // Send results:
+  return substitutionCount;
 }
 
 /******************************************************************************/
 
 void CoETools::computeIntraStats(
-	const HomogeneousTreeLikelihood & tl,
-	const SiteContainer & completeSites,
-	ProbabilisticSubstitutionMapping & mapping,
-	const Statistic & statistic,
-	map<string, string> & params)
+  const HomogeneousTreeLikelihood & tl,
+  const SiteContainer & completeSites,
+  ProbabilisticSubstitutionMapping & mapping,
+  const Statistic & statistic,
+  map<string, string> & params)
 {
-	//Vdouble branchLengths = vectors[0];
-	//vectors.erase(vectors.begin());//remove branch lengths.
-	
-	string statFilePath = ApplicationTools::getAFilePath("statistic.output.file", params, true, false);
-	ofstream statOut(statFilePath.c_str(), ios::out);
+  //Vdouble branchLengths = vectors[0];
+  //vectors.erase(vectors.begin());//remove branch lengths.
+  
+  string statFilePath = ApplicationTools::getAFilePath("statistic.output.file", params, true, false);
+  ofstream statOut(statFilePath.c_str(), ios::out);
 
-	//Getting parameters:
-		
-	int minRateClass     = getMinRateClass(params);
-	int maxRateClassDiff = getMaxRateClassDiff(params);
-	double minRate       = getMinRate(params);
-	double maxRateDiff   = getMaxRateDiff(params);
-	double minStatistic  = getStatisticMin(params);
+  //Getting parameters:
+    
+  int minRateClass     = getMinRateClass(params);
+  int maxRateClassDiff = getMaxRateClassDiff(params);
+  double minRate       = getMinRate(params);
+  double maxRateDiff   = getMaxRateDiff(params);
+  double minStatistic  = getStatisticMin(params);
 
-	unsigned int nbSites = mapping.getNumberOfSites();
+  unsigned int nbSites = mapping.getNumberOfSites();
 
-	ApplicationTools::displayMessage(
-		TextTools::toString(nbSites) + 
-		" sites => " +
-		TextTools::toString(nbSites * (nbSites + 1) / 2) +
-		" pairs to compute!");
+  ApplicationTools::displayMessage(
+    TextTools::toString(nbSites) + 
+    " sites => " +
+    TextTools::toString(nbSites * (nbSites + 1) / 2) +
+    " pairs to compute!");
 
-	statOut << "Sites\tStatistic\tmin.rc\tmin.pr" << endl;
+  statOut << "Sites\tStatistic\tmin.rc\tmin.pr" << endl;
 
-	ApplicationTools::displayTask("Analyse each site pair");
-	
-	vector<unsigned int> classes = tl.getRateClassWithMaxPostProbOfEachSite();
-	Vdouble rates   = tl.getPosteriorRateOfEachSite();
+  ApplicationTools::displayTask("Analyse each site pair");
+  
+  vector<unsigned int> classes = tl.getRateClassWithMaxPostProbOfEachSite();
+  Vdouble rates   = tl.getPosteriorRateOfEachSite();
 
-	for(unsigned int i = 0; i < nbSites; i++)
+  for(unsigned int i = 0; i < nbSites; i++)
   {
-		int    iClass = classes[i];
-		double iRate  = rates[i];
-		if(iClass < minRateClass) continue;
-		if(iRate  < minRate     ) continue;
-		ApplicationTools::message << ".";
-		ApplicationTools::message.flush();
-		for(unsigned int j = i + 1; j < nbSites; j++)
+    int    iClass = classes[i];
+    double iRate  = rates[i];
+    if(iClass < minRateClass) continue;
+    if(iRate  < minRate     ) continue;
+    ApplicationTools::message << ".";
+    ApplicationTools::message.flush();
+    for(unsigned int j = i + 1; j < nbSites; j++)
     {
-			int    jClass = classes[j];
-			double jRate  = rates[j];
-			if(jClass < minRateClass) continue;
-			if(jRate  < minRate     ) continue;
-		
-			//Sites which are in too different rate classes are not compared:
-			if(maxRateClassDiff >= 0  && NumTools::abs(jClass - iClass) > maxRateClassDiff) continue;
-			if(maxRateDiff      >= 0. && NumTools::abs(jRate  - iRate ) > maxRateDiff)      continue;
+      int    jClass = classes[j];
+      double jRate  = rates[j];
+      if(jClass < minRateClass) continue;
+      if(jRate  < minRate     ) continue;
+    
+      //Sites which are in too different rate classes are not compared:
+      if(maxRateClassDiff >= 0  && NumTools::abs(jClass - iClass) > maxRateClassDiff) continue;
+      if(maxRateDiff      >= 0. && NumTools::abs(jRate  - iRate ) > maxRateDiff)      continue;
 
-			double stat = statistic.getValue(mapping[i], mapping[j]);
-			if(NumTools::abs(stat) < minStatistic) continue;
+      double stat = statistic.getValue(mapping[i], mapping[j]);
+      if(NumTools::abs(stat) < minStatistic) continue;
 
-			//Then print to file:
-			statOut << "[";
-			statOut << completeSites.getSite(i) -> getPosition();
-			statOut << "; ";
-			statOut << completeSites.getSite(j) -> getPosition();
-			statOut << "]\t";
-			statOut << stat;
-			statOut << "\t";
-			statOut << min(iClass, jClass);
-			statOut << "\t";
-			statOut << min(iRate, jRate);
-			statOut << endl;
-		}
-	}
+      //Then print to file:
+      statOut << "[";
+      statOut << completeSites.getSite(i) -> getPosition();
+      statOut << "; ";
+      statOut << completeSites.getSite(j) -> getPosition();
+      statOut << "]\t";
+      statOut << stat;
+      statOut << "\t";
+      statOut << min(iClass, jClass);
+      statOut << "\t";
+      statOut << min(iRate, jRate);
+      statOut << endl;
+    }
+  }
 
-	ApplicationTools::displayTaskDone();
-	statOut.close();
+  ApplicationTools::displayTaskDone();
+  statOut.close();
 }
 
 /******************************************************************************/
 
 void CoETools::computeInterStats(
-	const HomogeneousTreeLikelihood & tl1,
-	const HomogeneousTreeLikelihood & tl2,
-	const SiteContainer & completeSites1,
-	const SiteContainer & completeSites2,
-	ProbabilisticSubstitutionMapping & mapping1,
-	ProbabilisticSubstitutionMapping & mapping2,
-	const Statistic & statistic,
-	map<string, string> & params)
+  const HomogeneousTreeLikelihood & tl1,
+  const HomogeneousTreeLikelihood & tl2,
+  const SiteContainer & completeSites1,
+  const SiteContainer & completeSites2,
+  ProbabilisticSubstitutionMapping & mapping1,
+  ProbabilisticSubstitutionMapping & mapping2,
+  const Statistic & statistic,
+  map<string, string> & params)
 {
-	// Compute statistics from data:
+  // Compute statistics from data:
 
-	bool indepComp = haveToPerformIndependantComparisons(params);
-	if(indepComp && mapping1.getNumberOfSites() != mapping2.getNumberOfSites())
+  bool indepComp = haveToPerformIndependantComparisons(params);
+  if(indepComp && mapping1.getNumberOfSites() != mapping2.getNumberOfSites())
   {
-		ApplicationTools::displayError("When performing independant comparisons, the two datasets must have the same length.");
-		exit(-1);
-	}
+    ApplicationTools::displayError("When performing independant comparisons, the two datasets must have the same length.");
+    exit(-1);
+  }
 
-	string statFilePath = ApplicationTools::getAFilePath("statistic.output.file", params, true, false);
-	ofstream statOut(statFilePath.c_str(), ios::out);
+  string statFilePath = ApplicationTools::getAFilePath("statistic.output.file", params, true, false);
+  ofstream statOut(statFilePath.c_str(), ios::out);
 
-	//Getting parameters:
-	int minRateClass1    = getMinRateClass(params);
-	int minRateClass2    = getMinRateClass(params, "2");
-	int maxRateClassDiff = getMaxRateClassDiff(params);
-	double minRate1      = getMinRate(params);
-	double minRate2      = getMinRate(params, "2");
-	double maxRateDiff   = getMaxRateDiff(params);
-	double minStatistic  = getStatisticMin(params);
+  //Getting parameters:
+  int minRateClass1    = getMinRateClass(params);
+  int minRateClass2    = getMinRateClass(params, "2");
+  int maxRateClassDiff = getMaxRateClassDiff(params);
+  double minRate1      = getMinRate(params);
+  double minRate2      = getMinRate(params, "2");
+  double maxRateDiff   = getMaxRateDiff(params);
+  double minStatistic  = getStatisticMin(params);
 
-	unsigned int nbSites1 = mapping1.getNumberOfSites();
-	unsigned int nbSites2 = mapping2.getNumberOfSites();
+  unsigned int nbSites1 = mapping1.getNumberOfSites();
+  unsigned int nbSites2 = mapping2.getNumberOfSites();
 
 
-	ApplicationTools::displayMessage(
-		TextTools::toString(nbSites1) +
-		" sites * " +
-		TextTools::toString(nbSites2) +
-		" = " +
-		TextTools::toString(indepComp ? nbSites1 : nbSites1 * nbSites2) +
-		" pairs to compute!");
+  ApplicationTools::displayMessage(
+    TextTools::toString(nbSites1) +
+    " sites * " +
+    TextTools::toString(nbSites2) +
+    " = " +
+    TextTools::toString(indepComp ? nbSites1 : nbSites1 * nbSites2) +
+    " pairs to compute!");
 
-	statOut << "Sites\tStatistic\tmin.rc\tmin.pr" << endl;
+  statOut << "Sites\tStatistic\tmin.rc\tmin.pr" << endl;
 
-	ApplicationTools::displayTask("Analyse each site pair");
-		
-	vector<unsigned int> classes1 = tl1.getRateClassWithMaxPostProbOfEachSite();
-	vector<unsigned int> classes2 = tl2.getRateClassWithMaxPostProbOfEachSite();
-	Vdouble rates1   = tl1.getPosteriorRateOfEachSite();
-	Vdouble rates2   = tl2.getPosteriorRateOfEachSite();
+  ApplicationTools::displayTask("Analyse each site pair");
+    
+  vector<unsigned int> classes1 = tl1.getRateClassWithMaxPostProbOfEachSite();
+  vector<unsigned int> classes2 = tl2.getRateClassWithMaxPostProbOfEachSite();
+  Vdouble rates1   = tl1.getPosteriorRateOfEachSite();
+  Vdouble rates2   = tl2.getPosteriorRateOfEachSite();
 
-	for(unsigned int i = 0; i < nbSites1; i++)
+  for(unsigned int i = 0; i < nbSites1; i++)
   {
-		int    iClass = classes1[i];
-		double iRate  = rates1[i];
-		if(iClass < minRateClass1) continue;
-		if(iRate  < minRate1     ) continue;
-		ApplicationTools::message << ".";
-		ApplicationTools::message.flush();
-			
-		unsigned int begin = indepComp ? i : 0;
-		unsigned int end   = indepComp ? i + 1 : nbSites2;
-		for(unsigned int j = begin; j < end; j++)
+    int    iClass = classes1[i];
+    double iRate  = rates1[i];
+    if(iClass < minRateClass1) continue;
+    if(iRate  < minRate1     ) continue;
+    ApplicationTools::message << ".";
+    ApplicationTools::message.flush();
+      
+    unsigned int begin = indepComp ? i : 0;
+    unsigned int end   = indepComp ? i + 1 : nbSites2;
+    for(unsigned int j = begin; j < end; j++)
     {
-			int    jClass = classes2[j];
-			double jRate  = rates2[j];
-			if(jClass < minRateClass2) continue;
-			if(jRate  < minRate2     ) continue;
-		
-			//Sites which are in too different rate classes are not compared:
-			if(maxRateClassDiff >= 0  && NumTools::abs(jClass - iClass) > maxRateClassDiff) continue;
-			if(maxRateDiff      >= 0. && NumTools::abs(jRate  - iRate ) > maxRateDiff     ) continue;
+      int    jClass = classes2[j];
+      double jRate  = rates2[j];
+      if(jClass < minRateClass2) continue;
+      if(jRate  < minRate2     ) continue;
+    
+      //Sites which are in too different rate classes are not compared:
+      if(maxRateClassDiff >= 0  && NumTools::abs(jClass - iClass) > maxRateClassDiff) continue;
+      if(maxRateDiff      >= 0. && NumTools::abs(jRate  - iRate ) > maxRateDiff     ) continue;
 
-			//double stat = table[i + 1][j + 1];
-			double stat = statistic.getValue(mapping1[i], mapping2[j]);
-			if(NumTools::abs(stat) < minStatistic) continue;
+      //double stat = table[i + 1][j + 1];
+      double stat = statistic.getValue(mapping1[i], mapping2[j]);
+      if(NumTools::abs(stat) < minStatistic) continue;
 
-			//Then print to file:
-			statOut << "[";
-			statOut << completeSites1.getSite(i) -> getPosition();
-			statOut << "; ";
-			statOut << completeSites2.getSite(j) -> getPosition();
-			statOut << "]\t";
-			statOut << stat;
-			statOut << "\t";
-			statOut << min(iClass, jClass);
-			statOut << "\t";
-			statOut << min(iRate, jRate);
-			statOut << endl;
-		}
-	}
+      //Then print to file:
+      statOut << "[";
+      statOut << completeSites1.getSite(i) -> getPosition();
+      statOut << "; ";
+      statOut << completeSites2.getSite(j) -> getPosition();
+      statOut << "]\t";
+      statOut << stat;
+      statOut << "\t";
+      statOut << min(iClass, jClass);
+      statOut << "\t";
+      statOut << min(iRate, jRate);
+      statOut << endl;
+    }
+  }
 
-	ApplicationTools::displayTaskDone();
-	statOut.close();
+  ApplicationTools::displayTaskDone();
+  statOut.close();
 }
 
 /******************************************************************************/
 
 void CoETools::computeIntraNullDistribution(
-	const MutationProcess & process,
-	const DiscreteDistribution & rDist,
-	const TreeTemplate<Node> & tree,
-	const SubstitutionCount & nijt,
-	const Statistic & statistic,
-	map<string, string> & params)
+  const MutationProcess & process,
+  const DiscreteDistribution & rDist,
+  const TreeTemplate<Node> & tree,
+  const SubstitutionCount & nijt,
+  const Statistic & statistic,
+  map<string, string> & params)
 {
-	HomogeneousSequenceSimulator seqSim(&process, &rDist, &tree);
+  HomogeneousSequenceSimulator seqSim(&process, &rDist, &tree);
   string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, true, false);
   ofstream outFile(path.c_str(), ios::out);
-	
-	ApplicationTools::displayMessage("Compute statistic under null hypothesis...");
-	
-	int nbRepCPU = ApplicationTools::getIntParameter("statistic.null.nb_rep_CPU", params, 10);
-	
-	// Drop this for now:
-	//bool reestimate = ApplicationTools::getBooleanParameter("statistic.null.reestimate", params, true);
-	//if(!reestimate) {
-	//	AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(seqSim, statistic, outFile, nbRepCPU, true);
-	//	outFile.close();
-	//	ApplicationTools::displayTaskDone();
-	//	return;
-	//}
-	
-	int nbRepRAM = ApplicationTools::getIntParameter("statistic.null.nb_rep_RAM", params, 100);
-	bool cumul   = ApplicationTools::getBooleanParameter("statistic.null.cumul", params, false);
-	//bool dr      = ApplicationTools::getBooleanParameter("likelihood.dr", params, false);
-	bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
-	bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true);
+  
+  ApplicationTools::displayMessage("Compute statistic under null hypothesis...");
+  
+  int nbRepCPU = ApplicationTools::getIntParameter("statistic.null.nb_rep_CPU", params, 10);
+  
+  // Drop this for now:
+  //bool reestimate = ApplicationTools::getBooleanParameter("statistic.null.reestimate", params, true);
+  //if(!reestimate) {
+  //  AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(seqSim, statistic, outFile, nbRepCPU, true);
+  //  outFile.close();
+  //  ApplicationTools::displayTaskDone();
+  //  return;
+  //}
+  
+  int nbRepRAM = ApplicationTools::getIntParameter("statistic.null.nb_rep_RAM", params, 100);
+  bool cumul   = ApplicationTools::getBooleanParameter("statistic.null.cumul", params, false);
+  //bool dr      = ApplicationTools::getBooleanParameter("likelihood.dr", params, false);
+  bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
+  bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true);
 
-	if(cumul)
+  if(cumul)
   {
-		// Building domain:
-		double lowerSB = ApplicationTools::getDoubleParameter("statistic.null.lower", params, -1.);
-		double upperSB = ApplicationTools::getDoubleParameter("statistic.null.upper", params, 1.);
-		int     nbSInt = ApplicationTools::getIntParameter   ("statistic.null.nb_int", params, 20);
-		Domain statDomain(lowerSB, upperSB, nbSInt);
-		Domain rateDomain = rDist.getDomain();
-	
-		// Simulate:
-		vector<IntervalData *> id; 
-		id = AnalysisTools::getNullDistributionIntraDR(seqSim, nijt, statistic, statDomain, rateDomain, nbRepCPU, nbRepRAM, average, joint, true);
-	
-		// Print to file:
+    // Building domain:
+    double lowerSB = ApplicationTools::getDoubleParameter("statistic.null.lower", params, -1.);
+    double upperSB = ApplicationTools::getDoubleParameter("statistic.null.upper", params, 1.);
+    int     nbSInt = ApplicationTools::getIntParameter   ("statistic.null.nb_int", params, 20);
+    Domain statDomain(lowerSB, upperSB, nbSInt);
+    Domain rateDomain = rDist.getDomain();
+  
+    // Simulate:
+    vector<IntervalData *> id; 
+    id = AnalysisTools::getNullDistributionIntraDR(seqSim, nijt, statistic, statDomain, rateDomain, nbRepCPU, nbRepRAM, average, joint, true);
+  
+    // Print to file:
     for(unsigned int i = 0; i < rateDomain.getSize(); i++)
     {
       outFile << "# Distribution with minimum rate " << rateDomain.getValue(i) << endl;
@@ -731,54 +731,54 @@ void CoETools::computeIntraNullDistribution(
       outFile << endl;
     }
 
-		// Free memory:
-		for(unsigned int i = 0; i < id.size(); i++) delete id[i];
+    // Free memory:
+    for(unsigned int i = 0; i < id.size(); i++) delete id[i];
 
-	}
+  }
   else
   {
-		//if(dr) {
-		AnalysisTools::getNullDistributionIntraDR(seqSim, nijt, statistic, outFile, nbRepCPU, nbRepRAM, average, joint, true);
-		//} else {
-		//	AnalysisTools::getNullDistributionIntra(seqSim, nijt, statistic, outFile, nbRepCPU, nbRepRAM, true);
-		//}
-	}
-	outFile.close();
+    //if(dr) {
+    AnalysisTools::getNullDistributionIntraDR(seqSim, nijt, statistic, outFile, nbRepCPU, nbRepRAM, average, joint, true);
+    //} else {
+    //  AnalysisTools::getNullDistributionIntra(seqSim, nijt, statistic, outFile, nbRepCPU, nbRepRAM, true);
+    //}
+  }
+  outFile.close();
 }
 
 /******************************************************************************/
 
 void CoETools::computeInterNullDistribution(
-	const MutationProcess & process1,
-	const MutationProcess & process2,
-	const DiscreteDistribution & rDist1,
-	const DiscreteDistribution & rDist2,
-	const TreeTemplate<Node> & tree1,
-	const TreeTemplate<Node> & tree2,
-	const SubstitutionCount & nijt1,
-	const SubstitutionCount & nijt2,
-	const Statistic & statistic,
-	map<string, string> & params)
+  const MutationProcess & process1,
+  const MutationProcess & process2,
+  const DiscreteDistribution & rDist1,
+  const DiscreteDistribution & rDist2,
+  const TreeTemplate<Node> & tree1,
+  const TreeTemplate<Node> & tree2,
+  const SubstitutionCount & nijt1,
+  const SubstitutionCount & nijt2,
+  const Statistic & statistic,
+  map<string, string> & params)
 {
-	HomogeneousSequenceSimulator seqSim1(&process1, &rDist1, &tree1);
-	HomogeneousSequenceSimulator seqSim2(&process2, &rDist2, &tree2);
-	string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, true, false);
+  HomogeneousSequenceSimulator seqSim1(&process1, &rDist1, &tree1);
+  HomogeneousSequenceSimulator seqSim2(&process2, &rDist2, &tree2);
+  string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, true, false);
   ofstream outFile(path.c_str(), ios::out);
-	
-	int nbRepCPU = ApplicationTools::getIntParameter("statistic.null.nb_rep_CPU", params, 10);
-	int nbRepRAM = ApplicationTools::getIntParameter("statistic.null.nb_rep_RAM", params, 100);
-	bool cumul   = ApplicationTools::getBooleanParameter("statistic.null.cumul", params, false);
-	bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
-	bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true);
+  
+  int nbRepCPU = ApplicationTools::getIntParameter("statistic.null.nb_rep_CPU", params, 10);
+  int nbRepRAM = ApplicationTools::getIntParameter("statistic.null.nb_rep_RAM", params, 100);
+  bool cumul   = ApplicationTools::getBooleanParameter("statistic.null.cumul", params, false);
+  bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
+  bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true);
 
-	ApplicationTools::displayMessage("Compute statistic under null hypothesis...");
-	if(cumul)
+  ApplicationTools::displayMessage("Compute statistic under null hypothesis...");
+  if(cumul)
   {
-		// Building domain:
-		double lowerSB = ApplicationTools::getDoubleParameter("statistic.null.lower", params, -1.);
-		double upperSB = ApplicationTools::getDoubleParameter("statistic.null.upper", params, 1.);
-		int     nbSInt = ApplicationTools::getIntParameter   ("statistic.null.nb_int", params, 20);
-		Domain statDomain(lowerSB, upperSB, nbSInt);
+    // Building domain:
+    double lowerSB = ApplicationTools::getDoubleParameter("statistic.null.lower", params, -1.);
+    double upperSB = ApplicationTools::getDoubleParameter("statistic.null.upper", params, 1.);
+    int     nbSInt = ApplicationTools::getIntParameter   ("statistic.null.nb_int", params, 20);
+    Domain statDomain(lowerSB, upperSB, nbSInt);
     Vdouble bounds = ApplicationTools::getVectorParameter<double>("statistic.null.rate.bounds", params, ',', "");
     Domain rateDomain = Domain(bounds);
     ApplicationTools::message << "The following rate domain will be used:"<< endl;
@@ -793,34 +793,34 @@ void CoETools::computeInterNullDistribution(
         << rateDomain.getValue(i)
         << endl;
     }
-	
-		// Simulate:
-		vector<IntervalData *> id;
-		id = AnalysisTools::getNullDistributionInterDR(
-			seqSim1, seqSim2,
-			nijt1, nijt2,
-			statistic,
-     	statDomain, rateDomain,
+  
+    // Simulate:
+    vector<IntervalData *> id;
+    id = AnalysisTools::getNullDistributionInterDR(
+      seqSim1, seqSim2,
+      nijt1, nijt2,
+      statistic,
+       statDomain, rateDomain,
       nbRepCPU, nbRepRAM,
-			average, joint,
-			true);
-	
-		// Print to file:
-	  for(unsigned int i = 0; i < rateDomain.getSize(); i++)
+      average, joint,
+      true);
+  
+    // Print to file:
+    for(unsigned int i = 0; i < rateDomain.getSize(); i++)
     {
-  	  outFile << "# Distribution with minimum rate " << rateDomain.getValue(i) << endl;
+      outFile << "# Distribution with minimum rate " << rateDomain.getValue(i) << endl;
       id[i] -> print(outFile);
       outFile << endl;
     }
-	
-		// Free memory:
-		for(unsigned int i = 0; i < id.size(); i++) delete id[i];
-	}
+  
+    // Free memory:
+    for(unsigned int i = 0; i < id.size(); i++) delete id[i];
+  }
   else
   {
-		AnalysisTools::getNullDistributionInterDR(seqSim1, seqSim2, nijt1, nijt2, statistic, outFile, nbRepCPU, nbRepRAM, average, joint, true);
-	}
-	outFile.close();
+    AnalysisTools::getNullDistributionInterDR(seqSim1, seqSim2, nijt1, nijt2, statistic, outFile, nbRepCPU, nbRepRAM, average, joint, true);
+  }
+  outFile.close();
 }
 
 /******************************************************************************/

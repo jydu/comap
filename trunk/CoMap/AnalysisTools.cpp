@@ -41,7 +41,6 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From the NumCalc library:
 using namespace VectorFunctions;
-using namespace VectorStatTools;
 
 // From Utils
 #include <Utils/ApplicationTools.h>

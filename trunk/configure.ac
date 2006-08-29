@@ -29,11 +29,11 @@
 #The fact that you are presently reading this means that you have had
 #knowledge of the CeCILL license and that you accept its terms.
 
-AC_INIT(CoMap, 0.1.0, Julien.Dutheil@univ-montp2.fr, CoMap)
+AC_INIT(CoMap, 1.0.1, Julien.Dutheil@univ-montp2.fr, CoMap)
 AC_CONFIG_SRCDIR(CoMap/CoMap.cpp)
 
 dnl We'll use automake:
-AM_INIT_AUTOMAKE(CoMap,0.1.0)
+AM_INIT_AUTOMAKE(CoMap,1.0.1)
 
 AC_PROG_CC
 dnl This is C++ program:
@@ -58,7 +58,7 @@ AC_ARG_ENABLE(static,
              esac],[static=false])
 AM_CONDITIONAL(STATIC, test x$static = xtrue)
 
-VERSION="1.0.0"
+VERSION="1.0.1"
 AC_SUBST(VERSION)
 AC_OUTPUT(Makefile CoMap/Makefile doc/Makefile)
 
