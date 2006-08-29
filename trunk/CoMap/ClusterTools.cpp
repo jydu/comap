@@ -38,6 +38,7 @@ knowledge of the CeCILL license and that you accept its terms.
 */
 
 #include "ClusterTools.h"
+#include "Cluster.h"
 
 // From NumCalc:
 #include <NumCalc/VectorTools.h>
@@ -253,6 +254,9 @@ void ClusterTools::computeGlobalDistanceDistribution(
 	  }
 
     //Perform clustering:
+    try {
+      dynamic_cast<SumClustering&>(clustering).setMapping(*mapping);
+    } catch(exception & e) {}
     clustering.setDistanceMatrix(*mat);
     clustering.computeTree(true);
     TreeTemplate<Node> * tree = dynamic_cast<TreeTemplate<Node> *>(clustering.getTree());
