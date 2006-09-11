@@ -523,6 +523,7 @@ void CoETools::computeIntraStats(
   double minStatistic  = getStatisticMin(params);
 
   unsigned int nbSites = mapping.getNumberOfSites();
+  vector<double> norms = AnalysisTools::computeNorms(mapping);
 
   ApplicationTools::displayMessage(
     TextTools::toString(nbSites) + 
@@ -530,7 +531,7 @@ void CoETools::computeIntraStats(
     TextTools::toString(nbSites * (nbSites + 1) / 2) +
     " pairs to compute!");
 
-  statOut << "Sites\tStatistic\tmin.rc\tmin.pr" << endl;
+  statOut << "Group\tstatistic\tmin.rc\tmin.pr\tNmin" << endl;
 
   ApplicationTools::displayTask("Analyse each site pair");
   
@@ -543,6 +544,7 @@ void CoETools::computeIntraStats(
     double iRate  = rates[i];
     if(iClass < minRateClass) continue;
     if(iRate  < minRate     ) continue;
+    double iNorm  = norms[i];
     ApplicationTools::message << ".";
     ApplicationTools::message.flush();
     for(unsigned int j = i + 1; j < nbSites; j++)
@@ -551,6 +553,7 @@ void CoETools::computeIntraStats(
       double jRate  = rates[j];
       if(jClass < minRateClass) continue;
       if(jRate  < minRate     ) continue;
+      double jNorm  = norms[j];
     
       //Sites which are in too different rate classes are not compared:
       if(maxRateClassDiff >= 0  && NumTools::abs(jClass - iClass) > maxRateClassDiff) continue;
@@ -561,15 +564,17 @@ void CoETools::computeIntraStats(
 
       //Then print to file:
       statOut << "[";
-      statOut << completeSites.getSite(i) -> getPosition();
-      statOut << "; ";
-      statOut << completeSites.getSite(j) -> getPosition();
+      statOut << completeSites.getSite(i)->getPosition();
+      statOut << ",";
+      statOut << completeSites.getSite(j)->getPosition();
       statOut << "]\t";
       statOut << stat;
       statOut << "\t";
       statOut << min(iClass, jClass);
       statOut << "\t";
       statOut << min(iRate, jRate);
+      statOut << "\t";
+      statOut << min(iNorm, jNorm);
       statOut << endl;
     }
   }
@@ -613,6 +618,8 @@ void CoETools::computeInterStats(
 
   unsigned int nbSites1 = mapping1.getNumberOfSites();
   unsigned int nbSites2 = mapping2.getNumberOfSites();
+  vector<double> norms1 = AnalysisTools::computeNorms(mapping1);
+  vector<double> norms2 = AnalysisTools::computeNorms(mapping2);
 
 
   ApplicationTools::displayMessage(
@@ -623,7 +630,7 @@ void CoETools::computeInterStats(
     TextTools::toString(indepComp ? nbSites1 : nbSites1 * nbSites2) +
     " pairs to compute!");
 
-  statOut << "Sites\tStatistic\tmin.rc\tmin.pr" << endl;
+  statOut << "Group\tstatistic\tmin.rc\tmin.pr\tNmin" << endl;
 
   ApplicationTools::displayTask("Analyse each site pair");
     
@@ -638,6 +645,7 @@ void CoETools::computeInterStats(
     double iRate  = rates1[i];
     if(iClass < minRateClass1) continue;
     if(iRate  < minRate1     ) continue;
+    double iNorm  = norms1[i];
     ApplicationTools::message << ".";
     ApplicationTools::message.flush();
       
@@ -649,6 +657,7 @@ void CoETools::computeInterStats(
       double jRate  = rates2[j];
       if(jClass < minRateClass2) continue;
       if(jRate  < minRate2     ) continue;
+      double jNorm  = norms2[i];
     
       //Sites which are in too different rate classes are not compared:
       if(maxRateClassDiff >= 0  && NumTools::abs(jClass - iClass) > maxRateClassDiff) continue;
@@ -660,15 +669,17 @@ void CoETools::computeInterStats(
 
       //Then print to file:
       statOut << "[";
-      statOut << completeSites1.getSite(i) -> getPosition();
-      statOut << "; ";
-      statOut << completeSites2.getSite(j) -> getPosition();
+      statOut << completeSites1.getSite(i)->getPosition();
+      statOut << ",";
+      statOut << completeSites2.getSite(j)->getPosition();
       statOut << "]\t";
       statOut << stat;
       statOut << "\t";
       statOut << min(iClass, jClass);
       statOut << "\t";
       statOut << min(iRate, jRate);
+      statOut << "\t";
+      statOut << min(iNorm, jNorm);
       statOut << endl;
     }
   }
@@ -693,7 +704,7 @@ void CoETools::computeIntraNullDistribution(
   
   ApplicationTools::displayMessage("Compute statistic under null hypothesis...");
   
-  int nbRepCPU = ApplicationTools::getIntParameter("statistic.null.nb_rep_CPU", params, 10);
+  unsigned int nbRepCPU = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rep_CPU", params, 10);
   
   // Drop this for now:
   //bool reestimate = ApplicationTools::getBooleanParameter("statistic.null.reestimate", params, true);
@@ -704,9 +715,8 @@ void CoETools::computeIntraNullDistribution(
   //  return;
   //}
   
-  int nbRepRAM = ApplicationTools::getIntParameter("statistic.null.nb_rep_RAM", params, 100);
+  unsigned int nbRepRAM = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rep_RAM", params, 100);
   bool cumul   = ApplicationTools::getBooleanParameter("statistic.null.cumul", params, false);
-  //bool dr      = ApplicationTools::getBooleanParameter("likelihood.dr", params, false);
   bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
   bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true);
 
@@ -727,7 +737,7 @@ void CoETools::computeIntraNullDistribution(
     for(unsigned int i = 0; i < rateDomain.getSize(); i++)
     {
       outFile << "# Distribution with minimum rate " << rateDomain.getValue(i) << endl;
-      id[i] -> print(outFile);
+      id[i]->print(outFile);
       outFile << endl;
     }
 
@@ -737,11 +747,7 @@ void CoETools::computeIntraNullDistribution(
   }
   else
   {
-    //if(dr) {
     AnalysisTools::getNullDistributionIntraDR(seqSim, nijt, statistic, outFile, nbRepCPU, nbRepRAM, average, joint, true);
-    //} else {
-    //  AnalysisTools::getNullDistributionIntra(seqSim, nijt, statistic, outFile, nbRepCPU, nbRepRAM, true);
-    //}
   }
   outFile.close();
 }
@@ -800,7 +806,7 @@ void CoETools::computeInterNullDistribution(
       seqSim1, seqSim2,
       nijt1, nijt2,
       statistic,
-       statDomain, rateDomain,
+      statDomain, rateDomain,
       nbRepCPU, nbRepRAM,
       average, joint,
       true);
@@ -809,7 +815,7 @@ void CoETools::computeInterNullDistribution(
     for(unsigned int i = 0; i < rateDomain.getSize(); i++)
     {
       outFile << "# Distribution with minimum rate " << rateDomain.getValue(i) << endl;
-      id[i] -> print(outFile);
+      id[i]->print(outFile);
       outFile << endl;
     }
   

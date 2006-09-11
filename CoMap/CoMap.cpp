@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
 		DiscreteDistribution * prDist2 = RASTools::getPosteriorRateDistribution(* tl2);
 
 		ApplicationTools::displayMessage("\nPosterior rate distribution for 2nd dataset:\n");
-		prDist2 -> print(ApplicationTools::message);
+		prDist2->print(ApplicationTools::message);
 		ApplicationTools::displayMessage("\n");
 		
 		ApplicationTools::displayMessage("\n\nIII) Compute statistics\n");
