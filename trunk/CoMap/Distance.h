@@ -128,7 +128,8 @@ class CorrelationDistance: public AbstractDistance
     {
 			if(v1.size() != v2.size()) throw DimensionException("CorrelationDistance::getCorrelation(...).", v2.size(), v1.size());
 			double sumx = 0., sumy = 0., sumx2 = 0., sumy2 = 0., sumxy = 0.;
-      for(unsigned int i = 0; i < v1.size(); i++) {
+      for(unsigned int i = 0; i < v1.size(); i++)
+      {
 			  sumx += v1[i];
 			  sumy += v2[i];
 			  sumxy += v1[i]*v2[i];
@@ -150,7 +151,8 @@ class CorrelationDistance: public AbstractDistance
     {
 			if(v1.size() != v2.size()) throw DimensionException("CorrelationDistance::getWeightedCorrelation(...).", v2.size(), v1.size());
 			double wsumx = 0., wsumy = 0., wsumx2 = 0., wsumy2 = 0., wsumxy = 0.;
-      for(unsigned int i = 0; i < v1.size(); i++) {
+      for(unsigned int i = 0; i < v1.size(); i++)
+      {
 			  wsumx += (*_weights)[i] * v1[i];
 			  wsumy += (*_weights)[i] * v2[i];
 			  wsumxy += (*_weights)[i] * v1[i] * v2[i];
@@ -203,25 +205,45 @@ class CompensationDistance: public AbstractDistance
 			throw (DimensionException)
     {
 			if(v1.size() != v2.size()) throw DimensionException("CompensationDistance::getCompensation(...).", v2.size(), v1.size());
-			double sumsq = 0.;
+      double sumsq1 = 0., sumsq2 = 0., sumsq3 = 0.;
       for(unsigned int i = 0; i < v1.size(); i++)
       {
-			  sumsq += pow(v1[i] + v2[i], 2.);
-			}
-			double n = (double)v1.size();
-			return sumsq / n;
+        sumsq1 += pow(v1[i],2);
+        sumsq2 += pow(v2[i],2);
+        sumsq3 += pow(v1[i]+v2[i],2);
+      }
+      return sqrt(sumsq3 / (sumsq1 + sumsq2));
+      
+			//vector<double> v3 = v1 + v2;
+      //double sumsq = 0.;
+      //for(unsigned int i = 0; i < v1.size(); i++)
+      //{
+			//  sumsq += pow(v1[i] + v2[i], 2.);
+			//}
+			//double n = (double)v1.size();
+			//return sumsq / n;
     }
     
     double getWeightedCompensation(const vector<double> & v1, const vector<double> & v2) const
 			throw (DimensionException)
     {
 			if(v1.size() != v2.size()) throw DimensionException("CompensationDistance::getWeightedCompensation(...).", v2.size(), v1.size());
-			double wsumsq = 0.;
+      double wsumsq1 = 0., wsumsq2 = 0., wsumsq3 = 0.;
       for(unsigned int i = 0; i < v1.size(); i++)
       {
-			  wsumsq += (*_weights)[i] * pow(v1[i] + v2[i], 2.);
-			}
-			return wsumsq;
+        wsumsq1 += pow(v1[i],2)*(*_weights)[i];
+        wsumsq2 += pow(v2[i],2)*(*_weights)[i];
+        wsumsq3 += pow(v1[i]+v2[i],2)*(*_weights)[i];
+      }
+      return sqrt(wsumsq3 / (wsumsq1 + wsumsq2));
+
+      //vector<double> v3 = v1 + v2;
+      //double wsumsq = 0.;
+      //for(unsigned int i = 0; i < v1.size(); i++)
+      //{
+			//  wsumsq += (*_weights)[i] * pow(v1[i] + v2[i], 2.);
+			//}
+			//return wsumsq;
     }
 
 };

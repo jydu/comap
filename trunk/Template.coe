@@ -163,7 +163,7 @@ statistic.null.nb_rep_CPU = 100
 statistic.null.nb_rep_RAM = 1000
 
 # Where to write the null distribution
-statistic.null.output_file = myfile.null
+statistic.null.output.file = myfile.null
 
 # Should we write the null distribution has an histogram?
 # Otherwise prints all similated pairs.

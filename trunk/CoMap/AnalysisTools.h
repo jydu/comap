@@ -53,6 +53,7 @@ knowledge of the CeCILL license and that you accept its terms.
 // From PhylLib:
 #include <Phyl/HomogeneousSequenceSimulator.h>
 #include <Phyl/SubstitutionCount.h>
+#include <Phyl/ProbabilisticSubstitutionMapping.h>
 
 // From the stl:
 #include <iostream>
@@ -191,12 +192,12 @@ class AnalysisTools
 			throw (DimensionException);
 	
 		/**
-		 * @brief Get the norms of each vector in a list.
+		 * @brief Get the norms of each substitution vector.
 		 *
-		 * @param vectors A vector of vectors.
+		 * @param mapping A substitution mapping.
 		 * @return A vector containing the norms of each vector in the list.
 		 */
-		static Vdouble computeNormVector(const VVdouble & vectors);
+		static Vdouble computeNorms(const ProbabilisticSubstitutionMapping & mapping);
 	
 		static void writeMatrix(
 			const VVdouble & matrix,

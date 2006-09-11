@@ -307,10 +307,11 @@ VVdouble AnalysisTools::computeCovarianceMatrix(
 
 /******************************************************************************/
 
-Vdouble AnalysisTools::computeNormVector(const VVdouble & vectors) {
-	int nbVectors = vectors.size();
+Vdouble AnalysisTools::computeNorms(const ProbabilisticSubstitutionMapping & mapping)
+{
+	unsigned int nbVectors = mapping.getNumberOfSites();
 	Vdouble vect(nbVectors);
-	for(int i = 0; i < nbVectors; i++) vect[i] = norm(vectors[i]);
+	for(unsigned int i = 0; i < nbVectors; i++) vect[i] = norm(mapping[i]);
 	return vect;
 }
 
@@ -394,14 +395,14 @@ vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
 				*sites1,
 				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
-				false);
+				false, false);
 		DRHomogeneousTreeLikelihood * drhtl2 =
 			new DRHomogeneousTreeLikelihood(
 				const_cast<TreeTemplate<Node> *>(seqSim.getTree()),
 				*sites2,
 				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
-				false);
+				false, false);
 		drhtl1->computeTreeLikelihood();
 		drhtl2->computeTreeLikelihood();
 		Vdouble r1 = drhtl1->getRateWithMaxPostProbOfEachSite();
@@ -441,7 +442,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
 			//int minRc = min (rc1[j], rc2[j]);
 			//cout << r1[j] << "\t" << r2[j] << "\t" << minR << "\t" << rateDomain.getIndex(minR) << endl;
 			//cout << rc1[j] << "\t" << rc2[j] << "\t" << minRc << "\t" << endl;
-			id[rateDomain.getIndex(minR)] -> addValue(stat);
+			id[rateDomain.getIndex(minR)]->addValue(stat);
 			//id[minRc] -> addValue(stat);
 		}
 		delete sites1;
@@ -491,7 +492,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
 				*sites1,
 				const_cast<SubstitutionModel *>(seqSim1.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim1.getRateDistribution()),
-        false
+        false, false
 			);
 		DRHomogeneousTreeLikelihood * drhtl2 = 
 			new DRHomogeneousTreeLikelihood(
@@ -499,7 +500,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
 				*sites2,
 				const_cast<SubstitutionModel *>(seqSim2.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim2.getRateDistribution()),
-				false
+				false, false
 			);
     drhtl1->computeTreeLikelihood();
     drhtl2->computeTreeLikelihood();
@@ -566,7 +567,7 @@ void AnalysisTools::getNullDistributionIntraDR(
 	bool verbose)
 {
 	// Write header line:
-	out << "statistic\tmin.rc\tmin.pr" << endl;
+	out << "statistic\tmin.rc\tmin.pr\tNmin" << endl;
 	for(unsigned int i = 0; i < repCPU; i++)
   {
 		if(verbose)
@@ -584,7 +585,7 @@ void AnalysisTools::getNullDistributionIntraDR(
 				*sites1,
 				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
-				false
+				false, false
 			);
 		DRHomogeneousTreeLikelihood * drhtl2 =
 			new DRHomogeneousTreeLikelihood(
@@ -592,7 +593,7 @@ void AnalysisTools::getNullDistributionIntraDR(
 				*sites2,
 				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
-				false
+				false, false
 			);
 		drhtl1->computeTreeLikelihood();
 		drhtl2->computeTreeLikelihood();
@@ -631,11 +632,13 @@ void AnalysisTools::getNullDistributionIntraDR(
 				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(* drhtl2, nijt, false);
 			}
 		}
+    Vdouble norm1 = computeNorms(*mapping1);
+    Vdouble norm2 = computeNorms(*mapping2);
    	//cout << "Computing statistics..." << endl;
 		for(unsigned int j = 0; j < repRAM; j++)
     {
 			double stat = statistic.getValue((*mapping1)[j], (*mapping2)[j]);
-			out << stat << "\t" << std::min(rc1[j], rc2[j]) << "\t" << std::min(pr1[j], pr2[j]) << endl;
+			out << stat << "\t" << std::min(rc1[j], rc2[j]) << "\t" << std::min(pr1[j], pr2[j]) << "\t" << std::min(norm1[j], norm2[j]) << endl;
 		}
 		//cout << "Freeing memory." << endl;
 		delete sites1;
@@ -663,7 +666,7 @@ void AnalysisTools::getNullDistributionInterDR(
 	bool verbose)
 {
 	// Write header line:
-	out << "statistic\tmin.rc\tmin.pr" << endl;
+	out << "statistic\tmin.rc\tmin.pr\tNmin" << endl;
 	for(unsigned int i = 0; i < repCPU; i++)
   {
 		if(verbose)
@@ -679,7 +682,7 @@ void AnalysisTools::getNullDistributionInterDR(
 				*sites1,
 				const_cast<SubstitutionModel *>(seqSim1.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim1.getRateDistribution()),
-				false
+				false, false
 			);
 		DRHomogeneousTreeLikelihood * drhtl2 =
 			new DRHomogeneousTreeLikelihood(
@@ -687,7 +690,7 @@ void AnalysisTools::getNullDistributionInterDR(
 				*sites2,
 				const_cast<SubstitutionModel *>(seqSim2.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim2.getRateDistribution()),
-				false
+				false, false
 			);
 		drhtl1->computeTreeLikelihood();
 		drhtl2->computeTreeLikelihood();
@@ -724,10 +727,12 @@ void AnalysisTools::getNullDistributionInterDR(
 				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(* drhtl2, nijt2, false);
 			}
 		}
+    Vdouble norm1 = computeNorms(*mapping1);
+    Vdouble norm2 = computeNorms(*mapping2);
    	for(unsigned int j = 0; j < repRAM; j++)
     {
 			double stat = statistic.getValue((*mapping1)[j], (*mapping2)[j]);
-			out << stat << "\t" << std::min(rc1[j], rc2[j]) << "\t" << std::min(pr1[j], pr2[j]) << endl;
+			out << stat << "\t" << std::min(rc1[j], rc2[j]) << "\t" << std::min(pr1[j], pr2[j]) << "\t" << std::min(norm1[j], norm2[j]) << endl;
 		}
 
 		delete sites1;
