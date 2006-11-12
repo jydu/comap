@@ -1,0 +1,91 @@
+<html lang="en">
+<head>
+<title>Mapping - CoMap Manual 1.0</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="CoMap Manual 1.0">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Estimation.html#Estimation" title="Estimation">
+<link rel="next" href="Pairwise.html#Pairwise" title="Pairwise">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This is the manual of CoMap, version 1.0.0, 31 July 2006.
+
+Copyright (C) 2006 Julien Dutheil-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Mapping"></a>
+Noeud « Next »:&nbsp;<a rel="next" accesskey="n" href="Pairwise.html#Pairwise">Pairwise</a>,
+Noeud « Previous »:&nbsp;<a rel="previous" accesskey="p" href="Estimation.html#Estimation">Estimation</a>,
+Noeud « Up »:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">5 Substitution mapping</h2>
+
+<p>Options in this chapter are for substitution vectors computation.
+
+     <dl>
+<dt><samp><span class="command">input.vectors.file = [[path]|none]</span></samp><dd>Restart an analysis by specifying the already computed vectors. 
+Otherwise, compute vectors using the following options.
+
+     <br><dt><samp><span class="command">nijt = [laplace|simple|aadist]</span></samp><dd>The kind of mapping to perform. 
+<samp><span class="option">laplace</span></samp> option perform exact mapping, as in Dutheil et
+al. (2005). 
+<samp><span class="option">simple</span></samp> performs a naive mapping, as in Tufféry and Darlu
+(2000). 
+<samp><span class="option">aadist</span></samp> performs a weighted mapping, as in Dutheil and Galtier
+(2006). Currently available only for proteins.
+
+     <br><dt><samp><span class="command">nijt_aadist.type = [grantham|grantham.volume|grantham.polarity|charge|klein.charge]</span></samp><dd>Specify the type of weight to use.
+
+     <br><dt><samp><span class="command">output.vectors.file = [[path]|none]</span></samp><dd>Where to write the substitution mapping.
+
+     <br><dt><samp><span class="command">output.tags.file = [[path]|none]</span></samp><dd>A tree file in newick format, with node ids instead of bootstrap
+values. 
+The node ids are the same as in the the vector file.
+
+     <br><dt><samp><span class="command">output.tags.translation = [[path]|none]</span></samp><dd>Write a file whith the correspondance between leaf names and ids.
+
+   </dl>
+
+<h3 class="section">5.1 Optional commands</h3>
+
+     <dl>
+<dt><samp><span class="command">nijt_laplace.trunc = [int&gt;0]</span></samp><dd>Where to trunc the series when estimating exact number of
+substitutions. A value of 10 should be fine.
+
+     <br><dt><samp><span class="command">nijt_aadist.sym = [boolean]</span></samp><dd>[untested] Tell if symetric matrices must be used. 
+Should be left to &ldquo;yes&rdquo;.
+
+     <p># Should we average over all ancestral state (yes) or use ancestral states reconstruction (no) ? 
+<br><dt><samp><span class="command">nijt.average = [boolean]</span></samp><dd>Tell if mapping should be averaged over all ancestral states
+(probabilistic mapping). 
+Otherwise use ancestral states reconstruction (naive mapping). 
+In most case, you should leave the default value (yes). 
+NB: only marginal ancestral state reconstruction is implemented.
+
+     <br><dt><samp><span class="command">nijt.joint = [boolean]</span></samp><dd>Tell if joint probabilities are to be use, otherwise us emarginal
+probabilities. 
+This option is for method comparisons, a 'yes' value is suitable in
+most cases.
+
+</dl>
+
+<!--  -->
+</body></html>
+

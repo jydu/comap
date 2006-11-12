@@ -1,0 +1,60 @@
+<html lang="en">
+<head>
+<title>Pvalue - CoMap Manual 1.0</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="CoMap Manual 1.0">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Clustering.html#Clustering" title="Clustering">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This is the manual of CoMap, version 1.0.0, 31 July 2006.
+
+Copyright (C) 2006 Julien Dutheil-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Pvalue"></a>
+Noeud « Previous »:&nbsp;<a rel="previous" accesskey="p" href="Clustering.html#Clustering">Clustering</a>,
+Noeud « Up »:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">8 P-value computation</h2>
+
+<p>CoMap do not compute p-values from the simulation. 
+This goal is achieved by two R scripts, distributed along with the
+program. 
+The script <samp><span class="file">CoMapFunctions.R</span></samp> contains several functions
+performing the computation. 
+The script <samp><span class="file">computePValues.R</span></samp> is the one to launch. 
+It calls the previous one, so they must be in the same directory.
+
+   <p>Edit the first section of the <samp><span class="file">computePValues.R</span></samp> so that is
+matches your files, and then run it with the command
+<p><table class="cartouche" summary="cartouche" border="1"><tr><td>
+<pre class="example">     R --vanilla &lt; computePValues.R
+</pre>
+   </td></tr></table>
+
+<!--  -->
+<!--  -->
+<!-- end of document -->
+<!-- @node Index,  , Pvalue, Top -->
+<!-- @unnumbered Index -->
+<!-- @printindex cp -->
+</body></html>
+

@@ -1,0 +1,99 @@
+<html lang="en">
+<head>
+<title>Pairwise - CoMap Manual 1.0</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="CoMap Manual 1.0">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Mapping.html#Mapping" title="Mapping">
+<link rel="next" href="Clustering.html#Clustering" title="Clustering">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This is the manual of CoMap, version 1.0.0, 31 July 2006.
+
+Copyright (C) 2006 Julien Dutheil-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Pairwise"></a>
+Noeud « Next »:&nbsp;<a rel="next" accesskey="n" href="Clustering.html#Clustering">Clustering</a>,
+Noeud « Previous »:&nbsp;<a rel="previous" accesskey="p" href="Mapping.html#Mapping">Mapping</a>,
+Noeud « Up »:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">6 Pairwise analysis</h2>
+
+     <dl>
+<dt><samp><span class="command">statistic = [correlation|none]</span></samp><dd>If <samp><span class="option">none</span></samp> is selected, no pairwise analysis is performed.
+
+     <br><dt><samp><span class="command">statistic.output.file = [path]</span></samp><dd>Where to write the statistic value for each pair of sites.
+
+     <br><dt><samp><span class="command">statistic.null = [boolean]</span></samp><dd>Tell is the null distribution of the statistic must be computed, using
+parametric bootstrap. 
+The number of simulations performed is the product of two numbers,
+adjusting the amount of CPU and RAM to use.
+
+     <br><dt><samp><span class="command">statistic.null.nb_rep_CPU = [int&gt;0]</span></samp><dd>Increase this parameter to take less memory (slow the program)
+
+     <br><dt><samp><span class="command">statistic.null.nb_rep_RAM = [int&gt;0]</span></samp><dd>Increase this parameter to speed the program (need more memory)
+
+     <br><dt><samp><span class="command">statistic.null.output_file = [path]</span></samp><dd>Where to write the null distribution
+
+</dl>
+
+<h3 class="section">6.1 Performing inter-gene comparisons</h3>
+
+<p>It is possible to compare all sites from one data set with all sites
+from a second data set (inter-gene analysis).
+
+     <dl>
+<dt><samp><span class="command">sequence.file2 = [[path]|none]</span></samp><dd>The path toward the second file. 
+All previous options can be set up for second file, just append '2' at option names. 
+The default is to use options of file1 for file2.
+
+   </dl>
+
+<h3 class="section">6.2 Optional commands</h3>
+
+     <dl>
+<dt><samp><span class="command">statistic.min = [float]</span></samp><dd>Write only pairs with a statistic greater or equal to this value.
+
+     <br><dt><samp><span class="command">statistic.min_rate = [float&gt;0]</span></samp><dd>Write only pairs with a posterior rate greater or equal to this value.
+
+     <br><dt><samp><span class="command">statistic.min_rate_class = [int&gt;0]</span></samp><dd>Write only pairs with a minimum rate class greater or equal to this
+value (first class is 0).
+
+     <br><dt><samp><span class="command">statistic.max_rate_diff = [float]</span></samp><dd>Write only pairs with rates that do not differ more than this value  (-1 -&gt;
+write all pairs).
+
+     <br><dt><samp><span class="command">statistic.max_rate_class_diff = [int]</span></samp><dd>Write only pairs with rate classes that do not differ more than this
+value (-1 -&gt; write all pairs).
+
+     <br><dt><samp><span class="command">statistic.null.cumul = [bool]</span></samp><dd>[deprecated] Tell if an histogram of the distribution should be returned instead of
+printing all simulated pairs.
+
+     <br><dt><samp><span class="command">statistic.null.lower = [float]</span></samp><dd>[deprecated] Lower bound of histogram.
+
+     <br><dt><samp><span class="command">statistic.null.upper = [float]</span></samp><dd>[deprecated] Upper bound of histogram.
+
+     <br><dt><samp><span class="command">statistic.null.nb_int = [int&lt;0]</span></samp><dd>[deprecated] Number of intervals in histogram.
+
+</dl>
+
+<!--  -->
+</body></html>
+

@@ -1,0 +1,77 @@
+<html lang="en">
+<head>
+<title>Model - CoMap Manual 1.0</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="CoMap Manual 1.0">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Data.html#Data" title="Data">
+<link rel="next" href="Estimation.html#Estimation" title="Estimation">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This is the manual of CoMap, version 1.0.0, 31 July 2006.
+
+Copyright (C) 2006 Julien Dutheil-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Model"></a>
+Noeud « Next »:&nbsp;<a rel="next" accesskey="n" href="Estimation.html#Estimation">Estimation</a>,
+Noeud « Previous »:&nbsp;<a rel="previous" accesskey="p" href="Data.html#Data">Data</a>,
+Noeud « Up »:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">3 Model specification</h2>
+
+     <dl>
+<dt><samp><span class="command">model = [JCnuc|K80|T92|HKY85|F84|TN93|GTR|JCprot|DSO78|JTT92|empirical]</span></samp><dd>Specify the substitution model to use. 
+For proteins, the DCmutt method is used for JTT92 and DSO78. 
+You can use the <samp><span class="option">empirical</span></samp> option to specify another model, as
+a text file in PAML format.
+
+     <br><dt><samp><span class="command">kappa=[real&gt;0]</span></samp><dd>Initial value or fixed value for parameter kappa
+(transition/transversion ratio) in models K80, T92, HKY85 and F84
+
+     <br><dt><samp><span class="command">kappa1=[real&gt;0]</span></samp><dd>Initial value or fixed value for parameter kappa1 in model TN93
+
+     <br><dt><samp><span class="command">kappa2=[real&gt;0]</span></samp><dd>Initial value or fixed value for parameter kappa2 in model TN93
+
+     <br><dt><samp><span class="command">theta=[real[0,1]]</span></samp><dd>Initial value or fixed value for parameter theta (GC content) in model
+T92
+
+     <br><dt><samp><span class="command">piA,piC,piG,piT = [real[0,1]]</span></samp><dd>Equilibrium frequencies of nucleotides A, C, G and T/U in models
+HKY85, F84, TN93 and GTR
+
+     <br><dt><samp><span class="command">a,b,c,d,e = [real&gt;0]</span></samp><dd>Parameters of the GTR model
+
+     <br><dt><samp><span class="command">model.use_observed_freq = [boolean]</span></samp><dd>Tell if we have to use observed frequencies as parameter values (for <samp><span class="command">piA</span></samp>, <samp><span class="command">piT</span></samp>, <samp><span class="command">piG</span></samp>, <samp><span class="command">piC</span></samp> and <samp><span class="command">theta</span></samp>). 
+For proteins, this is equivalent to the -F model family.
+
+     <br><dt><samp><span class="command">model_empirical.file = [path]</span></samp><dd>Meaningful only if the <samp><span class="option">empirical</span></samp> option is selected. 
+Specify the path where to find the model (in PAML format).
+
+     <br><dt><samp><span class="command">rate_distribution = [constant|gamma]</span></samp><dd>Specify the rate across sites distribution, as constant or gamma.
+
+     <br><dt><samp><span class="command">rate_distribution_gamma.alpha = [real&gt;0]</span></samp><dd>The gamma distribution's shape parameter
+
+     <br><dt><samp><span class="command">rate_distribution.classes_number = [int&gt;=2]</span></samp><dd>The number of classes to use in discretization.
+
+</dl>
+
+<!--  -->
+</body></html>
+

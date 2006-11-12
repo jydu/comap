@@ -1,0 +1,130 @@
+<html lang="en">
+<head>
+<title>Introduction - CoMap Manual 1.0</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="CoMap Manual 1.0">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="index.html#Top" title="Top">
+<link rel="next" href="Data.html#Data" title="Data">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This is the manual of CoMap, version 1.0.0, 31 July 2006.
+
+Copyright (C) 2006 Julien Dutheil-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Introduction"></a>
+Noeud « Next »:&nbsp;<a rel="next" accesskey="n" href="Data.html#Data">Data</a>,
+Noeud « Previous »:&nbsp;<a rel="previous" accesskey="p" href="index.html#Top">Top</a>,
+Noeud « Up »:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">1 Introduction</h2>
+
+<p>CoMap performs two kinds of tasks:
+     <dl>
+<dt><em>(Weighted) Probabilistic substitution mapping</em><dd>Compute all (weighted) number of subsitutions occuring on each branch of a tree,
+for each site of an alignment.
+
+     <br><dt><em>Co-evolution analysis</em><dd>Using the substitution mapping, look for significantly groups of sites
+departing the null hypothesis of independance. 
+Two kind of analyses are provided: a pairwise analysis, presented in
+Dutheil et al. (2005), and a clustering analysis in Dutheil ang Galtier (2006). 
+In both cases, a parametric bootstrap approach is used to evaluate the
+significance of groups. Simulation results are written to separate
+files, a statistics software like R is required to look for the
+significancy. 
+For the clustering analysis, we provide R script to perform theses
+computations. 
+No preliminary knowledge of the R language is required, although it is recommanded.
+
+   </dl>
+
+   <p>CoMap is a command line program, written in C++ using the Bio++
+libraries. It uses the Bio++ syntaxe, so that arguments may be passed
+as parameter=value options, either directly to the command line or
+using an option file:
+<p><table class="cartouche" summary="cartouche" border="1"><tr><td>
+<pre class="example">     comap parameter1=value1 parameter2=value2 ... parameterN=valueN
+</pre>
+   </td></tr></table>
+   or
+<p><table class="cartouche" summary="cartouche" border="1"><tr><td>
+<pre class="example">     comap param=option_file.
+</pre>
+   </td></tr></table>
+   Option files are a list of parameter=value lines, with only one
+parameter per line. Extra-space may however be included between
+parameter name, equal sign and value:
+<p><table class="cartouche" summary="cartouche" border="1"><tr><td>
+<pre class="example">     first_parameter   = value1
+     second_parameter  = value2
+</pre>
+   </td></tr></table>
+   Comment may also be included, in either script format
+<p><table class="cartouche" summary="cartouche" border="1"><tr><td>
+<pre class="example">     # This is a comment
+</pre>
+   </td></tr></table>
+   or C format
+<p><table class="cartouche" summary="cartouche" border="1"><tr><td>
+<pre class="example">     /* This is a comment
+     */
+</pre>
+   </td></tr></table>
+   or C++ format
+<p><table class="cartouche" summary="cartouche" border="1"><tr><td>
+<pre class="example">     // This is a comment
+</pre>
+   </td></tr></table>
+   Command line and file options may be combined:
+<p><table class="cartouche" summary="cartouche" border="1"><tr><td>
+<pre class="example">     comap param=option_file parameterX=valueX
+</pre>
+   </td></tr></table>
+   In case of parameterX is specified in both option file and command
+line, the command line value will be used. 
+This allows to run CoMap several time by changing a single option,
+like the kind of mapping for instance.
+
+   <p>The next chapters describes the whole set of options available in CoMap. 
+The type of parameter value expected is defined as:
+     <dl>
+<dt><samp><span class="command">[chars]</span></samp><dd>A character chain
+
+     <br><dt><samp><span class="command">[path]</span></samp><dd>A file path, may be absolute or related to the current directory
+
+     <br><dt><samp><span class="command">[int]</span></samp><dd>An integer
+
+     <br><dt><samp><span class="command">[int], [int&gt;0], [int&gt;=0], [int[2,10]]</span></samp><dd>An integer, a positive integer, a positive non-null integet, an
+integer folling between 2 and 10
+
+     <br><dt><samp><span class="command">[real], [real&gt;0], etc</span></samp><dd>A real number, a positive real number, etc.
+
+     <br><dt><samp><span class="command">[boolean]</span></samp><dd>A boolean value, may be one of 'yes', 'no', 'true' or 'false'
+
+     <br><dt><samp><span class="command">[xxx|xxx|xxx]</span></samp><dd>A set of allowed values
+
+     <br><dt><samp><span class="command">list[type]</span></samp><dd>A list of values of specified type, separated by comas.
+
+   </dl>
+
+<!--  -->
+</body></html>
+

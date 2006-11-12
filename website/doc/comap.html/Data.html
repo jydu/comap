@@ -1,0 +1,78 @@
+<html lang="en">
+<head>
+<title>Data - CoMap Manual 1.0</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="CoMap Manual 1.0">
+<meta name="generator" content="makeinfo 4.8">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Introduction.html#Introduction" title="Introduction">
+<link rel="next" href="Model.html#Model" title="Model">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This is the manual of CoMap, version 1.0.0, 31 July 2006.
+
+Copyright (C) 2006 Julien Dutheil-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+</head>
+<body>
+<div class="node">
+<p>
+<a name="Data"></a>
+Noeud « Next »:&nbsp;<a rel="next" accesskey="n" href="Model.html#Model">Model</a>,
+Noeud « Previous »:&nbsp;<a rel="previous" accesskey="p" href="Introduction.html#Introduction">Introduction</a>,
+Noeud « Up »:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">2 Data loading</h2>
+
+     <dl>
+<dt><samp><span class="command">alphabet = [DNA|RNA|Protein]</span></samp><dd>The alphabet to use when reading sequence.
+
+     <br><dt><samp><span class="command">sequence.file=[path]</span></samp><dd>The sequence file to use (sequences must be aligned!)
+
+     <br><dt><samp><span class="command">sequence.format = [Mase|Fasta|Phylip|Clustal|DCSE]</span></samp><dd>The alignment file format.
+
+     <br><dt><samp><span class="command">sequence.format_mase.site_selection = [chars]</span></samp><dd>Meaningful only for mase format. 
+Specify a name for a site set to use.
+
+     <br><dt><samp><span class="command">sequence.format_phylip.order = [interleaved|sequential]</span></samp><dd>Meaningful only for phylip format. 
+Tells if sequences are interleave or sequential format.
+
+     <br><dt><samp><span class="command">sequence.format_phylip.ext = [classic|extended]</span></samp><dd>Meaningful only for phylip format. 
+The <samp><span class="option">classic</span></samp> option corresponds to old phylip format, with
+names up to ten characters. 
+The <samp><span class="option">extended</span></samp> option corresponds to the behaviour of PAML,
+which allows sequence name of any size, separated from the sequence
+with at least two spaces.
+
+     <br><dt><samp><span class="command">sequence.sites_to_use = [all|nogap|complete]</span></samp><dd>Tells wich sites to use. 
+The <samp><span class="option">nogap</span></samp> option removes all sites containing at least one
+gap, and the <samp><span class="option">complete</span></samp> option removes all sites containing at
+least one gap or one generic character, as 'X' for instance.
+
+     <br><dt><samp><span class="command">sequence.max_gap_allowed=101%</span></samp><dd>Only works when the <samp><span class="option">all</span></samp> option is selected. 
+specify the maximum amount of gap allowed by site, given as a number
+of sequence or a percentage. 
+Sites not succeeding the criterion will not be included in the analysis.
+
+     <br><dt><samp><span class="command">tree.file = [path]</span></samp><dd>The phylogenetic tree file to use. 
+Branch lengths are optional. 
+Only newick format is supported for now.
+
+</dl>
+
+<!--  -->
+</body></html>
+
