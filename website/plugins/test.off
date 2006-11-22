@@ -1,4 +1,0 @@
-# test plugin for users plugins
-nb_msg "$plugins_loadaction `basename $nb_plugin` ..."
-
-# eof

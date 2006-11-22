@@ -1,154 +1,66 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
-  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta name="generator" content=
-"HTML Tidy for Linux/x86 (vers 1st December 2004), see www.w3.org" />
-<meta http-equiv="Content-Type" content=
-"application/xhtml+xml; charset=utf-8" />
-<meta name="generator" content="NanoBlogger 3.3 RC5" />
-<meta name="robots" content="all" />
-<meta name="revisit-after" content="31 days" />
 <title>CoMap</title>
-<link rel="stylesheet" href="./styles/nb_default.css" type=
-"text/css" media="all" />
-<link rel="stylesheet" href="./styles/print.css" type="text/css"
-media="print" />
-<link rel="shortcut icon" href="./images/favicon.ico" />
-<link rel="alternate" type="application/atom+xml" title="Atom 1.0"
-href="./atom.xml" />
-<link rel="alternate" type="application/rss+xml" title="RSS 2.0"
-href="./rss.xml" />
-<link rel="alternate" type="application/rss+xml" title="RSS 1.0"
-href="./index.xml" />
+<meta name="generator" content="Bluefish"/>
+<meta name="author" content="Julien Dutheil"/>
+<meta name="keywords" content="Molecular Coevolution, Substitution mapping, Phylogeny, Markov Chain, Proteins, RNA"/>
+<meta name="description" content="CoMap is a program for substitution mapping and coevolution detection"/>
+<meta name="ROBOTS" content="NOINDEX, NOFOLLOW"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8"/>
+<meta http-equiv="Content-Style-Type" content="text/css"/>
+<!-- meta http-equiv="refresh" content="5; URL=http://home.gna.org/comap"/ -->
+<style type="text/css">
+   @import url(Style.css);
+</style>
 </head>
 <body>
-<div id="container" class="clearfix">
-<div id="header" class="clearfix">
-<h1><a href="./index.html" accesskey="1">CoMap</a></h1>
-<span class="description">A C++ shell program to detect co-evolving
-groups of sites</span></div>
-<div id="content">
-<div id="wrap"><a id="top" name="top"></a>
-<div class="blog">
-<div class="item"><a id="e2006-08-01T09_59_31.txt" name=
-"e2006-08-01T09_59_31.txt"></a>
-<h2 class="date">Tuesday August 01 2006 [09:59]</h2>
-<div class="blogbody">
-<h3 class="title">Welcome!</h3>
-<div class="item-description">Welcome at CoMap's website.</div>
+<div class="banner">
+<p class="header">
+Menu:
+</p>
+<p>
+<a href="#news">News</a>
+<a href="#desc">Description</a>
+<a href="#download">Download</a>
+<a href="#doc">Documentation</a>
+</p>
 </div>
-<div class="posted"><br />
-Posted by <span class="item-creator">Julien Dutheil</span> |
-Categories: <!-- News --><a href=
-"./archives/cat_1/index.html">News</a> 
-<!-- <br /><a href="./archives/#comments">Comments</a> --></div>
-</div>
-</div>
-</div>
-<div class="menu"></div>
-</div>
-<div id="links">
-<div class="calendar">
-<table border="0" cellspacing="4" cellpadding="0" summary=
-"Calendar">
-<caption class="calendarhead"><a href=
-"./archives/2006/08/index.html">August 2006</a></caption>
-<tr>
-<th><span class="calendarday">Su</span></th>
-<th><span class="calendarday">Mo</span></th>
-<th><span class="calendarday">Tu</span></th>
-<th><span class="calendarday">We</span></th>
-<th><span class="calendarday">Th</span></th>
-<th><span class="calendarday">Fr</span></th>
-<th><span class="calendarday">Sa</span></th>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td><span class="calendar"><a href=
-"./archives/2006/08/index.html#e2006-08-01T09_59_31.txt">1</a></span></td>
-<td><span class="calendar">2</span></td>
-<td><span class="calendar">3</span></td>
-<td><span class="calendar">4</span></td>
-<td><span class="calendar">5</span></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><span class="calendar">6</span></td>
-<td><span class="calendar">7</span></td>
-<td><span class="calendar">8</span></td>
-<td><span class="calendar">9</span></td>
-<td><span class="calendar">10</span></td>
-<td><span class="calendar">11</span></td>
-<td><span class="calendar">12</span></td>
-</tr>
-<tr>
-<td><span class="calendar">13</span></td>
-<td><span class="calendar">14</span></td>
-<td><span class="calendar">15</span></td>
-<td><span class="calendar">16</span></td>
-<td><span class="calendar">17</span></td>
-<td><span class="calendar">18</span></td>
-<td><span class="calendar">19</span></td>
-</tr>
-<tr>
-<td><span class="calendar">20</span></td>
-<td><span class="calendar">21</span></td>
-<td><span class="calendar">22</span></td>
-<td><span class="calendar">23</span></td>
-<td><span class="calendar">24</span></td>
-<td><span class="calendar">25</span></td>
-<td><span class="calendar">26</span></td>
-</tr>
-<tr>
-<td><span class="calendar">27</span></td>
-<td><span class="calendar">28</span></td>
-<td><span class="calendar">29</span></td>
-<td><span class="calendar">30</span></td>
-<td><span class="calendar">31</span></td>
-</tr>
-</table>
-</div>
-<div class="sidetitle">articles</div>
-<div class="side"><!--Documentation--><a href=
-"./articles/documentation/index.html">Documentation</a><br />
-<!--Download--><a href=
-"./articles/download/index.html">Download</a><br /></div>
-<div class="sidetitle">Links</div>
-<div class="side"><a href="./index.html">Main</a><br />
-<!-- add more links below this line --></div>
-<div class="sidetitle">Recent Entries</div>
-<div class="side"><a href=
-"./archives/2006/08/index.html#e2006-08-01T09_59_31.txt">Welcome!</a><br />
-</div>
-<div class="sidetitle">Categories</div>
-<div class="side"><a href="./archives/cat_1/index.html">News</a>
-(1)<br /></div>
-<div class="sidetitle">Archives</div>
-<div class="side"><a href="./archives/index.html">Archive
-Index</a><br />
-<a href="./archives/2006/index.html">2006</a> (1)<br />
-<!-- <a href="./archives/2006/08/index.html">August 2006     </a> (1)<br /> --></div>
-<div class="syndicate">Syndicate this site: <a href=
-"./rss.xml">RSS</a>, <a href="./atom.xml">Atom</a></div>
-<div class="sidetitle">Contact</div>
-<div class="side"><a href=
-"mailto:julien.dutheil#univ-montp2.fr">Julien.Dutheil#univ-montp2.fr</a>
-(change # to @)</div>
-<div class="sidetitle">Weblog Status</div>
-<div class="side"><!-- Total categories:: 1<br /> -->
-Total entries: 1<br />
-Last entry: Tuesday August 01 2006 [09:59]<br />
-Last updated: Tuesday August 01 2006 [11:46]</div>
+
+<div class="back">
+<div class="section">
+<h1>CoMap<br/>A C++ shell program to detect co-evolving
+groups of sites</h1>
+
+<h2 id="news">News</h2>
+
+<p class="news">22/11/06<br />
+New CoMap website.
+</p>
+
+<h2 id="desc">Description</h2>
+
+<p>CoMap performs the following tasks:</p>
+<ul>
+<li>Compute probabilistic substitution maps</li>
+<li>Test for pairs/groups of sites that do not evolve independently</li>
+</ul>
+
+<h2 id="download">Download</h2>
+
+<p></p>CoMap may be downloaded from <a href="http://download.gna.org/comap">http://download.gna.org/comap</a>.
+The source code is available as a <code>.tar.gz</code> archive, and requires the Bio++ libraries Utils, NumCalc, SeqLib and PhylLib to be installed (see <a href="http://kimura.univ-montp2.fr/BioPP">http://kimura.univ-montp2.fr/BioPP</a>).
+A static executable is also available for the Linux and Win32 platforms.</p>
+
+<h2 id="doc">Documentation</h2>
+
+<p>The documentation of the program is available here [<a href="doc/comap.html/index.html">HTML</a>][<a href="doc/comap.pdf">PDF</a>].
+It is distributed along with the program source code.
 </div>
 </div>
-<div id="footer" style="clear:both;">
-<div class="metainfo">powered by $EDITOR, bash, cat, grep, sed, and
-<a href="http://nanoblogger.sourceforge.net">nb 3.3 RC5</a></div>
-<div class="menu"><a href="#top">[/\]</a><br /></div>
-</div>
+
+
 </body>
 </html>

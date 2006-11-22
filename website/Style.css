@@ -1,0 +1,99 @@
+div.banner {
+	margin:      0;
+	font-size:   100%;
+	font-weight: bold;
+	line-height: 1.5;
+	text-align:  center;
+	position:    fixed;
+	top:         2em;
+	left:        1em;
+	width:       9em;
+	right:       auto;
+	/*background:  url(semi2x2b.png) transparent fixed;*/
+	background:  white;
+}
+
+div.banner p {
+	margin:      0;
+	padding:     0.3em 0.4em;
+	font-family: Arial, sans-serif;
+	border:      thin outset #999;
+	color:       #025c7f;
+}
+div.banner p.header {
+  font-size: 125%;
+  font-variant: small-caps;
+	background: #025c7f;
+	color: white;
+	text-decoration: none;
+  display: block;
+}
+
+div.banner a, div.banner em {
+  display: block;
+  margin: 0 0.5em;
+  border-top: 2px groove #999;
+	color:  #025c7f;
+}
+div.banner a:first-child { border-top: none }
+div.banner em { color: #CFC }
+
+div.banner a:link { text-decoration: none; color: #025c7f }
+div.banner a:visited { text-decoration: none; color: #025c7f }
+div.banner a:hover { background: orange; color: white }
+
+div.back {
+  clear: both;
+  page-break-before: always;
+  margin: 3em -0.75em 3em 1em;
+  padding: .5em;
+  background: #666;
+}
+div.section {
+  background: #FBFBFF;
+  margin: -1.5em 0 0 -1.5em;
+  padding: 1.5em;
+  border: thin solid #999;
+}
+div.section div.back {
+  background: #666
+}
+h1 { color: black; line-height: 1.2; font-size: 110% }
+h1:first-line { color: #025c7f; font-size: 200%}
+h2 {
+  color: #025c7f;
+  text-shadow: 1px 1px black;
+  text-align: right;
+  font-variant: small-caps;
+  font-weight: bold;
+  margin-top: 0;
+  font-size: 140% /*200%*/;
+}
+h3 {
+  color: #025c7f;
+  font-size: 100%;
+  font-weight: normal;
+  font-variant: small-caps;
+  text-align: right;
+}
+body {
+  line-height: 1.4;
+  background: #CCC;
+  font-size: medium;
+  margin-right: 2em;
+  margin-left: 11em;
+}
+div.section a:link, div.section a:visited {
+  color: inherit;
+  font-style: italic;
+  text-decoration: underline;
+}
+/* Should be a:visited:hover, a:link:hover but Opera Linux
+   doesn't support that yet */
+a:hover {
+  background: #CCC;
+}
+
+div.section p.news:first-line {
+	color: #025c7f;
+}
