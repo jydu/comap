@@ -1,15 +1,9 @@
 # +---------------------------------------------------------+
 # | CoMap p-value computation -- R functions                |
 # | Julien Dutheil <Julien.Dutheil@univ-montp2.fr> 28/06/06 |
+# | Modified on: 15/01/2007                                 |
+# | Use a sliding window and conditional p-values           |
 # +---------------------------------------------------------+
-
-
-# Return the position of the maximum value of a multi-dimensional array
-# t: the array to parse
-which.max2 <- function(t)
-{
-  return(which(t==max(t), arr.ind=TRUE))
-}
 
 # Get p-values codes:
 pval<-function(x)
@@ -17,46 +11,13 @@ pval<-function(x)
   return(as.character(symnum(x, cutpoints=c(0,0.001,0.01,0.05,0.1,1), symbols=c("***","**","*",".","NS"))))
 }
 
-# Distribution discretization. Perform type I test (see article).
-#
-# sim: The simulation result (data.frame).
-# group.size: Group size for which the distribution must be computed.
-# n, n.nmin, n.dmax: number of classes to use for discretization for each axe.
-# Returns a n.nmin times n.dmax array, with -1 values in non-significant cells.
-disc.dist<-function(sim, group.size, n=10, n.nmin=n, n.dmax=n)
+round.pval<-function(p)
 {
-  sim<-sim[sim$Size==group.size,]
-  d.lim<-seq(0,max(sim$Dmax),len=n.dmax+1)
-  n.lim<-seq(0,max(sim$Nmin),len=n.nmin+1)
-  dmax.f<-cut(sim$Dmax, breaks=d.lim)
-  nmin.f<-cut(sim$Nmin, breaks=n.lim)
-  t<-table(dmax.f, nmin.f)
-  t<-t/sum(t)
-  dimnames(t)[[1]]<-d.lim[-1]
-  dimnames(t)[[2]]<-n.lim[-1]
-  pvalues<-t*0 - 1 #A table with the same dimensions but filled with -1.
-  a<-0;
-  while(max(t) >= 0) {
-    #cat(a,"\n")
-    d<-which.max2(t)
-    i<-d[1,1]
-    j<-d[1,2]
-    a<-a+t[i,j]
-    t[i,j]<- -1
-    for(ii in i:n.dmax) {
-      if(t[ii,j] > -1) {
-        a<-a+t[ii,j]
-        t[ii,j]<- -1
-      }
-    }
-    pvalues[i,j]<-1-a
-    for(ii in i:n.dmax) {
-      if(pvalues[ii,j] == -1) {
-        pvalues[ii,j]<-1-a
-      }
-    }
+  for(i in 1:length(p))
+  {
+    if(!is.na(p[i])) if(p[i]<0) p[i]<-0
   }
-  return(pvalues)
+  return(p)
 }
 
 # Test each group.
@@ -64,88 +25,31 @@ disc.dist<-function(sim, group.size, n=10, n.nmin=n, n.dmax=n)
 # data: The clustered groups (data.frame).
 # group.sizes: A vector of sizes to test. 2:20 will test all groups with a size <= 20 for instance.
 # sim: The simulation result (data.frame).
-# n, n.nmin, n.dmax: number of classes to use for discretization for each axe.
-# Return a data.frame similar to data, with a new column named Pred 'level', telling if a group is significant at the given level.
-test<-function(data, sim, group.sizes, n=10, n.nmin=n, n.dmax=n)  
+# window: The size of the sliding window, in percent.
+# Return a data.frame similar to data, with a new column named 'p.value'.
+test<-function(data, sim, group.sizes, window)  
 { 
   cn<-"p.value"
-  data[,cn] <- numeric(nrow(data))
-  # Compute dist for each group size:
-  dist<-list();
-  for(i in group.sizes) {
-    dist[[as.character(i)]]<-disc.dist(sim,group.size=i,n.nmin=n.nmin,n.dmax=n.dmax)
-  }
-  
-  for(i in 1:nrow(data)) {
-    group<-data[i,"Size"]
-    nmin <-data[i,"Nmin"]
-    dmax <-data[i,"Dmax"]
-    nmin.i<-which(nmin<=as.numeric(colnames(dist[[as.character(group)]])))[1]
-    dmax.i<-which(dmax<=as.numeric(rownames(dist[[as.character(group)]])))[1]
-    if(is.null(dist[[as.character(group)]])) {
-      data[i,cn]<-NA
-    } else {
-      if(is.na(nmin.i)) { # Value is out of simulation range.
-        warning(paste("Nmin value out of range for group",i,"."))
-        data[i,cn]<-NA
-      } else {
-        data[i,cn]<-dist[[as.character(group)]][dmax.i,nmin.i]
+  data[,cn]<-rep(NA,nrow(data))
+  for(i in group.sizes)
+  {
+    data.group<-data[data$Size==i,]
+    if(nrow(data.group) > 0)
+    {
+      sim.group<-sim[sim$Size==i,]
+      ws<-(max(sim.group$Nmin) - min(sim.group$Nmin)) * window / 2
+
+      for(j in 1:nrow(data.group))
+      {
+        nmin<-data.group[j,"Nmin"]
+        dmax<-data.group[j,"Dmax"]
+        d<-sim.group[sim.group$Nmin > nmin - ws & sim.group$Nmin < nmin + ws,]
+        data[which(data$Group==data.group[j, "Group"]),cn]<-(sum(d$Dmax <= dmax) + 1) / (nrow(d) + 1)
       }
     }
   }
   data$code<-pval(data$p.value)
   return(data)
-}
-
-# Distribution discretization. Perform type II test (see article).
-#
-# sim: The simulation result (data.frame).
-# group.size: Group size for which the distribution must be computed.
-# n, n.nmin, n.dmax, n.delta: number of classes to use for discretization for each axe.
-# Returns a n.nmin times n.dmax array, with -1 values in non-significant cells.
-disc.dist2<-function(sim, group.size, n=10, n.nmin=n, n.dmax=n, n.delta=n)
-{
-  sim<-sim[sim$Size==group.size,]
-  d.lim<-seq(0,max(sim$Dmax),len=n.dmax+1)
-  n.lim<-seq(0,max(sim$Nmin),len=n.nmin+1)
-  m.lim<-seq(0,max(sim$Delta),len=n.delta+1)
-  dmax.f<-cut(sim$Dmax, breaks=d.lim)
-  nmin.f<-cut(sim$Nmin, breaks=n.lim)
-  delta.f<-cut(sim$Delta, breaks=m.lim)
-  t<-table(dmax.f, nmin.f, delta.f)
-  t<-t/sum(t)
-  r<-array(rank(t), dim=dim(t))
-  dimnames(t)[[1]]<-d.lim[-1]
-  dimnames(t)[[2]]<-n.lim[-1]
-  dimnames(t)[[3]]<-m.lim[-1]
-  pvalues<-t*0 - 1 #A table with the same dimensions but filled with -1.
-  a<-0;
-  while(max(t) >= 0) {
-    #cat(a,"\n")
-    d<-which.max2(t)
-    i<-d[1,1]
-    j<-d[1,2]
-    k<-d[1,3]
-    a<-a+t[i,j,k]
-    t[i,j,k]<- -1
-    for(ii in i:n.dmax) {
-      for(kk in 1:k) {
-        if(t[ii,j,kk] > -1) {
-          a<-a+t[ii,j,kk]
-          t[ii,j,kk]<- -1
-        }
-      }
-    }
-    pvalues[i,j,k]<-1-a
-    for(ii in i:n.dmax) {
-      for(kk in 1:k) {
-        if(pvalues[ii,j,kk] == -1) {
-          pvalues[ii,j,kk]<-1-a
-        }
-      }
-    }
-  }
-  return(pvalues)
 }
 
 # Test each group.
@@ -153,34 +57,30 @@ disc.dist2<-function(sim, group.size, n=10, n.nmin=n, n.dmax=n, n.delta=n)
 # data: The clustered groups (data.frame).
 # group.sizes: A vector of sizes to test. 2:20 will test all groups with a size <= 20 for instance.
 # sim: The simulation result (data.frame).
-# n, n.nmin, n.dmax, n.delta: number of classes to use for discretization for each axe.
-# Return a data.frame similar to data, with a new column named Pred 'level', telling if a group is significant at the given level.
-test2<-function(data, sim, group.sizes, n=10, n.nmin=n, n.dmax=n, n.delta=n)
+# window: The size of the sliding window for Nmin, in percent.
+# window2: The size of the sliding window for delta, in percent.
+# Return a data.frame similar to data, with a new column named 'p.value'.
+test2<-function(data, sim, group.sizes, window, window2)
 { 
   cn<-"p.value"
-  data[,cn] <- numeric(nrow(data))
-  # Compute dist for each group size:
-  dist<-list();
-  for(i in group.sizes) {
-    dist[[as.character(i)]]<-disc.dist2(sim,group.size=i,n.nmin=n.nmin,n.dmax=n.dmax,n.delta=n.delta)
-  }
-  
-  for(i in 1:nrow(data)) {
-    group<-data[i,"Size"]
-    nmin <-data[i,"Nmin"]
-    dmax <-data[i,"Dmax"]
-    delta<-data[i,"Delta"]
-    nmin.i<-which(nmin<=as.numeric(colnames(dist[[as.character(group)]])))[1]
-    dmax.i<-which(dmax<=as.numeric(rownames(dist[[as.character(group)]])))[1]
-    delta.i<-which(delta<=as.numeric(dimnames(dist[[as.character(group)]])[[3]]))[1]
-    if(is.null(dist[[as.character(group)]])) {
-      data[i,cn]<-NA
-    } else {
-      if(is.na(nmin.i)) { # Value is out of simulation range.
-        warning(paste("Nmin value out of range for group",i,"."))
-        data[i,cn]<-NA
-      } else {
-        data[i,cn]<-dist[[as.character(group)]][dmax.i,nmin.i,delta.i]
+  data[,cn]<-rep(NA,nrow(data))
+  for(i in group.sizes)
+  {
+    data.group<-data[data$Size==i,]
+    if(nrow(data.group) > 0)
+    {
+      sim.group<-sim[sim$Size==i,]
+      ws<-(max(sim.group$Nmin) - min(sim.group$Nmin)) * window / 2
+      ws2<-(max(sim.group$Delta) - min(sim.group$Delta)) * window2 / 2
+
+      for(j in 1:nrow(data.group))
+      {
+        nmin<-data.group[j,"Nmin"]
+        delta<-data.group[j,"Delta"]
+        dmax<-data.group[j,"Dmax"]
+        d<-sim.group[sim.group$Nmin > nmin - ws & sim.group$Nmin < nmin + ws
+                   & sim.group$Delta > delta - ws2 & sim.group$Delta < delta + ws2,]
+        data[which(data$Group==data.group[j, "Group"]),cn]<-(sum(d$Dmax <= dmax) + 1) / (nrow(d) + 1)
       }
     }
   }
@@ -188,42 +88,125 @@ test2<-function(data, sim, group.sizes, n=10, n.nmin=n, n.dmax=n, n.delta=n)
   return(data)
 }
 
-# Compute how many simulated group are observed for each group size and each nmin.
-# sim: The simulation result (data.frame).
-# group.sizes Group sizes to test.
-# n.nmin Number of classes to use for nmin discretization.
-compute.eff<-function(sim, group.sizes, n.nmin=10)
+# when nested groups are detected, keep only the level with the most significant value
+belongsto<-function(group1, group2)
 {
-  l<-list()
-  for(i in group.sizes)
+  s1<-strsplit(substr(group1, start=2, stop=nchar(group1)-1),";")[[1]]
+  res<-logical(length(group2))
+  for(i in 1:length(group2))
   {
-    sim.i<-sim[sim$Size==i,]
-    n.lim<-seq(0,max(sim.i$Nmin),len=n.nmin+1)
-    nmin.f<-cut(sim.i$Nmin, breaks=n.lim)
-    t<-table(nmin.f)
-    dimnames(t)[[1]]<-n.lim[-1]
-    l[[as.character(i)]]<-t
+    s2<-strsplit(substr(group2[i], start=2, stop=nchar(group2[i])-1),";")[[1]]
+    res[i]<-all(s1 %in% s2)
   }
-  return(l)
+  return(res)
+}
+size<-function(groups)
+{
+  sizes<-numeric(length(groups))
+  for(i in 1:length(groups))
+  {
+    s<-strsplit(substr(groups[i], start=2, stop=nchar(groups[i])-1),";")[[1]]
+    sizes[i]<-length(s)
+  }
+  return(sizes)
+}
+build.cliques<-function(pred,cng,logFile="")
+{
+  cat("Building cliques...\n")
+  cat(file=logFile,date(),"\n")
+  cliques<-as.list(as.character(pred$Group))
+  names(cliques)<-as.character(pred$Group)
+
+  #Now sort cliques:
+
+  groups<-names(cliques)
+  groups<-groups[order(pred$Size,pred$p.value)]
+  while(length(groups)>0)
+  {
+    group<-groups[1]
+    candidates<-which(belongsto(group,groups))
+    candidates<-candidates[-1]
+    if(length(candidates) > 0)
+    {
+      superGroups<-groups[candidates]
+      superGroup<-superGroups[which.min(size(superGroups))]
+      if(cng)
+      {
+        #Check groups p-values:
+        groupPVal     <-pred[pred$Group==group     ,"p.value"]
+        superGroupPVal<-pred[pred$Group==superGroup,"p.value"]
+        #This keeps the most significant group:
+        if(groupPVal <= superGroupPVal)
+        {
+          #Small group is better, remove big group:
+          cat("Removing group",superGroup,"[p-value",superGroupPVal,"] for group",group,"[p-value",groupPVal,"]\n",file=logFile,append=TRUE)
+          cliques[[superGroup]]<-NULL
+          groups<-groups[-which(groups==superGroup)]
+          #... and test again current group!
+        }
+        else
+        {
+          #Big group is better, remove small group:
+          cat("Removing group",group,"[p-value",groupPVal,"] for group",superGroup,"[p-value",superGroupPVal,"]\n",file=logFile,append=TRUE)
+          cliques[[group]]<-NULL
+          groups<-groups[-1]
+        }
+        #This keeps the smallest group:
+#        cat("Removing group",superGroup,"[p-value",superGroupPVal,"] for group",group,"[p-value",groupPVal,"]\n",file=logFile,append=TRUE)
+#        cliques[[superGroup]]<-NULL
+#        groups<-groups[-which(groups==superGroup)]
+#        #... and test again current group!
+      }
+      else
+      {
+        cat("Merging group",group,"with",superGroup,"[",length(groups),"remaining ]\n",file=logFile,append=TRUE)
+        # Merging...
+        cliques[[superGroup]]<-append(cliques[[superGroup]],cliques[[group]])
+        # Removing old group:
+        cliques[[group]]<-NULL
+        groups<-groups[-1]
+      }
+    }
+    else
+    {
+      #Otherwise lonely clique
+      cat("Group",group,"has no super clique.\n",file=logFile,append=TRUE)
+      groups<-groups[-1]
+    }
+  }
+
+  # Now sort table:
+  groups<-character(0)
+  cliquesId<-numeric(0)
+  count<-1
+  for(i in names(cliques))
+  {
+    clique<-cliques[[i]]
+    groups<-c(groups,clique)
+    cliquesId<-c(cliquesId,rep(count,length(clique)))
+    count<-count+1
+  }
+
+  rownames(pred)<-as.character(pred$Group)
+  pred<-pred[groups,]
+  pred$Clique<-cliquesId
+  return(pred)
 }
 
-# Display method.
-# Test all groups at the 5%, 1% and 0.1% level with a type I test (see article).
-# Add a 'Conf' column telling how many simulated groups have a given nmin and group size.
-# Optionaly add a column specifying the type of vector used.
+# Test all groups, and format results.
 # data: The clustered groups (data.frame).
 # group.sizes: A vector of sizes to test. 2:20 will test all groups with a size <= 20 for instance.
 # sim: The simulation result (data.frame).
+# window: The size of the sliding window, in percent.
+# method: Add a column with the name of the method used (eg Volume, Charge, etc.).
 # level: The maximum p-value level for groups to output.
-# conf.level: remove groups with a conf value lower than this parameter.
-# Return a data.frame similar to data, with 3 new column named Pred 0.05, Pred 0.01 and Pred 0.001.
-# A 10*10 discretization grid is applied, with one tail tests.
-get.pred<-function(data, sim, group.sizes, method="", level=0.05, conf.level=50)
+# cng: Tell if correction for nested groups must be applied.
+# logFile: Where to write the groups removed.
+get.pred<-function(data, sim, group.sizes, window, method="", level=0.05, cng, logFile)
 {
-  pred<-test(data, sim, group.sizes)
-  conf<-compute.eff(sim, group.sizes);
-
+  pred<-test(data, sim, group.sizes, window)
   pred<-pred[!is.na(pred$p.value),]
+  pred$p.value<-round.pval(pred$p.value)
   pred<-pred[pred$p.value <= level & pred[,"Const"] == "no",]
   if(nrow(pred)==0) return(pred)
   pred<-pred[order(pred$p.value),]
@@ -231,34 +214,31 @@ get.pred<-function(data, sim, group.sizes, method="", level=0.05, conf.level=50)
   {
     pred[,"Method"]<-rep(method, nrow(pred))
   }
-  # Confidence:
-  pred[,"Conf"]<-numeric(nrow(pred))
-  for(i in 1:nrow(pred))
-  {
-    conf.i<-conf[[as.character(pred[i,"Size"])]]
-    nmin.i<-which(pred[i,"Nmin"] < as.numeric(rownames(conf.i)))[1]
-    pred[i,"Conf"]<-conf.i[nmin.i]
-  }
-  return(pred[pred$Conf>=conf.level,])
+  n1<-sum(data$Size %in% group.sizes & data$Const == "no")
+  n2<-nrow(pred)
+  pred<-build.cliques(pred,cng,logFile)
+  n3<-nrow(pred)
+  p1<-sum(dbinom(n2:n1,n1,level))
+  p2<-sum(dbinom(n3:n1,n1,level))
+  cat(n1, "tested,", n2, "sign.,", n3, "indep. p-value in [", p1, ",", p2, "].\n")
+  return(pred)
 }
 
-# Display method.
-# Test all groups at the 5%, 1% and 0.1% level with a type II test (see article).
-# Add a 'Conf' column telling how many simulated groups have a given nmin and group size.
-# Optionaly add a column specifying the type of vector used.
+# Test all groups, and format results.
 # data: The clustered groups (data.frame).
-# sim: The simulation result (data.frame).
 # group.sizes: A vector of sizes to test. 2:20 will test all groups with a size <= 20 for instance.
+# sim: The simulation result (data.frame).
+# window: The size of the sliding window for Nmin, in percent.
+# window2: The size of the sliding window for delta, in percent.
+# method: Add a column with the name of the method used (eg Volume, Charge, etc.).
 # level: The maximum p-value level for groups to output.
-# conf.level: remove groups with a conf value lower than this parameter.
-# Return a data.frame similar to data, with 3 new column named Pred 0.05, Pred 0.01 and Pred 0.001.
-# A 10*10 discretization grid is applied, with one tail tests.
-get.pred2<-function(data, sim, group.sizes, method="", level=0.05, conf.level=50)
+# cng: Tell if correction for nested groups must be applied.
+# logFile: Where to write the groups removed.
+get.pred2<-function(data, sim, group.sizes, window, window2, method="", level=0.05, cng, logFile)
 {
-  pred<-test2(data, sim, group.sizes)
-  conf<-compute.eff(sim, group.sizes);
-
+  pred<-test2(data, sim, group.sizes, window, window2)
   pred<-pred[!is.na(pred$p.value),]
+  pred$p.value<-round.pval(pred$p.value)
   pred<-pred[pred$p.value <= level & pred[,"Const"] == "no",]
   if(nrow(pred)==0) return(pred)
   pred<-pred[order(pred$p.value),]
@@ -266,13 +246,13 @@ get.pred2<-function(data, sim, group.sizes, method="", level=0.05, conf.level=50
   {
     pred[,"Method"]<-rep(method, nrow(pred))
   }
-  # Confidence:
-  pred[,"Conf"]<-numeric(nrow(pred))
-  for(i in 1:nrow(pred))
-  {
-    conf.i<-conf[[as.character(pred[i,"Size"])]]
-    nmin.i<-which(pred[i,"Nmin"] < as.numeric(rownames(conf.i)))[1]
-    pred[i,"Conf"]<-conf.i[nmin.i]
-  }
-  return(pred[pred$Conf>=conf.level,])
+  n1<-sum(data$Size %in% group.sizes & data$Const == "no")
+  n2<-nrow(pred)
+  pred<-build.cliques(pred,cng,logFile)
+  n3<-nrow(pred)
+  p1<-sum(dbinom(n2:n1,n1,level))
+  p2<-sum(dbinom(n3:n1,n1,level))
+  cat(n1, "tested,", n2, "sign.,", n3, "indep. p-value in [", p1, ",", p2, "].\n")
+  return(pred)
 }
+

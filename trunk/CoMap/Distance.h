@@ -212,7 +212,7 @@ class CompensationDistance: public AbstractDistance
         sumsq2 += pow(v2[i],2);
         sumsq3 += pow(v1[i]+v2[i],2);
       }
-      return sqrt(sumsq3 / (sumsq1 + sumsq2));
+      return sqrt(sumsq3) / (sqrt(sumsq1) + sqrt(sumsq2));
       
 			//vector<double> v3 = v1 + v2;
       //double sumsq = 0.;
@@ -235,7 +235,7 @@ class CompensationDistance: public AbstractDistance
         wsumsq2 += pow(v2[i],2)*(*_weights)[i];
         wsumsq3 += pow(v1[i]+v2[i],2)*(*_weights)[i];
       }
-      return sqrt(wsumsq3 / (wsumsq1 + wsumsq2));
+      return sqrt(wsumsq3) / (sqrt(wsumsq1) + sqrt(wsumsq2));
 
       //vector<double> v3 = v1 + v2;
       //double wsumsq = 0.;

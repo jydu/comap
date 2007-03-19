@@ -41,7 +41,6 @@ knowledge of the CeCILL license and that you accept its terms.
 #define _CLUSTERTOOLS_H_
 
 #include "Distance.h"
-#include "ContingencyTable.h"
 
 // From NumCalc:
 #include <NumCalc/DiscreteDistribution.h>
@@ -159,7 +158,6 @@ class ClusterTools
         const vector<double> & scales,
         unsigned int sizeOfDataSet,
         unsigned int nrep,
-        ContingencyTable & table,
         ofstream * out = NULL);
 
     static void translate(TreeTemplate<Node> & tree, const vector<string> & tln)

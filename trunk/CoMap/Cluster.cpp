@@ -60,9 +60,9 @@ const string SimpleClustering::MEDIAN   = "Median";
 const string SimpleClustering::WARD     = "Ward"; 
 const string SimpleClustering::CENTROID = "Centroid"; 
 
-Tree * SimpleClustering::getTree() const
+TreeTemplate<Node> * SimpleClustering::getTree() const
 {
-	Node * root = TreeTools::cloneSubtree<Node>(* dynamic_cast<TreeTemplate<NodeTemplate<ClusterInfos> > *>(_tree) -> getRootNode());
+	Node * root = TreeTemplateTools::cloneSubtree<Node>(* dynamic_cast<TreeTemplate<NodeTemplate<ClusterInfos> > *>(_tree) -> getRootNode());
 	return new TreeTemplate<Node>(* root);
 }
 
@@ -70,23 +70,28 @@ vector<unsigned int> SimpleClustering::getBestPair() throw (Exception)
 {
 	vector<unsigned int> bestPair(2);
 	double distMin = -std::log(0.);
-	for(map<unsigned int, Node *>::iterator i = _currentNodes.begin(); i != _currentNodes.end(); i++) {
-		unsigned int id = i -> first;
+	for(map<unsigned int, Node *>::iterator i = _currentNodes.begin(); i != _currentNodes.end(); i++)
+  {
+		unsigned int id = i->first;
 		map<unsigned int, Node *>::iterator j = i;
 		j++;
-		for(; j != _currentNodes.end(); j++) {
+		for(; j != _currentNodes.end(); j++)
+    {
 			unsigned int jd = j -> first;
 			double dist = _matrix(id, jd);
-			if(dist < distMin) {
+			if(dist < distMin)
+      {
 				distMin = dist;
 				bestPair[0] = id;
 				bestPair[1] = jd;
 			}
 		}
 	}
-	if(distMin == -std::log(0.)) {
+	if(distMin == -std::log(0.))
+  {
     cout << "---------------------------------------------------------------------------------" << endl;
-	  for(map<unsigned int, Node *>::iterator i = _currentNodes.begin(); i != _currentNodes.end(); i++) {
+	  for(map<unsigned int, Node *>::iterator i = _currentNodes.begin(); i != _currentNodes.end(); i++)
+    {
 		  unsigned int id = i -> first;
 		  map<unsigned int, Node *>::iterator j = i;
 		  j++;
@@ -108,15 +113,16 @@ vector<double> SimpleClustering::computeBranchLengthsForPair(const vector<unsign
 {
 	vector<double> d(2);
 	double dist = _matrix(pair[0], pair[1]) / 2.;
-	d[0] = dist - dynamic_cast<NodeTemplate<ClusterInfos> *>(_currentNodes[pair[0]]) -> getInfos().length; 
-	d[1] = dist - dynamic_cast<NodeTemplate<ClusterInfos> *>(_currentNodes[pair[1]]) -> getInfos().length; 
+	d[0] = dist - dynamic_cast<NodeTemplate<ClusterInfos> *>(_currentNodes[pair[0]])->getInfos().length; 
+	d[1] = dist - dynamic_cast<NodeTemplate<ClusterInfos> *>(_currentNodes[pair[1]])->getInfos().length; 
 	return d;
 }
 
 double SimpleClustering::computeDistancesFromPair(const vector<unsigned int> & pair, const vector<double> & branchLengths, unsigned int pos)
 {
 	double w1, w2, w3, w4;
-	if(_method == "Single") {
+	if(_method == "Single")
+  {
 		w1 = .5;
 		w2 = .5;
 		w3 = 0.;
@@ -164,16 +170,16 @@ void SimpleClustering::finalStep(int idRoot)
 {
 	NodeTemplate<ClusterInfos> * root = new NodeTemplate<ClusterInfos>(idRoot);
 	map<unsigned int, Node * >::iterator it = _currentNodes.begin();
-	unsigned int i1 = it -> first;
-	Node * n1       = it -> second;
+	unsigned int i1 = it->first;
+	Node * n1       = it->second;
 	it++;
-	unsigned int i2 = it -> first;
-	Node * n2       = it -> second;
+	unsigned int i2 = it->first;
+	Node * n2       = it->second;
 	double d = _matrix(i1, i2) / 2;
-	root -> addSon(*n1);
-	root -> addSon(*n2);
-	n1 -> setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n1) -> getInfos().length); 
-	n2 -> setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n2) -> getInfos().length); 
+	root->addSon(*n1);
+	root->addSon(*n2);
+	n1->setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n1)->getInfos().length); 
+	n2->setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n2)->getInfos().length); 
 	_tree = new TreeTemplate<NodeTemplate<ClusterInfos> >(*root);
 }
 
@@ -204,9 +210,9 @@ Node * SimpleClustering::getParentNode(int id, Node * son1, Node * son2)
 //---------------------------------------------------------------------------------------------
 
 
-Tree * SumClustering::getTree() const
+TreeTemplate<Node> * SumClustering::getTree() const
 {
-	Node * root = TreeTools::cloneSubtree<Node>(* dynamic_cast<TreeTemplate<NodeTemplate<ClusterInfos> > *>(_tree) -> getRootNode());
+	Node * root = TreeTemplateTools::cloneSubtree<Node>(* dynamic_cast<TreeTemplate<NodeTemplate<ClusterInfos> > *>(_tree) -> getRootNode());
 	return new TreeTemplate<Node>(* root);
 }
 
@@ -214,14 +220,17 @@ vector<unsigned int> SumClustering::getBestPair() throw (Exception)
 {
 	vector<unsigned int> bestPair(2);
 	double distMin = -std::log(0.);
-	for(map<unsigned int, Node *>::iterator i = _currentNodes.begin(); i != _currentNodes.end(); i++) {
+	for(map<unsigned int, Node *>::iterator i = _currentNodes.begin(); i != _currentNodes.end(); i++)
+  {
 		unsigned int id = i -> first;
 		map<unsigned int, Node *>::iterator j = i;
 		j++;
-		for(; j != _currentNodes.end(); j++) {
-			unsigned int jd = j -> first;
+		for(; j != _currentNodes.end(); j++)
+    {
+			unsigned int jd = j->first;
 			double dist = _matrix(id, jd);
-			if(dist < distMin) {
+			if(dist < distMin)
+      {
 				distMin = dist;
 				bestPair[0] = id;
 				bestPair[1] = jd;
@@ -236,10 +245,10 @@ vector<double> SumClustering::computeBranchLengthsForPair(const vector<unsigned 
 {
 	vector<double> d(2);
 	double dist = _matrix(pair[0], pair[1]) / 2.;
-	//d[0] = dist - dynamic_cast<NodeTemplate<ClusterInfos> *>(_currentNodes[pair[0]]) -> getInfos().length; 
-	//d[1] = dist - dynamic_cast<NodeTemplate<ClusterInfos> *>(_currentNodes[pair[1]]) -> getInfos().length; 
-	d[0] = dist; 
-	d[1] = dist; 
+	d[0] = dist - dynamic_cast<NodeTemplate<ClusterInfos> *>(_currentNodes[pair[0]])->getInfos().length; 
+	d[1] = dist - dynamic_cast<NodeTemplate<ClusterInfos> *>(_currentNodes[pair[1]])->getInfos().length; 
+	//d[0] = dist; 
+	//d[1] = dist; 
 	return d;
 }
 
@@ -252,18 +261,18 @@ void SumClustering::finalStep(int idRoot)
 {
 	NodeTemplate<ClusterInfos> * root = new NodeTemplate<ClusterInfos>(idRoot);
 	map<unsigned int, Node * >::iterator it = _currentNodes.begin();
-	unsigned int i1 = it -> first;
-	Node * n1       = it -> second;
+	unsigned int i1 = it->first;
+	Node * n1       = it->second;
 	it++;
-	unsigned int i2 = it -> first;
-	Node * n2       = it -> second;
+	unsigned int i2 = it->first;
+	Node * n2       = it->second;
 	double d = _matrix(i1, i2) / 2;
-	root -> addSon(*n1);
-	root -> addSon(*n2);
-	//n1 -> setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n1) -> getInfos().length); 
-	//n2 -> setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n2) -> getInfos().length); 
-	n1 -> setDistanceToFather(d); 
-	n2 -> setDistanceToFather(d); 
+	root->addSon(*n1);
+	root->addSon(*n2);
+	n1->setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n1)->getInfos().length); 
+	n2->setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n2)->getInfos().length); 
+	//n1->setDistanceToFather(d); 
+	//n2->setDistanceToFather(d); 
 	_tree = new TreeTemplate<NodeTemplate<ClusterInfos> >(*root);
 }
 

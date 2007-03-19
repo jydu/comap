@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename comap.info
-@settitle CoMap Manual 1.0.1
+@settitle CoMap Manual 1.0.2
 @afourpaper
 @c %**end of header
 
@@ -10,7 +10,7 @@
 @copying
 This is the manual of CoMap, version @value{VERSION}, @value{UPDATED}.
 
-Copyright @copyright{} 2006 Julien Dutheil
+Copyright @copyright{} 2006, 2007 Julien Dutheil
 @end copying
 
 @titlepage
@@ -41,7 +41,7 @@ Copyright @copyright{} 2006 Julien Dutheil
 * Estimation::                  How to estimate parameters before an analysis.                 
 * Mapping::                     Compute the substitution mapping.                   
 * Pairwise::                    Performing the pairwise analysis of Dutheil et al. (2005).                 
-* Clustering::                  Performing the clustering analysis of Dutheil et al. (2006).              
+* Clustering::                  Performing the clustering analysis of Dutheil et al. (2007).              
 * Pvalue::                      Using the R scripts to compute p-values.                            
 @end menu
 
@@ -348,10 +348,23 @@ al. (2005).
 @option{simple} performs a naive mapping, as in Tufféry and Darlu
 (2000).
 @option{aadist} performs a weighted mapping, as in Dutheil and Galtier
-(2006). Currently available only for proteins.
+(2007). Currently available only for proteins.
 
-@item nijt_aadist.type = [grantham|grantham.volume|grantham.polarity|charge|klein.charge]
+@item nijt_aadist.type = [grantham|miyata|grantham.volume|grantham.polarity|charge|klein.charge|user1|user2]
 Specify the type of weight to use.
+The @option{user1} option is for computing a simple distance from a AAIndex1 file, @option{user2} uses a AAIndex2 distance file.
+
+@item nijt_aadist.type_user1.file = [path]
+File path toward a AAIndex1 file.
+Used only if @option{nijt_aadist.type=user1}.
+
+@item nijt_aadist.type_user2.file = [path]
+File path toward a AAIndex2 file.
+Used only if @option{nijt_aadist.type=user2}.
+
+@item nijt_aadist.sym = [boolean]
+Tell if symetric matrices must be used.
+This option should be set to "no" for testing compensation.
 
 @item output.vectors.file = [[path]|none]
 Where to write the substitution mapping.
@@ -373,11 +386,6 @@ Write a file whith the correspondance between leaf names and ids.
 Where to trunc the series when estimating exact number of
 substitutions. A value of 10 should be fine.
 
-@item nijt_aadist.sym = [boolean]
-[untested] Tell if symetric matrices must be used.
-Should be left to ``yes''.
-
-# Should we average over all ancestral state (yes) or use ancestral states reconstruction (no) ?
 @item nijt.average = [boolean]
 Tell if mapping should be averaged over all ancestral states
 (probabilistic mapping).
@@ -480,15 +488,16 @@ printing all simulated pairs.
 
 @table @command
 
-@item clustering.distance = [cor|euclidian|none]
-Distance to use: cor (correlation) or euclidian or none (no clustering).
+@item clustering.distance = [cor|euclidian|comp|none]
+Distance to use: cor (correlation), euclidian, comp (compensation) or none (no clustering).
 
 @item clustering.scale = [boolean]
 Tell is mapping should be normalized (each row (=branch) will be
 divided by its sum.
 
-@item clustering.method = complete
-Clustering algorithm: only complete is supported for now.
+@item clustering.method = [complete|sum]
+Clustering algorithm: complete linkage or sum.
+The sum option should be used only when testing compensation, i.e. in conjunction with the @option{nijt_aadist.sym=no} and @option{clustering.distance=comp} options.
 
 @item clustering.output.matrix.file = [[path]|none]
 Where to write the distance matrix (in phylip format).

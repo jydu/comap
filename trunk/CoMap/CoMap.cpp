@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 	cout << endl;
 	cout << endl;
 	cout << "***********************************************************" << endl;
-	cout << "* This is CoMap       version 1.0.1      date: 25/07/2006 *" << endl;
+	cout << "* This is CoMap       version 1.1.0      date: 19/03/2007 *" << endl;
 	cout << "*     A C++ shell program to detect co-evolving sites.    *" << endl;
 	cout << "***********************************************************" << endl;
 	cout << endl;
@@ -117,7 +117,8 @@ int main(int argc, char *argv[])
 	// **************************
 	
 	if(argc == 1)
-  { // No argument, show display some help and leave.
+  { 
+    // No argument, show display some help and leave.
 		help();
 		exit(-1);
 	}
@@ -162,6 +163,9 @@ int main(int argc, char *argv[])
 	DiscreteDistribution *rDist1;
 	HomogeneousTreeLikelihood *tl1;
 	CoETools::readData(tree1, alphabet1, allSites1, sites1, model1, rDist1, tl1, params, "");
+  
+  bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", params, false, "", true, false);
+	ApplicationTools::displayResult("Rate distribution for simulations", (continuousSim ? "continuous" : "discrete"));
 
 	ApplicationTools::displayMessage("\n\nII) Get substitution vectors\n");
 
@@ -186,13 +190,6 @@ int main(int argc, char *argv[])
 		* rDist1,
 		* substitutionCount1,
 		params);
-
-	// Getting posterior rate class distribution:
-	DiscreteDistribution * prDist1 = RASTools::getPosteriorRateDistribution(* tl1);
-
-	ApplicationTools::displayMessage("\nPosterior rate distribution for dataset:\n");
-	prDist1-> print(ApplicationTools::message);
-	ApplicationTools::displayMessage("\n");
 
 	// *******************************************
 	// * The same for a putative second dataset: *
@@ -249,13 +246,6 @@ int main(int argc, char *argv[])
 			params,
 			"2");
 		
-		// Getting posterior rate class distribution:
-		DiscreteDistribution * prDist2 = RASTools::getPosteriorRateDistribution(* tl2);
-
-		ApplicationTools::displayMessage("\nPosterior rate distribution for 2nd dataset:\n");
-		prDist2->print(ApplicationTools::message);
-		ApplicationTools::displayMessage("\n");
-		
 		ApplicationTools::displayMessage("\n\nIII) Compute statistics\n");
 		
 		// *************************
@@ -280,7 +270,8 @@ int main(int argc, char *argv[])
 			*substitutionCount1,
       *substitutionCount2,
 			*statistic,
-			params);
+			params,
+      continuousSim);
 
 		CoETools::writeInfos(*sites2, *tl2, params, "2");
 
@@ -289,7 +280,6 @@ int main(int argc, char *argv[])
 		delete sites2;
 		delete model2;
 		delete rDist2;
-		delete prDist2;
 		delete tl2;
 		delete substitutionCount2;
 		delete process2;
@@ -319,7 +309,8 @@ int main(int argc, char *argv[])
 				*tree1,
 				*substitutionCount1,
 				*statistic,
-				params);
+				params,
+        continuousSim);
 		}
  
 		CoETools::writeInfos(*sites1, *tl1, params);
@@ -337,7 +328,6 @@ int main(int argc, char *argv[])
   // ***********************
 	// * Clustering analysis *
 	// ***********************
-
 	string clusteringMethod = ApplicationTools::getStringParameter("clustering.method", params, "none", "", false, false);
 	if(clusteringMethod != "none")
   {
@@ -411,9 +401,12 @@ int main(int argc, char *argv[])
     {
       string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", "", true);
       bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", params, true, "", true); 
-      if(nijtOption != "aadist" || sym) {
+      if(nijtOption != "aadist" || sym)
+      {
         throw Exception("Compensation distance must be used with 'nijt=aadist' and 'nijt_aadist.sym=no' options.");
-      } else {
+      }
+      else
+      {
 		    dist = new CompensationDistance();
       }
     }
@@ -482,13 +475,15 @@ int main(int argc, char *argv[])
 	
     // Dumping groups to file, with more or less information, depending on the method used.
 	  string groupsPath = ApplicationTools::getAFilePath("clustering.output.groups.file", params, true, false, "", false);
-    vector<string> colNames(6);
+    vector<string> colNames(8);
     colNames[0] = "Group";
     colNames[1] = "Size";
     colNames[2] = "Const";
     colNames[3] = "Dmax";
     colNames[4] = "Nmin";
-    colNames[5] = "Delta"; //Distance From Mean Vector
+    colNames[5] = "Nmax";
+    colNames[6] = "Nmean";
+    colNames[7] = "Delta"; //Distance From Mean Vector
     DataTable groupsData(colNames);
 
     // A few infos we will need:
@@ -505,11 +500,17 @@ int main(int argc, char *argv[])
       Group * group = &groups[i];
       // Compute minimal norms:
       double minNorm = -log(0.);
+      double maxNorm = log(0.);
+      double meanNorm = 0.;
       for(unsigned int j = 0; j < group->size(); j++)
       {
         double norm = norms[TextTools::to<unsigned int>((*group)[j])];
         if(norm < minNorm) minNorm = norm; 
+        if(norm > maxNorm) maxNorm = norm; 
+        meanNorm += norm;
       }
+      meanNorm /= (double)group->size();
+      
       // Does the group contain a constant site?
       bool test = false;
       for(unsigned int j = 0; j < group->size() && !test; j++)
@@ -527,13 +528,15 @@ int main(int argc, char *argv[])
 
       minNorms[i] = minNorm;
       // Store results:
-      vector<string> row(6);
+      vector<string> row(8);
       row[0] = group->toString(siteNames);
       row[1] = TextTools::toString(group->size());
       row[2] = test ? "yes" : "no";
       row[3] = TextTools::toString(group->getHeight() * 2.);
       row[4] = TextTools::toString(minNorm);
-      row[5] = TextTools::toString(distFromMeanVector);
+      row[5] = TextTools::toString(maxNorm);
+      row[6] = TextTools::toString(meanNorm);
+      row[7] = TextTools::toString(distFromMeanVector);
       groupsData.addRow(row);
     }
 
@@ -543,28 +546,16 @@ int main(int argc, char *argv[])
     if(testGroupsGlobal)
     {
       HomogeneousSequenceSimulator simulator(process1, rDist1, tree1, true);
+      simulator.enableContinuousRates(continuousSim);
 
 	    string simPath = ApplicationTools::getAFilePath("clustering.null.output.file", params, true, false, "", false);
       unsigned int nrep = ApplicationTools::getParameter<unsigned int>("clustering.null.number", params, 1, "", true);
       ofstream * out = NULL;
       if(simPath != "none") out = new ofstream(simPath.c_str(), ios::out);
-      ContingencyTable table(50, 0.5, 20, 0.1, 15);
-      ClusterTools::computeGlobalDistanceDistribution(simulator, *substitutionCount1, *dist, *clustering, scales, nbSites, nrep, table, out);
+      ApplicationTools::displayTask("Simulating groups", true);
+      ClusterTools::computeGlobalDistanceDistribution(simulator, *substitutionCount1, *dist, *clustering, scales, nbSites, nrep, out);
+      ApplicationTools::displayTaskDone();
       if(out != NULL) out->close();
-      //// Now write p-values:
-      //vector<string> pvalues(groups.size());
-      //for(unsigned int i = 0; i < groups.size(); i++)
-      //{
-      //  Group * group = &groups[i];
-      //  string pvalue = "NA";
-      //  try {
-      //    pvalue = TextTools::toString(table.getPValue(group->size(), minNorms[i], max(0., group->getHeight() * 2.)));
-      //  } catch(Exception & ex) {
-      //    cout << "WARNING: Could not compute p-value for group " << group->toString() << " (value out of table range)." << endl;
-      //  }
-      //  pvalues[i] = pvalue;
-      //}
-      //groupsData.addColumn("p-values", pvalues);
     }
 
     //Write detected groups to file:
@@ -603,7 +594,6 @@ int main(int argc, char *argv[])
 	delete sites1;
 	delete model1;
 	delete rDist1;
-	delete prDist1;
 	delete tl1;
 	delete substitutionCount1;
 	delete process1;

@@ -54,6 +54,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Phyl/Tree.h>
 #include <Phyl/SubstitutionModel.h>
 #include <Phyl/HomogeneousTreeLikelihood.h>
+#include <Phyl/DRHomogeneousTreeLikelihood.h>
 #include <Phyl/MutationProcess.h>
 #include <Phyl/DiscreteRatesAcrossSitesTreeLikelihood.h>
 #include <Phyl/SubstitutionCount.h>
@@ -134,15 +135,15 @@ class CoETools
 			string suffix = "");
 
     static void computeIntraStats(
-			const HomogeneousTreeLikelihood & tl,
+			const DiscreteRatesAcrossSitesTreeLikelihood & tl,
 			const SiteContainer & completeSites,
 			ProbabilisticSubstitutionMapping & mapping,
 			const Statistic & statistic,
 			map<string, string> & params);
 
 		static void computeInterStats(
-			const HomogeneousTreeLikelihood & tl1,
-			const HomogeneousTreeLikelihood & tl2,
+			const DiscreteRatesAcrossSitesTreeLikelihood & tl1,
+			const DiscreteRatesAcrossSitesTreeLikelihood & tl2,
 			const SiteContainer & completeSites1,
 			const SiteContainer & completeSites2,
 			ProbabilisticSubstitutionMapping & mapping1,
@@ -156,7 +157,8 @@ class CoETools
 			const TreeTemplate<Node> & tree,
 			const SubstitutionCount & nijt,
 			const Statistic & statistic,
-			map<string, string> & params);
+			map<string, string> & params,
+      bool useContinuousRates = false);
 	
 		static void computeInterNullDistribution(
 			const MutationProcess & process1,
@@ -168,7 +170,8 @@ class CoETools
 			const SubstitutionCount & nijt1,
 			const SubstitutionCount & nijt2,
 			const Statistic & statistic,
-			map<string, string> & params);
+			map<string, string> & params,
+      bool useContinuousRates = false);
 	
 };
 
