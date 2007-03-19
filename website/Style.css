@@ -7,7 +7,7 @@ div.banner {
 	position:    fixed;
 	top:         2em;
 	left:        1em;
-	width:       9em;
+	width:       200px;
 	right:       auto;
 	/*background:  url(semi2x2b.png) transparent fixed;*/
 	background:  white;
@@ -45,7 +45,7 @@ div.banner a:hover { background: orange; color: white }
 div.back {
   clear: both;
   page-break-before: always;
-  margin: 3em -0.75em 3em 1em;
+  margin: 3em -0.75em 3em 5em;
   padding: .5em;
   background: #666;
 }
@@ -66,8 +66,11 @@ h2 {
   text-align: right;
   font-variant: small-caps;
   font-weight: bold;
-  margin-top: 0;
-  font-size: 140% /*200%*/;
+  margin-top: 2em;
+  font-size: 140%; /*200%*/;
+  padding: 3px;
+  padding-right:10px;
+  border-style: solid;
 }
 h3 {
   color: #025c7f;
@@ -79,9 +82,11 @@ h3 {
 body {
   line-height: 1.4;
   background: #CCC;
+  font-family: arial, "lucida console", sans-serif
   font-size: medium;
   margin-right: 2em;
   margin-left: 11em;
+  line-height: 1.5;
 }
 div.section a:link, div.section a:visited {
   color: inherit;

@@ -1,17 +1,17 @@
 <html lang="en">
 <head>
-<title>Clustering - CoMap Manual 1.0</title>
+<title>Clustering - CoMap Manual 1.0.2</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="CoMap Manual 1.0">
+<meta name="description" content="CoMap Manual 1.0.2">
 <meta name="generator" content="makeinfo 4.8">
 <link title="Top" rel="start" href="index.html#Top">
 <link rel="prev" href="Pairwise.html#Pairwise" title="Pairwise">
 <link rel="next" href="Pvalue.html#Pvalue" title="Pvalue">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <!--
-This is the manual of CoMap, version 1.0.0, 31 July 2006.
+This is the manual of CoMap, version 1.1.0, 4 March 2007.
 
-Copyright (C) 2006 Julien Dutheil-->
+Copyright (C) 2006, 2007 Julien Dutheil-->
 <meta http-equiv="Content-Style-Type" content="text/css">
 <style type="text/css"><!--
   pre.display { font-family:inherit }
@@ -29,21 +29,22 @@ Copyright (C) 2006 Julien Dutheil-->
 <div class="node">
 <p>
 <a name="Clustering"></a>
-Noeud « Next »:&nbsp;<a rel="next" accesskey="n" href="Pvalue.html#Pvalue">Pvalue</a>,
-Noeud « Previous »:&nbsp;<a rel="previous" accesskey="p" href="Pairwise.html#Pairwise">Pairwise</a>,
-Noeud « Up »:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+Next:&nbsp;<a rel="next" accesskey="n" href="Pvalue.html#Pvalue">Pvalue</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Pairwise.html#Pairwise">Pairwise</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
 <hr>
 </div>
 
 <h2 class="chapter">7 Clustering analysis</h2>
 
      <dl>
-<dt><samp><span class="command">clustering.distance = [cor|euclidian|none]</span></samp><dd>Distance to use: cor (correlation) or euclidian or none (no clustering).
+<dt><samp><span class="command">clustering.distance = [cor|euclidian|comp|none]</span></samp><dd>Distance to use: cor (correlation), euclidian, comp (compensation) or none (no clustering).
 
      <br><dt><samp><span class="command">clustering.scale = [boolean]</span></samp><dd>Tell is mapping should be normalized (each row (=branch) will be
 divided by its sum.
 
-     <br><dt><samp><span class="command">clustering.method = complete</span></samp><dd>Clustering algorithm: only complete is supported for now.
+     <br><dt><samp><span class="command">clustering.method = [complete|sum]</span></samp><dd>Clustering algorithm: complete linkage or sum. 
+The sum option should be used only when testing compensation, i.e. in conjunction with the <samp><span class="option">nijt_aadist.sym=no</span></samp> and <samp><span class="option">clustering.distance=comp</span></samp> options.
 
      <br><dt><samp><span class="command">clustering.output.matrix.file = [[path]|none]</span></samp><dd>Where to write the distance matrix (in phylip format).
 
