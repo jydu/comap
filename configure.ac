@@ -29,11 +29,11 @@
 #The fact that you are presently reading this means that you have had
 #knowledge of the CeCILL license and that you accept its terms.
 
-AC_INIT(CoMap, 1.0.1, Julien.Dutheil@univ-montp2.fr, CoMap)
+AC_INIT(CoMap, 1.1.0, Julien.Dutheil@univ-montp2.fr, CoMap)
 AC_CONFIG_SRCDIR(CoMap/CoMap.cpp)
 
 dnl We'll use automake:
-AM_INIT_AUTOMAKE(CoMap,1.0.1)
+AM_INIT_AUTOMAKE()
 
 AC_PROG_CC
 dnl This is C++ program:
@@ -49,6 +49,26 @@ AC_PROG_INSTALL
 dnl Look for the STL:
 AC_HEADER_STDC
 
+AC_MSG_CHECKING([Covariant return with virtual inheritance])
+AC_ARG_WITH(
+	[virtual-cov],
+	[  --with-virtual-cov      Enable covariant return type with
+	                  virtual inheritance (GCC >= 3.4)],
+  ,
+  with_virtual_cov="yes"
+)
+AC_MSG_RESULT($with_virtual_cov);
+if test "$with_virtual_cov" == "no"
+then
+	AC_MSG_WARN([
++--------------------------------------------------------+
+|Covariant return type with virtual inheritance disabled.|
++--------------------------------------------------------+
+]);
+else
+	AC_DEFINE(VIRTUAL_COV, yes)
+fi
+
 AC_ARG_ENABLE(static,
               [  --enable-static    Turn on static linkage],
               [case "${enableval}" in
@@ -58,7 +78,7 @@ AC_ARG_ENABLE(static,
              esac],[static=false])
 AM_CONDITIONAL(STATIC, test x$static = xtrue)
 
-VERSION="1.0.1"
+VERSION="1.1.0"
 AC_SUBST(VERSION)
 AC_OUTPUT(Makefile CoMap/Makefile doc/Makefile)
 

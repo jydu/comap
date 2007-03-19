@@ -74,7 +74,7 @@ class SimpleClustering : public AbstractAgglomerativeDistanceMethod
 		~SimpleClustering() {}
 
 	public:
-		Tree * getTree() const;
+		TreeTemplate<Node> * getTree() const;
 
 	protected:
 		vector<unsigned int> getBestPair() throw (Exception);
@@ -99,7 +99,7 @@ class SumClustering : public AbstractAgglomerativeDistanceMethod
 		~SumClustering() {}
 
 	public:
-		Tree * getTree() const;
+		TreeTemplate<Node> * getTree() const;
 		void setMapping(const ProbabilisticSubstitutionMapping & mapping)
 		{
 			_mapping = mapping;

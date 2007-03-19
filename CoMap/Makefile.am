@@ -35,16 +35,14 @@ Statistics.h\
 Cluster.h\
 Distance.h\
 ClusterTools.h\
-AnalysisTools.h\
-ContingencyTable.h
+AnalysisTools.h
 
 CPP_FILES = \
 CoETools.cpp \
 CoMap.cpp\
 Cluster.cpp\
 ClusterTools.cpp\
-AnalysisTools.cpp\
-ContingencyTable.cpp
+AnalysisTools.cpp
 
 AUTOMAKE_OPTIONS = gnu
 
@@ -54,5 +52,5 @@ comap_LDFLAGS = -static
 else
 comap_LDFLAGS =
 endif
-comap_LDADD = -lbpp-utils -lbpp-numcalc -lbpp-seq -lbpp-phyl
+comap_LDADD = -lbpp-phyl -lbpp-seq -lbpp-numcalc -lbpp-utils
 comap_SOURCES = $(H_FILES) $(CPP_FILES)

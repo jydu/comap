@@ -40,6 +40,9 @@ knowledge of the CeCILL license and that you accept its terms.
 #include "ClusterTools.h"
 #include "Cluster.h"
 
+// From Utils:
+#include <Utils/ApplicationTools.h>
+
 // From NumCalc:
 #include <NumCalc/VectorTools.h>
 using namespace VectorOperators;
@@ -187,11 +190,10 @@ void ClusterTools::computeGlobalDistanceDistribution(
   const vector<double> & scales,
   unsigned int sizeOfDataSet,
   unsigned int nrep,
-  ContingencyTable & table,
   ofstream * out)
 {
   DRHomogeneousTreeLikelihood drhtl(
-	  const_cast<TreeTemplate<Node> *>(simulator.getTree()),
+	  *simulator.getTree(),
 		const_cast<SubstitutionModel *>(simulator.getSubstitutionModel()),
 		const_cast<DiscreteDistribution *>(simulator.getRateDistribution()),
 		true, false);
@@ -201,11 +203,11 @@ void ClusterTools::computeGlobalDistanceDistribution(
     siteNames[i] = TextTools::toString(i);
   }
   
-  if(out != NULL) *out << "Size\tNmin\tDmax\tDelta" << endl;
+  if(out != NULL) *out << "Size\tDmax\tNmin\tNmax\tNmean\tDelta" << endl;
 
   for(unsigned int k = 0; k < nrep; k++)
   {
-    cout << "*"; cout.flush();
+    ApplicationTools::displayGauge(k, nrep-1, '>');
     SiteContainer * sites = simulator.simulate(sizeOfDataSet);
     drhtl.setData(*sites);
     drhtl.computeTreeLikelihood();
@@ -269,11 +271,16 @@ void ClusterTools::computeGlobalDistanceDistribution(
       
       // Compute minimal norm:
       double normMin = -log(0.);
+      double normMax = log(0.);
+      double normMean = 0.;
       for(unsigned int j = 0; j < group->size(); j++)
       {
         double norm = norms[TextTools::to<unsigned int>(group->at(j))];
         if(norm < normMin) normMin = norm;
+        if(norm > normMax) normMax = norm;
+        normMean += norm;
       }
+      normMean /= (double)group->size();
       
       // Compute distance from mean vector:
       vector<double> groupMeanVector(mapping->getNumberOfBranches(), 0.);
@@ -283,15 +290,12 @@ void ClusterTools::computeGlobalDistanceDistribution(
       }
       double distFromMeanVector = distance.d(groupMeanVector/group->size(), meanVector);
       
-      //try
-      //{
-      //  table.addToCount(group->size(), normMin, max(0., group->getHeight() * 2.));
-      //}
-      //catch(Exception & ex)
-      //{
-      //  cout << "WARNING: This group is out of bound: " << group->size() << "," << normMin << "," << (group->getHeight() * 2.) << "." << endl; 
-      //}
-      if(out != NULL) *out << group->size() << "\t" << normMin << "\t" << (group->getHeight() * 2.) <<"\t" << distFromMeanVector << endl;
+      if(out != NULL) *out << group->size()
+        << "\t" << (group->getHeight() * 2.)
+        << "\t" << normMin
+        << "\t" << normMax
+        << "\t" << normMean
+        << "\t" << distFromMeanVector << endl;
     }
 
     //Housekeeping:
@@ -300,5 +304,6 @@ void ClusterTools::computeGlobalDistanceDistribution(
     delete mat;
     delete tree;
   }
+  ApplicationTools::message << endl;
 }
 

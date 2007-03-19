@@ -61,6 +61,8 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Seq/GranthamAAPolarityIndex.h>
 #include <Seq/GranthamAAVolumeIndex.h>
 #include <Seq/SimpleIndexDistance.h>
+#include <Seq/AAIndex1Entry.h>
+#include <Seq/AAIndex2Entry.h>
 
 // From PhylLib:
 #include <Phyl/PhylogeneticsApplicationTools.h>
@@ -100,13 +102,13 @@ void CoETools::readData(
   
   ApplicationTools::displayTask("Initializing likelihood");
   tl = new HomogeneousTreeLikelihood(
-    tree,
+    *tree,
     *sites,
     model,
     rDist, true);
 
   ApplicationTools::displayTask("Tree likelihood");
-  double ll = tl -> getValue();
+  double ll = tl->getValue();
   if(isinf(ll))
   {
     ApplicationTools::error << "!!! Unexpected initial likelihood == 0." << endl;
@@ -118,54 +120,9 @@ void CoETools::readData(
   bool optimize = ApplicationTools::getBooleanParameter("optimization", params, true, suffix, true, false);
   if(optimize)
   {
-
     ApplicationTools::displayResult("Optimization", "");
     PhylogeneticsApplicationTools::optimizeParameters(tl, params, suffix, true, true);
-
-//    string mhPath = ApplicationTools::getAFilePath("optimization.message_handler", params, false, false, suffix, true);
-//    ostream * messageHandler = 
-//      (mhPath == "none") ? NULL :
-//        (mhPath == "std") ? &cout :
-//          new ofstream(mhPath.c_str(), ios::out);
-//    ApplicationTools::displayResult("Message handler", mhPath);
-//
-//    string prPath = ApplicationTools::getAFilePath("optimization.profiler", params, false, false, suffix, false);
-//    ostream * profiler = 
-//      (prPath == "none") ? NULL :
-//        (prPath == "std") ? &cout :
-//          new ofstream(prPath.c_str(), ios::out);
-//    if(profiler != NULL) (*profiler) << setprecision(20);
-//    ApplicationTools::displayResult("Profiler", prPath);
-//
-//    // Should I ignore some parameters?
-//    string paramListDesc = ApplicationTools::getStringParameter("optimization.ignore_parameter", params, "", suffix, false, true);
-//    StringTokenizer st(paramListDesc, ",");
-//    while(st.hasMoreToken()) {
-//      try {
-//        dynamic_cast<HomogeneousTreeLikelihood *>(tl) -> ignoreParameter(st.nextToken());
-//      } catch(ParameterNotFoundException pnfe) {
-//        ApplicationTools::displayError("Parameter '" + pnfe.getParameter() + "' not found, and so can't be ignored!");
-//      } catch(exception e) {
-//        cerr << "DEBUB: ERROR!!! This functionality can only be used with HomogeneousTreeLikelihood for now." << endl;
-//      }
-//    }
-//  
-//    int nbEvalMax = ApplicationTools::getIntParameter("optimization.max_number_f_eval", params, 1000000, suffix, true);
-//    ApplicationTools::displayResult("Max # ML evaluations", TextTools::toString(nbEvalMax));
-//  
-//    double tolerance = ApplicationTools::getDoubleParameter("optimization.tolerance", params, .000001, suffix, true);
-//    ApplicationTools::displayResult("Tolerance", TextTools::toString(tolerance));
-//  
-//    int n = OptimizationTools::optimizeNumericalParameters(
-//      tl,
-//      tolerance,
-//      nbEvalMax,
-//      messageHandler,
-//      profiler,
-//      2);
-//    ApplicationTools::displayResult("Performed", TextTools::toString(n) + " function evaluations.");
-//  
-    TreeTemplate<Node> *treeOpt = dynamic_cast<TreeTemplate<Node> *>(tl -> getTree());
+    TreeTemplate<Node> *treeOpt = dynamic_cast<TreeTemplate<Node> *>(tl->getTree());
     PhylogeneticsApplicationTools::writeTree(*treeOpt, params, suffix);
   
     // Actualize tree.
@@ -185,7 +142,7 @@ void CoETools::readData(
     vector<Node *> nodes = treeCopy.getInnerNodes();
     for(unsigned int i = 0; i < nodes.size(); i++)
     {
-      nodes[i]->setProperty("name", new String(TextTools::toString(nodes[i]->getId())));
+      nodes[i]->setNodeProperty("name", new String(TextTools::toString(nodes[i]->getId())));
     }
     nodes = treeCopy.getLeaves();
 
@@ -249,7 +206,7 @@ ProbabilisticSubstitutionMapping * CoETools::getVectors(
     
     bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
     bool joint   = ApplicationTools::getBooleanParameter("nijt.joint"  , params, true);
-    DRHomogeneousTreeLikelihood drhtl(&tree, completeSites, &model, &rDist, true);
+    DRHomogeneousTreeLikelihood drhtl(tree, completeSites, &model, &rDist, true);
     if(average)
     {
       if(joint)
@@ -436,7 +393,7 @@ SubstitutionCount * CoETools::getSubstitutionCount(
   }
   else if(nijtOption == "aadist")
   {
-    if(alphabet->getAlphabetType() != "Proteic alphabet")
+    if(!AlphabetTools::isProteicAlphabet(alphabet))
     {
       ApplicationTools::displayError("Chemical distance can only be used with protein data.");
       exit(-1);
@@ -483,6 +440,24 @@ SubstitutionCount * CoETools::getSubstitutionCount(
       M->setSymmetric(sym);
       substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
+    else if(dist == "user1")
+    {
+      string aax1FilePath = ApplicationTools::getAFilePath("nijt_aadist.type_user1.file", params, true, true, suffix, false);
+      ifstream aax1File(aax1FilePath.c_str(), ios::in);
+      AAIndex1Entry I(aax1File);
+      SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
+      aax1File.close();
+      M->setSymmetric(sym);
+      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+    }
+    else if(dist == "user2")
+    {
+      string aax2FilePath = ApplicationTools::getAFilePath("nijt_aadist.type_user2.file", params, true, true, suffix, false);
+      ifstream aax2File(aax2FilePath.c_str(), ios::in);
+      AAIndex2Entry * M = new AAIndex2Entry(aax2File, sym);
+      aax2File.close();
+      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+    }
     else
     {
       ApplicationTools::displayError("Invalid distance '" + dist + ", in 'nijt_aadist' parameter.");
@@ -502,7 +477,7 @@ SubstitutionCount * CoETools::getSubstitutionCount(
 /******************************************************************************/
 
 void CoETools::computeIntraStats(
-  const HomogeneousTreeLikelihood & tl,
+  const DiscreteRatesAcrossSitesTreeLikelihood & tl,
   const SiteContainer & completeSites,
   ProbabilisticSubstitutionMapping & mapping,
   const Statistic & statistic,
@@ -586,8 +561,8 @@ void CoETools::computeIntraStats(
 /******************************************************************************/
 
 void CoETools::computeInterStats(
-  const HomogeneousTreeLikelihood & tl1,
-  const HomogeneousTreeLikelihood & tl2,
+  const DiscreteRatesAcrossSitesTreeLikelihood & tl1,
+  const DiscreteRatesAcrossSitesTreeLikelihood & tl2,
   const SiteContainer & completeSites1,
   const SiteContainer & completeSites2,
   ProbabilisticSubstitutionMapping & mapping1,
@@ -696,9 +671,11 @@ void CoETools::computeIntraNullDistribution(
   const TreeTemplate<Node> & tree,
   const SubstitutionCount & nijt,
   const Statistic & statistic,
-  map<string, string> & params)
+  map<string, string> & params,
+  bool useContinuousRates)
 {
   HomogeneousSequenceSimulator seqSim(&process, &rDist, &tree);
+  seqSim.enableContinuousRates(useContinuousRates);
   string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, true, false);
   ofstream outFile(path.c_str(), ios::out);
   
@@ -743,7 +720,6 @@ void CoETools::computeIntraNullDistribution(
 
     // Free memory:
     for(unsigned int i = 0; i < id.size(); i++) delete id[i];
-
   }
   else
   {
@@ -764,10 +740,13 @@ void CoETools::computeInterNullDistribution(
   const SubstitutionCount & nijt1,
   const SubstitutionCount & nijt2,
   const Statistic & statistic,
-  map<string, string> & params)
+  map<string, string> & params,
+  bool useContinuousRates)
 {
   HomogeneousSequenceSimulator seqSim1(&process1, &rDist1, &tree1);
+  seqSim1.enableContinuousRates(useContinuousRates);
   HomogeneousSequenceSimulator seqSim2(&process2, &rDist2, &tree2);
+  seqSim2.enableContinuousRates(useContinuousRates);
   string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, true, false);
   ofstream outFile(path.c_str(), ios::out);
   

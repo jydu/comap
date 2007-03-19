@@ -56,7 +56,8 @@ AnalysisTools::~AnalysisTools() {}
 	
 /******************************************************************************/
 
-VVdouble AnalysisTools::getFromStream(istream & in) {
+VVdouble AnalysisTools::getFromStream(istream & in)
+{
 	string token;
 	VVdouble analysis;
 	in >> token;
@@ -98,7 +99,8 @@ VVdouble AnalysisTools::getFromStream(istream & in) {
 
 /******************************************************************************/
 
-VVdouble AnalysisTools::computeScalarProductMatrix(const VVdouble & vectors) {
+VVdouble AnalysisTools::computeScalarProductMatrix(const VVdouble & vectors)
+{
 	int nbVectors = vectors.size();
 	VVdouble matrix = VVdouble(nbVectors);
 	for(int i = 0; i < nbVectors; i++) {
@@ -121,7 +123,8 @@ VVdouble AnalysisTools::computeScalarProductMatrix (
 	const VVdouble & vectors1,
 	const VVdouble & vectors2,
 	bool independantComparisons
-) throw (DimensionException) {
+) throw (DimensionException)
+{
 	int nbVectors1 = vectors1.size();
 	int nbVectors2 = vectors2.size();
 	if(independantComparisons && nbVectors1 != nbVectors2) {
@@ -150,7 +153,8 @@ VVdouble AnalysisTools::computeScalarProductMatrix (
 
 /******************************************************************************/
 
-VVdouble AnalysisTools::computeCosinusMatrix(const VVdouble & vectors) {
+VVdouble AnalysisTools::computeCosinusMatrix(const VVdouble & vectors)
+{
 	int nbVectors = vectors.size();
 	VVdouble matrix = VVdouble(nbVectors);
 	for(int i = 0; i < nbVectors; i++) {
@@ -203,7 +207,8 @@ VVdouble AnalysisTools::computeCosinusMatrix(
 
 /******************************************************************************/
 
-VVdouble AnalysisTools::computeCorrelationMatrix(const VVdouble & vectors) {
+VVdouble AnalysisTools::computeCorrelationMatrix(const VVdouble & vectors)
+{
 	int nbVectors = vectors.size();
 	VVdouble matrix = VVdouble(nbVectors);
 	for(int i = 0; i < nbVectors; i++) {
@@ -226,7 +231,8 @@ VVdouble AnalysisTools::computeCorrelationMatrix(
 	const VVdouble & vectors1,
 	const VVdouble & vectors2,
 	bool independantComparisons
-) throw (DimensionException) {
+) throw (DimensionException)
+{
 	int nbVectors1 = vectors1.size();
 	int nbVectors2 = vectors2.size();
 	if(independantComparisons && nbVectors1 != nbVectors2) {
@@ -255,7 +261,8 @@ VVdouble AnalysisTools::computeCorrelationMatrix(
 
 /******************************************************************************/
 
-VVdouble AnalysisTools::computeCovarianceMatrix(const VVdouble & vectors) {
+VVdouble AnalysisTools::computeCovarianceMatrix(const VVdouble & vectors)
+{
 	int nbVectors = vectors.size();
 	VVdouble matrix = VVdouble(nbVectors);
 	for(int i = 0; i < nbVectors; i++) {
@@ -278,7 +285,8 @@ VVdouble AnalysisTools::computeCovarianceMatrix(
 	const VVdouble & vectors1,
 	const VVdouble & vectors2,
 	bool independantComparisons
-) throw (DimensionException) {
+) throw (DimensionException)
+{
 	int nbVectors1 = vectors1.size();
 	int nbVectors2 = vectors2.size();
 	if(independantComparisons && nbVectors1 != nbVectors2) {
@@ -320,8 +328,8 @@ Vdouble AnalysisTools::computeNorms(const ProbabilisticSubstitutionMapping & map
 void AnalysisTools::writeMatrix(
 	const VVdouble & matrix,
 	const SiteContainer & sites,
-	ostream & out
-) {
+	ostream & out)
+{
 	out << "\tMean";
 	for(unsigned int i = 0; i < matrix.size() - 1; i++) {
 		out << "\tSite" << sites.getSite(i) -> getPosition();
@@ -343,8 +351,8 @@ void AnalysisTools::writeMatrix(
 	const VVdouble & matrix,
 	const SiteContainer & sites1,
 	const SiteContainer & sites2,
-	ostream & out
-) {
+	ostream & out)
+{
 	out << "\tMean";
 	for(unsigned int i = 0; i < matrix.size() - 1; i++) {
 		out << "\tSite" << sites1.getSite(i) -> getPosition();
@@ -391,14 +399,14 @@ vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
 		SiteContainer * sites2 = seqSim.simulate(repRAM);
 		DRHomogeneousTreeLikelihood * drhtl1 =
 			new DRHomogeneousTreeLikelihood(
-				const_cast<TreeTemplate<Node> *>(seqSim.getTree()),
+				*seqSim.getTree(),
 				*sites1,
 				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
 				false, false);
 		DRHomogeneousTreeLikelihood * drhtl2 =
 			new DRHomogeneousTreeLikelihood(
-				const_cast<TreeTemplate<Node> *>(seqSim.getTree()),
+				*seqSim.getTree(),
 				*sites2,
 				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
@@ -488,7 +496,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
 		SiteContainer * sites2 = seqSim2.simulate(repRAM);
 		DRHomogeneousTreeLikelihood * drhtl1 = 
 			new DRHomogeneousTreeLikelihood(
-				const_cast<TreeTemplate<Node> *>(seqSim1.getTree()),
+				*seqSim1.getTree(),
 				*sites1,
 				const_cast<SubstitutionModel *>(seqSim1.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim1.getRateDistribution()),
@@ -496,7 +504,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
 			);
 		DRHomogeneousTreeLikelihood * drhtl2 = 
 			new DRHomogeneousTreeLikelihood(
-				const_cast<TreeTemplate<Node> *>(seqSim2.getTree()),
+				*seqSim2.getTree(),
 				*sites2,
 				const_cast<SubstitutionModel *>(seqSim2.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim2.getRateDistribution()),
@@ -581,7 +589,7 @@ void AnalysisTools::getNullDistributionIntraDR(
 		//cout << "Computing likelihoods..." << endl;
 		DRHomogeneousTreeLikelihood * drhtl1 =
 			new DRHomogeneousTreeLikelihood(
-				const_cast<TreeTemplate<Node> *>(seqSim.getTree()),
+				*seqSim.getTree(),
 				*sites1,
 				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
@@ -589,7 +597,7 @@ void AnalysisTools::getNullDistributionIntraDR(
 			);
 		DRHomogeneousTreeLikelihood * drhtl2 =
 			new DRHomogeneousTreeLikelihood(
-				const_cast<TreeTemplate<Node> *>(seqSim.getTree()),
+				*seqSim.getTree(),
 				*sites2,
 				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
@@ -598,8 +606,8 @@ void AnalysisTools::getNullDistributionIntraDR(
 		drhtl1->computeTreeLikelihood();
 		drhtl2->computeTreeLikelihood();
 		//cout << "Computing posterior rates..." << endl;
-		vector<unsigned int> rc1    = drhtl1->getRateClassWithMaxPostProbOfEachSite();
-		vector<unsigned int> rc2    = drhtl2->getRateClassWithMaxPostProbOfEachSite();
+		vector<unsigned int> rc1 = drhtl1->getRateClassWithMaxPostProbOfEachSite();
+		vector<unsigned int> rc2 = drhtl2->getRateClassWithMaxPostProbOfEachSite();
 		Vdouble pr1 = drhtl1->getPosteriorRateOfEachSite();
 		Vdouble pr2 = drhtl2->getPosteriorRateOfEachSite();
 		
@@ -678,7 +686,7 @@ void AnalysisTools::getNullDistributionInterDR(
 		SiteContainer * sites2 = seqSim2.simulate(repRAM);
 		DRHomogeneousTreeLikelihood * drhtl1 =
 			new DRHomogeneousTreeLikelihood(
-				const_cast<TreeTemplate<Node> *>(seqSim1.getTree()),
+				*seqSim1.getTree(),
 				*sites1,
 				const_cast<SubstitutionModel *>(seqSim1.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim1.getRateDistribution()),
@@ -686,7 +694,7 @@ void AnalysisTools::getNullDistributionInterDR(
 			);
 		DRHomogeneousTreeLikelihood * drhtl2 =
 			new DRHomogeneousTreeLikelihood(
-				const_cast<TreeTemplate<Node> *>(seqSim2.getTree()),
+				*seqSim2.getTree(),
 				*sites2,
 				const_cast<SubstitutionModel *>(seqSim2.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim2.getRateDistribution()),
@@ -756,7 +764,8 @@ void AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(
 	// Write header line:
 	out << "statistic\tr1\tr2" << endl;
 	unsigned int c = 0;
-	for(unsigned int i = 0; i < rep; i++) {
+	for(unsigned int i = 0; i < rep; i++)
+  {
 		if(c == 1000) { cout << "."; cout.flush(); c = 0; }
 		c++;
 		HomogeneousSiteSimulationResult * hssr1 = 
