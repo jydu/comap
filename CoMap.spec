@@ -1,28 +1,26 @@
 %define name CoMap
-%define version 1.0.0
+%define version 1.2.0
 %define release 1
 %define _prefix /usr/local
 
-Summary: Coe: a program for decting molecular co-evolution.
+Summary: CoMap: a program for decting molecular co-evolution.
 Name: %{name}
 Version: %{version}
 Release: %{release}
-Vendor: The Bio++ Project
-Source: http://kimura.univ-montp2.fr/BioPP/Download/Sources/%{name}-%{version}.tar.gz
+Vendor: Julien Dutheil
+Source: http://download.gna.org/comap/%{name}-%{version}.tar.gz
 License: CeCILL 2
 Group: System Environment/Libraries
 BuildRoot: %{_builddir}/%{name}-root
 Packager: Julien Dutheil
 Prefix: %{_prefix}
-Requires: Bpp-Utils = 1.0
-Requires: Bpp-NumCalc = 1.0
-Requires: Bpp-Seq = 1.0
-Requires: Bpp-Phyl = 1.0
-Requires: Coevolution = 0.1
+Requires: Bpp-Utils = 1.1.0
+Requires: Bpp-NumCalc = 1.3.0
+Requires: Bpp-Seq = 1.3.0
+Requires: Bpp-Phyl = 1.4.0
 
 %description
-This is an unofficial program for molecular co-evolution analysis.
-It is still under development and is provided for convenience.
+CoMap is a program for substitution mapping and molecular co-evolution analysis.
 
 %prep
 %setup -q
@@ -45,9 +43,12 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %doc AUTHORS COPYING INSTALL NEWS README ChangeLog
-%{_prefix}/bin/coe
+%{_prefix}/bin/comap
+%{_infodir}/comap.info
 
 %changelog
+* Tue Jul 19 2007 Julien Dutheil <Julien.Dutheil@univ-montp2.fr>
+- CoMap 1.2.0 release
 * Mon Jul 31 2006 Julien Dutheil <Julien.Dutheil@univ-montp2.fr>
 - CoMap 1.0.0 release
 * Fri Nov 16 2005 Julien Dutheil <Julien.Dutheil@univ-montp2.fr>

@@ -88,7 +88,7 @@ void help()
 	cout << endl;
 	PhylogeneticsApplicationTools::printRateDistributionHelp();
 	cout << endl;
-	PhylogeneticsApplicationTools::printOptimizationHelp();
+	PhylogeneticsApplicationTools::printOptimizationHelp(false, false);
 	cout << endl;
 }
 
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 	cout << endl;
 	cout << endl;
 	cout << "***********************************************************" << endl;
-	cout << "* This is CoMap       version 1.1.0      date: 19/03/2007 *" << endl;
+	cout << "* This is CoMap       version 1.2.0      date: 19/07/2007 *" << endl;
 	cout << "*     A C++ shell program to detect co-evolving sites.    *" << endl;
 	cout << "***********************************************************" << endl;
 	cout << endl;
@@ -152,8 +152,8 @@ int main(int argc, char *argv[])
 	ApplicationTools::displayMessage("\n\nI) Retrieve data and model\n");
 
 	TreeTemplate<Node> * tree1 = PhylogeneticsApplicationTools::getTree(params);
-	ApplicationTools::displayResult("# number of leaves", TextTools::toString(tree1 -> getNumberOfLeaves()));
-	ApplicationTools::displayResult("# number of sons at root", TextTools::toString(tree1 -> getRootNode() -> getNumberOfSons()));
+	ApplicationTools::displayResult("# number of leaves", TextTools::toString(tree1->getNumberOfLeaves()));
+	ApplicationTools::displayResult("# number of sons at root", TextTools::toString(tree1->getRootNode()->getNumberOfSons()));
 	
 	// Get data 1:
 	//Tree * tree1 = new Tree(* tree); // Copy tree.
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 	VectorSiteContainer *allSites1, *sites1;
 	SubstitutionModel *model1;
 	DiscreteDistribution *rDist1;
-	HomogeneousTreeLikelihood *tl1;
+	DRHomogeneousTreeLikelihood *tl1;
 	CoETools::readData(tree1, alphabet1, allSites1, sites1, model1, rDist1, tl1, params, "");
   
   bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", params, false, "", true, false);
@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
 		VectorSiteContainer *allSites2, *sites2;
 		SubstitutionModel *model2;
 		DiscreteDistribution *rDist2;
-		HomogeneousTreeLikelihood *tl2;
+		DRHomogeneousTreeLikelihood *tl2;
 		ApplicationTools::displayMessage("\nLoading second dataset...\n");
 		CoETools::readData(tree2, alphabet2, allSites2, sites2, model2, rDist2, tl2, params, "2");
 
@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
 
 		CoETools::writeInfos(*sites2, *tl2, params, "2");
 
-		delete tree2;
+    delete tree2;
 		delete allSites2;
 		delete sites2;
 		delete model2;
@@ -378,7 +378,7 @@ int main(int argc, char *argv[])
     {
       string siteName = "Site" + TextTools::toString(sites1->getSite(i)->getPosition());
       siteNames[i] = siteName; 
-      norms[i] = norm((*mapping1)[i]);
+      norms[i] = VectorTools::norm((*mapping1)[i]);
     }
   
 	  // Get the distance to use
@@ -589,7 +589,7 @@ int main(int argc, char *argv[])
 	ApplicationTools::displayTask("CoMap's done. Freeing memory");
   
   // Dataset 1 memory freeing:
-	delete tree1;
+  delete tree1;
 	delete allSites1;
 	delete sites1;
 	delete model1;

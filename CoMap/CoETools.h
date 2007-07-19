@@ -73,15 +73,15 @@ class CoETools
 	public:
 		
 		static void readData(
-			TreeTemplate<Node> *        &tree,
-			Alphabet *                  &alphabet,
-			VectorSiteContainer *       &allSites,
-			VectorSiteContainer *       &sites,
-			SubstitutionModel *         &model,
-			DiscreteDistribution *      &rDist,
-			HomogeneousTreeLikelihood * &tl,
-			map<string, string>         &params,
-			const string                &suffix = "");
+			TreeTemplate<Node> *          &tree,
+			Alphabet *                    &alphabet,
+			VectorSiteContainer *         &allSites,
+			VectorSiteContainer *         &sites,
+			SubstitutionModel *           &model,
+			DiscreteDistribution *        &rDist,
+			DRHomogeneousTreeLikelihood * &tl,
+			map<string, string>           &params,
+			const string                  &suffix = "");
 
 		static ProbabilisticSubstitutionMapping * getVectors(
 			const Alphabet * alphabet,

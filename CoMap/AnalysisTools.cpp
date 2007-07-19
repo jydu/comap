@@ -40,7 +40,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include "AnalysisTools.h"
 
 // From the NumCalc library:
-using namespace VectorFunctions;
+#include <NumCalc/VectorTools.h>
 
 // From Utils
 #include <Utils/ApplicationTools.h>
@@ -101,17 +101,20 @@ VVdouble AnalysisTools::getFromStream(istream & in)
 
 VVdouble AnalysisTools::computeScalarProductMatrix(const VVdouble & vectors)
 {
-	int nbVectors = vectors.size();
+	unsigned int nbVectors = vectors.size();
 	VVdouble matrix = VVdouble(nbVectors);
-	for(int i = 0; i < nbVectors; i++) {
+	for(unsigned int i = 0; i < nbVectors; i++)
+  {
 		//Must initialize all vector first, since we access
 		//both matrix[i, j] and matrix[j, i] in the same time.
 		matrix[i] = Vdouble(nbVectors, 0);
 	}
-	for(int i = 0; i < nbVectors; i++) {
-		matrix[i][i] = scalar(vectors[i], vectors[i]);
-		for(int j = i + 1; j < nbVectors; j++) {
-			matrix[i][j] = matrix[j][i] = scalar(vectors[i], vectors[j]);
+	for(unsigned int i = 0; i < nbVectors; i++)
+  {
+		matrix[i][i] = VectorTools::scalar(vectors[i], vectors[i]);
+		for(unsigned int j = i + 1; j < nbVectors; j++)
+    {
+			matrix[i][j] = matrix[j][i] = VectorTools::scalar(vectors[i], vectors[j]);
 		}
 	}
 	return matrix;
@@ -125,9 +128,10 @@ VVdouble AnalysisTools::computeScalarProductMatrix (
 	bool independantComparisons
 ) throw (DimensionException)
 {
-	int nbVectors1 = vectors1.size();
-	int nbVectors2 = vectors2.size();
-	if(independantComparisons && nbVectors1 != nbVectors2) {
+	unsigned int nbVectors1 = vectors1.size();
+	unsigned int nbVectors2 = vectors2.size();
+	if(independantComparisons && nbVectors1 != nbVectors2)
+  {
 		throw DimensionException(
 			string("AnalysisTools::computeScalarProductMatrix.\n") +
 			string("When performing independant comparisons, ") +
@@ -137,15 +141,18 @@ VVdouble AnalysisTools::computeScalarProductMatrix (
 		);
 	}
 	VVdouble matrix = VVdouble(nbVectors1);
-	for(int i = 0; i < nbVectors1; i++) {
+	for(unsigned int i = 0; i < nbVectors1; i++)
+  {
 		//Must initialize all vector first, since we access
 		matrix[i] = Vdouble(nbVectors2, 0);
 	}
-	for(int i = 0; i < nbVectors1; i++) {
-		int begin = independantComparisons ? i : 0;
-		int end   = independantComparisons ? i + 1 : nbVectors2;
-		for(int j = begin; j < end; j++) {
-			matrix[i][j] = scalar(vectors1[i], vectors2[j]);
+	for(unsigned int i = 0; i < nbVectors1; i++)
+  {
+		unsigned int begin = independantComparisons ? i : 0;
+		unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
+		for(unsigned int j = begin; j < end; j++)
+    {
+			matrix[i][j] = VectorTools::scalar(vectors1[i], vectors2[j]);
 		}
 	}
 	return matrix;
@@ -155,17 +162,20 @@ VVdouble AnalysisTools::computeScalarProductMatrix (
 
 VVdouble AnalysisTools::computeCosinusMatrix(const VVdouble & vectors)
 {
-	int nbVectors = vectors.size();
+	unsigned int nbVectors = vectors.size();
 	VVdouble matrix = VVdouble(nbVectors);
-	for(int i = 0; i < nbVectors; i++) {
+	for(unsigned int i = 0; i < nbVectors; i++)
+  {
 		//Must initialize all vector first, since we access
 		//both matrix[i, j] and matrix[j, i] in the same time.
 		matrix[i] = Vdouble(nbVectors, 0);
 	}
-	for(int i = 0; i < nbVectors; i++) {
+	for(unsigned int i = 0; i < nbVectors; i++)
+  {
 		matrix[i][i] = 1;
-		for(int j = i + 1; j < nbVectors; j++) {
-			matrix[i][j] = matrix[j][i] = cos(vectors[i], vectors[j]);
+		for(unsigned int j = i + 1; j < nbVectors; j++)
+    {
+			matrix[i][j] = matrix[j][i] = VectorTools::cos(vectors[i], vectors[j]);
 		}
 	}
 	return matrix;
@@ -179,9 +189,10 @@ VVdouble AnalysisTools::computeCosinusMatrix(
 	bool independantComparisons
 ) throw (DimensionException)
 {
-	int nbVectors1 = vectors1.size();
-	int nbVectors2 = vectors2.size();
-	if(independantComparisons && nbVectors1 != nbVectors2) {
+	unsigned int nbVectors1 = vectors1.size();
+	unsigned int nbVectors2 = vectors2.size();
+	if(independantComparisons && nbVectors1 != nbVectors2)
+  {
 		throw DimensionException(
 			string("AnalysisTools::computeCosinusMatrix.\n") +
 			string("When performing independant comparisons, ") +
@@ -191,15 +202,18 @@ VVdouble AnalysisTools::computeCosinusMatrix(
 		);
 	}
 	VVdouble matrix = VVdouble(nbVectors1);
-	for(int i = 0; i < nbVectors1; i++) {
+	for(unsigned int i = 0; i < nbVectors1; i++)
+  {
 		//Must initialize all vector first, since we access
 		matrix[i] = Vdouble(nbVectors2, 0);
 	}
-	for(int i = 0; i < nbVectors1; i++) {
-		int begin = independantComparisons ? i : 0;
-		int end   = independantComparisons ? i + 1 : nbVectors2;
-		for(int j = begin; j < end; j++) {
-			matrix[i][j] = cos(vectors1[i], vectors2[j]);
+	for(unsigned int i = 0; i < nbVectors1; i++)
+  {
+		unsigned int begin = independantComparisons ? i : 0;
+		unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
+		for(unsigned int j = begin; j < end; j++)
+    {
+			matrix[i][j] = VectorTools::cos(vectors1[i], vectors2[j]);
 		}
 	}
 	return matrix;
@@ -209,17 +223,20 @@ VVdouble AnalysisTools::computeCosinusMatrix(
 
 VVdouble AnalysisTools::computeCorrelationMatrix(const VVdouble & vectors)
 {
-	int nbVectors = vectors.size();
+	unsigned int nbVectors = vectors.size();
 	VVdouble matrix = VVdouble(nbVectors);
-	for(int i = 0; i < nbVectors; i++) {
+	for(unsigned int i = 0; i < nbVectors; i++)
+  {
 		//Must initialize all vector first, since we access
 		//both matrix[i, j] and matrix[j, i] in the same time.
 		matrix[i] = Vdouble(nbVectors, 0);
 	}
-	for(int i = 0; i < nbVectors; i++) {
+	for(unsigned int i = 0; i < nbVectors; i++)
+  {
 		matrix[i][i] = 1;
-		for(int j = i + 1; j < nbVectors; j++) {
-			matrix[i][j] = matrix[j][i] = cor(vectors[i], vectors[j]);
+		for(unsigned int j = i + 1; j < nbVectors; j++)
+    {
+			matrix[i][j] = matrix[j][i] = VectorTools::cor(vectors[i], vectors[j]);
 		}
 	}
 	return matrix;
@@ -233,9 +250,10 @@ VVdouble AnalysisTools::computeCorrelationMatrix(
 	bool independantComparisons
 ) throw (DimensionException)
 {
-	int nbVectors1 = vectors1.size();
-	int nbVectors2 = vectors2.size();
-	if(independantComparisons && nbVectors1 != nbVectors2) {
+	unsigned int nbVectors1 = vectors1.size();
+	unsigned int nbVectors2 = vectors2.size();
+	if(independantComparisons && nbVectors1 != nbVectors2)
+  {
 		throw DimensionException(
 			string("AnalysisTools::computeCorrelationMatrix.\n") +
 			string("When performing independant comparisons, ") +
@@ -245,15 +263,18 @@ VVdouble AnalysisTools::computeCorrelationMatrix(
 		);
 	}
 	VVdouble matrix = VVdouble(nbVectors1);
-	for(int i = 0; i < nbVectors1; i++) {
+	for(unsigned int i = 0; i < nbVectors1; i++)
+  {
 		//Must initialize all vector first, since we access
 		matrix[i] = Vdouble(nbVectors2, 0);
 	}
-	for(int i = 0; i < nbVectors1; i++) {
-		int begin = independantComparisons ? i : 0;
-		int end   = independantComparisons ? i + 1 : nbVectors2;
-		for(int j = begin; j < end; j++) {
-			matrix[i][j] = cor(vectors1[i], vectors2[j]);
+	for(unsigned int i = 0; i < nbVectors1; i++)
+  {
+		unsigned int begin = independantComparisons ? i : 0;
+		unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
+		for(unsigned int j = begin; j < end; j++) 
+    {
+			matrix[i][j] = VectorTools::cor(vectors1[i], vectors2[j]);
 		}
 	}
 	return matrix;
@@ -263,17 +284,20 @@ VVdouble AnalysisTools::computeCorrelationMatrix(
 
 VVdouble AnalysisTools::computeCovarianceMatrix(const VVdouble & vectors)
 {
-	int nbVectors = vectors.size();
+	unsigned int nbVectors = vectors.size();
 	VVdouble matrix = VVdouble(nbVectors);
-	for(int i = 0; i < nbVectors; i++) {
+	for(unsigned int i = 0; i < nbVectors; i++)
+  {
 		//Must initialize all vector first, since we access
 		//both matrix[i, j] and matrix[j, i] in the same time.
 		matrix[i] = Vdouble(nbVectors, 0);
 	}
-	for(int i = 0; i < nbVectors; i++) {
-		matrix[i][i] = var(vectors[i]);
-		for(int j = i + 1; j < nbVectors; j++) {
-			matrix[i][j] = matrix[j][i] = cov(vectors[i], vectors[j]);
+	for(unsigned int i = 0; i < nbVectors; i++)
+  {
+		matrix[i][i] = VectorTools::var(vectors[i]);
+		for(unsigned int j = i + 1; j < nbVectors; j++)
+    {
+			matrix[i][j] = matrix[j][i] = VectorTools::cov(vectors[i], vectors[j]);
 		}
 	}
 	return matrix;
@@ -287,9 +311,10 @@ VVdouble AnalysisTools::computeCovarianceMatrix(
 	bool independantComparisons
 ) throw (DimensionException)
 {
-	int nbVectors1 = vectors1.size();
-	int nbVectors2 = vectors2.size();
-	if(independantComparisons && nbVectors1 != nbVectors2) {
+	unsigned int nbVectors1 = vectors1.size();
+	unsigned int nbVectors2 = vectors2.size();
+	if(independantComparisons && nbVectors1 != nbVectors2)
+  {
 		throw DimensionException(
 			string("AnalysisTools::computeCovarianceMatrix.\n") +
 			string("When performing independant comparisons, ") +
@@ -299,15 +324,18 @@ VVdouble AnalysisTools::computeCovarianceMatrix(
 		);
 	}
 	VVdouble matrix = VVdouble(nbVectors1);
-	for(int i = 0; i < nbVectors1; i++) {
+	for(unsigned int i = 0; i < nbVectors1; i++)
+  {
 		//Must initialize all vector first, since we access
 		matrix[i] = Vdouble(nbVectors2, 0);
 	}
-	for(int i = 0; i < nbVectors1; i++) {
-		int begin = independantComparisons ? i : 0;
-		int end   = independantComparisons ? i + 1 : nbVectors2;
-		for(int j = begin; j < end; j++) {
-			matrix[i][j] = cov(vectors1[i], vectors2[j]);
+	for(unsigned int i = 0; i < nbVectors1; i++)
+  {
+		unsigned int begin = independantComparisons ? i : 0;
+		unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
+		for(unsigned int j = begin; j < end; j++)
+    {
+			matrix[i][j] = VectorTools::cov(vectors1[i], vectors2[j]);
 		}
 	}
 	return matrix;
@@ -319,7 +347,7 @@ Vdouble AnalysisTools::computeNorms(const ProbabilisticSubstitutionMapping & map
 {
 	unsigned int nbVectors = mapping.getNumberOfSites();
 	Vdouble vect(nbVectors);
-	for(unsigned int i = 0; i < nbVectors; i++) vect[i] = norm(mapping[i]);
+	for(unsigned int i = 0; i < nbVectors; i++) vect[i] = VectorTools::norm(mapping[i]);
 	return vect;
 }
 
@@ -392,8 +420,8 @@ vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
   {
 		if(verbose)
     {
-			ApplicationTools::message << ".";
-			ApplicationTools::message.flush();
+			*ApplicationTools::message << ".";
+			ApplicationTools::message->flush();
 		}
 		SiteContainer * sites1 = seqSim.simulate(repRAM);
 		SiteContainer * sites2 = seqSim.simulate(repRAM);
@@ -404,6 +432,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
 				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
 				false, false);
+    drhtl1->initialize();
 		DRHomogeneousTreeLikelihood * drhtl2 =
 			new DRHomogeneousTreeLikelihood(
 				*seqSim.getTree(),
@@ -411,8 +440,9 @@ vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
 				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
 				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
 				false, false);
-		drhtl1->computeTreeLikelihood();
-		drhtl2->computeTreeLikelihood();
+    drhtl2->initialize();
+		//drhtl1->computeTreeLikelihood();
+		//drhtl2->computeTreeLikelihood();
 		Vdouble r1 = drhtl1->getRateWithMaxPostProbOfEachSite();
 		Vdouble r2 = drhtl2->getRateWithMaxPostProbOfEachSite();
     ProbabilisticSubstitutionMapping * mapping1;
@@ -489,8 +519,8 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
   {
 		if(verbose)
     {
-			ApplicationTools::message << ".";
-			ApplicationTools::message.flush();
+			*ApplicationTools::message << ".";
+			ApplicationTools::message->flush();
 		}
 		SiteContainer * sites1 = seqSim1.simulate(repRAM);
 		SiteContainer * sites2 = seqSim2.simulate(repRAM);
@@ -502,6 +532,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
 				const_cast<DiscreteDistribution *>(seqSim1.getRateDistribution()),
         false, false
 			);
+    drhtl1->initialize();
 		DRHomogeneousTreeLikelihood * drhtl2 = 
 			new DRHomogeneousTreeLikelihood(
 				*seqSim2.getTree(),
@@ -510,8 +541,9 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
 				const_cast<DiscreteDistribution *>(seqSim2.getRateDistribution()),
 				false, false
 			);
-    drhtl1->computeTreeLikelihood();
-    drhtl2->computeTreeLikelihood();
+    drhtl2->initialize();
+    //drhtl1->computeTreeLikelihood();
+    //drhtl2->computeTreeLikelihood();
     Vdouble r1 = drhtl1->getRateWithMaxPostProbOfEachSite();
     Vdouble r2 = drhtl2->getRateWithMaxPostProbOfEachSite();
 
@@ -580,8 +612,8 @@ void AnalysisTools::getNullDistributionIntraDR(
   {
 		if(verbose)
     {
-			ApplicationTools::message << ".";
-			ApplicationTools::message.flush();
+			*ApplicationTools::message << ".";
+			ApplicationTools::message->flush();
 		}
 		//cout << "Creating datasets..." << endl;
 		SiteContainer * sites1 = seqSim.simulate(repRAM);
@@ -595,6 +627,7 @@ void AnalysisTools::getNullDistributionIntraDR(
 				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
 				false, false
 			);
+    drhtl1->initialize();
 		DRHomogeneousTreeLikelihood * drhtl2 =
 			new DRHomogeneousTreeLikelihood(
 				*seqSim.getTree(),
@@ -603,8 +636,9 @@ void AnalysisTools::getNullDistributionIntraDR(
 				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
 				false, false
 			);
-		drhtl1->computeTreeLikelihood();
-		drhtl2->computeTreeLikelihood();
+    drhtl2->initialize();
+		//drhtl1->computeTreeLikelihood();
+		//drhtl2->computeTreeLikelihood();
 		//cout << "Computing posterior rates..." << endl;
 		vector<unsigned int> rc1 = drhtl1->getRateClassWithMaxPostProbOfEachSite();
 		vector<unsigned int> rc2 = drhtl2->getRateClassWithMaxPostProbOfEachSite();
@@ -679,8 +713,8 @@ void AnalysisTools::getNullDistributionInterDR(
   {
 		if(verbose)
     {
-			ApplicationTools::message << ".";
-			ApplicationTools::message.flush();
+			*ApplicationTools::message << ".";
+			ApplicationTools::message->flush();
 		}
 		SiteContainer * sites1 = seqSim1.simulate(repRAM);
 		SiteContainer * sites2 = seqSim2.simulate(repRAM);
@@ -692,6 +726,7 @@ void AnalysisTools::getNullDistributionInterDR(
 				const_cast<DiscreteDistribution *>(seqSim1.getRateDistribution()),
 				false, false
 			);
+    drhtl1->initialize();
 		DRHomogeneousTreeLikelihood * drhtl2 =
 			new DRHomogeneousTreeLikelihood(
 				*seqSim2.getTree(),
@@ -700,8 +735,9 @@ void AnalysisTools::getNullDistributionInterDR(
 				const_cast<DiscreteDistribution *>(seqSim2.getRateDistribution()),
 				false, false
 			);
-		drhtl1->computeTreeLikelihood();
-		drhtl2->computeTreeLikelihood();
+    drhtl2->initialize();
+		//drhtl1->computeTreeLikelihood();
+		//drhtl2->computeTreeLikelihood();
 		vector<unsigned int> rc1 = drhtl1->getRateClassWithMaxPostProbOfEachSite();
 		vector<unsigned int> rc2 = drhtl2->getRateClassWithMaxPostProbOfEachSite();
 		Vdouble pr1 = drhtl1->getPosteriorRateOfEachSite();

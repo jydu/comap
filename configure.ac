@@ -29,7 +29,7 @@
 #The fact that you are presently reading this means that you have had
 #knowledge of the CeCILL license and that you accept its terms.
 
-AC_INIT(CoMap, 1.1.0, Julien.Dutheil@univ-montp2.fr, CoMap)
+AC_INIT(CoMap, 1.2.0, Julien.Dutheil@univ-montp2.fr, CoMap)
 AC_CONFIG_SRCDIR(CoMap/CoMap.cpp)
 
 dnl We'll use automake:
@@ -65,8 +65,7 @@ then
 |Covariant return type with virtual inheritance disabled.|
 +--------------------------------------------------------+
 ]);
-else
-	AC_DEFINE(VIRTUAL_COV, yes)
+	AC_DEFINE(NO_VIRTUAL_COV, yes)
 fi
 
 AC_ARG_ENABLE(static,
@@ -78,7 +77,7 @@ AC_ARG_ENABLE(static,
              esac],[static=false])
 AM_CONDITIONAL(STATIC, test x$static = xtrue)
 
-VERSION="1.1.0"
+VERSION="1.2.0"
 AC_SUBST(VERSION)
 AC_OUTPUT(Makefile CoMap/Makefile doc/Makefile)
 

@@ -1,3 +1,6 @@
+- 19/03/07 -*- Version 1.2.0 -*-
+* Compatibility update with Bio++ 1.4.
+
 - 19/03/07 -*- Version 1.1.0 -*-
 * Need the latest CVS version of Bio++
 * Update for compatibility with Bio++ 1.3.

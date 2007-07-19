@@ -84,15 +84,15 @@ using namespace std;
 /******************************************************************************/
 
 void CoETools::readData(
-  TreeTemplate<Node> *        &tree,
-  Alphabet *                  &alphabet,
-  VectorSiteContainer *       &allSites,
-  VectorSiteContainer *       &sites,
-  SubstitutionModel *         &model,
-  DiscreteDistribution *      &rDist,
-  HomogeneousTreeLikelihood * &tl,
-  map<string, string>         &params,
-  const string                &suffix)
+  TreeTemplate<Node> *          &tree,
+  Alphabet *                    &alphabet,
+  VectorSiteContainer *         &allSites,
+  VectorSiteContainer *         &sites,
+  SubstitutionModel *           &model,
+  DiscreteDistribution *        &rDist,
+  DRHomogeneousTreeLikelihood * &tl,
+  map<string, string>           &params,
+  const string                  &suffix)
 {
   alphabet = SequenceApplicationTools::getAlphabet(params, suffix, true);
   allSites = SequenceApplicationTools::getSiteContainer(alphabet, params, suffix, false);
@@ -101,28 +101,29 @@ void CoETools::readData(
   rDist    = PhylogeneticsApplicationTools::getRateDistribution(params, suffix, true);
   
   ApplicationTools::displayTask("Initializing likelihood");
-  tl = new HomogeneousTreeLikelihood(
+  tl = new DRHomogeneousTreeLikelihood(
     *tree,
     *sites,
     model,
-    rDist, true);
+    rDist, true, true);
+  tl->initialize();
 
   ApplicationTools::displayTask("Tree likelihood");
   double ll = tl->getValue();
   if(isinf(ll))
   {
-    ApplicationTools::error << "!!! Unexpected initial likelihood == 0." << endl;
-    ApplicationTools::error << "!!! You should consider reestimating all branch lengths parameters." << endl;
+    ApplicationTools::displayError("!!! Unexpected initial likelihood == 0.");
+    ApplicationTools::displayError("!!! You should consider reestimating all branch lengths parameters.");
     exit(-1);
   }
-  ApplicationTools::message << setprecision(20) << ll << endl;
+  *ApplicationTools::message << setprecision(20) << ll << endl;
   
   bool optimize = ApplicationTools::getBooleanParameter("optimization", params, true, suffix, true, false);
   if(optimize)
   {
-    ApplicationTools::displayResult("Optimization", "");
+    ApplicationTools::displayResult("Optimization", (optimize ? "yes" : "no"));
     PhylogeneticsApplicationTools::optimizeParameters(tl, params, suffix, true, true);
-    TreeTemplate<Node> *treeOpt = dynamic_cast<TreeTemplate<Node> *>(tl->getTree());
+    TreeTemplate<Node> *treeOpt = dynamic_cast<TreeTemplate<Node> *>(tl->getTree()->clone());
     PhylogeneticsApplicationTools::writeTree(*treeOpt, params, suffix);
   
     // Actualize tree.
@@ -132,8 +133,8 @@ void CoETools::readData(
     
     // Print parameters:
     ApplicationTools::displayResult("Final likelihood, -lnL =", TextTools::toString(tl -> getLogLikelihood(), 20));
-    model->getParameters().printParameters(ApplicationTools::message);
-    rDist->getParameters().printParameters(ApplicationTools::message);
+    model->getParameters().printParameters(*ApplicationTools::message);
+    rDist->getParameters().printParameters(*ApplicationTools::message);
   }
   string tags = ApplicationTools::getAFilePath("output.tags.file", params, false, false, suffix, false);
   if(tags != "none")
@@ -142,7 +143,7 @@ void CoETools::readData(
     vector<Node *> nodes = treeCopy.getInnerNodes();
     for(unsigned int i = 0; i < nodes.size(); i++)
     {
-      nodes[i]->setNodeProperty("name", new String(TextTools::toString(nodes[i]->getId())));
+      nodes[i]->setNodeProperty("name", String(TextTools::toString(nodes[i]->getId())));
     }
     nodes = treeCopy.getLeaves();
 
@@ -207,6 +208,7 @@ ProbabilisticSubstitutionMapping * CoETools::getVectors(
     bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
     bool joint   = ApplicationTools::getBooleanParameter("nijt.joint"  , params, true);
     DRHomogeneousTreeLikelihood drhtl(tree, completeSites, &model, &rDist, true);
+    drhtl.initialize();
     if(average)
     {
       if(joint)
@@ -520,8 +522,8 @@ void CoETools::computeIntraStats(
     if(iClass < minRateClass) continue;
     if(iRate  < minRate     ) continue;
     double iNorm  = norms[i];
-    ApplicationTools::message << ".";
-    ApplicationTools::message.flush();
+    *ApplicationTools::message << ".";
+    ApplicationTools::message->flush();
     for(unsigned int j = i + 1; j < nbSites; j++)
     {
       int    jClass = classes[j];
@@ -621,8 +623,8 @@ void CoETools::computeInterStats(
     if(iClass < minRateClass1) continue;
     if(iRate  < minRate1     ) continue;
     double iNorm  = norms1[i];
-    ApplicationTools::message << ".";
-    ApplicationTools::message.flush();
+    *ApplicationTools::message << ".";
+    ApplicationTools::message->flush();
       
     unsigned int begin = indepComp ? i : 0;
     unsigned int end   = indepComp ? i + 1 : nbSites2;
@@ -766,10 +768,10 @@ void CoETools::computeInterNullDistribution(
     Domain statDomain(lowerSB, upperSB, nbSInt);
     Vdouble bounds = ApplicationTools::getVectorParameter<double>("statistic.null.rate.bounds", params, ',', "");
     Domain rateDomain = Domain(bounds);
-    ApplicationTools::message << "The following rate domain will be used:"<< endl;
+    ApplicationTools::displayMessage("The following rate domain will be used:");
     for(unsigned int i = 0; i < rateDomain.getSize(); i++)
     {
-      ApplicationTools::message
+      *ApplicationTools::message
         << "["
         << rateDomain.getBound(i)
         << ", "

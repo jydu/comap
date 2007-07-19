@@ -46,7 +46,6 @@ knowledge of the CeCILL license and that you accept its terms.
 // From NumCalc:
 #include <NumCalc/VectorTools.h>
 using namespace VectorOperators;
-using namespace VectorFunctions;
 
 // From SeqLib:
 #include <Seq/VectorSiteContainer.h>
@@ -210,7 +209,7 @@ void ClusterTools::computeGlobalDistanceDistribution(
     ApplicationTools::displayGauge(k, nrep-1, '>');
     SiteContainer * sites = simulator.simulate(sizeOfDataSet);
     drhtl.setData(*sites);
-    drhtl.computeTreeLikelihood();
+    drhtl.initialize();
     ProbabilisticSubstitutionMapping * mapping = SubstitutionMappingTools::computeSubstitutionVectors(drhtl, nijt, false);
     unsigned int nbBranches = mapping->getNumberOfBranches();
     
@@ -240,7 +239,7 @@ void ClusterTools::computeGlobalDistanceDistribution(
     vector<double> norms(sizeOfDataSet);
     for(unsigned int i = 0; i < sizeOfDataSet; i++)
     {
-      norms[i] = norm((*mapping)[i]);
+      norms[i] = VectorTools::norm((*mapping)[i]);
     }
     
     //Compute distance matrix:
@@ -304,6 +303,6 @@ void ClusterTools::computeGlobalDistanceDistribution(
     delete mat;
     delete tree;
   }
-  ApplicationTools::message << endl;
+  *ApplicationTools::message << endl;
 }
 
