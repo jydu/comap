@@ -44,7 +44,6 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <NumCalc/VectorExceptions.h>
 #include <NumCalc/VectorTools.h>
 using namespace VectorOperators;
-using namespace VectorFunctions;
 
 // From the STL:
 #include <cmath>
@@ -55,7 +54,6 @@ using namespace std;
  */
 class Distance
 {
-
 	public:
 		Distance() {}
 		virtual ~Distance() {}
@@ -80,7 +78,7 @@ class AbstractDistance : public Distance
     void setWeights(const vector<double> & weights)
     { 
       _weights = new vector<double>(weights);
-      double s = sum(*_weights);
+      double s = VectorTools::sum(*_weights);
       *_weights /= s;
     }
     void deleteWeights() { delete _weights; _weights = NULL; }
@@ -100,7 +98,8 @@ class EuclidianDistance: public AbstractDistance
 			if(v1.size() != v2.size()) throw DimensionException("EuclidianDistance::d(...).", v2.size(), v1.size());
       if(_weights != NULL && _weights->size() != v1.size()) throw DimensionException("EuclidianDistance::d(...).", v1.size(), _weights->size());
 			double d = 0;
-			for(unsigned int i = 0; i < v1.size(); i++) {
+			for(unsigned int i = 0; i < v1.size(); i++)
+      {
 				d += (_weights == NULL) ? std::pow(v2[i] - v1[i], 2) : (*_weights)[i] * std::pow(v2[i] - v1[i], 2) ;
 			}
 			return sqrt(d);

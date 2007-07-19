@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename comap.info
-@settitle CoMap Manual 1.0.2
+@settitle CoMap Manual 1.2.0
 @afourpaper
 @c %**end of header
 
@@ -154,6 +154,25 @@ A set of allowed values
 A list of values of specified type, separated by comas.
 
 @end table
+
+From version 1.2, CoMap can use Bio++ macro system.
+This possible to recall anywhere the value of an option by using $(parameter).
+@cartouche
+@example
+model=JTT92
+rat_distribution=gamma
+output.tree = mydata$(model)$(rate_distribution).dnd
+@end example
+@end cartouche
+You can use this system to define global variables:
+@cartouche
+@example
+data=LSU
+sequence.file=$(data).fasta
+input.tree=$(data).dnd
+output.infos=$(data).infos
+@end example
+@end cartouche
  
 @c ------------------------------------------------------------------------------------------------------------------
 
@@ -173,7 +192,6 @@ The alignment file format.
 @item sequence.format_mase.site_selection = [chars]
 Meaningful only for mase format.
 Specify a name for a site set to use.
-
 
 @item sequence.format_phylip.order = [interleaved|sequential]
 Meaningful only for phylip format.

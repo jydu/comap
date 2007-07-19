@@ -43,7 +43,6 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From NumCalc:
 #include <NumCalc/VectorTools.h>
-using namespace VectorFunctions;
 
 class Statistic
 {
@@ -59,7 +58,7 @@ class CorrelationStatistic: public Statistic
 {
 	public:
 		double getValue(const Vdouble & v1, const Vdouble & v2) const {
-			return cor(v1, v2);
+			return VectorTools::cor(v1, v2);
 		}
 };
 
@@ -67,7 +66,7 @@ class CovarianceStatistic: public Statistic
 {
 	public:
 		double getValue(const Vdouble & v1, const Vdouble & v2) const {
-			return cov(v1, v2);
+			return VectorTools::cov(v1, v2);
 		}
 };
 
@@ -75,7 +74,7 @@ class CosinusStatistic: public Statistic
 {
 	public:
 		double getValue(const Vdouble & v1, const Vdouble & v2) const {
-			return cos(v1, v2);
+			return VectorTools::cos(v1, v2);
 		}
 };
 
