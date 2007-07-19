@@ -23,24 +23,29 @@ div.banner p {
 div.banner p.header {
   font-size: 125%;
   font-variant: small-caps;
-	background: #025c7f;
-	color: white;
-	text-decoration: none;
+  background: #025c7f;
+  color: white;
+  text-decoration: none;
   display: block;
 }
 
-div.banner a, div.banner em {
+div.banner a {
   display: block;
   margin: 0 0.5em;
-  border-top: 2px groove #999;
-	color:  #025c7f;
+  color:  #025c7f;
 }
-div.banner a:first-child { border-top: none }
-div.banner em { color: #CFC }
 
-div.banner a:link { text-decoration: none; color: #025c7f }
-div.banner a:visited { text-decoration: none; color: #025c7f }
-div.banner a:hover { background: orange; color: white }
+div.banner p.toc a {
+  border-top: 2px groove #999;
+}  
+
+div.banner p.toc a:first-child { border-top: none }
+div.banner p.toc a:link { text-decoration: none; color: #025c7f }
+div.banner p.toc a:visited { text-decoration: none; color: #025c7f }
+div.banner p.toc a:hover { background: orange; color: white }
+div.banner p.links a:link { text-decoration: none; color: #025c7f }
+div.banner p.links a:visited { text-decoration: none; color: #025c7f }
+div.banner p.links a:hover { background: white; color: white }
 
 div.back {
   clear: both;

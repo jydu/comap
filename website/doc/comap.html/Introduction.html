@@ -1,15 +1,15 @@
 <html lang="en">
 <head>
-<title>Introduction - CoMap Manual 1.0.2</title>
+<title>Introduction - CoMap Manual 1.2.0</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="CoMap Manual 1.0.2">
+<meta name="description" content="CoMap Manual 1.2.0">
 <meta name="generator" content="makeinfo 4.8">
 <link title="Top" rel="start" href="index.html#Top">
 <link rel="prev" href="index.html#Top" title="Top">
 <link rel="next" href="Data.html#Data" title="Data">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <!--
-This is the manual of CoMap, version 1.1.0, 4 March 2007.
+This is the manual of CoMap, version 1.2.0, 19 July 2007.
 
 Copyright (C) 2006, 2007 Julien Dutheil-->
 <meta http-equiv="Content-Style-Type" content="text/css">
@@ -124,6 +124,23 @@ integer folling between 2 and 10
      <br><dt><samp><span class="command">list[type]</span></samp><dd>A list of values of specified type, separated by comas.
 
    </dl>
+
+   <p>From version 1.2, CoMap can use Bio++ macro system. 
+This possible to recall anywhere the value of an option by using $(parameter). 
+<p><table class="cartouche" summary="cartouche" border="1"><tr><td>
+<pre class="example">     model=JTT92
+     rat_distribution=gamma
+     output.tree = mydata$(model)$(rate_distribution).dnd
+</pre>
+   </td></tr></table>
+   You can use this system to define global variables:
+<p><table class="cartouche" summary="cartouche" border="1"><tr><td>
+<pre class="example">     data=LSU
+     sequence.file=$(data).fasta
+     input.tree=$(data).dnd
+     output.infos=$(data).infos
+</pre>
+   </td></tr></table>
 
 <!--  -->
 </body></html>
