@@ -159,7 +159,7 @@ double SimpleClustering::computeDistancesFromPair(const vector<unsigned int> & p
 		w2 = n2/(n1+n2);
 		w3 = -n1*n2/pow(n1+n2, 2.);
 		w4 = 0.;
-	}
+	} else throw Exception("SimpleClustering::computeBranchLengthsForPair. unknown method '" + _method + "'.");
 	double d1 = _matrix(pair[0], pos);
 	double d2 = _matrix(pair[1], pos);
 	double d3 = _matrix(pair[0], pair[1]);
@@ -189,7 +189,7 @@ Node * SimpleClustering::getLeafNode(int id, const string & name)
 	infos.numberOfLeaves = 1;
 	infos.length = 0.;
 	NodeTemplate<ClusterInfos> * leaf = new NodeTemplate<ClusterInfos>(id, name);
-	leaf -> setInfos(infos);
+	leaf->setInfos(infos);
 	return leaf;
 }
 
@@ -208,7 +208,6 @@ Node * SimpleClustering::getParentNode(int id, Node * son1, Node * son2)
 }
 
 //---------------------------------------------------------------------------------------------
-
 
 TreeTemplate<Node> * SumClustering::getTree() const
 {
@@ -254,7 +253,7 @@ vector<double> SumClustering::computeBranchLengthsForPair(const vector<unsigned 
 
 double SumClustering::computeDistancesFromPair(const vector<unsigned int> & pair, const vector<double> & branchLengths, unsigned int pos)
 {
-	return _distance->d(_mapping[pos], _mapping[pair[0]]);
+	return _distance->getDistanceForPair(_mapping[pos], _mapping[pair[0]]);
 }
 
 void SumClustering::finalStep(int idRoot)
@@ -282,7 +281,7 @@ Node * SumClustering::getLeafNode(int id, const string & name)
 	infos.numberOfLeaves = 1;
 	infos.length = 0.;
 	NodeTemplate<ClusterInfos> * leaf = new NodeTemplate<ClusterInfos>(id, name);
-	leaf -> setInfos(infos);
+	leaf->setInfos(infos);
 	return leaf;
 }
 
@@ -290,13 +289,16 @@ Node * SumClustering::getParentNode(int id, Node * son1, Node * son2)
 {
 	ClusterInfos infos;
 	infos.numberOfLeaves = 
-		dynamic_cast<NodeTemplate<ClusterInfos> *>(son1) -> getInfos().numberOfLeaves
-	+ dynamic_cast<NodeTemplate<ClusterInfos> *>(son2) -> getInfos().numberOfLeaves;
-	infos.length = dynamic_cast<NodeTemplate<ClusterInfos> *>(son1) -> getInfos().length + son1 -> getDistanceToFather();
+		dynamic_cast<NodeTemplate<ClusterInfos> *>(son1)->getInfos().numberOfLeaves
+	+ dynamic_cast<NodeTemplate<ClusterInfos> *>(son2)->getInfos().numberOfLeaves;
+	infos.length = dynamic_cast<NodeTemplate<ClusterInfos> *>(son1)->getInfos().length + son1->getDistanceToFather();
 	Node * parent = new NodeTemplate<ClusterInfos>(id);
-	dynamic_cast<NodeTemplate<ClusterInfos> *>(parent) -> setInfos(infos);
-	parent -> addSon(* son1);
-	parent -> addSon(* son2);
+	dynamic_cast<NodeTemplate<ClusterInfos> *>(parent)->setInfos(infos);
+	parent->addSon(* son1);
+	parent->addSon(* son2);
 	return parent;
 }
+
+//---------------------------------------------------------------------------------------------
+
 

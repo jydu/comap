@@ -85,6 +85,12 @@ class SimpleClustering : public AbstractAgglomerativeDistanceMethod
 		virtual Node * getParentNode(int id, Node * son1, Node * son2);
 };
 
+/**
+ * @brief Specific clustering.
+ *
+ * Compute the distance between two groups as the pairwise distance from the
+ * two sums of vectors for the two groups.
+ */
 class SumClustering : public AbstractAgglomerativeDistanceMethod
 {
 	protected:
@@ -96,7 +102,7 @@ class SumClustering : public AbstractAgglomerativeDistanceMethod
 		{
 			computeTree(true);
 		}
-		~SumClustering() {}
+		virtual ~SumClustering() {}
 
 	public:
 		TreeTemplate<Node> * getTree() const;

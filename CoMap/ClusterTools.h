@@ -46,17 +46,19 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <NumCalc/DiscreteDistribution.h>
 
 // From Phylib:
+#include <Phyl/TreeTemplate.h>
 #include <Phyl/HomogeneousSequenceSimulator.h>
 #include <Phyl/AgglomerativeDistanceMethod.h>
 #include <Phyl/SubstitutionCount.h>
+#include <Phyl/ProbabilisticSubstitutionMapping.h>
 
 class Group: public vector<string>
 {
   protected:
     double _height;
-    vector<double> _rates;
     vector< vector<unsigned int> > _subgroups;
     vector<double> _subgroupsHeights;
+    map<string, const Clonable *> _properties;
 
   public:
     Group() { _height = 0; }
@@ -65,8 +67,6 @@ class Group: public vector<string>
   public:
     void setHeight(double height) { _height = height; }
     const double getHeight() const { return  _height; }
-    void setRates(const vector<double> & rates) { _rates = rates; }
-    const vector<double> & getRates() const { return _rates; } 
     void addSubgroup(const vector<unsigned int> & subgroup, double height)
     {
       _subgroups.push_back(subgroup);
@@ -88,15 +88,6 @@ class Group: public vector<string>
         names.push_back((*this)[_subgroups[i][j]]);
       }
       return names;
-    }
-    const vector<double> getSubgroupRates(unsigned int i) const
-    {
-      vector<double> rates;
-      for(unsigned int j = 0; j < _subgroups[i].size(); j++)
-      {
-        rates.push_back(_rates[_subgroups[i][j]]);
-      }
-      return rates;
     }
     double getSubgroupHeight(unsigned int i) const { return _subgroupsHeights[i]; }
     string toString() const
@@ -134,6 +125,11 @@ class Group: public vector<string>
       return text;
     }
 
+    const Clonable * getProperty(const string & name) { return _properties[name]; }
+
+    void setProperty(const string & name, const Clonable * value) { _properties[name] = value; }
+
+    vector<string> getPropertyNames() const { return MapTools::getKeys(_properties); }
 };
 
 class ClusterTools
@@ -158,6 +154,7 @@ class ClusterTools
         const vector<double> & scales,
         unsigned int sizeOfDataSet,
         unsigned int nrep,
+        unsigned int maxGroupSize,
         ofstream * out = NULL);
 
     static void translate(TreeTemplate<Node> & tree, const vector<string> & tln)
@@ -165,6 +162,9 @@ class ClusterTools
       translate(tree.getRootNode(), tln);
     }
 
+    //Only min norm for now.
+    static void computeNormProperties(TreeTemplate<Node> & tree, const ProbabilisticSubstitutionMapping & mapping);
+    
   private:
     static Group getGroups(const Node & subtree, vector<Group> & groups);
     static Group getGroup(const Node & subtree);
@@ -174,6 +174,7 @@ class ClusterTools
       if(node->isLeaf()) node->setName(tln[TextTools::to<unsigned int>(node->getName())]);
       for(unsigned int i = 0; i < node->getNumberOfSons(); i++) translate(node->getSon(i), tln);
     }
+    static void _computeNormProperties(Node * node, const ProbabilisticSubstitutionMapping & mapping, double & minNorm);
 
 };
 
