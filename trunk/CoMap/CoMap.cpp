@@ -104,13 +104,15 @@ int main(int argc, char *argv[])
 	cout << endl;
 	cout << endl;
 	cout << "***********************************************************" << endl;
-	cout << "* This is CoMap       version 1.2.0      date: 19/07/2007 *" << endl;
+	cout << "* This is CoMap       version 1.3.0      date: 05/08/07 *" << endl;
 	cout << "*     A C++ shell program to detect co-evolving sites.    *" << endl;
 	cout << "***********************************************************" << endl;
 	cout << endl;
-
+  
 	try
   {
+  
+  ApplicationTools::startTimer();
 
 	// **************************
 	// * Retrieving parameters: *
@@ -149,11 +151,11 @@ int main(int argc, char *argv[])
 		params = cmdParams;
 	}
 
-	ApplicationTools::displayMessage("\n\nI) Retrieve data and model\n");
+	ApplicationTools::displayMessage("\n\n-*- Retrieve data and model -*-\n");
 
 	TreeTemplate<Node> * tree1 = PhylogeneticsApplicationTools::getTree(params);
-	ApplicationTools::displayResult("# number of leaves", TextTools::toString(tree1->getNumberOfLeaves()));
-	ApplicationTools::displayResult("# number of sons at root", TextTools::toString(tree1->getRootNode()->getNumberOfSons()));
+	ApplicationTools::displayResult("Number of leaves", TextTools::toString(tree1->getNumberOfLeaves()));
+	ApplicationTools::displayResult("Number of sons at root", TextTools::toString(tree1->getRootNode()->getNumberOfSons()));
 	
 	// Get data 1:
 	//Tree * tree1 = new Tree(* tree); // Copy tree.
@@ -167,7 +169,7 @@ int main(int argc, char *argv[])
   bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", params, false, "", true, false);
 	ApplicationTools::displayResult("Rate distribution for simulations", (continuousSim ? "continuous" : "discrete"));
 
-	ApplicationTools::displayMessage("\n\nII) Get substitution vectors\n");
+	ApplicationTools::displayMessage("\n\n-*- Get substitution vectors -*-\n");
 
 	// Building a MutationProcess object:
 	MutationProcess * process1 = new SimpleMutationProcess(model1);
@@ -196,7 +198,9 @@ int main(int argc, char *argv[])
 	// *******************************************
 	
 	const Statistic * statistic = CoETools::getStatistic(params);
-	bool computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", params, false);
+  bool computeNullHyp = false;
+  if(statistic != NULL)
+	  computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", params, false);
 	
 	if(params.find("sequence.file2") != params.end() && params["sequence.file2"] != "none")
   {
@@ -246,22 +250,25 @@ int main(int argc, char *argv[])
 			params,
 			"2");
 		
-		ApplicationTools::displayMessage("\n\nIII) Compute statistics\n");
+		ApplicationTools::displayMessage("\n\n-*- Compute statistics -*-\n");
 		
 		// *************************
 		// * Now the stat stuff... *
 		// *************************
 		
-		ApplicationTools::displayMessage("Compares data set 1 with data set 2.");
-		CoETools::computeInterStats(
-			*tl1,
-			*tl2,
-			*sites1,
-			*sites2,
-			*mapping1,
-			*mapping2,
-			*statistic,
-			params);
+		if(statistic != NULL)
+    {
+		  ApplicationTools::displayMessage("Compares data set 1 with data set 2.");
+		  CoETools::computeInterStats(
+			  *tl1,
+			  *tl2,
+			  *sites1,
+			  *sites2,
+			  *mapping1,
+			  *mapping2,
+			  *statistic,
+			  params);
+    }
 			
 		if(computeNullHyp) CoETools::computeInterNullDistribution(
 			*process1, *process2,
@@ -290,7 +297,7 @@ int main(int argc, char *argv[])
   {
 		if(statistic != NULL)
     {
-			ApplicationTools::displayMessage("\n\nIII) Compute statistics\n");
+			ApplicationTools::displayMessage("\n\n-*- Compute statistics -*- \n");
 		
 			ApplicationTools::displayMessage("Analyse dataset.");
 			CoETools::computeIntraStats(
@@ -315,7 +322,6 @@ int main(int argc, char *argv[])
  
 		CoETools::writeInfos(*sites1, *tl1, params);
 	}
-	ApplicationTools::displayTaskDone();
 
 
 
@@ -328,7 +334,10 @@ int main(int argc, char *argv[])
   // ***********************
 	// * Clustering analysis *
 	// ***********************
-	string clusteringMethod = ApplicationTools::getStringParameter("clustering.method", params, "none", "", false, false);
+	
+  ApplicationTools::displayMessage("\n\n-*- Perform clustering analysis -*-\n");
+	
+  string clusteringMethod = ApplicationTools::getStringParameter("clustering.method", params, "none", "", false, false);
 	if(clusteringMethod != "none")
   {
     unsigned int nbBranches = mapping1->getNumberOfBranches();
@@ -369,7 +378,7 @@ int main(int argc, char *argv[])
         scales[j] = scale;
       }
 	  }  
-	  ApplicationTools::displayResult("Scale by row:", scale ? "yes" : "no");
+	  ApplicationTools::displayResult("Scale by row", scale ? "yes" : "no");
   
     // Compute norms:
     vector<double> norms(nbSites);
@@ -378,7 +387,7 @@ int main(int argc, char *argv[])
     {
       string siteName = "Site" + TextTools::toString(sites1->getSite(i)->getPosition());
       siteNames[i] = siteName; 
-      norms[i] = VectorTools::norm((*mapping1)[i]);
+      norms[i] = VectorTools::norm<double, double>((*mapping1)[i]);
     }
   
 	  // Get the distance to use
@@ -389,13 +398,10 @@ int main(int argc, char *argv[])
     {
 		  dist = new EuclidianDistance();
 	  }
-    else if(distanceMethod == "sqcor")
-    {
-		  dist = new SquareCorrelationDistance();
-	  }
     else if(distanceMethod == "cor")
     {
-		  dist = new CorrelationDistance();
+      Statistic * cor = new CorrelationStatistic();
+		  dist = new StatisticBasedDistance(cor, 1.);
     }
     else if(distanceMethod == "comp")
     {
@@ -416,7 +422,7 @@ int main(int argc, char *argv[])
 		  exit(-1);
 	  }
     dist->setWeights(weights);
-	  ApplicationTools::displayResult("Distance to use:", distanceMethod);
+	  ApplicationTools::displayResult("Distance to use", distanceMethod);
 
 	  // Compute the distance matrix.
 	  DistanceMatrix * mat = new DistanceMatrix(siteNames);
@@ -425,7 +431,7 @@ int main(int argc, char *argv[])
 		  (*mat)(i,i) = 0.;
 		  for(unsigned int j = 0; j < i; j++)
       {
-		  	(*mat)(i,j) = (*mat)(j,i) = dist->d((*mapping1)[i], (*mapping1)[j]);
+		  	(*mat)(i,j) = (*mat)(j,i) = dist->getDistanceForPair((*mapping1)[i], (*mapping1)[j]);
 		  }
 	  }
 
@@ -459,31 +465,35 @@ int main(int argc, char *argv[])
     {
 		  clustering = new SimpleClustering(SimpleClustering::AVERAGE, *mat);
 	  }
-    else if(clusteringMethod == "sum")
-    {
-	  	clustering = new SumClustering(*mapping1, *dist, *mat);
-	  }
+//    else if(clusteringMethod == "sum")
+//    {
+//	  	clustering = new SumClustering(*mapping1, *dist, *mat);
+//	  }
     else
     {
 		  ApplicationTools::displayError("Unknown clustering method.");
 		  exit(-1);
 	  }
-	  ApplicationTools::displayResult("Clustering method:", clusteringMethod);
+	  ApplicationTools::displayResult("Clustering method", clusteringMethod);
 	
 	  // Build tree:
-	  Tree * clusteringTree = clustering->getTree();
+	  TreeTemplate<Node> clusteringTree(* clustering->getTree());
+
+    // Add information to tree:
+    ClusterTools::computeNormProperties(clusteringTree, *mapping1);
+    dist->setStatisticAsProperty(*clusteringTree.getRootNode(), *mapping1);
 	
     // Dumping groups to file, with more or less information, depending on the method used.
 	  string groupsPath = ApplicationTools::getAFilePath("clustering.output.groups.file", params, true, false, "", false);
-    vector<string> colNames(8);
+    ApplicationTools::displayResult("Site clusters output file", groupsPath);
+    vector<string> colNames(6);
     colNames[0] = "Group";
     colNames[1] = "Size";
     colNames[2] = "Const";
     colNames[3] = "Dmax";
-    colNames[4] = "Nmin";
-    colNames[5] = "Nmax";
-    colNames[6] = "Nmean";
-    colNames[7] = "Delta"; //Distance From Mean Vector
+    colNames[4] = "Stat";
+    colNames[5] = "Nmin";
+    //colNames[6] = "Delta"; //Distance From Mean Vector
     DataTable groupsData(colNames);
 
     // A few infos we will need:
@@ -492,24 +502,12 @@ int main(int argc, char *argv[])
     for(unsigned int i = 0; i < nbSites; i++)
       isConst[i] = SiteTools::isConstant(*(sites1->getSite(i)), true);
   
-    vector<Group> groups = ClusterTools::getGroups(dynamic_cast<TreeTemplate<Node> *>(clusteringTree));
-    vector<double> minNorms(groups.size());
+    vector<Group> groups = ClusterTools::getGroups(&clusteringTree);
+    //vector<double> minNorms(groups.size());
   
     for(unsigned int i = 0; i < groups.size(); i++)
     {
       Group * group = &groups[i];
-      // Compute minimal norms:
-      double minNorm = -log(0.);
-      double maxNorm = log(0.);
-      double meanNorm = 0.;
-      for(unsigned int j = 0; j < group->size(); j++)
-      {
-        double norm = norms[TextTools::to<unsigned int>((*group)[j])];
-        if(norm < minNorm) minNorm = norm; 
-        if(norm > maxNorm) maxNorm = norm; 
-        meanNorm += norm;
-      }
-      meanNorm /= (double)group->size();
       
       // Does the group contain a constant site?
       bool test = false;
@@ -518,44 +516,25 @@ int main(int argc, char *argv[])
         if(isConst[TextTools::to<unsigned int>((*group)[j])]) test = true;
       }
 
-      // Compute distance from mean vector:
-      vector<double> groupMeanVector(nbBranches, 0.);
-      for(unsigned int j = 0; j < group->size(); j++)
-      {
-        groupMeanVector += (*mapping1)[TextTools::to<unsigned int>((*group)[j])]; 
-      }
-      double distFromMeanVector = dist->d(groupMeanVector/group->size(), meanVector);   
+      //// Compute distance from mean vector:
+      //vector<double> groupMeanVector(nbBranches, 0.);
+      //for(unsigned int j = 0; j < group->size(); j++)
+      //{
+      //  groupMeanVector += (*mapping1)[TextTools::to<unsigned int>((*group)[j])]; 
+      //}
+      //double distFromMeanVector = dist->getDistanceForPair(groupMeanVector/group->size(), meanVector);   
 
-      minNorms[i] = minNorm;
+      //?minNorms[i] = minNorm;
       // Store results:
-      vector<string> row(8);
+      vector<string> row(6);
       row[0] = group->toString(siteNames);
       row[1] = TextTools::toString(group->size());
       row[2] = test ? "yes" : "no";
       row[3] = TextTools::toString(group->getHeight() * 2.);
-      row[4] = TextTools::toString(minNorm);
-      row[5] = TextTools::toString(maxNorm);
-      row[6] = TextTools::toString(meanNorm);
-      row[7] = TextTools::toString(distFromMeanVector);
+      row[4] = TextTools::toString(dynamic_cast<const Number<double> *>(group->getProperty("Stat"))->getValue());
+      row[5] = TextTools::toString(dynamic_cast<const Number<double> *>(group->getProperty("Nmin"))->getValue());
+      //row[6] = TextTools::toString(distFromMeanVector);
       groupsData.addRow(row);
-    }
-
-    // Now test each group:
-  
-    bool testGroupsGlobal = ApplicationTools::getBooleanParameter("clustering.null", params, false, "", true, false);
-    if(testGroupsGlobal)
-    {
-      HomogeneousSequenceSimulator simulator(process1, rDist1, tree1, true);
-      simulator.enableContinuousRates(continuousSim);
-
-	    string simPath = ApplicationTools::getAFilePath("clustering.null.output.file", params, true, false, "", false);
-      unsigned int nrep = ApplicationTools::getParameter<unsigned int>("clustering.null.number", params, 1, "", true);
-      ofstream * out = NULL;
-      if(simPath != "none") out = new ofstream(simPath.c_str(), ios::out);
-      ApplicationTools::displayTask("Simulating groups", true);
-      ClusterTools::computeGlobalDistanceDistribution(simulator, *substitutionCount1, *dist, *clustering, scales, nbSites, nrep, out);
-      ApplicationTools::displayTaskDone();
-      if(out != NULL) out->close();
     }
 
     //Write detected groups to file:
@@ -568,17 +547,38 @@ int main(int argc, char *argv[])
 	  if(treeFile != "none")
     {
 	    // First we retranslate leaves names:
-      ClusterTools::translate(*dynamic_cast<TreeTemplate<Node> *>(clusteringTree), siteNames);
+      ClusterTools::translate(clusteringTree, siteNames);
       Newick newick;
-	    newick.write(*clusteringTree, treeFile, true);
+	    newick.write(clusteringTree, treeFile, true);
 	    ApplicationTools::displayResult("Wrote tree to file", treeFile);
     }
     
+    // Now test each group:
+    ApplicationTools::displayMessage("\n\n-*- Compute null distribution of clusters -*-\n");
+  
+    bool testGroupsGlobal = ApplicationTools::getBooleanParameter("clustering.null", params, false, "", true, false);
+    unsigned int maxGroupSize = ApplicationTools::getParameter<unsigned int>("clustering.maximum_group_size", params, 10, "", true, false);
+    ApplicationTools::displayResult("Maximum group size to test", TextTools::toString(maxGroupSize));
+    if(testGroupsGlobal)
+    {
+      HomogeneousSequenceSimulator simulator(process1, rDist1, tree1, true);
+      simulator.enableContinuousRates(continuousSim);
+	    string simPath = ApplicationTools::getAFilePath("clustering.null.output.file", params, true, false, "", false);
+      unsigned int nrep = ApplicationTools::getParameter<unsigned int>("clustering.null.number", params, 1, "", true);
+      ApplicationTools::displayResult("Number of simulations", TextTools::toString(nrep));
+      ApplicationTools::displayResult("Simulations output file", simPath);
+      ofstream * out = NULL;
+      if(simPath != "none") out = new ofstream(simPath.c_str(), ios::out);
+      ApplicationTools::displayTask("Simulating groups", true);
+      ClusterTools::computeGlobalDistanceDistribution(simulator, *substitutionCount1, *dist, *clustering, scales, nbSites, nrep, maxGroupSize, out);
+      ApplicationTools::displayTaskDone();
+      if(out != NULL) out->close();
+    }
+
     // Clustering memory freeing:
 	  delete dist;
 	  delete mat;
 	  delete clustering;
-	  delete clusteringTree;
   }
 
 
@@ -598,8 +598,12 @@ int main(int argc, char *argv[])
 	delete substitutionCount1;
 	delete process1;
   delete mapping1;
+	
+  ApplicationTools::displayTaskDone();
 
-	ApplicationTools::displayMessage("Bye bye ;-)");	
+  ApplicationTools::displayTime("Total execution time:");
+	
+  ApplicationTools::displayMessage("Bye bye ;-)");	
 
 	}
   catch(Exception e)

@@ -1,7 +1,13 @@
-- 19/03/07 -*- Version 1.2.0 -*-
+05/08/07 Julien Dutheil
+* New R scripts: type II test removed, new FDR computation.
+* More detailled simulation files for FR computation.
+* Possibility to limit the size of the groups in simulation file: faster and
+output file smaller.
+
+19/03/07 -*- Version 1.2.0 -*-
 * Compatibility update with Bio++ 1.4.
 
-- 19/03/07 -*- Version 1.1.0 -*-
+19/03/07 -*- Version 1.1.0 -*-
 * Need the latest CVS version of Bio++
 * Update for compatibility with Bio++ 1.3.
 * Weighted substitution mapping: possibility to use a weight from AAIndex 1
@@ -9,12 +15,12 @@ and 2.
 * Compensation test.
 * New p-value computation procedure.
 
-- 29/08/06 -*- Version 1.0.1 -*-
+29/08/06 -*- Version 1.0.1 -*-
 
-- 25/08/06 Julien Dutheil
+25/08/06 Julien Dutheil
 * Update for compatibility with PhylLib 1.2.
 * Removed garbage output when simulating.
 * New method for detecting compensatory mutations (beta).
 
-- 26/07/06 Julien Dutheil
+26/07/06 Julien Dutheil
 * Version 1.0.0 (first public release).

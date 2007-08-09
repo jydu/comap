@@ -100,7 +100,6 @@ void CoETools::readData(
   model    = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, sites, params, suffix, true);
   rDist    = PhylogeneticsApplicationTools::getRateDistribution(params, suffix, true);
   
-  ApplicationTools::displayTask("Initializing likelihood");
   tl = new DRHomogeneousTreeLikelihood(
     *tree,
     *sites,
@@ -536,7 +535,7 @@ void CoETools::computeIntraStats(
       if(maxRateClassDiff >= 0  && NumTools::abs(jClass - iClass) > maxRateClassDiff) continue;
       if(maxRateDiff      >= 0. && NumTools::abs(jRate  - iRate ) > maxRateDiff)      continue;
 
-      double stat = statistic.getValue(mapping[i], mapping[j]);
+      double stat = statistic.getValueForPair(mapping[i], mapping[j]);
       if(NumTools::abs(stat) < minStatistic) continue;
 
       //Then print to file:
@@ -641,7 +640,7 @@ void CoETools::computeInterStats(
       if(maxRateDiff      >= 0. && NumTools::abs(jRate  - iRate ) > maxRateDiff     ) continue;
 
       //double stat = table[i + 1][j + 1];
-      double stat = statistic.getValue(mapping1[i], mapping2[j]);
+      double stat = statistic.getValueForPair(mapping1[i], mapping2[j]);
       if(NumTools::abs(stat) < minStatistic) continue;
 
       //Then print to file:

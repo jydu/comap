@@ -111,10 +111,10 @@ VVdouble AnalysisTools::computeScalarProductMatrix(const VVdouble & vectors)
 	}
 	for(unsigned int i = 0; i < nbVectors; i++)
   {
-		matrix[i][i] = VectorTools::scalar(vectors[i], vectors[i]);
+		matrix[i][i] = VectorTools::scalar<double, double>(vectors[i], vectors[i]);
 		for(unsigned int j = i + 1; j < nbVectors; j++)
     {
-			matrix[i][j] = matrix[j][i] = VectorTools::scalar(vectors[i], vectors[j]);
+			matrix[i][j] = matrix[j][i] = VectorTools::scalar<double, double>(vectors[i], vectors[j]);
 		}
 	}
 	return matrix;
@@ -152,7 +152,7 @@ VVdouble AnalysisTools::computeScalarProductMatrix (
 		unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
 		for(unsigned int j = begin; j < end; j++)
     {
-			matrix[i][j] = VectorTools::scalar(vectors1[i], vectors2[j]);
+			matrix[i][j] = VectorTools::scalar<double, double>(vectors1[i], vectors2[j]);
 		}
 	}
 	return matrix;
@@ -175,7 +175,7 @@ VVdouble AnalysisTools::computeCosinusMatrix(const VVdouble & vectors)
 		matrix[i][i] = 1;
 		for(unsigned int j = i + 1; j < nbVectors; j++)
     {
-			matrix[i][j] = matrix[j][i] = VectorTools::cos(vectors[i], vectors[j]);
+			matrix[i][j] = matrix[j][i] = VectorTools::cos<double, double>(vectors[i], vectors[j]);
 		}
 	}
 	return matrix;
@@ -213,7 +213,7 @@ VVdouble AnalysisTools::computeCosinusMatrix(
 		unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
 		for(unsigned int j = begin; j < end; j++)
     {
-			matrix[i][j] = VectorTools::cos(vectors1[i], vectors2[j]);
+			matrix[i][j] = VectorTools::cos<double, double>(vectors1[i], vectors2[j]);
 		}
 	}
 	return matrix;
@@ -236,7 +236,7 @@ VVdouble AnalysisTools::computeCorrelationMatrix(const VVdouble & vectors)
 		matrix[i][i] = 1;
 		for(unsigned int j = i + 1; j < nbVectors; j++)
     {
-			matrix[i][j] = matrix[j][i] = VectorTools::cor(vectors[i], vectors[j]);
+			matrix[i][j] = matrix[j][i] = VectorTools::cor<double, double>(vectors[i], vectors[j]);
 		}
 	}
 	return matrix;
@@ -274,7 +274,7 @@ VVdouble AnalysisTools::computeCorrelationMatrix(
 		unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
 		for(unsigned int j = begin; j < end; j++) 
     {
-			matrix[i][j] = VectorTools::cor(vectors1[i], vectors2[j]);
+			matrix[i][j] = VectorTools::cor<double, double>(vectors1[i], vectors2[j]);
 		}
 	}
 	return matrix;
@@ -294,10 +294,10 @@ VVdouble AnalysisTools::computeCovarianceMatrix(const VVdouble & vectors)
 	}
 	for(unsigned int i = 0; i < nbVectors; i++)
   {
-		matrix[i][i] = VectorTools::var(vectors[i]);
+		matrix[i][i] = VectorTools::var<double, double>(vectors[i]);
 		for(unsigned int j = i + 1; j < nbVectors; j++)
     {
-			matrix[i][j] = matrix[j][i] = VectorTools::cov(vectors[i], vectors[j]);
+			matrix[i][j] = matrix[j][i] = VectorTools::cov<double, double>(vectors[i], vectors[j]);
 		}
 	}
 	return matrix;
@@ -335,7 +335,7 @@ VVdouble AnalysisTools::computeCovarianceMatrix(
 		unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
 		for(unsigned int j = begin; j < end; j++)
     {
-			matrix[i][j] = VectorTools::cov(vectors1[i], vectors2[j]);
+			matrix[i][j] = VectorTools::cov<double, double>(vectors1[i], vectors2[j]);
 		}
 	}
 	return matrix;
@@ -347,7 +347,7 @@ Vdouble AnalysisTools::computeNorms(const ProbabilisticSubstitutionMapping & map
 {
 	unsigned int nbVectors = mapping.getNumberOfSites();
 	Vdouble vect(nbVectors);
-	for(unsigned int i = 0; i < nbVectors; i++) vect[i] = VectorTools::norm(mapping[i]);
+	for(unsigned int i = 0; i < nbVectors; i++) vect[i] = VectorTools::norm<double, double>(mapping[i]);
 	return vect;
 }
 
@@ -475,7 +475,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
 		}
    	for(unsigned int j = 0; j < repRAM; j++)
     {
-			double stat = statistic.getValue((*mapping1)[j], (*mapping2)[j]);
+			double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
 			double minR = min(r1[j], r2[j]);
 			//int minRc = min (rc1[j], rc2[j]);
 			//cout << r1[j] << "\t" << r2[j] << "\t" << minR << "\t" << rateDomain.getIndex(minR) << endl;
@@ -578,7 +578,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
     
 		for(unsigned int j = 0; j < repRAM; j++)
     {
-      double stat = statistic.getValue((*mapping1)[j], (*mapping2)[j]);
+      double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
       double minR = min(r1[j], r2[j]);
       id[rateDomain.getIndex(minR)] -> addValue(stat);
     }
@@ -679,7 +679,7 @@ void AnalysisTools::getNullDistributionIntraDR(
    	//cout << "Computing statistics..." << endl;
 		for(unsigned int j = 0; j < repRAM; j++)
     {
-			double stat = statistic.getValue((*mapping1)[j], (*mapping2)[j]);
+			double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
 			out << stat << "\t" << std::min(rc1[j], rc2[j]) << "\t" << std::min(pr1[j], pr2[j]) << "\t" << std::min(norm1[j], norm2[j]) << endl;
 		}
 		//cout << "Freeing memory." << endl;
@@ -775,7 +775,7 @@ void AnalysisTools::getNullDistributionInterDR(
     Vdouble norm2 = computeNorms(*mapping2);
    	for(unsigned int j = 0; j < repRAM; j++)
     {
-			double stat = statistic.getValue((*mapping1)[j], (*mapping2)[j]);
+			double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
 			out << stat << "\t" << std::min(rc1[j], rc2[j]) << "\t" << std::min(pr1[j], pr2[j]) << "\t" << std::min(norm1[j], norm2[j]) << endl;
 		}
 
@@ -815,7 +815,7 @@ void AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(
 		double         rate2   = hssr2->getRate(); 
 		delete hssr2;
 
-		double stat = statistic.getValue(vector1, vector2);
+		double stat = statistic.getValueForPair(vector1, vector2);
 		out << stat << "\t" << rate1 << "\t" << rate2 << endl;
 	}
 }

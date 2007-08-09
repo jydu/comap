@@ -42,6 +42,7 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From Utils:
 #include <Utils/ApplicationTools.h>
+#include <Utils/Number.h>
 
 // From NumCalc:
 #include <NumCalc/VectorTools.h>
@@ -69,9 +70,12 @@ vector<Group> ClusterTools::getGroups(const TreeTemplate<Node> * tree)
 Group ClusterTools::getGroups(const Node & subtree, vector<Group> & groups)
 {
   Group group;
-  if(subtree.isLeaf()) {
+  if(subtree.isLeaf())
+  {
     group.push_back(subtree.getName());
-  } else {
+  }
+  else
+  {
     unsigned int subcount = 0;
     vector<unsigned int> thisgroup;
     for(unsigned int i = 0; i < subtree.getNumberOfSons(); i++)
@@ -88,7 +92,8 @@ Group ClusterTools::getGroups(const Node & subtree, vector<Group> & groups)
         thisgroup.push_back(subcount);
         subcount++;
       }
-      if(subgroup.size() > 1) {
+      if(subgroup.size() > 1)
+      {
         //group.addSubgroup(subgroup, sonGroup.getHeight());
         // Recursively add subgroups:
         for(unsigned int j = 0; j < sonGroup.getSubgroups().size(); j++)
@@ -98,6 +103,11 @@ Group ClusterTools::getGroups(const Node & subtree, vector<Group> & groups)
       }
       group.setHeight(sonGroup.getHeight() + son->getDistanceToFather());
     }
+    vector<string> propNames = subtree.getNodePropertyNames();
+    for(unsigned int i = 0; i < propNames.size(); i++)
+    {
+      group.setProperty(propNames[i], subtree.getNodeProperty(propNames[i]));
+    }
     group.addSubgroup(thisgroup, group.getHeight());
     
     // Add this group:
@@ -106,12 +116,16 @@ Group ClusterTools::getGroups(const Node & subtree, vector<Group> & groups)
   return group;
 }
 
+//Useful?
 Group ClusterTools::getGroup(const Node & subtree)
 {
   Group group;
-  if(subtree.isLeaf()) {
+  if(subtree.isLeaf())
+  {
     group.push_back(subtree.getName());
-  } else {
+  }
+  else
+  {
     unsigned int subcount = 0;
     vector<unsigned int> thisgroup;
     for(unsigned int i = 0; i < subtree.getNumberOfSons(); i++)
@@ -128,7 +142,8 @@ Group ClusterTools::getGroup(const Node & subtree)
         thisgroup.push_back(subcount);
         subcount++;
       }
-      if(subgroup.size() > 1) {
+      if(subgroup.size() > 1)
+      {
         //group.addSubgroup(subgroup, sonGroup.getHeight());
         // Recursively add subgroups:
         for(unsigned int j = 0; j < sonGroup.getSubgroups().size(); j++)
@@ -139,6 +154,11 @@ Group ClusterTools::getGroup(const Node & subtree)
       group.setHeight(sonGroup.getHeight() + son->getDistanceToFather());
     }
     group.addSubgroup(thisgroup, group.getHeight());
+  }
+  vector<string> propNames = subtree.getNodePropertyNames();
+  for(unsigned int i = 0; i < propNames.size(); i++)
+  {
+    group.setProperty(propNames[i], subtree.getNodeProperty(propNames[i]));
   }
   return group;
 }
@@ -189,6 +209,7 @@ void ClusterTools::computeGlobalDistanceDistribution(
   const vector<double> & scales,
   unsigned int sizeOfDataSet,
   unsigned int nrep,
+  unsigned int maxGroupSize,
   ofstream * out)
 {
   DRHomogeneousTreeLikelihood drhtl(
@@ -202,7 +223,7 @@ void ClusterTools::computeGlobalDistanceDistribution(
     siteNames[i] = TextTools::toString(i);
   }
   
-  if(out != NULL) *out << "Size\tDmax\tNmin\tNmax\tNmean\tDelta" << endl;
+  if(out != NULL) *out << "Rep\tGroup\tSize\tDmax\tStat\tNmin" << endl;
 
   for(unsigned int k = 0; k < nrep; k++)
   {
@@ -235,13 +256,6 @@ void ClusterTools::computeGlobalDistanceDistribution(
 			}
 		}
     
-    //Compute norms:
-    vector<double> norms(sizeOfDataSet);
-    for(unsigned int i = 0; i < sizeOfDataSet; i++)
-    {
-      norms[i] = VectorTools::norm((*mapping)[i]);
-    }
-    
     //Compute distance matrix:
 	  DistanceMatrix * mat = new DistanceMatrix(siteNames);
 	  for(unsigned int i = 0; i < sizeOfDataSet; i++)
@@ -250,59 +264,80 @@ void ClusterTools::computeGlobalDistanceDistribution(
       Vdouble * vec = &((*mapping)[i]);
 		  for(unsigned int j = 0; j < i; j++)
       {
-			  (*mat)(i,j) = (*mat)(j,i) = distance.d(*vec, (*mapping)[j]);
+			  (*mat)(i,j) = (*mat)(j,i) = distance.getDistanceForPair(*vec, (*mapping)[j]);
 		  }
 	  }
 
     //Perform clustering:
-    try {
+    try
+    {
       dynamic_cast<SumClustering&>(clustering).setMapping(*mapping);
-    } catch(exception & e) {}
+    }
+    catch(exception & e) {}
+    
     clustering.setDistanceMatrix(*mat);
     clustering.computeTree(true);
-    TreeTemplate<Node> * tree = dynamic_cast<TreeTemplate<Node> *>(clustering.getTree());
+    TreeTemplate<Node> clusteringTree(*clustering.getTree());
+
+    //Add information to tree:
+    computeNormProperties(clusteringTree, *mapping);
+    distance.setStatisticAsProperty(*clusteringTree.getRootNode(), *mapping);
     
     //Now parse each group:
-    vector<Group> groups = getGroups(tree);
+    vector<Group> groups = getGroups(&clusteringTree);
     for(unsigned int i = 0; i < groups.size(); i++)
     {
       Group * group = &groups[i];
+      if(group->size() > maxGroupSize) continue;
       
-      // Compute minimal norm:
-      double normMin = -log(0.);
-      double normMax = log(0.);
-      double normMean = 0.;
-      for(unsigned int j = 0; j < group->size(); j++)
-      {
-        double norm = norms[TextTools::to<unsigned int>(group->at(j))];
-        if(norm < normMin) normMin = norm;
-        if(norm > normMax) normMax = norm;
-        normMean += norm;
-      }
-      normMean /= (double)group->size();
+      //// Compute distance from mean vector:
+      //vector<double> groupMeanVector(mapping->getNumberOfBranches(), 0.);
+      //for(unsigned int j = 0; j < group->size(); j++)
+      //{
+      //  groupMeanVector += (*mapping)[TextTools::to<unsigned int>((*group)[j])]; 
+      //}
+      //double distFromMeanVector = distance.getDistanceForPair(groupMeanVector/group->size(), meanVector);
       
-      // Compute distance from mean vector:
-      vector<double> groupMeanVector(mapping->getNumberOfBranches(), 0.);
-      for(unsigned int j = 0; j < group->size(); j++)
-      {
-        groupMeanVector += (*mapping)[TextTools::to<unsigned int>((*group)[j])]; 
-      }
-      double distFromMeanVector = distance.d(groupMeanVector/group->size(), meanVector);
-      
-      if(out != NULL) *out << group->size()
+      if(out != NULL) *out << k
+        << "\t" << group->toString()
+        << "\t" << group->size()
         << "\t" << (group->getHeight() * 2.)
-        << "\t" << normMin
-        << "\t" << normMax
-        << "\t" << normMean
-        << "\t" << distFromMeanVector << endl;
+        << "\t" << (dynamic_cast<const Number<double> *>(group->getProperty("Stat"))->getValue())
+        << "\t" << (dynamic_cast<const Number<double> *>(group->getProperty("Nmin"))->getValue())
+        //<< "\t" << distFromMeanVector
+        << endl;
     }
 
     //Housekeeping:
     delete sites;
     delete mapping;
     delete mat;
-    delete tree;
   }
   *ApplicationTools::message << endl;
 }
+
+void ClusterTools::computeNormProperties(TreeTemplate<Node> & tree, const ProbabilisticSubstitutionMapping & mapping)
+{
+  double min;
+  _computeNormProperties(tree.getRootNode(), mapping, min);
+}
+    
+void ClusterTools::_computeNormProperties(Node * node, const ProbabilisticSubstitutionMapping & mapping, double & minNorm)
+{
+  minNorm = -log(0.);
+  if(node->isLeaf())
+  {
+    minNorm = VectorTools::norm<double,double>(mapping[TextTools::to<unsigned int>(node->getName())]);
+  }
+  else
+  {
+    for(unsigned int i = 0; i < node->getNumberOfSons(); i++)
+    {
+      double minNormSon;
+      _computeNormProperties(node->getSon(i), mapping, minNormSon);
+      if(minNormSon < minNorm) minNorm = minNormSon;
+    }
+    node->setNodeProperty("Nmin", Number<double>(minNorm));
+  }
+}    
 
