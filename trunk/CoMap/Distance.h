@@ -133,7 +133,7 @@ class AbstractMaximumDistance: public AbstractDistance
           if(val > maxi) maxi = val;
         }
       }
-      return val;
+      return maxi;
     }
 };
 

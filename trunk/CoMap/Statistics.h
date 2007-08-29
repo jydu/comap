@@ -113,7 +113,7 @@ class AbstractMinimumStatistic: public Statistic
   public:
     virtual double getValueForGroup(const vector<const Vdouble *> & v) const throw (DimensionException)
     {
-      double mini = -log(0), val = 0;
+      double mini = -log(0), val = 0.;
       for(unsigned int i = 1; i < v.size(); i++)
       {
         for(unsigned int j = 0; j < i; j++)
@@ -122,7 +122,7 @@ class AbstractMinimumStatistic: public Statistic
           if(val < mini) mini = val;
         }
       }
-      return val;
+      return mini;
     }
     void setWeights(const Vdouble & w)
     { 
