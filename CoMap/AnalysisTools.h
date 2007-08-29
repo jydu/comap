@@ -57,7 +57,7 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From the stl:
 #include <iostream>
-
+#include <vector>
 using namespace std;
 
 /**

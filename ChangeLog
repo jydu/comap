@@ -1,3 +1,5 @@
+* Start implementation of new test when candidate positions are available.
+
 05/08/07 Julien Dutheil
 * New R scripts: type II test removed, new FDR computation.
 * More detailled simulation files for FR computation.

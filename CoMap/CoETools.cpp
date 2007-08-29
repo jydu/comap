@@ -354,7 +354,7 @@ void CoETools::writeInfos(
 
 /******************************************************************************/
 
-const Statistic * CoETools::getStatistic(map<string, string> & params)
+const Statistic * CoETools::getStatistic(map<string, string> & params) throw (Exception)
 {
   string statistic = ApplicationTools::getStringParameter("statistic", params, "none");
   if(statistic == "cosinus") {
@@ -366,7 +366,7 @@ const Statistic * CoETools::getStatistic(map<string, string> & params)
   } else if(statistic == "cosubstitution") {
     return new CosubstitutionNumberStatistic();
   } else {
-    return NULL;
+    throw Exception("Unknown statistic used: " + statistic);
   }
 }
 
@@ -807,6 +807,196 @@ void CoETools::computeInterNullDistribution(
     AnalysisTools::getNullDistributionInterDR(seqSim1, seqSim2, nijt1, nijt2, statistic, outFile, nbRepCPU, nbRepRAM, average, joint, true);
   }
   outFile.close();
+}
+
+/******************************************************************************/
+
+vector<unsigned int> CandidateGroupSet::nextCandidateSite() const throw (Exception)
+{
+  if(_nbCompleted == size()) throw Exception("CandidateGroupSet::nextCandidateSite. enough simulations!!");
+  //Site increment:
+  if(_n2[_groupPos] < _minSim)
+  {
+    _sitePos++;
+    if(_sitePos >= (*this)[_groupPos].size())
+    {
+      _groupPos++;
+      if(_groupPos >= size()) _groupPos = 0;
+      _sitePos = 0;
+    }
+  }
+  unsigned int startSearch = _groupPos;
+  if(_n2[_groupPos] >= _minSim)
+  {
+    while(_n2[_groupPos] >= _minSim)
+    {
+      _groupPos++;
+
+      if(_groupPos >= size()) _groupPos = 0;
+      if(_groupPos == startSearch)
+      {
+        //No more site to complete!
+        throw Exception("DEBUG: something wrong happened, this message should never appear!");
+      }
+    }
+    _sitePos = 0;
+  }
+  vector<unsigned int> pos(2);
+  pos[0] = _groupPos;
+  pos[1] = _sitePos;
+  return pos;
+}
+
+/******************************************************************************/
+
+vector<unsigned int> CandidateGroupSet::currentCandidateSite() const throw (Exception)
+{
+  if(_nbCompleted == size()) throw Exception("CandidateGroupSet::nextCandidateSite. enough simulations!!");
+  vector<unsigned int> pos(2);
+  pos[0] = _groupPos;
+  pos[1] = _sitePos;
+  return pos;
+}
+
+/******************************************************************************/
+
+bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMapping & mapping)
+{
+  Vdouble norms = AnalysisTools::computeNorms(mapping);
+  //Analyse each site in the set:
+  bool test = true, testNorm, first;
+  vector<unsigned int> pos, start;
+  for(unsigned int i = 0; test && i < mapping.getNumberOfSites(); i++)
+  {
+    first = true;
+    testNorm = false;
+    while(test && !testNorm)
+    {
+      pos = nextCandidateSite();
+      if(first)
+      {
+        start = pos;
+        first = false;
+      }
+      else
+      {
+        if(currentCandidateSite() == start) //We looped over all set, drop this simulated site:
+          break;
+      }
+      testNorm = _candidates[pos[0]][pos[1]].checkNorm(norms[i]);
+      if(testNorm)
+      {
+        addSimulatedSite(pos[0], pos[1], &mapping[i]);
+        if(_nbCompleted == size()) test = false;
+      }
+    }
+  }
+  //Reset pointers:
+  resetSimulations();
+  return test;
+}
+
+/******************************************************************************/
+
+void CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const Vdouble * v) throw (IndexOutOfBoundsException)
+{
+  if(groupIndex >= _simulations.size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad group index.", groupIndex, 0, _simulations.size());
+  if(siteIndex >= _simulations[groupIndex].size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad site index.", siteIndex, 0, _simulations[groupIndex].size());
+  vector< deque<const Vdouble *> > * group = &_simulations[groupIndex];
+  (*group)[siteIndex].push_back(v);
+  //Test if the group is complete:
+  bool test = true;
+  for(unsigned int i = 0; test && i < group->size(); i++)
+  {
+    if((*group)[i].size() == 0) test = false;
+  }
+  if(test)
+  {
+    vector<const Vdouble *> groupVectors;
+    for(unsigned int i = 0; i < group->size(); i++)
+    {
+      groupVectors.push_back((*group)[i][0]);
+      (*group)[i].pop_front();
+    }
+    _n2[groupIndex]++;
+    double stat = _statistic->getValueForGroup(groupVectors);
+    if(stat >= (*this)[groupIndex].getStatisticValue()) _n1[groupIndex]++;
+    if(_n2[groupIndex] == _minSim)
+    {
+      _nbCompleted++;
+      if(_verbose == 1)
+      {
+        ApplicationTools::displayGauge(_nbCompleted, size(), '=');
+      }
+      if(_verbose > 1)
+      {
+        ApplicationTools::displayResult("Group completed", TextTools::toString(groupIndex));
+      }
+    }
+  }
+}
+
+/******************************************************************************/
+
+void CoETools::computePValuesForCandidateGroups(
+    CandidateGroupSet & candidates,
+    const MutationProcess & process,
+    const DiscreteDistribution & rDist,
+    const TreeTemplate<Node> & tree,
+    const SubstitutionCount & nijt,
+	  map<string, string> & params,
+    bool useContinuousRates)
+{
+  HomogeneousSequenceSimulator seqSim(&process, &rDist, &tree);
+  seqSim.enableContinuousRates(useContinuousRates);
+  
+  unsigned int repRAM = ApplicationTools::getParameter<unsigned int>("candidates.null.nb_rep_RAM", params, 1000, "", true, true);
+  bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
+  bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true);
+
+  bool test = true;
+  while(test)
+  {
+    if(candidates.getVerbose() >= 2)
+      ApplicationTools::displayResult("Simulate ", TextTools::toString(repRAM) + " sites.");
+    SiteContainer * sites = seqSim.simulate(repRAM);
+		DRHomogeneousTreeLikelihood * drhtl =
+			new DRHomogeneousTreeLikelihood(
+				*seqSim.getTree(),
+				*sites,
+				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
+				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
+				false, false);
+    drhtl->initialize();
+    ProbabilisticSubstitutionMapping * mapping;
+		if(average)
+    {
+			if(joint)
+      {
+				mapping = SubstitutionMappingTools::computeSubstitutionVectors(*drhtl, nijt, false);
+			}
+      else
+      {
+				mapping = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(*drhtl, nijt, false);
+			}
+		}
+    else
+    {
+			if(joint)
+      {
+				mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(*drhtl, nijt, false);
+			}
+      else
+      {
+				mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(*drhtl, nijt, false);
+			}
+		}
+		test = candidates.analyseSimulations(*mapping);
+
+    delete sites;
+		delete drhtl;
+    delete mapping;
+  }
 }
 
 /******************************************************************************/
