@@ -1,3 +1,5 @@
+07/11/07 Julien Dutheil
+* Compatibility update with Bio++.
 * Start implementation of new test when candidate positions are available.
 
 05/08/07 Julien Dutheil

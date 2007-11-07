@@ -374,19 +374,18 @@ const Statistic * CoETools::getStatistic(map<string, string> & params) throw (Ex
 
 SubstitutionCount * CoETools::getSubstitutionCount(
   const Alphabet * alphabet,
-  const TreeTemplate<Node> & tree,
-  const MutationProcess & process,
-  const DiscreteDistribution & rDist,
+  const SubstitutionModel* model,
+  const DiscreteDistribution* rDist,
   map<string, string> & params,
   string suffix)
 {
-  SubstitutionCount * substitutionCount = NULL;
+  SubstitutionCount* substitutionCount = NULL;
   string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", suffix, true);
 
-   if(nijtOption == "laplace")
+  if(nijtOption == "laplace")
   {
     int trunc = ApplicationTools::getIntParameter("nijt_laplace.trunc", params, 10, suffix, true);
-    substitutionCount = new AnalyticalSubstitutionCount(process.getSubstitutionModel(), trunc);
+    substitutionCount = new AnalyticalSubstitutionCount(model, trunc);
   }
   else if(nijtOption == "simple")
   {
@@ -404,7 +403,7 @@ SubstitutionCount * CoETools::getSubstitutionCount(
     if(dist == "grantham")
     {
       GranthamAAChemicalDistance * M = new GranthamAAChemicalDistance();
-      M -> setSymmetric(sym);
+      M->setSymmetric(sym);
       substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
     else if(dist == "miyata")
@@ -667,32 +666,19 @@ void CoETools::computeInterStats(
 /******************************************************************************/
 
 void CoETools::computeIntraNullDistribution(
-  const MutationProcess & process,
-  const DiscreteDistribution & rDist,
-  const TreeTemplate<Node> & tree,
-  const SubstitutionCount & nijt,
-  const Statistic & statistic,
-  map<string, string> & params,
-  bool useContinuousRates)
+    const HomogeneousSequenceSimulator& seqSim,
+    const SubstitutionCount & nijt,
+    const Statistic & statistic,
+    map<string, string> & params)
 {
-  HomogeneousSequenceSimulator seqSim(&process, &rDist, &tree);
-  seqSim.enableContinuousRates(useContinuousRates);
+  const DiscreteDistribution* rDist = seqSim.getRateDistribution();
+
   string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, true, false);
   ofstream outFile(path.c_str(), ios::out);
   
   ApplicationTools::displayMessage("Compute statistic under null hypothesis...");
   
   unsigned int nbRepCPU = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rep_CPU", params, 10);
-  
-  // Drop this for now:
-  //bool reestimate = ApplicationTools::getBooleanParameter("statistic.null.reestimate", params, true);
-  //if(!reestimate) {
-  //  AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(seqSim, statistic, outFile, nbRepCPU, true);
-  //  outFile.close();
-  //  ApplicationTools::displayTaskDone();
-  //  return;
-  //}
-  
   unsigned int nbRepRAM = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rep_RAM", params, 100);
   bool cumul   = ApplicationTools::getBooleanParameter("statistic.null.cumul", params, false);
   bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
@@ -705,7 +691,7 @@ void CoETools::computeIntraNullDistribution(
     double upperSB = ApplicationTools::getDoubleParameter("statistic.null.upper", params, 1.);
     int     nbSInt = ApplicationTools::getIntParameter   ("statistic.null.nb_int", params, 20);
     Domain statDomain(lowerSB, upperSB, nbSInt);
-    Domain rateDomain = rDist.getDomain();
+    Domain rateDomain = rDist->getDomain();
   
     // Simulate:
     vector<IntervalData *> id; 
@@ -732,22 +718,13 @@ void CoETools::computeIntraNullDistribution(
 /******************************************************************************/
 
 void CoETools::computeInterNullDistribution(
-  const MutationProcess & process1,
-  const MutationProcess & process2,
-  const DiscreteDistribution & rDist1,
-  const DiscreteDistribution & rDist2,
-  const TreeTemplate<Node> & tree1,
-  const TreeTemplate<Node> & tree2,
-  const SubstitutionCount & nijt1,
-  const SubstitutionCount & nijt2,
-  const Statistic & statistic,
-  map<string, string> & params,
-  bool useContinuousRates)
+    const HomogeneousSequenceSimulator& seqSim1,
+    const HomogeneousSequenceSimulator& seqSim2,
+    const SubstitutionCount & nijt1,
+    const SubstitutionCount & nijt2,
+    const Statistic & statistic,
+    map<string, string> & params)
 {
-  HomogeneousSequenceSimulator seqSim1(&process1, &rDist1, &tree1);
-  seqSim1.enableContinuousRates(useContinuousRates);
-  HomogeneousSequenceSimulator seqSim2(&process2, &rDist2, &tree2);
-  seqSim2.enableContinuousRates(useContinuousRates);
   string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, true, false);
   ofstream outFile(path.c_str(), ios::out);
   
@@ -940,16 +917,10 @@ void CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int s
 
 void CoETools::computePValuesForCandidateGroups(
     CandidateGroupSet & candidates,
-    const MutationProcess & process,
-    const DiscreteDistribution & rDist,
-    const TreeTemplate<Node> & tree,
+    const HomogeneousSequenceSimulator& seqSim,
     const SubstitutionCount & nijt,
-	  map<string, string> & params,
-    bool useContinuousRates)
+	  map<string, string> & params)
 {
-  HomogeneousSequenceSimulator seqSim(&process, &rDist, &tree);
-  seqSim.enableContinuousRates(useContinuousRates);
-  
   unsigned int repRAM = ApplicationTools::getParameter<unsigned int>("candidates.null.nb_rep_RAM", params, 1000, "", true, true);
   bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
   bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true);

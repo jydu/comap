@@ -53,12 +53,13 @@ knowledge of the CeCILL license and that you accept its terms.
 // From PhylLib:
 #include <Phyl/Tree.h>
 #include <Phyl/SubstitutionModel.h>
-#include <Phyl/HomogeneousTreeLikelihood.h>
+#include <Phyl/NonHomogeneousTreeLikelihood.h>
 #include <Phyl/DRHomogeneousTreeLikelihood.h>
 #include <Phyl/MutationProcess.h>
 #include <Phyl/DiscreteRatesAcrossSitesTreeLikelihood.h>
 #include <Phyl/SubstitutionCount.h>
 #include <Phyl/ProbabilisticSubstitutionMapping.h>
+#include <Phyl/HomogeneousSequenceSimulator.h>
 
 // From the STL:
 #include <map>
@@ -288,10 +289,9 @@ class CoETools
 		static const Statistic * getStatistic(map<string, string> & params) throw (Exception);
 		
 		static SubstitutionCount * getSubstitutionCount(
-			const Alphabet * chars,
-			const TreeTemplate<Node> & tree,
-			const MutationProcess & process,
-			const DiscreteDistribution & rDist,
+			const Alphabet* alphabet,
+			const SubstitutionModel* model,
+			const DiscreteDistribution* rDist,
 			map<string, string> & params,
 			string suffix = "");
 
@@ -313,35 +313,24 @@ class CoETools
 			map<string, string> & params);
 		
 		static void computeIntraNullDistribution(
-			const MutationProcess & process,
-			const DiscreteDistribution & rDist,
-			const TreeTemplate<Node> & tree,
-			const SubstitutionCount & nijt,
-			const Statistic & statistic,
-			map<string, string> & params,
-      bool useContinuousRates = false);
+  			const HomogeneousSequenceSimulator& seqSim,
+	  		const SubstitutionCount & nijt,
+		  	const Statistic & statistic,
+			  map<string, string> & params);
 	
 		static void computeInterNullDistribution(
-			const MutationProcess & process1,
-			const MutationProcess & process2,
-			const DiscreteDistribution & rDist1,
-			const DiscreteDistribution & rDist2,
-			const TreeTemplate<Node> & tree1,
-			const TreeTemplate<Node> & tree2,
-			const SubstitutionCount & nijt1,
-			const SubstitutionCount & nijt2,
-			const Statistic & statistic,
-			map<string, string> & params,
-      bool useContinuousRates = false);
+			  const HomogeneousSequenceSimulator& seqSim1,
+			  const HomogeneousSequenceSimulator& seqSim2,
+			  const SubstitutionCount & nijt1,
+			  const SubstitutionCount & nijt2,
+			  const Statistic & statistic,
+			  map<string, string> & params);
 
     static void computePValuesForCandidateGroups(
         CandidateGroupSet & candidates,
-        const MutationProcess & process,
-        const DiscreteDistribution & rDist,
-        const TreeTemplate<Node> & tree,
+			  const HomogeneousSequenceSimulator& seqSim,
         const SubstitutionCount & nijt,
-			  map<string, string> & params,
-        bool useContinuousRates = false);
+			  map<string, string> & params);
 	
 };
 
