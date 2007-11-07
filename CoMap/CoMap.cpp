@@ -171,16 +171,12 @@ int main(int argc, char *argv[])
 
 	ApplicationTools::displayMessage("\n\n-*- Get substitution vectors -*-\n");
 
-	// Building a MutationProcess object:
-	MutationProcess * process1 = new SimpleMutationProcess(model1);
+	// Building a simulator object:
+	HomogeneousSequenceSimulator seqSim1(model1, rDist1, tree1);
+  seqSim1.enableContinuousRates(continuousSim);
 
 	// Getting the substitutions count function:
-	SubstitutionCount * substitutionCount1 = CoETools::getSubstitutionCount(
-		alphabet1,
-		* tree1,
-		* process1,
-		* rDist1,
-		params);
+	SubstitutionCount* substitutionCount1 = CoETools::getSubstitutionCount(alphabet1, model1, rDist1, params);
 		
 	// Getting the substitution vectors:
 	ProbabilisticSubstitutionMapping * mapping1 = CoETools::getVectors(
@@ -232,16 +228,12 @@ int main(int argc, char *argv[])
 
 		  ApplicationTools::displayMessage("\n... and get its substitution vectors.\n");
 		
-		  // Building a MutationProcess object:
-		  MutationProcess * process2 = new SimpleMutationProcess(model2);
+		  // Building a simulator object:
+		  HomogeneousSequenceSimulator seqSim2(model2, rDist2, tree2);
+      seqSim2.enableContinuousRates(continuousSim);
 
 		  // Getting the substitutions count function:
-		  SubstitutionCount * substitutionCount2 = CoETools::getSubstitutionCount(
-			  alphabet2,
-			  * tree2,
-			  * process2,
-			  * rDist2,
-			  params);
+		  SubstitutionCount* substitutionCount2 = CoETools::getSubstitutionCount(alphabet2, model2, rDist2, params);
 		
 		  // Getting the substitution vectors:
 		  ProbabilisticSubstitutionMapping * mapping2 = CoETools::getVectors(
@@ -273,14 +265,12 @@ int main(int argc, char *argv[])
 			  params);
 			
 		  if(computeNullHyp) CoETools::computeInterNullDistribution(
-			  *process1, *process2,
-			  *rDist1, *rDist2,
-			  *tree1, *tree2,
+			  seqSim1,
+			  seqSim2,
 			  *substitutionCount1,
         *substitutionCount2,
 			  *statistic,
-			  params,
-        continuousSim);
+			  params);
 
 		  CoETools::writeInfos(*sites2, *tl2, params, "2");
 
@@ -291,8 +281,6 @@ int main(int argc, char *argv[])
 		  delete rDist2;
 		  delete tl2;
 		  delete substitutionCount2;
-		  delete process2;
-      delete mapping2;
 		  ApplicationTools::displayTaskDone();
 	  }
     else
@@ -310,13 +298,10 @@ int main(int argc, char *argv[])
 		  if(computeNullHyp)
       {
 			  CoETools::computeIntraNullDistribution(
-				  *process1,
-				  *rDist1,
-				  *tree1,
+				  seqSim1,
 				  *substitutionCount1,
 				  *statistic,
-				  params,
-          continuousSim);
+				  params);
 		  }
  
 		  CoETools::writeInfos(*sites1, *tl1, params);
@@ -458,15 +443,15 @@ int main(int argc, char *argv[])
 	    AgglomerativeDistanceMethod * clustering = NULL;
 	    if(clusteringMethod == "complete")
       {
-		    clustering = new SimpleClustering(SimpleClustering::COMPLETE, *mat);
+		    clustering = new SimpleClustering(SimpleClustering::COMPLETE, *mat, false);
 	    }
       else if(clusteringMethod == "single")
       {
-		    clustering = new SimpleClustering(SimpleClustering::SINGLE, *mat);
+		    clustering = new SimpleClustering(SimpleClustering::SINGLE, *mat, false);
 	    }
       else if(clusteringMethod == "average")
       {
-		    clustering = new SimpleClustering(SimpleClustering::AVERAGE, *mat);
+		    clustering = new SimpleClustering(SimpleClustering::AVERAGE, *mat, false);
 	    }
 //      else if(clusteringMethod == "sum")
 //      {
@@ -564,7 +549,7 @@ int main(int argc, char *argv[])
       ApplicationTools::displayResult("Maximum group size to test", TextTools::toString(maxGroupSize));
       if(testGroupsGlobal)
       {
-        HomogeneousSequenceSimulator simulator(process1, rDist1, tree1, true);
+        HomogeneousSequenceSimulator simulator(model1, rDist1, tree1);
         simulator.enableContinuousRates(continuousSim);
 	      string simPath = ApplicationTools::getAFilePath("clustering.null.output.file", params, true, false, "", false);
         unsigned int nrep = ApplicationTools::getParameter<unsigned int>("clustering.null.number", params, 1, "", true);
@@ -614,7 +599,7 @@ int main(int argc, char *argv[])
       for(unsigned int i = 0; i < positions.size(); i++) posIndex[positions[i]] = i;
 
       //Parse file:
-      DataTable * table = DataTable::read(groupsFile, "\t", true, -1);
+      DataTable* table = DataTable::read(groupsFile, "\t", true, -1);
       groupsFile.close();
       string groupsColumnName = ApplicationTools::getStringParameter("candidates.input.column_name", params, "Groups", "", true, true);
       vector<string> groups = table->getColumn(groupsColumnName);
@@ -661,7 +646,7 @@ int main(int argc, char *argv[])
       ApplicationTools::displayTaskDone();
 
       //Now compute p-values:
-      CoETools::computePValuesForCandidateGroups(candidates, *process1, *rDist1, *tree1, *substitutionCount1, params, false);
+      CoETools::computePValuesForCandidateGroups(candidates, seqSim1, *substitutionCount1, params);
 
       //Now fill data table:
       vector<string> stats(table->getNumberOfRows()), pvalues(table->getNumberOfRows());
@@ -701,7 +686,6 @@ int main(int argc, char *argv[])
 	delete rDist1;
 	delete tl1;
 	delete substitutionCount1;
-	delete process1;
   delete mapping1;
 	
   ApplicationTools::displayTaskDone();

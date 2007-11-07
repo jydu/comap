@@ -804,13 +804,13 @@ void AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(
   {
 		if(c == 1000) { cout << "."; cout.flush(); c = 0; }
 		c++;
-		HomogeneousSiteSimulationResult * hssr1 = 
-			dynamic_cast<HomogeneousSiteSimulationResult *>(seqSim.dSimulate());
+		RASiteSimulationResult * hssr1 = 
+			dynamic_cast<RASiteSimulationResult *>(seqSim.dSimulate());
 		vector<double> vector1 = hssr1->getSubstitutionVector();
 		double         rate1   = hssr1->getRate();
 		delete hssr1;
-		HomogeneousSiteSimulationResult * hssr2 = 
-			dynamic_cast<HomogeneousSiteSimulationResult *>(seqSim.dSimulate());
+		RASiteSimulationResult * hssr2 = 
+			dynamic_cast<RASiteSimulationResult *>(seqSim.dSimulate());
 		vector<double> vector2 = hssr2->getSubstitutionVector();
 		double         rate2   = hssr2->getRate(); 
 		delete hssr2;

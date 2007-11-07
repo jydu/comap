@@ -52,7 +52,8 @@ struct ClusterInfos
 	double length;
 };
 
-class SimpleClustering : public AbstractAgglomerativeDistanceMethod
+class SimpleClustering:
+  public AbstractAgglomerativeDistanceMethod
 {
 	public:
 		static const string COMPLETE; 
@@ -66,8 +67,8 @@ class SimpleClustering : public AbstractAgglomerativeDistanceMethod
 		string _method;
 	
 	public:
-		SimpleClustering(const string & method): _method(method) {}
-		SimpleClustering(const string & method, const DistanceMatrix & matrix) throw (Exception): AbstractAgglomerativeDistanceMethod(matrix), _method(method) 
+		SimpleClustering(const string & method, bool verbose = false): AbstractAgglomerativeDistanceMethod(verbose), _method(method) {}
+		SimpleClustering(const string & method, const DistanceMatrix & matrix, bool verbose = false) throw (Exception): AbstractAgglomerativeDistanceMethod(matrix, verbose), _method(method) 
 		{
 			computeTree(true);
 		}
