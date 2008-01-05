@@ -47,6 +47,7 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From PhylLib:
 #include <Phyl/SubstitutionMappingTools.h>
+#include <Phyl/DRHomogeneousTreeLikelihood.h>
 
 /******************************************************************************/
 
