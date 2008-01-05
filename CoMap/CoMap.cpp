@@ -189,13 +189,13 @@ int main(int argc, char *argv[])
 		* substitutionCount1,
 		params);
 
-	const Statistic * statistic = CoETools::getStatistic(params);
-
   string analysis = ApplicationTools::getStringParameter("analysis", params, "pairwise");
   ApplicationTools::displayResult("Analysis type", analysis);
 
   if(analysis == "pairwise")
   {
+	  const Statistic * statistic = CoETools::getStatistic(params);
+
     bool computeNullHyp = false;
 	  computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", params, false);
 	
@@ -306,6 +306,8 @@ int main(int argc, char *argv[])
  
 		  CoETools::writeInfos(*sites1, *tl1, params);
 	  }
+
+    delete statistic;
   }
 
 
@@ -578,6 +580,8 @@ int main(int argc, char *argv[])
   	// * Candidate groups analysis *
   	// *****************************
     // We only deal with the one data set case for now.
+	  
+    const Statistic * statistic = CoETools::getStatistic(params);
 	
     string groupsPath = ApplicationTools::getAFilePath("candidates.input.file", params, false, true);
     if(groupsPath != "none")
@@ -599,9 +603,10 @@ int main(int argc, char *argv[])
       for(unsigned int i = 0; i < positions.size(); i++) posIndex[positions[i]] = i;
 
       //Parse file:
-      DataTable* table = DataTable::read(groupsFile, "\t", true, -1);
+      string groupsColumnSep = ApplicationTools::getStringParameter("candidates.input.column_sep", params, "\t", "", true, true);
+      DataTable* table = DataTable::read(groupsFile, groupsColumnSep, true, -1);
       groupsFile.close();
-      string groupsColumnName = ApplicationTools::getStringParameter("candidates.input.column_name", params, "Groups", "", true, true);
+      string groupsColumnName = ApplicationTools::getStringParameter("candidates.input.column_name", params, "Group", "", true, true);
       vector<string> groups = table->getColumn(groupsColumnName);
 
       //Get range value:
@@ -614,7 +619,7 @@ int main(int argc, char *argv[])
       }
 
       //Now parse each group, compute index and corresponding norm ranges and statistic value:
-      ApplicationTools::displayTask("Compute statistic for each group");
+      ApplicationTools::displayTask("Compute statistic for each group", true);
       string group, tmp, strok = "0123456789;,";
       for(unsigned int i = 0; i < groups.size(); i++)
       {
@@ -661,14 +666,17 @@ int main(int argc, char *argv[])
 
       //Write result to file:
       string outputPath = ApplicationTools::getAFilePath("candidates.output.file", params, true, false);
+      groupsColumnSep = ApplicationTools::getStringParameter("candidates.output.column_sep", params, groupsColumnSep, "", true, true);
       ofstream outputFile(outputPath.c_str(), ios::out);
-      DataTable::write(*table, outputFile, "\t");
+      DataTable::write(*table, outputFile, groupsColumnSep);
       outputFile.close();
       ApplicationTools::displayResult("Wrote results in file", outputPath);
 
       //Free memory.
       delete table;
     }
+
+    delete statistic;
   }
 
 

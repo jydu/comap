@@ -202,8 +202,6 @@ ProbabilisticSubstitutionMapping * CoETools::getVectors(
     string outputVectorsFilePath = ApplicationTools::getAFilePath("output.vectors.file", params, true, false, suffix, false);
     ApplicationTools::displayResult("Output mapping to file" + suffix, outputVectorsFilePath);
 
-    ApplicationTools::displayMessage("Compute all substitution numbers for each site.");
-    
     bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
     bool joint   = ApplicationTools::getBooleanParameter("nijt.joint"  , params, true);
     DRHomogeneousTreeLikelihood drhtl(tree, completeSites, &model, &rDist, true);
