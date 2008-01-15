@@ -53,18 +53,21 @@ knowledge of the CeCILL license and that you accept its terms.
 // From PhylLib:
 #include <Phyl/Tree.h>
 #include <Phyl/SubstitutionModel.h>
-#include <Phyl/NonHomogeneousTreeLikelihood.h>
-#include <Phyl/DRHomogeneousTreeLikelihood.h>
+#include <Phyl/DRTreeLikelihood.h>
 #include <Phyl/MutationProcess.h>
+#include <Phyl/DRTreeLikelihood.h>
 #include <Phyl/DiscreteRatesAcrossSitesTreeLikelihood.h>
 #include <Phyl/SubstitutionCount.h>
 #include <Phyl/ProbabilisticSubstitutionMapping.h>
-#include <Phyl/HomogeneousSequenceSimulator.h>
+#include <Phyl/SequenceSimulator.h>
+
+using namespace bpp;
 
 // From the STL:
 #include <map>
 #include <vector>
 #include <deque>
+
 using namespace std;
 
 class CandidateSite
@@ -235,26 +238,23 @@ class CoETools
 	public:
 		
 		static void readData(
-			TreeTemplate<Node> *          &tree,
-			Alphabet *                    &alphabet,
-			VectorSiteContainer *         &allSites,
-			VectorSiteContainer *         &sites,
-			SubstitutionModel *           &model,
-			DiscreteDistribution *        &rDist,
-			DRHomogeneousTreeLikelihood * &tl,
-			map<string, string>           &params,
-			const string                  &suffix = "");
+			TreeTemplate<Node> *   tree,
+			Alphabet *             &alphabet,
+			VectorSiteContainer *  &allSites,
+			VectorSiteContainer *  &sites,
+			SubstitutionModel *    &model,
+			SubstitutionModelSet * &modelSet,
+			DiscreteDistribution * &rDist,
+			DRTreeLikelihood *     &tl,
+			map<string, string>    &params,
+			const string           &suffix = "");
 
 		static ProbabilisticSubstitutionMapping * getVectors(
-			const Alphabet * alphabet,
-				    TreeTemplate<Node> & tree,
-			const SiteContainer      & completeSites,
-			const SiteContainer      & sites,
-				  SubstitutionModel    & model,
-				  DiscreteDistribution & rDist,
-			const SubstitutionCount  & substitutionCount,
-			map<string, string>      & params,
-			const string             & suffix = "");
+			const DRTreeLikelihood & drtl, 
+      SubstitutionCount      & substitutionCount,
+      const SiteContainer    & completeSites,
+			map<string, string>    & params,
+			const string           & suffix = "");
 			
 	  /**
  	   * This write a file with some information for each site in the selected alignment
@@ -313,23 +313,27 @@ class CoETools
 			map<string, string> & params);
 		
 		static void computeIntraNullDistribution(
-  			const HomogeneousSequenceSimulator& seqSim,
-	  		const SubstitutionCount & nijt,
+        DRTreeLikelihood & drtl,
+  			const SequenceSimulator& seqSim,
+	  		SubstitutionCount & nijt,
 		  	const Statistic & statistic,
 			  map<string, string> & params);
 	
 		static void computeInterNullDistribution(
-			  const HomogeneousSequenceSimulator& seqSim1,
-			  const HomogeneousSequenceSimulator& seqSim2,
-			  const SubstitutionCount & nijt1,
-			  const SubstitutionCount & nijt2,
+        DRTreeLikelihood & drtl1,
+        DRTreeLikelihood & drtl2,
+			  const SequenceSimulator& seqSim1,
+			  const SequenceSimulator& seqSim2,
+			  SubstitutionCount & nijt1,
+			  SubstitutionCount & nijt2,
 			  const Statistic & statistic,
 			  map<string, string> & params);
 
     static void computePValuesForCandidateGroups(
         CandidateGroupSet & candidates,
-			  const HomogeneousSequenceSimulator& seqSim,
-        const SubstitutionCount & nijt,
+        DRTreeLikelihood & drtl,
+			  const SequenceSimulator& seqSim,
+        SubstitutionCount & nijt,
 			  map<string, string> & params);
 	
 };

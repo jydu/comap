@@ -47,468 +47,376 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From PhylLib:
 #include <Phyl/SubstitutionMappingTools.h>
-#include <Phyl/DRHomogeneousTreeLikelihood.h>
 
 /******************************************************************************/
 
 AnalysisTools::AnalysisTools() {}
 
 AnalysisTools::~AnalysisTools() {}
-	
+  
 /******************************************************************************/
 
 VVdouble AnalysisTools::getFromStream(istream & in)
 {
-	string token;
-	VVdouble analysis;
-	in >> token;
-	if(token != "Site") {
-		cerr << "Error while reading result file. Bad header line." << endl;
-		exit(-1);
-	}
-	//This is the first line of file.
-	//Initialise the result array:
-	while(in && token.find("Branch") == string::npos) {
-		analysis.push_back(Vdouble());
-	}
-		
-	int size = analysis.size();
-	if(size == 0) {
-		cerr << "Error while reading result file. Bad header line or no data." << endl;
-		exit(-1);
-	}
+  string token;
+  VVdouble analysis;
+  in >> token;
+  if(token != "Site") {
+    cerr << "Error while reading result file. Bad header line." << endl;
+    exit(-1);
+  }
+  //This is the first line of file.
+  //Initialise the result array:
+  while(in && token.find("Branch") == string::npos) {
+    analysis.push_back(Vdouble());
+  }
+    
+  int size = analysis.size();
+  if(size == 0) {
+    cerr << "Error while reading result file. Bad header line or no data." << endl;
+    exit(-1);
+  }
 
-	double value;
-	while(in) {
-		cin >> token;
-		if(token.find("Branch") == string::npos) {
-			cerr << "Error while reading result file. Bad branch data line." << endl;
-			exit(-1);
-		}
-		//begin to parse a new line:
-		for(int i = 0; i < size + 1; i++) {
-			if(!in) {
-				cerr << "Error while reading result file. Incomplete branch data line." << endl;
-				exit(-1);
-			}
-			cin >> value;
-			analysis[i].push_back(value);
-		}
-	}
-	return analysis;
+  double value;
+  while(in) {
+    cin >> token;
+    if(token.find("Branch") == string::npos) {
+      cerr << "Error while reading result file. Bad branch data line." << endl;
+      exit(-1);
+    }
+    //begin to parse a new line:
+    for(int i = 0; i < size + 1; i++) {
+      if(!in) {
+        cerr << "Error while reading result file. Incomplete branch data line." << endl;
+        exit(-1);
+      }
+      cin >> value;
+      analysis[i].push_back(value);
+    }
+  }
+  return analysis;
 }
 
 /******************************************************************************/
 
 VVdouble AnalysisTools::computeScalarProductMatrix(const VVdouble & vectors)
 {
-	unsigned int nbVectors = vectors.size();
-	VVdouble matrix = VVdouble(nbVectors);
-	for(unsigned int i = 0; i < nbVectors; i++)
+  unsigned int nbVectors = vectors.size();
+  VVdouble matrix = VVdouble(nbVectors);
+  for(unsigned int i = 0; i < nbVectors; i++)
   {
-		//Must initialize all vector first, since we access
-		//both matrix[i, j] and matrix[j, i] in the same time.
-		matrix[i] = Vdouble(nbVectors, 0);
-	}
-	for(unsigned int i = 0; i < nbVectors; i++)
+    //Must initialize all vector first, since we access
+    //both matrix[i, j] and matrix[j, i] in the same time.
+    matrix[i] = Vdouble(nbVectors, 0);
+  }
+  for(unsigned int i = 0; i < nbVectors; i++)
   {
-		matrix[i][i] = VectorTools::scalar<double, double>(vectors[i], vectors[i]);
-		for(unsigned int j = i + 1; j < nbVectors; j++)
+    matrix[i][i] = VectorTools::scalar<double, double>(vectors[i], vectors[i]);
+    for(unsigned int j = i + 1; j < nbVectors; j++)
     {
-			matrix[i][j] = matrix[j][i] = VectorTools::scalar<double, double>(vectors[i], vectors[j]);
-		}
-	}
-	return matrix;
+      matrix[i][j] = matrix[j][i] = VectorTools::scalar<double, double>(vectors[i], vectors[j]);
+    }
+  }
+  return matrix;
 }
 
 /******************************************************************************/
 
 VVdouble AnalysisTools::computeScalarProductMatrix (
-	const VVdouble & vectors1,
-	const VVdouble & vectors2,
-	bool independantComparisons
+  const VVdouble & vectors1,
+  const VVdouble & vectors2,
+  bool independantComparisons
 ) throw (DimensionException)
 {
-	unsigned int nbVectors1 = vectors1.size();
-	unsigned int nbVectors2 = vectors2.size();
-	if(independantComparisons && nbVectors1 != nbVectors2)
+  unsigned int nbVectors1 = vectors1.size();
+  unsigned int nbVectors2 = vectors2.size();
+  if(independantComparisons && nbVectors1 != nbVectors2)
   {
-		throw DimensionException(
-			string("AnalysisTools::computeScalarProductMatrix.\n") +
-			string("When performing independant comparisons, ") +
-			string("the two datasets must have the same length."),
-			nbVectors1,
-			nbVectors2
-		);
-	}
-	VVdouble matrix = VVdouble(nbVectors1);
-	for(unsigned int i = 0; i < nbVectors1; i++)
+    throw DimensionException(
+      string("AnalysisTools::computeScalarProductMatrix.\n") +
+      string("When performing independant comparisons, ") +
+      string("the two datasets must have the same length."),
+      nbVectors1,
+      nbVectors2
+    );
+  }
+  VVdouble matrix = VVdouble(nbVectors1);
+  for(unsigned int i = 0; i < nbVectors1; i++)
   {
-		//Must initialize all vector first, since we access
-		matrix[i] = Vdouble(nbVectors2, 0);
-	}
-	for(unsigned int i = 0; i < nbVectors1; i++)
+    //Must initialize all vector first, since we access
+    matrix[i] = Vdouble(nbVectors2, 0);
+  }
+  for(unsigned int i = 0; i < nbVectors1; i++)
   {
-		unsigned int begin = independantComparisons ? i : 0;
-		unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
-		for(unsigned int j = begin; j < end; j++)
+    unsigned int begin = independantComparisons ? i : 0;
+    unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
+    for(unsigned int j = begin; j < end; j++)
     {
-			matrix[i][j] = VectorTools::scalar<double, double>(vectors1[i], vectors2[j]);
-		}
-	}
-	return matrix;
+      matrix[i][j] = VectorTools::scalar<double, double>(vectors1[i], vectors2[j]);
+    }
+  }
+  return matrix;
 }
 
 /******************************************************************************/
 
 VVdouble AnalysisTools::computeCosinusMatrix(const VVdouble & vectors)
 {
-	unsigned int nbVectors = vectors.size();
-	VVdouble matrix = VVdouble(nbVectors);
-	for(unsigned int i = 0; i < nbVectors; i++)
+  unsigned int nbVectors = vectors.size();
+  VVdouble matrix = VVdouble(nbVectors);
+  for(unsigned int i = 0; i < nbVectors; i++)
   {
-		//Must initialize all vector first, since we access
-		//both matrix[i, j] and matrix[j, i] in the same time.
-		matrix[i] = Vdouble(nbVectors, 0);
-	}
-	for(unsigned int i = 0; i < nbVectors; i++)
+    //Must initialize all vector first, since we access
+    //both matrix[i, j] and matrix[j, i] in the same time.
+    matrix[i] = Vdouble(nbVectors, 0);
+  }
+  for(unsigned int i = 0; i < nbVectors; i++)
   {
-		matrix[i][i] = 1;
-		for(unsigned int j = i + 1; j < nbVectors; j++)
+    matrix[i][i] = 1;
+    for(unsigned int j = i + 1; j < nbVectors; j++)
     {
-			matrix[i][j] = matrix[j][i] = VectorTools::cos<double, double>(vectors[i], vectors[j]);
-		}
-	}
-	return matrix;
+      matrix[i][j] = matrix[j][i] = VectorTools::cos<double, double>(vectors[i], vectors[j]);
+    }
+  }
+  return matrix;
 }
 
 /******************************************************************************/
 
 VVdouble AnalysisTools::computeCosinusMatrix(
-	const VVdouble & vectors1,
-	const VVdouble & vectors2,
-	bool independantComparisons
+  const VVdouble & vectors1,
+  const VVdouble & vectors2,
+  bool independantComparisons
 ) throw (DimensionException)
 {
-	unsigned int nbVectors1 = vectors1.size();
-	unsigned int nbVectors2 = vectors2.size();
-	if(independantComparisons && nbVectors1 != nbVectors2)
+  unsigned int nbVectors1 = vectors1.size();
+  unsigned int nbVectors2 = vectors2.size();
+  if(independantComparisons && nbVectors1 != nbVectors2)
   {
-		throw DimensionException(
-			string("AnalysisTools::computeCosinusMatrix.\n") +
-			string("When performing independant comparisons, ") +
-			string("the two datasets must have the same length."),
-			nbVectors1,
-			nbVectors2
-		);
-	}
-	VVdouble matrix = VVdouble(nbVectors1);
-	for(unsigned int i = 0; i < nbVectors1; i++)
+    throw DimensionException(
+      string("AnalysisTools::computeCosinusMatrix.\n") +
+      string("When performing independant comparisons, ") +
+      string("the two datasets must have the same length."),
+      nbVectors1,
+      nbVectors2
+    );
+  }
+  VVdouble matrix = VVdouble(nbVectors1);
+  for(unsigned int i = 0; i < nbVectors1; i++)
   {
-		//Must initialize all vector first, since we access
-		matrix[i] = Vdouble(nbVectors2, 0);
-	}
-	for(unsigned int i = 0; i < nbVectors1; i++)
+    //Must initialize all vector first, since we access
+    matrix[i] = Vdouble(nbVectors2, 0);
+  }
+  for(unsigned int i = 0; i < nbVectors1; i++)
   {
-		unsigned int begin = independantComparisons ? i : 0;
-		unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
-		for(unsigned int j = begin; j < end; j++)
+    unsigned int begin = independantComparisons ? i : 0;
+    unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
+    for(unsigned int j = begin; j < end; j++)
     {
-			matrix[i][j] = VectorTools::cos<double, double>(vectors1[i], vectors2[j]);
-		}
-	}
-	return matrix;
+      matrix[i][j] = VectorTools::cos<double, double>(vectors1[i], vectors2[j]);
+    }
+  }
+  return matrix;
 }
 
 /******************************************************************************/
 
 VVdouble AnalysisTools::computeCorrelationMatrix(const VVdouble & vectors)
 {
-	unsigned int nbVectors = vectors.size();
-	VVdouble matrix = VVdouble(nbVectors);
-	for(unsigned int i = 0; i < nbVectors; i++)
+  unsigned int nbVectors = vectors.size();
+  VVdouble matrix = VVdouble(nbVectors);
+  for(unsigned int i = 0; i < nbVectors; i++)
   {
-		//Must initialize all vector first, since we access
-		//both matrix[i, j] and matrix[j, i] in the same time.
-		matrix[i] = Vdouble(nbVectors, 0);
-	}
-	for(unsigned int i = 0; i < nbVectors; i++)
+    //Must initialize all vector first, since we access
+    //both matrix[i, j] and matrix[j, i] in the same time.
+    matrix[i] = Vdouble(nbVectors, 0);
+  }
+  for(unsigned int i = 0; i < nbVectors; i++)
   {
-		matrix[i][i] = 1;
-		for(unsigned int j = i + 1; j < nbVectors; j++)
+    matrix[i][i] = 1;
+    for(unsigned int j = i + 1; j < nbVectors; j++)
     {
-			matrix[i][j] = matrix[j][i] = VectorTools::cor<double, double>(vectors[i], vectors[j]);
-		}
-	}
-	return matrix;
+      matrix[i][j] = matrix[j][i] = VectorTools::cor<double, double>(vectors[i], vectors[j]);
+    }
+  }
+  return matrix;
 }
 
 /******************************************************************************/
 
 VVdouble AnalysisTools::computeCorrelationMatrix(
-	const VVdouble & vectors1,
-	const VVdouble & vectors2,
-	bool independantComparisons
+  const VVdouble & vectors1,
+  const VVdouble & vectors2,
+  bool independantComparisons
 ) throw (DimensionException)
 {
-	unsigned int nbVectors1 = vectors1.size();
-	unsigned int nbVectors2 = vectors2.size();
-	if(independantComparisons && nbVectors1 != nbVectors2)
+  unsigned int nbVectors1 = vectors1.size();
+  unsigned int nbVectors2 = vectors2.size();
+  if(independantComparisons && nbVectors1 != nbVectors2)
   {
-		throw DimensionException(
-			string("AnalysisTools::computeCorrelationMatrix.\n") +
-			string("When performing independant comparisons, ") +
-			string("the two datasets must have the same length."),
-			nbVectors1,
-			nbVectors2
-		);
-	}
-	VVdouble matrix = VVdouble(nbVectors1);
-	for(unsigned int i = 0; i < nbVectors1; i++)
+    throw DimensionException(
+      string("AnalysisTools::computeCorrelationMatrix.\n") +
+      string("When performing independant comparisons, ") +
+      string("the two datasets must have the same length."),
+      nbVectors1,
+      nbVectors2
+    );
+  }
+  VVdouble matrix = VVdouble(nbVectors1);
+  for(unsigned int i = 0; i < nbVectors1; i++)
   {
-		//Must initialize all vector first, since we access
-		matrix[i] = Vdouble(nbVectors2, 0);
-	}
-	for(unsigned int i = 0; i < nbVectors1; i++)
+    //Must initialize all vector first, since we access
+    matrix[i] = Vdouble(nbVectors2, 0);
+  }
+  for(unsigned int i = 0; i < nbVectors1; i++)
   {
-		unsigned int begin = independantComparisons ? i : 0;
-		unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
-		for(unsigned int j = begin; j < end; j++) 
+    unsigned int begin = independantComparisons ? i : 0;
+    unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
+    for(unsigned int j = begin; j < end; j++) 
     {
-			matrix[i][j] = VectorTools::cor<double, double>(vectors1[i], vectors2[j]);
-		}
-	}
-	return matrix;
+      matrix[i][j] = VectorTools::cor<double, double>(vectors1[i], vectors2[j]);
+    }
+  }
+  return matrix;
 }
 
 /******************************************************************************/
 
 VVdouble AnalysisTools::computeCovarianceMatrix(const VVdouble & vectors)
 {
-	unsigned int nbVectors = vectors.size();
-	VVdouble matrix = VVdouble(nbVectors);
-	for(unsigned int i = 0; i < nbVectors; i++)
+  unsigned int nbVectors = vectors.size();
+  VVdouble matrix = VVdouble(nbVectors);
+  for(unsigned int i = 0; i < nbVectors; i++)
   {
-		//Must initialize all vector first, since we access
-		//both matrix[i, j] and matrix[j, i] in the same time.
-		matrix[i] = Vdouble(nbVectors, 0);
-	}
-	for(unsigned int i = 0; i < nbVectors; i++)
+    //Must initialize all vector first, since we access
+    //both matrix[i, j] and matrix[j, i] in the same time.
+    matrix[i] = Vdouble(nbVectors, 0);
+  }
+  for(unsigned int i = 0; i < nbVectors; i++)
   {
-		matrix[i][i] = VectorTools::var<double, double>(vectors[i]);
-		for(unsigned int j = i + 1; j < nbVectors; j++)
+    matrix[i][i] = VectorTools::var<double, double>(vectors[i]);
+    for(unsigned int j = i + 1; j < nbVectors; j++)
     {
-			matrix[i][j] = matrix[j][i] = VectorTools::cov<double, double>(vectors[i], vectors[j]);
-		}
-	}
-	return matrix;
+      matrix[i][j] = matrix[j][i] = VectorTools::cov<double, double>(vectors[i], vectors[j]);
+    }
+  }
+  return matrix;
 }
 
 /******************************************************************************/
 
 VVdouble AnalysisTools::computeCovarianceMatrix(
-	const VVdouble & vectors1,
-	const VVdouble & vectors2,
-	bool independantComparisons
+  const VVdouble & vectors1,
+  const VVdouble & vectors2,
+  bool independantComparisons
 ) throw (DimensionException)
 {
-	unsigned int nbVectors1 = vectors1.size();
-	unsigned int nbVectors2 = vectors2.size();
-	if(independantComparisons && nbVectors1 != nbVectors2)
+  unsigned int nbVectors1 = vectors1.size();
+  unsigned int nbVectors2 = vectors2.size();
+  if(independantComparisons && nbVectors1 != nbVectors2)
   {
-		throw DimensionException(
-			string("AnalysisTools::computeCovarianceMatrix.\n") +
-			string("When performing independant comparisons, ") +
-			string("the two datasets must have the same length."),
-			nbVectors1,
-			nbVectors2
-		);
-	}
-	VVdouble matrix = VVdouble(nbVectors1);
-	for(unsigned int i = 0; i < nbVectors1; i++)
+    throw DimensionException(
+      string("AnalysisTools::computeCovarianceMatrix.\n") +
+      string("When performing independant comparisons, ") +
+      string("the two datasets must have the same length."),
+      nbVectors1,
+      nbVectors2
+    );
+  }
+  VVdouble matrix = VVdouble(nbVectors1);
+  for(unsigned int i = 0; i < nbVectors1; i++)
   {
-		//Must initialize all vector first, since we access
-		matrix[i] = Vdouble(nbVectors2, 0);
-	}
-	for(unsigned int i = 0; i < nbVectors1; i++)
+    //Must initialize all vector first, since we access
+    matrix[i] = Vdouble(nbVectors2, 0);
+  }
+  for(unsigned int i = 0; i < nbVectors1; i++)
   {
-		unsigned int begin = independantComparisons ? i : 0;
-		unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
-		for(unsigned int j = begin; j < end; j++)
+    unsigned int begin = independantComparisons ? i : 0;
+    unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
+    for(unsigned int j = begin; j < end; j++)
     {
-			matrix[i][j] = VectorTools::cov<double, double>(vectors1[i], vectors2[j]);
-		}
-	}
-	return matrix;
+      matrix[i][j] = VectorTools::cov<double, double>(vectors1[i], vectors2[j]);
+    }
+  }
+  return matrix;
 }
 
 /******************************************************************************/
 
 Vdouble AnalysisTools::computeNorms(const ProbabilisticSubstitutionMapping & mapping)
 {
-	unsigned int nbVectors = mapping.getNumberOfSites();
-	Vdouble vect(nbVectors);
-	for(unsigned int i = 0; i < nbVectors; i++) vect[i] = VectorTools::norm<double, double>(mapping[i]);
-	return vect;
+  unsigned int nbVectors = mapping.getNumberOfSites();
+  Vdouble vect(nbVectors);
+  for(unsigned int i = 0; i < nbVectors; i++)
+    vect[i] = VectorTools::norm<double, double>(mapping[i]);
+  return vect;
 }
 
 /******************************************************************************/
 
 void AnalysisTools::writeMatrix(
-	const VVdouble & matrix,
-	const SiteContainer & sites,
-	ostream & out)
+  const VVdouble & matrix,
+  const SiteContainer & sites,
+  ostream & out)
 {
-	out << "\tMean";
-	for(unsigned int i = 0; i < matrix.size() - 1; i++) {
-		out << "\tSite" << sites.getSite(i) -> getPosition();
-	}
-	out << endl;
-	for(unsigned int j = 0; j < matrix[0].size(); j++) {
-		if(j == 0) out << "Mean";
-		else out << "Site" << sites.getSite(j - 1) -> getPosition();
-		for(unsigned int i = 0; i < matrix.size(); i++) {
-			out << "\t" << matrix[i][j];
-		}
-		out << endl;
-	}
+  out << "\tMean";
+  for(unsigned int i = 0; i < matrix.size() - 1; i++)
+  {
+    out << "\tSite" << sites.getSite(i)->getPosition();
+  }
+  out << endl;
+  for(unsigned int j = 0; j < matrix[0].size(); j++)
+  {
+    if(j == 0) out << "Mean";
+    else out << "Site" << sites.getSite(j - 1)->getPosition();
+    for(unsigned int i = 0; i < matrix.size(); i++)
+    {
+      out << "\t" << matrix[i][j];
+    }
+    out << endl;
+  }
 }
 
 /******************************************************************************/
 
 void AnalysisTools::writeMatrix(
-	const VVdouble & matrix,
-	const SiteContainer & sites1,
-	const SiteContainer & sites2,
-	ostream & out)
+  const VVdouble & matrix,
+  const SiteContainer & sites1,
+  const SiteContainer & sites2,
+  ostream & out)
 {
-	out << "\tMean";
-	for(unsigned int i = 0; i < matrix.size() - 1; i++) {
-		out << "\tSite" << sites1.getSite(i) -> getPosition();
-	}
-	out << endl;
-	for(unsigned int j = 0; j < matrix[0].size(); j++) {
-		if(j == 0) out << "Mean";
-		else out << "Site" << sites2.getSite(j - 1) -> getPosition();
-		for(unsigned int i = 0; i < matrix.size(); i++) {
-			out << "\t" << matrix[i][j];
-		}
-		out << endl;
-	}
+  out << "\tMean";
+  for(unsigned int i = 0; i < matrix.size() - 1; i++)
+  {
+    out << "\tSite" << sites1.getSite(i)->getPosition();
+  }
+  out << endl;
+  for(unsigned int j = 0; j < matrix[0].size(); j++)
+  {
+    if(j == 0) out << "Mean";
+    else out << "Site" << sites2.getSite(j - 1)->getPosition();
+    for(unsigned int i = 0; i < matrix.size(); i++)
+    {
+      out << "\t" << matrix[i][j];
+    }
+    out << endl;
+  }
 }
 
 /******************************************************************************/
 
 vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
-	const HomogeneousSequenceSimulator & seqSim,
-	const SubstitutionCount & nijt,
-	const Statistic & statistic,
-	const Domain & statDomain,
-	const Domain & rateDomain,
-	unsigned int repCPU,
-	unsigned int repRAM,
-	bool average,
-	bool joint,
-	bool verbose)
-{
-	unsigned int nbClasses = rateDomain.getSize();
-	vector<IntervalData *> id(nbClasses);
-	for(unsigned int i = 0; i < nbClasses; i++)
-  {
-		id[i] = new IntervalData(statDomain, "Null distribution (classe > " + TextTools::toString(rateDomain.getValue(i)) + ")");
-	}
-	for(unsigned int i = 0; i < repCPU; i++)
-  {
-		if(verbose)
-    {
-			*ApplicationTools::message << ".";
-			ApplicationTools::message->flush();
-		}
-		SiteContainer * sites1 = seqSim.simulate(repRAM);
-		SiteContainer * sites2 = seqSim.simulate(repRAM);
-		DRHomogeneousTreeLikelihood * drhtl1 =
-			new DRHomogeneousTreeLikelihood(
-				*seqSim.getTree(),
-				*sites1,
-				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
-				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
-				false, false);
-    drhtl1->initialize();
-		DRHomogeneousTreeLikelihood * drhtl2 =
-			new DRHomogeneousTreeLikelihood(
-				*seqSim.getTree(),
-				*sites2,
-				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
-				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
-				false, false);
-    drhtl2->initialize();
-		//drhtl1->computeTreeLikelihood();
-		//drhtl2->computeTreeLikelihood();
-		Vdouble r1 = drhtl1->getRateWithMaxPostProbOfEachSite();
-		Vdouble r2 = drhtl2->getRateWithMaxPostProbOfEachSite();
-    ProbabilisticSubstitutionMapping * mapping1;
-		ProbabilisticSubstitutionMapping * mapping2;
-		if(average)
-    {
-			if(joint)
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectors(* drhtl1, nijt, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectors(* drhtl2, nijt, false);
-			}
-      else
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(* drhtl1, nijt, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(* drhtl2, nijt, false);
-			}
-		}
-    else
-    {
-			if(joint)
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(* drhtl1, nijt, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(* drhtl2, nijt, false);
-			}
-      else
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(* drhtl1, nijt, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(* drhtl2, nijt, false);
-			}
-		}
-   	for(unsigned int j = 0; j < repRAM; j++)
-    {
-			double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
-			double minR = min(r1[j], r2[j]);
-			//int minRc = min (rc1[j], rc2[j]);
-			//cout << r1[j] << "\t" << r2[j] << "\t" << minR << "\t" << rateDomain.getIndex(minR) << endl;
-			//cout << rc1[j] << "\t" << rc2[j] << "\t" << minRc << "\t" << endl;
-			id[rateDomain.getIndex(minR)]->addValue(stat);
-			//id[minRc] -> addValue(stat);
-		}
-		delete sites1;
-		delete sites2;
-		delete drhtl1;
-		delete drhtl2;
-    delete mapping1;
-    delete mapping2;
-	}
-	return id;
-}
-
-/******************************************************************************/
-
-vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
-	const HomogeneousSequenceSimulator & seqSim1,
-	const HomogeneousSequenceSimulator & seqSim2,
-	const SubstitutionCount & nijt1,
-	const SubstitutionCount & nijt2,
-	const Statistic & statistic,
-	const Domain & statDomain,
+  DRTreeLikelihood& drtl,
+  const SequenceSimulator & seqSim,
+  SubstitutionCount & nijt,
+  const Statistic & statistic,
+  const Domain & statDomain,
   const Domain & rateDomain,
-	unsigned int repCPU,
+  unsigned int repCPU,
   unsigned int repRAM,
-	bool average,
-	bool joint,
-	bool verbose)
+  bool average,
+  bool joint,
+  bool verbose)
 {
   unsigned int nbClasses = rateDomain.getSize();
   vector<IntervalData *> id(nbClasses);
@@ -516,309 +424,356 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
   {
     id[i] = new IntervalData(statDomain, "Null distribution (classe > " + TextTools::toString(rateDomain.getValue(i)) + ")");
   }
-	for(unsigned int i = 0; i < repCPU; i++)
+  for(unsigned int i = 0; i < repCPU; i++)
   {
-		if(verbose)
+    if(verbose)
     {
-			*ApplicationTools::message << ".";
-			ApplicationTools::message->flush();
-		}
-		SiteContainer * sites1 = seqSim1.simulate(repRAM);
-		SiteContainer * sites2 = seqSim2.simulate(repRAM);
-		DRHomogeneousTreeLikelihood * drhtl1 = 
-			new DRHomogeneousTreeLikelihood(
-				*seqSim1.getTree(),
-				*sites1,
-				const_cast<SubstitutionModel *>(seqSim1.getSubstitutionModel()),
-				const_cast<DiscreteDistribution *>(seqSim1.getRateDistribution()),
-        false, false
-			);
-    drhtl1->initialize();
-		DRHomogeneousTreeLikelihood * drhtl2 = 
-			new DRHomogeneousTreeLikelihood(
-				*seqSim2.getTree(),
-				*sites2,
-				const_cast<SubstitutionModel *>(seqSim2.getSubstitutionModel()),
-				const_cast<DiscreteDistribution *>(seqSim2.getRateDistribution()),
-				false, false
-			);
-    drhtl2->initialize();
-    //drhtl1->computeTreeLikelihood();
-    //drhtl2->computeTreeLikelihood();
-    Vdouble r1 = drhtl1->getRateWithMaxPostProbOfEachSite();
-    Vdouble r2 = drhtl2->getRateWithMaxPostProbOfEachSite();
+      *ApplicationTools::message << ".";
+      ApplicationTools::message->flush();
+    }
 
+    SiteContainer * sites1 = seqSim.simulate(repRAM);
+    drtl.setData(*sites1);
+    drtl.initialize();
+    Vdouble pr1 = drtl.getPosteriorRateOfEachSite();
     ProbabilisticSubstitutionMapping * mapping1;
-		ProbabilisticSubstitutionMapping * mapping2;
-		if(average)
+    if(average)
     {
-			if(joint)
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectors(* drhtl1, nijt1, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectors(* drhtl2, nijt2, false);
-			}
+      if(joint)
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
       else
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(* drhtl1, nijt1, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(* drhtl2, nijt2, false);
-			}
-		}
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, nijt, false);
+    }
     else
     {
-			if(joint)
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(* drhtl1, nijt1, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(* drhtl2, nijt2, false);
-			}
+      if(joint)
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, nijt, false);
       else
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(* drhtl1, nijt1, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(* drhtl2, nijt2, false);
-			}
-		}
-    
-		for(unsigned int j = 0; j < repRAM; j++)
-    {
-      double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
-      double minR = min(r1[j], r2[j]);
-      id[rateDomain.getIndex(minR)] -> addValue(stat);
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, nijt, false);
     }
     delete sites1;
+    SiteContainer * sites2 = seqSim.simulate(repRAM);
+    drtl.setData(*sites2);
+    drtl.initialize();
+    Vdouble pr2 = drtl.getPosteriorRateOfEachSite();
+    ProbabilisticSubstitutionMapping * mapping2;
+    if(average)
+    {
+      if(joint)
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
+      else
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, nijt, false);
+    }
+    else
+    {
+      if(joint)
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, nijt, false);
+      else
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, nijt, false);
+    }
     delete sites2;
-		delete drhtl1;
-		delete drhtl2;
+
+     for(unsigned int j = 0; j < repRAM; j++)
+    {
+      double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
+      double minR = min(pr1[j], pr2[j]);
+      //int minRc = min (rc1[j], rc2[j]);
+      //cout << r1[j] << "\t" << r2[j] << "\t" << minR << "\t" << rateDomain.getIndex(minR) << endl;
+      //cout << rc1[j] << "\t" << rc2[j] << "\t" << minRc << "\t" << endl;
+      id[rateDomain.getIndex(minR)]->addValue(stat);
+      //id[minRc] -> addValue(stat);
+    }
     delete mapping1;
     delete mapping2;
-	}
-	return id;
+  }
+  return id;
+}
+
+/******************************************************************************/
+
+vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
+  DRTreeLikelihood& drtl1,
+  DRTreeLikelihood& drtl2,
+  const SequenceSimulator & seqSim1,
+  const SequenceSimulator & seqSim2,
+  SubstitutionCount & nijt1,
+  SubstitutionCount & nijt2,
+  const Statistic & statistic,
+  const Domain & statDomain,
+  const Domain & rateDomain,
+  unsigned int repCPU,
+  unsigned int repRAM,
+  bool average,
+  bool joint,
+  bool verbose)
+{
+  unsigned int nbClasses = rateDomain.getSize();
+  vector<IntervalData *> id(nbClasses);
+  for(unsigned int i = 0; i < nbClasses; i++)
+  {
+    id[i] = new IntervalData(statDomain, "Null distribution (classe > " + TextTools::toString(rateDomain.getValue(i)) + ")");
+  }
+  for(unsigned int i = 0; i < repCPU; i++)
+  {
+    if(verbose)
+    {
+      *ApplicationTools::message << ".";
+      ApplicationTools::message->flush();
+    }
+
+    SiteContainer * sites1 = seqSim1.simulate(repRAM);
+    drtl1.setData(*sites1);
+    drtl1.initialize();
+    Vdouble pr1 = drtl1.getPosteriorRateOfEachSite();
+    ProbabilisticSubstitutionMapping * mapping1;
+    if(average)
+    {
+      if(joint)
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectors(drtl1, nijt1, false);
+      else
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl1, nijt1, false);
+    }
+    else
+    {
+      if(joint)
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl1, nijt1, false);
+      else
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl1, nijt1, false);
+    }
+    delete sites1;
+
+    SiteContainer * sites2 = seqSim2.simulate(repRAM);
+    drtl2.setData(*sites2);
+    drtl2.initialize();
+    Vdouble pr2 = drtl2.getPosteriorRateOfEachSite();
+    ProbabilisticSubstitutionMapping * mapping2;
+    if(average)
+    {
+      if(joint)
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectors(drtl2, nijt2, false);
+      else
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl2, nijt2, false);
+    }
+    else
+    {
+      if(joint)
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl2, nijt2, false);
+      else
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl2, nijt2, false);
+    }
+    delete sites2;
+    
+    for(unsigned int j = 0; j < repRAM; j++)
+    {
+      double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
+      double minR = min(pr1[j], pr2[j]);
+      id[rateDomain.getIndex(minR)]->addValue(stat);
+    }
+    delete mapping1;
+    delete mapping2;
+  }
+  return id;
 }
 
 
 /******************************************************************************/
 
 void AnalysisTools::getNullDistributionIntraDR(
-	const HomogeneousSequenceSimulator & seqSim,
-	const SubstitutionCount & nijt,
-	const Statistic & statistic,
-	ostream & out,
-	unsigned int repCPU,
-	unsigned int repRAM,
-	bool average,
-	bool joint,
-	bool verbose)
+  DRTreeLikelihood & drtl,
+  const SequenceSimulator & seqSim,
+  SubstitutionCount & nijt,
+  const Statistic & statistic,
+  ostream & out,
+  unsigned int repCPU,
+  unsigned int repRAM,
+  bool average,
+  bool joint,
+  bool verbose)
 {
-	// Write header line:
-	out << "statistic\tmin.rc\tmin.pr\tNmin" << endl;
-	for(unsigned int i = 0; i < repCPU; i++)
+  // Write header line:
+  out << "statistic\tmin.rc\tmin.pr\tNmin" << endl;
+  for(unsigned int i = 0; i < repCPU; i++)
   {
-		if(verbose)
+    if(verbose)
     {
-			*ApplicationTools::message << ".";
-			ApplicationTools::message->flush();
-		}
-		//cout << "Creating datasets..." << endl;
-		SiteContainer * sites1 = seqSim.simulate(repRAM);
-		SiteContainer * sites2 = seqSim.simulate(repRAM);
-		//cout << "Computing likelihoods..." << endl;
-		DRHomogeneousTreeLikelihood * drhtl1 =
-			new DRHomogeneousTreeLikelihood(
-				*seqSim.getTree(),
-				*sites1,
-				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
-				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
-				false, false
-			);
-    drhtl1->initialize();
-		DRHomogeneousTreeLikelihood * drhtl2 =
-			new DRHomogeneousTreeLikelihood(
-				*seqSim.getTree(),
-				*sites2,
-				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
-				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
-				false, false
-			);
-    drhtl2->initialize();
-		//drhtl1->computeTreeLikelihood();
-		//drhtl2->computeTreeLikelihood();
-		//cout << "Computing posterior rates..." << endl;
-		vector<unsigned int> rc1 = drhtl1->getRateClassWithMaxPostProbOfEachSite();
-		vector<unsigned int> rc2 = drhtl2->getRateClassWithMaxPostProbOfEachSite();
-		Vdouble pr1 = drhtl1->getPosteriorRateOfEachSite();
-		Vdouble pr2 = drhtl2->getPosteriorRateOfEachSite();
-		
-		//cout << "Computing vectors..." << endl;
+      *ApplicationTools::message << ".";
+      ApplicationTools::message->flush();
+    }
+    
+    SiteContainer * sites1 = seqSim.simulate(repRAM);
+    drtl.setData(*sites1);
+    drtl.initialize();
+    vector<unsigned int> rc1 = drtl.getRateClassWithMaxPostProbOfEachSite();
+    Vdouble pr1 = drtl.getPosteriorRateOfEachSite();
+    
     ProbabilisticSubstitutionMapping * mapping1;
-		ProbabilisticSubstitutionMapping * mapping2;
-		if(average)
+    if(average)
     {
-			if(joint)
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectors(* drhtl1, nijt, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectors(* drhtl2, nijt, false);
-			}
+      if(joint)
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
       else
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(* drhtl1, nijt, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(* drhtl2, nijt, false);
-			}
-		}
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, nijt, false);
+    }
     else
     {
-			if(joint)
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(* drhtl1, nijt, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(* drhtl2, nijt, false);
-			}
+      if(joint)
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, nijt, false);
       else
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(* drhtl1, nijt, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(* drhtl2, nijt, false);
-			}
-		}
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, nijt, false);
+    }
+    delete sites1;
     Vdouble norm1 = computeNorms(*mapping1);
-    Vdouble norm2 = computeNorms(*mapping2);
-   	//cout << "Computing statistics..." << endl;
-		for(unsigned int j = 0; j < repRAM; j++)
+     
+    SiteContainer * sites2 = seqSim.simulate(repRAM);
+    drtl.setData(*sites2);
+    drtl.initialize();
+    vector<unsigned int> rc2 = drtl.getRateClassWithMaxPostProbOfEachSite();
+    Vdouble pr2 = drtl.getPosteriorRateOfEachSite();
+    
+    ProbabilisticSubstitutionMapping * mapping2;
+    if(average)
     {
-			double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
-			out << stat << "\t" << std::min(rc1[j], rc2[j]) << "\t" << std::min(pr1[j], pr2[j]) << "\t" << std::min(norm1[j], norm2[j]) << endl;
-		}
-		//cout << "Freeing memory." << endl;
-		delete sites1;
-		delete sites2;
-		delete drhtl1;
-		delete drhtl2;
+      if(joint)
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
+      else
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, nijt, false);
+    }
+    else
+    {
+      if(joint)
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, nijt, false);
+      else
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, nijt, false);
+    }
+    delete sites1;
+    Vdouble norm2 = computeNorms(*mapping2);
+      
+    for(unsigned int j = 0; j < repRAM; j++)
+    {
+      double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
+      out << stat << "\t" << std::min(rc1[j], rc2[j]) << "\t" << std::min(pr1[j], pr2[j]) << "\t" << std::min(norm1[j], norm2[j]) << endl;
+    }
+    //cout << "Freeing memory." << endl;
     delete mapping1;
     delete mapping2;
-	}
+  }
 }
 
 /******************************************************************************/
 
 void AnalysisTools::getNullDistributionInterDR(
-	const HomogeneousSequenceSimulator & seqSim1,
-	const HomogeneousSequenceSimulator & seqSim2,
-	const SubstitutionCount & nijt1,
-	const SubstitutionCount & nijt2,
-	const Statistic & statistic,
-	ostream & out,
-	unsigned int repCPU,
-	unsigned int repRAM,
-	bool average,
-	bool joint,
-	bool verbose)
+  DRTreeLikelihood & drtl1,
+  DRTreeLikelihood & drtl2,
+  const SequenceSimulator & seqSim1,
+  const SequenceSimulator & seqSim2,
+  SubstitutionCount & nijt1,
+  SubstitutionCount & nijt2,
+  const Statistic & statistic,
+  ostream & out,
+  unsigned int repCPU,
+  unsigned int repRAM,
+  bool average,
+  bool joint,
+  bool verbose)
 {
-	// Write header line:
-	out << "statistic\tmin.rc\tmin.pr\tNmin" << endl;
-	for(unsigned int i = 0; i < repCPU; i++)
+  // Write header line:
+  out << "statistic\tmin.rc\tmin.pr\tNmin" << endl;
+  for(unsigned int i = 0; i < repCPU; i++)
   {
-		if(verbose)
+    if(verbose)
     {
-			*ApplicationTools::message << ".";
-			ApplicationTools::message->flush();
-		}
-		SiteContainer * sites1 = seqSim1.simulate(repRAM);
-		SiteContainer * sites2 = seqSim2.simulate(repRAM);
-		DRHomogeneousTreeLikelihood * drhtl1 =
-			new DRHomogeneousTreeLikelihood(
-				*seqSim1.getTree(),
-				*sites1,
-				const_cast<SubstitutionModel *>(seqSim1.getSubstitutionModel()),
-				const_cast<DiscreteDistribution *>(seqSim1.getRateDistribution()),
-				false, false
-			);
-    drhtl1->initialize();
-		DRHomogeneousTreeLikelihood * drhtl2 =
-			new DRHomogeneousTreeLikelihood(
-				*seqSim2.getTree(),
-				*sites2,
-				const_cast<SubstitutionModel *>(seqSim2.getSubstitutionModel()),
-				const_cast<DiscreteDistribution *>(seqSim2.getRateDistribution()),
-				false, false
-			);
-    drhtl2->initialize();
-		//drhtl1->computeTreeLikelihood();
-		//drhtl2->computeTreeLikelihood();
-		vector<unsigned int> rc1 = drhtl1->getRateClassWithMaxPostProbOfEachSite();
-		vector<unsigned int> rc2 = drhtl2->getRateClassWithMaxPostProbOfEachSite();
-		Vdouble pr1 = drhtl1->getPosteriorRateOfEachSite();
-		Vdouble pr2 = drhtl2->getPosteriorRateOfEachSite();
-		
+      *ApplicationTools::message << ".";
+      ApplicationTools::message->flush();
+    }
+
+    SiteContainer * sites1 = seqSim1.simulate(repRAM);
+    drtl1.setData(*sites1);
+    drtl1.initialize();
+    vector<unsigned int> rc1 = drtl1.getRateClassWithMaxPostProbOfEachSite();
+    Vdouble pr1 = drtl1.getPosteriorRateOfEachSite();
+ 
     ProbabilisticSubstitutionMapping * mapping1;
-		ProbabilisticSubstitutionMapping * mapping2;
-		if(average)
+    if(average)
     {
-			if(joint)
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectors(* drhtl1, nijt1, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectors(* drhtl2, nijt2, false);
-			}
+      if(joint)
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectors(drtl1, nijt1, false);
       else
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(* drhtl1, nijt1, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(* drhtl2, nijt2, false);
-			}
-		}
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl1, nijt1, false);
+    }
     else
     {
-			if(joint)
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(* drhtl1, nijt1, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(* drhtl2, nijt2, false);
-			}
+      if(joint)
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl1, nijt1, false);
       else
-      {
-				mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(* drhtl1, nijt1, false);
-				mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(* drhtl2, nijt2, false);
-			}
-		}
+        mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl1, nijt1, false);
+    }
+    delete sites1;
     Vdouble norm1 = computeNorms(*mapping1);
-    Vdouble norm2 = computeNorms(*mapping2);
-   	for(unsigned int j = 0; j < repRAM; j++)
-    {
-			double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
-			out << stat << "\t" << std::min(rc1[j], rc2[j]) << "\t" << std::min(pr1[j], pr2[j]) << "\t" << std::min(norm1[j], norm2[j]) << endl;
-		}
 
-		delete sites1;
-		delete sites2;
-		delete drhtl1;
-		delete drhtl2;
+    SiteContainer * sites2 = seqSim2.simulate(repRAM);
+    drtl2.setData(*sites2);
+    drtl2.initialize();
+    vector<unsigned int> rc2 = drtl2.getRateClassWithMaxPostProbOfEachSite();
+    Vdouble pr2 = drtl2.getPosteriorRateOfEachSite();
+    ProbabilisticSubstitutionMapping * mapping2;
+    if(average)
+    {
+      if(joint)
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectors(drtl2, nijt2, false);
+      else
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl2, nijt2, false);
+    }
+    else
+    {
+      if(joint)
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl2, nijt2, false);
+      else
+        mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl2, nijt2, false);
+    }
+    delete sites2;
+    Vdouble norm2 = computeNorms(*mapping2);
+
+    for(unsigned int j = 0; j < repRAM; j++)
+    {
+      double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
+      out << stat << "\t" << std::min(rc1[j], rc2[j]) << "\t" << std::min(pr1[j], pr2[j]) << "\t" << std::min(norm1[j], norm2[j]) << endl;
+    }
+
     delete mapping1;
     delete mapping2;
-	}
+  }
 }
 
 /******************************************************************************/
 
 void AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(
-	const HomogeneousSequenceSimulator & seqSim,
-	const Statistic & statistic,
-	ostream & out,
-	unsigned int rep,
-	bool verbose)
+  const DetailedSiteSimulator & seqSim,
+  const Statistic & statistic,
+  ostream & out,
+  unsigned int rep,
+  bool verbose)
 {
-	// Write header line:
-	out << "statistic\tr1\tr2" << endl;
-	unsigned int c = 0;
-	for(unsigned int i = 0; i < rep; i++)
+  // Write header line:
+  out << "statistic\tr1\tr2" << endl;
+  unsigned int c = 0;
+  for(unsigned int i = 0; i < rep; i++)
   {
-		if(c == 1000) { cout << "."; cout.flush(); c = 0; }
-		c++;
-		RASiteSimulationResult * hssr1 = 
-			dynamic_cast<RASiteSimulationResult *>(seqSim.dSimulate());
-		vector<double> vector1 = hssr1->getSubstitutionVector();
-		double         rate1   = hssr1->getRate();
-		delete hssr1;
-		RASiteSimulationResult * hssr2 = 
-			dynamic_cast<RASiteSimulationResult *>(seqSim.dSimulate());
-		vector<double> vector2 = hssr2->getSubstitutionVector();
-		double         rate2   = hssr2->getRate(); 
-		delete hssr2;
+    if(c == 1000) { cout << "."; cout.flush(); c = 0; }
+    c++;
+    RASiteSimulationResult * hssr1 = 
+      dynamic_cast<RASiteSimulationResult *>(seqSim.dSimulate());
+    vector<double> vector1 = hssr1->getSubstitutionVector();
+    double         rate1   = hssr1->getRate();
+    delete hssr1;
+    RASiteSimulationResult * hssr2 = 
+      dynamic_cast<RASiteSimulationResult *>(seqSim.dSimulate());
+    vector<double> vector2 = hssr2->getSubstitutionVector();
+    double         rate2   = hssr2->getRate(); 
+    delete hssr2;
 
-		double stat = statistic.getValueForPair(vector1, vector2);
-		out << stat << "\t" << rate1 << "\t" << rate2 << endl;
-	}
+    double stat = statistic.getValueForPair(vector1, vector2);
+    out << stat << "\t" << rate1 << "\t" << rate2 << endl;
+  }
 }
 
 /******************************************************************************/

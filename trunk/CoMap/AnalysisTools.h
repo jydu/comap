@@ -51,13 +51,18 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Seq/SiteContainer.h>
 
 // From PhylLib:
-#include <Phyl/HomogeneousSequenceSimulator.h>
+#include <Phyl/SequenceSimulator.h>
+#include <Phyl/DetailedSiteSimulator.h>
 #include <Phyl/SubstitutionCount.h>
 #include <Phyl/ProbabilisticSubstitutionMapping.h>
+#include <Phyl/DRTreeLikelihood.h>
+
+using namespace bpp;
 
 // From the stl:
 #include <iostream>
 #include <vector>
+
 using namespace std;
 
 /**
@@ -213,8 +218,9 @@ class AnalysisTools
 		/**********************************************************************/
 		
 		static vector<IntervalData *> getNullDistributionIntraDR(
-			const HomogeneousSequenceSimulator & seqSim,
-			const SubstitutionCount & nijt,
+      DRTreeLikelihood & drtl,
+			const SequenceSimulator & seqSim,
+			SubstitutionCount & nijt,
 			const Statistic & statistic,
 			const Domain & statDomain,
 			const Domain & rateDomain,
@@ -225,10 +231,12 @@ class AnalysisTools
 			bool verbose = true);
 
 		static vector<IntervalData *> getNullDistributionInterDR(
-			const HomogeneousSequenceSimulator & seqSim1,
-			const HomogeneousSequenceSimulator & seqSim2,
-			const SubstitutionCount & nijt1,
-			const SubstitutionCount & nijt2,
+      DRTreeLikelihood & drtl1,
+      DRTreeLikelihood & drtl2,
+			const SequenceSimulator & seqSim1,
+			const SequenceSimulator & seqSim2,
+			SubstitutionCount & nijt1,
+			SubstitutionCount & nijt2,
 			const Statistic & statistic,
 			const Domain & statDomain,
 			const Domain & rateDomain,
@@ -239,8 +247,9 @@ class AnalysisTools
 			bool verbose = true);
 
 		static void getNullDistributionIntraDR(
-			const HomogeneousSequenceSimulator & seqSim,
-			const SubstitutionCount & nijt,
+      DRTreeLikelihood & drtl,
+			const SequenceSimulator & seqSim,
+			SubstitutionCount & nijt,
 			const Statistic & statistic,
 			ostream & out,
 			unsigned int repCPU,
@@ -250,10 +259,12 @@ class AnalysisTools
 			bool verbose = true);
 			
 		static void getNullDistributionInterDR(
-			const HomogeneousSequenceSimulator & seqSim1,
-			const HomogeneousSequenceSimulator & seqSim2,
-			const SubstitutionCount & nijt1,
-			const SubstitutionCount & nijt2,
+      DRTreeLikelihood & drtl1,
+      DRTreeLikelihood & drtl2,
+			const SequenceSimulator & seqSim1,
+			const SequenceSimulator & seqSim2,
+			SubstitutionCount & nijt1,
+			SubstitutionCount & nijt2,
 			const Statistic & statistic,
 			ostream & out,
 			unsigned int repCPU,
@@ -263,7 +274,7 @@ class AnalysisTools
 			bool verbose = true);
 
 		static void getNullDistributionIntraWithoutReestimatingCounts(
-			const HomogeneousSequenceSimulator & seqSim,
+			const DetailedSiteSimulator & seqSim,
 			const Statistic & statistic,
 			ostream & out,
 			unsigned int rep,

@@ -47,12 +47,16 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From Phylib:
 #include <Phyl/TreeTemplate.h>
-#include <Phyl/HomogeneousSequenceSimulator.h>
+#include <Phyl/DRTreeLikelihood.h>
+#include <Phyl/SequenceSimulator.h>
 #include <Phyl/AgglomerativeDistanceMethod.h>
 #include <Phyl/SubstitutionCount.h>
 #include <Phyl/ProbabilisticSubstitutionMapping.h>
 
-class Group: public vector<string>
+using namespace bpp;
+
+class Group:
+  public vector<string>
 {
   protected:
     double _height;
@@ -147,8 +151,9 @@ class ClusterTools
     static vector<Group> getGroupsWithSize(const TreeTemplate<Node> & tree, unsigned int size);
     
     static void computeGlobalDistanceDistribution(
-        const HomogeneousSequenceSimulator & simulator,
-	      const SubstitutionCount & nijt,
+        DRTreeLikelihood & drtl,
+        const SequenceSimulator & simulator,
+	      SubstitutionCount & nijt,
         const Distance & distance,
         AgglomerativeDistanceMethod & clustering,
         const vector<double> & scales,

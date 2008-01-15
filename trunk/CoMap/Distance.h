@@ -48,14 +48,16 @@ knowledge of the CeCILL license and that you accept its terms.
 // From NumCalc:
 #include <NumCalc/VectorExceptions.h>
 #include <NumCalc/VectorTools.h>
-using namespace VectorOperators;
 
 // From PhylLib:
 #include <Phyl/Node.h>
 #include <Phyl/ProbabilisticSubstitutionMapping.h>
 
+using namespace bpp;
+
 // From the STL:
 #include <cmath>
+
 using namespace std;
 
 /**
