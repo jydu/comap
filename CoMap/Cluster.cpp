@@ -41,7 +41,6 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From NumCalc:
 #include <NumCalc/VectorTools.h>
-using namespace VectorOperators; 
 
 // From PhylLib:
 #include <Phyl/NodeTemplate.h>
@@ -51,6 +50,7 @@ using namespace VectorOperators;
 // From the STL:
 #include <cmath>
 #include <iostream>
+
 using namespace std;
 	
 const string SimpleClustering::COMPLETE = "Complete"; 

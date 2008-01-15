@@ -40,9 +40,10 @@ knowledge of the CeCILL license and that you accept its terms.
 // From the STL:
 
 #include <iostream>
-using namespace std;
 #include <cstdlib>
 #include <stdexcept>
+
+using namespace std;
 
 // From Utils:
 #include <Utils/AttributesTools.h>
@@ -58,12 +59,15 @@ using namespace std;
 
 // From PhylLib:
 #include <Phyl/PhylogeneticsApplicationTools.h>
-#include <Phyl/HomogeneousTreeLikelihood.h>
+#include <Phyl/HomogeneousSequenceSimulator.h>
+#include <Phyl/NonHomogeneousSequenceSimulator.h>
 #include <Phyl/MutationProcess.h>
 #include <Phyl/RASTools.h>
 #include <Phyl/PhylipDistanceMatrixFormat.h>
 #include <Phyl/AgglomerativeDistanceMethod.h>
 #include <Phyl/Newick.h>
+
+using namespace bpp;
 
 // CoMap's include files:
 #include "CoETools.h"
@@ -104,7 +108,7 @@ int main(int argc, char *argv[])
 	cout << endl;
 	cout << endl;
 	cout << "***********************************************************" << endl;
-	cout << "* This is CoMap       version 1.3.0      date: 05/08/07 *" << endl;
+	cout << "* This is CoMap        version 1.3.0       date: 05/08/07 *" << endl;
 	cout << "*     A C++ shell program to detect co-evolving sites.    *" << endl;
 	cout << "***********************************************************" << endl;
 	cout << endl;
@@ -162,9 +166,10 @@ int main(int argc, char *argv[])
 	Alphabet *alphabet1;
 	VectorSiteContainer *allSites1, *sites1;
 	SubstitutionModel *model1;
+	SubstitutionModelSet *modelSet1;
 	DiscreteDistribution *rDist1;
-	DRHomogeneousTreeLikelihood *tl1;
-	CoETools::readData(tree1, alphabet1, allSites1, sites1, model1, rDist1, tl1, params, "");
+	DRTreeLikelihood *tl1;
+	CoETools::readData(tree1, alphabet1, allSites1, sites1, model1, modelSet1, rDist1, tl1, params, "");
   
   bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", params, false, "", true, false);
 	ApplicationTools::displayResult("Rate distribution for simulations", (continuousSim ? "continuous" : "discrete"));
@@ -172,22 +177,23 @@ int main(int argc, char *argv[])
 	ApplicationTools::displayMessage("\n\n-*- Get substitution vectors -*-\n");
 
 	// Building a simulator object:
-	HomogeneousSequenceSimulator seqSim1(model1, rDist1, tree1);
-  seqSim1.enableContinuousRates(continuousSim);
+  SequenceSimulator* seqSim1 = NULL;
+  if(modelSet1)
+  {
+    seqSim1 = new NonHomogeneousSequenceSimulator(modelSet1, rDist1, tree1);
+    dynamic_cast<NonHomogeneousSequenceSimulator *>(seqSim1)->enableContinuousRates(continuousSim);
+  }
+  else
+  {
+    seqSim1 = new HomogeneousSequenceSimulator(model1, rDist1, tree1);
+    dynamic_cast<HomogeneousSequenceSimulator *>(seqSim1)->enableContinuousRates(continuousSim);
+  }
 
 	// Getting the substitutions count function:
 	SubstitutionCount* substitutionCount1 = CoETools::getSubstitutionCount(alphabet1, model1, rDist1, params);
 		
 	// Getting the substitution vectors:
-	ProbabilisticSubstitutionMapping * mapping1 = CoETools::getVectors(
-		alphabet1,
-		* tree1,
-		* sites1,
-		* allSites1,
-		* model1,
-		* rDist1,
-		* substitutionCount1,
-		params);
+	ProbabilisticSubstitutionMapping* mapping1 = CoETools::getVectors(*tl1, *substitutionCount1, *sites1, params);
 
   string analysis = ApplicationTools::getStringParameter("analysis", params, "pairwise");
   ApplicationTools::displayResult("Analysis type", analysis);
@@ -221,31 +227,32 @@ int main(int argc, char *argv[])
 		  Alphabet *alphabet2;
 		  VectorSiteContainer *allSites2, *sites2;
 		  SubstitutionModel *model2;
+		  SubstitutionModelSet *modelSet2;
 		  DiscreteDistribution *rDist2;
-		  DRHomogeneousTreeLikelihood *tl2;
+		  DRTreeLikelihood *tl2;
 		  ApplicationTools::displayMessage("\nLoading second dataset...\n");
-		  CoETools::readData(tree2, alphabet2, allSites2, sites2, model2, rDist2, tl2, params, "2");
+		  CoETools::readData(tree2, alphabet2, allSites2, sites2, model2, modelSet2, rDist2, tl2, params, "2");
 
 		  ApplicationTools::displayMessage("\n... and get its substitution vectors.\n");
 		
 		  // Building a simulator object:
-		  HomogeneousSequenceSimulator seqSim2(model2, rDist2, tree2);
-      seqSim2.enableContinuousRates(continuousSim);
+      SequenceSimulator* seqSim2 = NULL;
+      if(modelSet2)
+      {
+        seqSim2 = new NonHomogeneousSequenceSimulator(modelSet2, rDist2, tree2);
+        dynamic_cast<NonHomogeneousSequenceSimulator *>(seqSim2)->enableContinuousRates(continuousSim);
+      }
+      else
+      {
+        seqSim2 = new HomogeneousSequenceSimulator(model2, rDist2, tree2);
+        dynamic_cast<HomogeneousSequenceSimulator *>(seqSim2)->enableContinuousRates(continuousSim);
+      }
 
 		  // Getting the substitutions count function:
 		  SubstitutionCount* substitutionCount2 = CoETools::getSubstitutionCount(alphabet2, model2, rDist2, params);
 		
 		  // Getting the substitution vectors:
-		  ProbabilisticSubstitutionMapping * mapping2 = CoETools::getVectors(
-			  alphabet2,
-			  * tree2,
-			  * sites2,
-			  * allSites2,
-			  * model2,
-			  * rDist2,
-			  * substitutionCount2,
-			  params,
-			  "2");
+		  ProbabilisticSubstitutionMapping * mapping2 = CoETools::getVectors(*tl2, *substitutionCount2, *sites2, params, "2");
 		
 	  	ApplicationTools::displayMessage("\n\n-*- Compute statistics -*-\n");
 		
@@ -264,23 +271,31 @@ int main(int argc, char *argv[])
 			  *statistic,
 			  params);
 			
-		  if(computeNullHyp) CoETools::computeInterNullDistribution(
-			  seqSim1,
-			  seqSim2,
-			  *substitutionCount1,
-        *substitutionCount2,
-			  *statistic,
-			  params);
-
 		  CoETools::writeInfos(*sites2, *tl2, params, "2");
+		  
+      //tl2 will be modified after the simulations!
+      if(computeNullHyp)
+      {
+        CoETools::computeInterNullDistribution(
+          *tl1,
+          *tl2,
+			    *seqSim1,
+			    *seqSim2,
+			    *substitutionCount1,
+          *substitutionCount2,
+			    *statistic,
+			    params);
+      }
 
       delete tree2;
 		  delete allSites2;
 		  delete sites2;
-		  delete model2;
+		  if(model2) delete model2;
+		  if(modelSet2) delete modelSet2;
 		  delete rDist2;
 		  delete tl2;
 		  delete substitutionCount2;
+      delete seqSim2;
 		  ApplicationTools::displayTaskDone();
 	  }
     else
@@ -295,16 +310,18 @@ int main(int argc, char *argv[])
 				*statistic,
 				params);
 
-		  if(computeNullHyp)
+		  CoETools::writeInfos(*sites1, *tl1, params);
+      
+      //tl2 will be modified after the simulations!
+      if(computeNullHyp)
       {
 			  CoETools::computeIntraNullDistribution(
-				  seqSim1,
+          *tl1,
+				  *seqSim1,
 				  *substitutionCount1,
 				  *statistic,
 				  params);
 		  }
- 
-		  CoETools::writeInfos(*sites1, *tl1, params);
 	  }
 
     delete statistic;
@@ -323,6 +340,7 @@ int main(int argc, char *argv[])
 	
   if(analysis == "clustering")
   {
+		CoETools::writeInfos(*sites1, *tl1, params);
 
     ApplicationTools::displayMessage("\n\n-*- Perform clustering analysis -*-\n");
 	
@@ -455,10 +473,10 @@ int main(int argc, char *argv[])
       {
 		    clustering = new SimpleClustering(SimpleClustering::AVERAGE, *mat, false);
 	    }
-//      else if(clusteringMethod == "sum")
-//      {
-//  	  	clustering = new SumClustering(*mapping1, *dist, *mat);
-//	    }
+      //else if(clusteringMethod == "sum")
+      //{
+  	  //	clustering = new SumClustering(*mapping1, *dist, *mat);
+	    //}
       else
       {
 		    ApplicationTools::displayError("Unknown clustering method.");
@@ -550,9 +568,7 @@ int main(int argc, char *argv[])
       unsigned int maxGroupSize = ApplicationTools::getParameter<unsigned int>("clustering.maximum_group_size", params, 10, "", true, false);
       ApplicationTools::displayResult("Maximum group size to test", TextTools::toString(maxGroupSize));
       if(testGroupsGlobal)
-      {
-        HomogeneousSequenceSimulator simulator(model1, rDist1, tree1);
-        simulator.enableContinuousRates(continuousSim);
+      {       
 	      string simPath = ApplicationTools::getAFilePath("clustering.null.output.file", params, true, false, "", false);
         unsigned int nrep = ApplicationTools::getParameter<unsigned int>("clustering.null.number", params, 1, "", true);
         ApplicationTools::displayResult("Number of simulations", TextTools::toString(nrep));
@@ -560,7 +576,7 @@ int main(int argc, char *argv[])
         ofstream * out = NULL;
         if(simPath != "none") out = new ofstream(simPath.c_str(), ios::out);
         ApplicationTools::displayTask("Simulating groups", true);
-        ClusterTools::computeGlobalDistanceDistribution(simulator, *substitutionCount1, *dist, *clustering, scales, nbSites, nrep, maxGroupSize, out);
+        ClusterTools::computeGlobalDistanceDistribution(*tl1, *seqSim1, *substitutionCount1, *dist, *clustering, scales, nbSites, nrep, maxGroupSize, out);
         ApplicationTools::displayTaskDone();
         if(out != NULL) out->close();
       }
@@ -581,6 +597,8 @@ int main(int argc, char *argv[])
   	// *****************************
     // We only deal with the one data set case for now.
 	  
+		CoETools::writeInfos(*sites1, *tl1, params);
+    
     const Statistic * statistic = CoETools::getStatistic(params);
 	
     string groupsPath = ApplicationTools::getAFilePath("candidates.input.file", params, false, true);
@@ -651,7 +669,7 @@ int main(int argc, char *argv[])
       ApplicationTools::displayTaskDone();
 
       //Now compute p-values:
-      CoETools::computePValuesForCandidateGroups(candidates, seqSim1, *substitutionCount1, params);
+      CoETools::computePValuesForCandidateGroups(candidates, *tl1, *seqSim1, *substitutionCount1, params);
 
       //Now fill data table:
       vector<string> stats(table->getNumberOfRows()), pvalues(table->getNumberOfRows());
@@ -690,11 +708,13 @@ int main(int argc, char *argv[])
   delete tree1;
 	delete allSites1;
 	delete sites1;
-	delete model1;
+	if(model1) delete model1;
+	if(modelSet1) delete modelSet1;
 	delete rDist1;
 	delete tl1;
 	delete substitutionCount1;
   delete mapping1;
+  delete seqSim1;
 	
   ApplicationTools::displayTaskDone();
 

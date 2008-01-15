@@ -46,7 +46,6 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From NumCalc:
 #include <NumCalc/VectorTools.h>
-using namespace VectorOperators;
 
 // From SeqLib:
 #include <Seq/VectorSiteContainer.h>
@@ -202,8 +201,9 @@ vector<Group> ClusterTools::getGroupsWithSize(const TreeTemplate<Node> & tree, u
 }
 
 void ClusterTools::computeGlobalDistanceDistribution(
-  const HomogeneousSequenceSimulator & simulator,
-	const SubstitutionCount & nijt,
+  DRTreeLikelihood & drtl,
+  const SequenceSimulator & simulator,
+	SubstitutionCount & nijt,
   const Distance & distance,
   AgglomerativeDistanceMethod & clustering,
   const vector<double> & scales,
@@ -212,11 +212,6 @@ void ClusterTools::computeGlobalDistanceDistribution(
   unsigned int maxGroupSize,
   ofstream * out)
 {
-  DRHomogeneousTreeLikelihood drhtl(
-	  *simulator.getTree(),
-		const_cast<SubstitutionModel *>(simulator.getSubstitutionModel()),
-		const_cast<DiscreteDistribution *>(simulator.getRateDistribution()),
-		true, false);
   vector<string> siteNames(sizeOfDataSet);
   for(unsigned int i = 0; i < sizeOfDataSet; i++)
   {
@@ -229,9 +224,9 @@ void ClusterTools::computeGlobalDistanceDistribution(
   {
     ApplicationTools::displayGauge(k, nrep-1, '>');
     SiteContainer * sites = simulator.simulate(sizeOfDataSet);
-    drhtl.setData(*sites);
-    drhtl.initialize();
-    ProbabilisticSubstitutionMapping * mapping = SubstitutionMappingTools::computeSubstitutionVectors(drhtl, nijt, false);
+    drtl.setData(*sites);
+    drtl.initialize();
+    ProbabilisticSubstitutionMapping * mapping = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
     unsigned int nbBranches = mapping->getNumberOfBranches();
     
     //Mean vector:

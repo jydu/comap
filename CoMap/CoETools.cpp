@@ -44,7 +44,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Utils/TextTools.h>
 #include <Utils/StringTokenizer.h>
 #include <Utils/ApplicationTools.h>
-#include <Utils/String.h>
+#include <Utils/BppString.h>
 
 // From NumCalc:
 #include <NumCalc/Domain.h>
@@ -73,8 +73,11 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Phyl/SimpleSubstitutionCount.h>
 #include <Phyl/IndexToCount.h>
 #include <Phyl/SubstitutionMappingTools.h>
-#include <Phyl/HomogeneousSequenceSimulator.h>
 #include <Phyl/Newick.h>
+#include <Phyl/SubstitutionModelSet.h>
+#include <Phyl/SubstitutionModelSetTools.h>
+#include <Phyl/DRHomogeneousTreeLikelihood.h>
+#include <Phyl/DRNonHomogeneousTreeLikelihood.h>
 
 // From the STL:
 #include <fstream>
@@ -84,27 +87,86 @@ using namespace std;
 /******************************************************************************/
 
 void CoETools::readData(
-  TreeTemplate<Node> *          &tree,
+  TreeTemplate<Node> *          tree,
   Alphabet *                    &alphabet,
   VectorSiteContainer *         &allSites,
   VectorSiteContainer *         &sites,
   SubstitutionModel *           &model,
+  SubstitutionModelSet *        &modelSet,
   DiscreteDistribution *        &rDist,
-  DRHomogeneousTreeLikelihood * &tl,
+  DRTreeLikelihood *            &tl,
   map<string, string>           &params,
   const string                  &suffix)
 {
   alphabet = SequenceApplicationTools::getAlphabet(params, suffix, true);
   allSites = SequenceApplicationTools::getSiteContainer(alphabet, params, suffix, false);
   sites    = SequenceApplicationTools::getSitesToAnalyse(*allSites, params, suffix, true, true, true);
-  model    = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, sites, params, suffix, true);
-  rDist    = PhylogeneticsApplicationTools::getRateDistribution(params, suffix, true);
+
+  string nhOpt = ApplicationTools::getStringParameter("nonhomogeneous", params, "no", "", true, false);
+  ApplicationTools::displayResult("Heterogeneous model", nhOpt);
+
+  model = NULL;
+  modelSet = NULL;
+
+  if(nhOpt == "no")
+  {  
+    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, sites, params);
+    if(model->getNumberOfStates() > model->getAlphabet()->getSize())
+    {
+      //Markov-modulated Markov model!
+      //rDist = new ConstantDistribution(1.);
+      throw Exception("Covarion models not supported for now :(");
+    }
+    else
+    {
+      rDist = PhylogeneticsApplicationTools::getRateDistribution(params);
+    }
+    tl = new DRHomogeneousTreeLikelihood(*tree, *sites, model, rDist, true, true);
+  }
+  else if(nhOpt == "one_per_branch")
+  {
+    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, sites, params);
+    if(model->getNumberOfStates() > model->getAlphabet()->getSize())
+    {
+      //Markov-modulated Markov model!
+      //rDist = new ConstantDistribution(1.);
+      throw Exception("Covarion models not supported for now :(");
+    }
+    else
+    {
+      rDist = PhylogeneticsApplicationTools::getRateDistribution(params);
+    }
+    vector<double> rateFreqs;
+    if(model->getNumberOfStates() != alphabet->getSize())
+    {
+      //Markov-Modulated Markov Model...
+      unsigned int n =(unsigned int)(model->getNumberOfStates() / alphabet->getSize());
+      rateFreqs = vector<double>(n, 1./(double)n); // Equal rates assumed for now, may be changed later (actually, in the most general case,
+                                                    // we should assume a rate distribution for the root also!!!  
+    }
+    FrequenciesSet * rootFreqs = PhylogeneticsApplicationTools::getFrequenciesSet(alphabet, sites, params, rateFreqs);
+    vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", params, ',', "");
+    modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, globalParameters); 
+    model = NULL;
+    tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, true);
+  }
+  else if(nhOpt == "general")
+  {
+    modelSet = PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet,NULL, params);
+    if(modelSet->getNumberOfStates() > modelSet->getAlphabet()->getSize())
+    {
+      //Markov-modulated Markov model!
+      //rDist = new ConstantDistribution(1.);
+      throw Exception("Covarion models not supported for now :(");
+    }
+    else
+    {
+      rDist = PhylogeneticsApplicationTools::getRateDistribution(params);
+    }
+    tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, true); 
+  }
+  else throw Exception("Unknown option for nonhomogeneous: " + nhOpt);
   
-  tl = new DRHomogeneousTreeLikelihood(
-    *tree,
-    *sites,
-    model,
-    rDist, true, true);
   tl->initialize();
 
   ApplicationTools::displayTask("Tree likelihood");
@@ -113,6 +175,13 @@ void CoETools::readData(
   {
     ApplicationTools::displayError("!!! Unexpected initial likelihood == 0.");
     ApplicationTools::displayError("!!! You should consider reestimating all branch lengths parameters.");
+    ApplicationTools::displayError("!!! Site-specific likelihood have been written in file DEBUG_likelihoods.txt .");
+    ofstream debug ("DEBUG_likelihoods.txt", ios::out);
+    for(unsigned int i = 0; i < allSites->getNumberOfSites(); i++)
+    {
+      debug << "Position " << i+1 << " = " << tl->getLogLikelihoodForASite(i) << endl; 
+    }
+    debug.close();
     exit(-1);
   }
   *ApplicationTools::message << setprecision(20) << ll << endl;
@@ -132,8 +201,6 @@ void CoETools::readData(
     
     // Print parameters:
     ApplicationTools::displayResult("Final likelihood, -lnL =", TextTools::toString(tl -> getLogLikelihood(), 20));
-    model->getParameters().printParameters(*ApplicationTools::message);
-    rDist->getParameters().printParameters(*ApplicationTools::message);
   }
   string tags = ApplicationTools::getAFilePath("output.tags.file", params, false, false, suffix, false);
   if(tags != "none")
@@ -173,15 +240,11 @@ void CoETools::readData(
 /******************************************************************************/
   
 ProbabilisticSubstitutionMapping * CoETools::getVectors(
-  const Alphabet * alphabet,
-        TreeTemplate<Node> & tree,
-  const SiteContainer & completeSites,
-  const SiteContainer & sites,
-        SubstitutionModel & model,
-        DiscreteDistribution & rDist,
-  const SubstitutionCount & substitutionCount,
-  map<string, string> & params,
-  const string & suffix)
+  const DRTreeLikelihood & drtl,
+  SubstitutionCount      & substitutionCount,
+  const SiteContainer    & completeSites,
+  map<string, string>    & params,
+  const string           & suffix)
 {
   ProbabilisticSubstitutionMapping * substitutions = NULL;
   string inputVectorsFilePath = ApplicationTools::getAFilePath("input.vectors.file", params, false, false, suffix, false);
@@ -189,10 +252,10 @@ ProbabilisticSubstitutionMapping * CoETools::getVectors(
   if(inputVectorsFilePath != "none")
   {
     //We try to load the substitution vector directly from file:
-    int nbSites = completeSites.getNumberOfSites();
+    int nbSites = drtl.getNumberOfSites();
     ApplicationTools::displayResult("Substitution mapping in file:", inputVectorsFilePath);
     ifstream sc(inputVectorsFilePath.c_str(), ios::in);
-    substitutions = new ProbabilisticSubstitutionMapping(tree, nbSites);
+    substitutions = new ProbabilisticSubstitutionMapping(*drtl.getTree(), nbSites);
     SubstitutionMappingTools::readFromStream(sc, *substitutions);
   }
   else
@@ -204,28 +267,26 @@ ProbabilisticSubstitutionMapping * CoETools::getVectors(
 
     bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
     bool joint   = ApplicationTools::getBooleanParameter("nijt.joint"  , params, true);
-    DRHomogeneousTreeLikelihood drhtl(tree, completeSites, &model, &rDist, true);
-    drhtl.initialize();
     if(average)
     {
       if(joint)
       {
-        substitutions = SubstitutionMappingTools::computeSubstitutionVectors(drhtl, substitutionCount);
+        substitutions = SubstitutionMappingTools::computeSubstitutionVectors(drtl, substitutionCount);
       }
       else
       {
-        substitutions = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drhtl, substitutionCount);
+        substitutions = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, substitutionCount);
       }
     }
     else
     {
       if(joint)
       {
-        substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drhtl, substitutionCount);
+        substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, substitutionCount);
       }
       else
       {
-        substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drhtl, substitutionCount);
+        substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, substitutionCount);
       }
     }
     if(outputVectorsFilePath != "none")
@@ -664,12 +725,13 @@ void CoETools::computeInterStats(
 /******************************************************************************/
 
 void CoETools::computeIntraNullDistribution(
-    const HomogeneousSequenceSimulator& seqSim,
-    const SubstitutionCount & nijt,
+    DRTreeLikelihood & drtl,
+    const SequenceSimulator& seqSim,
+    SubstitutionCount & nijt,
     const Statistic & statistic,
     map<string, string> & params)
 {
-  const DiscreteDistribution* rDist = seqSim.getRateDistribution();
+  const DiscreteDistribution* rDist = drtl.getRateDistribution();
 
   string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, true, false);
   ofstream outFile(path.c_str(), ios::out);
@@ -693,7 +755,7 @@ void CoETools::computeIntraNullDistribution(
   
     // Simulate:
     vector<IntervalData *> id; 
-    id = AnalysisTools::getNullDistributionIntraDR(seqSim, nijt, statistic, statDomain, rateDomain, nbRepCPU, nbRepRAM, average, joint, true);
+    id = AnalysisTools::getNullDistributionIntraDR(drtl, seqSim, nijt, statistic, statDomain, rateDomain, nbRepCPU, nbRepRAM, average, joint, true);
   
     // Print to file:
     for(unsigned int i = 0; i < rateDomain.getSize(); i++)
@@ -708,7 +770,7 @@ void CoETools::computeIntraNullDistribution(
   }
   else
   {
-    AnalysisTools::getNullDistributionIntraDR(seqSim, nijt, statistic, outFile, nbRepCPU, nbRepRAM, average, joint, true);
+    AnalysisTools::getNullDistributionIntraDR(drtl, seqSim, nijt, statistic, outFile, nbRepCPU, nbRepRAM, average, joint, true);
   }
   outFile.close();
 }
@@ -716,10 +778,12 @@ void CoETools::computeIntraNullDistribution(
 /******************************************************************************/
 
 void CoETools::computeInterNullDistribution(
-    const HomogeneousSequenceSimulator& seqSim1,
-    const HomogeneousSequenceSimulator& seqSim2,
-    const SubstitutionCount & nijt1,
-    const SubstitutionCount & nijt2,
+    DRTreeLikelihood & drtl1,
+    DRTreeLikelihood & drtl2,
+    const SequenceSimulator& seqSim1,
+    const SequenceSimulator& seqSim2,
+    SubstitutionCount & nijt1,
+    SubstitutionCount & nijt2,
     const Statistic & statistic,
     map<string, string> & params)
 {
@@ -758,6 +822,7 @@ void CoETools::computeInterNullDistribution(
     // Simulate:
     vector<IntervalData *> id;
     id = AnalysisTools::getNullDistributionInterDR(
+      drtl1, drtl2,
       seqSim1, seqSim2,
       nijt1, nijt2,
       statistic,
@@ -779,7 +844,7 @@ void CoETools::computeInterNullDistribution(
   }
   else
   {
-    AnalysisTools::getNullDistributionInterDR(seqSim1, seqSim2, nijt1, nijt2, statistic, outFile, nbRepCPU, nbRepRAM, average, joint, true);
+    AnalysisTools::getNullDistributionInterDR(drtl1, drtl2, seqSim1, seqSim2, nijt1, nijt2, statistic, outFile, nbRepCPU, nbRepRAM, average, joint, true);
   }
   outFile.close();
 }
@@ -915,8 +980,9 @@ void CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int s
 
 void CoETools::computePValuesForCandidateGroups(
     CandidateGroupSet & candidates,
-    const HomogeneousSequenceSimulator& seqSim,
-    const SubstitutionCount & nijt,
+    DRTreeLikelihood & drtl,
+    const SequenceSimulator& seqSim,
+    SubstitutionCount & nijt,
 	  map<string, string> & params)
 {
   unsigned int repRAM = ApplicationTools::getParameter<unsigned int>("candidates.null.nb_rep_RAM", params, 1000, "", true, true);
@@ -929,41 +995,34 @@ void CoETools::computePValuesForCandidateGroups(
     if(candidates.getVerbose() >= 2)
       ApplicationTools::displayResult("Simulate ", TextTools::toString(repRAM) + " sites.");
     SiteContainer * sites = seqSim.simulate(repRAM);
-		DRHomogeneousTreeLikelihood * drhtl =
-			new DRHomogeneousTreeLikelihood(
-				*seqSim.getTree(),
-				*sites,
-				const_cast<SubstitutionModel *>(seqSim.getSubstitutionModel()),
-				const_cast<DiscreteDistribution *>(seqSim.getRateDistribution()),
-				false, false);
-    drhtl->initialize();
+    drtl.setData(*sites);
+    drtl.initialize();
     ProbabilisticSubstitutionMapping * mapping;
 		if(average)
     {
 			if(joint)
       {
-				mapping = SubstitutionMappingTools::computeSubstitutionVectors(*drhtl, nijt, false);
+				mapping = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
 			}
       else
       {
-				mapping = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(*drhtl, nijt, false);
+				mapping = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, nijt, false);
 			}
 		}
     else
     {
 			if(joint)
       {
-				mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(*drhtl, nijt, false);
+				mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, nijt, false);
 			}
       else
       {
-				mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(*drhtl, nijt, false);
+				mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, nijt, false);
 			}
 		}
 		test = candidates.analyseSimulations(*mapping);
 
     delete sites;
-		delete drhtl;
     delete mapping;
   }
 }
