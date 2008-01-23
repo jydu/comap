@@ -1,17 +1,17 @@
 <html lang="en">
 <head>
-<title>Estimation - CoMap Manual 1.2.0</title>
+<title>Estimation - CoMap Manual 1.3.0</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="CoMap Manual 1.2.0">
+<meta name="description" content="CoMap Manual 1.3.0">
 <meta name="generator" content="makeinfo 4.8">
 <link title="Top" rel="start" href="index.html#Top">
 <link rel="prev" href="Model.html#Model" title="Model">
 <link rel="next" href="Mapping.html#Mapping" title="Mapping">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <!--
-This is the manual of CoMap, version 1.2.0, 19 July 2007.
+This is the manual of CoMap, version 1.3.0, 23 January 2008.
 
-Copyright (C) 2006, 2007 Julien Dutheil-->
+Copyright (C) 2006, 2007, 2008 Julien Dutheil-->
 <meta http-equiv="Content-Style-Type" content="text/css">
 <style type="text/css"><!--
   pre.display { font-family:inherit }
@@ -43,12 +43,10 @@ These parameters include
      <ul>
 <li>Branch lengths
 
-     <li>Entries of the substitution matrices, excepted base frequencies (piA,
-piC, piG and piT parameters, which must be taken as there observed
+     <li>Entries of the substitution matrices, included base frequencies. 
 values)
 
-     <li>Parameters of the rate distribution (currently only the shape
-parameter of the gamma law)
+     <li>Parameters of the rate distribution (shape parameter of the gamma law, proportion of invariant sites).
 
    </ul>
 
@@ -56,16 +54,22 @@ parameter of the gamma law)
 <dt><samp><span class="command">optimization = [boolean]</span></samp><dd>Tells if numerical  parameters should be estimated. 
 Topology estimation is not supported.
 
-     <br><dt><samp><span class="command">optimization.method=[NB|NND]</span></samp><dd>The optimization method to use. 
-NB (default) stands for Newton-Raphson for branch lengths + Brent for
-other parameters, and
-the NND options uses Newton-Raphson for all parameters, with numerical derivatives for non-branch lengths parameters.
+     <br><dt><samp><span class="command">optimization.method=[DB|fullD]</span></samp><dd>The optimization method to use. 
+DB (default) uses derivatives-based optimization for branch lengths + Brent for
+other parameters, and the fullD options uses derivatives for all parameters, with numerical derivatives for non-branch lengths parameters.
 
-     <br><dt><samp><span class="command">optimization_NB.nstep=[int&gt;=1]</span></samp><dd>Number of progressive steps to perform during optimization. 
+     <br><dt><samp><span class="command">optimization_DB.nstep=[int&gt;=1]</span></samp><dd>Number of progressive steps to perform during optimization. 
 If nstep=3 and precision=E-6, a first optimization with precision =
 E-2, will be performed, then a round with precision set to E-4 and
 finally precision will be set to E-6. This approcah generally saves
 significant computation time.
+
+     <br><dt><samp><span class="command">optimization.method.derivatives = [newton|gradient]</span></samp><dd>Derivatives-based algorithm to use. 
+The Newton algorithm uses derivatives up to the second order, and is the recommanded choice. 
+The gradient algortihm uses only first order derivatives and can also be used.
+
+     <br><dt><samp><span class="command">optimization.final = [powell|simplex]</span></samp><dd>Optinal final optimization step, useful if numerical derivatives are to be used. 
+Leave the field empty in order to skip this step.
 
      <br><dt><samp><span class="command">optimization.profiler = [[path]|std]|none</span></samp><dd>A file where to dump optimization steps (a file path or std for
 standard output or none for no output).

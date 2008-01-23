@@ -1,17 +1,17 @@
 <html lang="en">
 <head>
-<title>Introduction - CoMap Manual 1.2.0</title>
+<title>Introduction - CoMap Manual 1.3.0</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="CoMap Manual 1.2.0">
+<meta name="description" content="CoMap Manual 1.3.0">
 <meta name="generator" content="makeinfo 4.8">
 <link title="Top" rel="start" href="index.html#Top">
 <link rel="prev" href="index.html#Top" title="Top">
 <link rel="next" href="Data.html#Data" title="Data">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <!--
-This is the manual of CoMap, version 1.2.0, 19 July 2007.
+This is the manual of CoMap, version 1.3.0, 23 January 2008.
 
-Copyright (C) 2006, 2007 Julien Dutheil-->
+Copyright (C) 2006, 2007, 2008 Julien Dutheil-->
 <meta http-equiv="Content-Style-Type" content="text/css">
 <style type="text/css"><!--
   pre.display { font-family:inherit }
@@ -45,7 +45,7 @@ for each site of an alignment.
      <br><dt><em>Co-evolution analysis</em><dd>Using the substitution mapping, look for significantly groups of sites
 departing the null hypothesis of independance. 
 Two kind of analyses are provided: a pairwise analysis, presented in
-Dutheil et al. (2005), and a clustering analysis in Dutheil ang Galtier (2006). 
+Dutheil et al. (2005), and a clustering analysis in Dutheil ang Galtier (2007). 
 In both cases, a parametric bootstrap approach is used to evaluate the
 significance of groups. Simulation results are written to separate
 files, a statistics software like R is required to look for the
@@ -128,7 +128,7 @@ integer folling between 2 and 10
    <p>From version 1.2, CoMap can use Bio++ macro system. 
 This possible to recall anywhere the value of an option by using $(parameter). 
 <p><table class="cartouche" summary="cartouche" border="1"><tr><td>
-<pre class="example">     model=JTT92
+<pre class="example">     model.name=JTT92
      rat_distribution=gamma
      output.tree = mydata$(model)$(rate_distribution).dnd
 </pre>

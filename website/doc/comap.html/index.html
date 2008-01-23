@@ -1,15 +1,15 @@
 <html lang="en">
 <head>
-<title>CoMap Manual 1.2.0</title>
+<title>CoMap Manual 1.3.0</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="CoMap Manual 1.2.0">
+<meta name="description" content="CoMap Manual 1.3.0">
 <meta name="generator" content="makeinfo 4.8">
 <link title="Top" rel="start" href="#Top">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <!--
-This is the manual of CoMap, version 1.2.0, 19 July 2007.
+This is the manual of CoMap, version 1.3.0, 23 January 2008.
 
-Copyright (C) 2006, 2007 Julien Dutheil-->
+Copyright (C) 2006, 2007, 2008 Julien Dutheil-->
 <meta http-equiv="Content-Style-Type" content="text/css">
 <style type="text/css"><!--
   pre.display { font-family:inherit }
@@ -24,7 +24,7 @@ Copyright (C) 2006, 2007 Julien Dutheil-->
 --></style>
 </head>
 <body>
-<h1 class="settitle">CoMap Manual 1.2.0</h1>
+<h1 class="settitle">CoMap Manual 1.3.0</h1>
    <div class="contents">
 <h2>Table of Contents</h2>
 <ul>
@@ -32,6 +32,15 @@ Copyright (C) 2006, 2007 Julien Dutheil-->
 <li><a name="toc_Introduction" href="Introduction.html#Introduction">1 Introduction</a>
 <li><a name="toc_Data" href="Data.html#Data">2 Data loading</a>
 <li><a name="toc_Model" href="Model.html#Model">3 Model specification</a>
+<ul>
+<li><a href="Model.html#Model">3.1 Substitution model</a>
+<li><a href="Model.html#Model">3.2 Non-homogeneous models</a>
+<ul>
+<li><a href="Model.html#Model">3.2.1 One-per-branch non-homogeneous models</a>
+<li><a href="Model.html#Model">3.2.2 General non-homogeneous models</a>
+</li></ul>
+<li><a href="Model.html#Model">3.3 Rate across site distribution</a>
+</li></ul>
 <li><a name="toc_Estimation" href="Estimation.html#Estimation">4 Numerical parameters estimation</a>
 <li><a name="toc_Mapping" href="Mapping.html#Mapping">5 Substitution mapping</a>
 <ul>
@@ -43,7 +52,8 @@ Copyright (C) 2006, 2007 Julien Dutheil-->
 <li><a href="Pairwise.html#Pairwise">6.2 Optional commands</a>
 </li></ul>
 <li><a name="toc_Clustering" href="Clustering.html#Clustering">7 Clustering analysis</a>
-<li><a name="toc_Pvalue" href="Pvalue.html#Pvalue">8 P-value computation</a>
+<li><a name="toc_Candidates" href="Candidates.html#Candidates">8 Candidate groups analysis</a>
+<li><a name="toc_Pvalue" href="Pvalue.html#Pvalue">9 P-value computation</a>
 </li></ul>
 </div>
 
@@ -60,9 +70,9 @@ Up:&nbsp;<a rel="up" accesskey="u" href="../index.html#dir">(dir)</a>
 
 <h2 class="unnumbered">CoMap Manual</h2>
 
-<p>This is the manual of CoMap, version 1.2.0, 19 July 2007.
+<p>This is the manual of CoMap, version 1.3.0, 23 January 2008.
 
-   <p>Copyright &copy; 2006, 2007 Julien Dutheil
+   <p>Copyright &copy; 2006, 2007, 2008 Julien Dutheil
 
 <ul class="menu">
 <li><a accesskey="1" href="Introduction.html#Introduction">Introduction</a>:                 Introducing the CoMap program and this manual. 
@@ -72,7 +82,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="../index.html#dir">(dir)</a>
 <li><a accesskey="5" href="Mapping.html#Mapping">Mapping</a>:                      Compute the substitution mapping. 
 <li><a accesskey="6" href="Pairwise.html#Pairwise">Pairwise</a>:                     Performing the pairwise analysis of Dutheil et al. (2005). 
 <li><a accesskey="7" href="Clustering.html#Clustering">Clustering</a>:                   Performing the clustering analysis of Dutheil et al. (2007). 
-<li><a accesskey="8" href="Pvalue.html#Pvalue">Pvalue</a>:                       Using the R scripts to compute p-values. 
+<li><a accesskey="8" href="Candidates.html#Candidates">Candidates</a>:                   Candidate groups analysis (under development)
+<li><a accesskey="9" href="Pvalue.html#Pvalue">Pvalue</a>:                       Using the R scripts to compute p-values. 
 </ul>
 
 <!--  -->
