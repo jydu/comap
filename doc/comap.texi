@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename comap.info
-@settitle CoMap Manual 1.2.0
+@settitle CoMap Manual 1.3.0
 @afourpaper
 @c %**end of header
 
@@ -10,7 +10,7 @@
 @copying
 This is the manual of CoMap, version @value{VERSION}, @value{UPDATED}.
 
-Copyright @copyright{} 2006, 2007 Julien Dutheil
+Copyright @copyright{} 2006, 2007, 2008 Julien Dutheil
 @end copying
 
 @titlepage
@@ -42,6 +42,7 @@ Copyright @copyright{} 2006, 2007 Julien Dutheil
 * Mapping::                     Compute the substitution mapping.                   
 * Pairwise::                    Performing the pairwise analysis of Dutheil et al. (2005).                 
 * Clustering::                  Performing the clustering analysis of Dutheil et al. (2007).              
+* Candidates::                  Candidate groups analysis (under development)
 * Pvalue::                      Using the R scripts to compute p-values.                            
 @end menu
 
@@ -60,7 +61,7 @@ for each site of an alignment.
 Using the substitution mapping, look for significantly groups of sites
 departing the null hypothesis of independance.
 Two kind of analyses are provided: a pairwise analysis, presented in
-Dutheil et al. (2005), and a clustering analysis in Dutheil ang Galtier (2006).
+Dutheil et al. (2005), and a clustering analysis in Dutheil ang Galtier (2007).
 In both cases, a parametric bootstrap approach is used to evaluate the
 significance of groups. Simulation results are written to separate
 files, a statistics software like R is required to look for the
@@ -159,7 +160,7 @@ From version 1.2, CoMap can use Bio++ macro system.
 This possible to recall anywhere the value of an option by using $(parameter).
 @cartouche
 @example
-model=JTT92
+model.name=JTT92
 rat_distribution=gamma
 output.tree = mydata$(model)$(rate_distribution).dnd
 @end example
@@ -229,51 +230,156 @@ Only newick format is supported for now.
 @node Model, Estimation, Data, Top
 @chapter Model specification
 
+@section Substitution model
+
 @table @command
 
-@item model = [JCnuc|K80|T92|HKY85|F84|TN93|GTR|JCprot|DSO78|JTT92|empirical]
+@item model.name = [JCnuc|K80|T92|HKY85|F84|TN93|GTR|JCprot|DSO78|JTT92|empirical]
 Specify the substitution model to use.
 For proteins, the DCmutt method is used for JTT92 and DSO78.
 You can use the @option{empirical} option to specify another model, as
 a text file in PAML format.
 
-@item kappa=[real>0]
+@item model.kappa=[real>0]
 Initial value or fixed value for parameter kappa
 (transition/transversion ratio) in models K80, T92, HKY85 and F84
 
-@item kappa1=[real>0]
+@item model.kappa1=[real>0]
 Initial value or fixed value for parameter kappa1 in model TN93
 
-@item kappa2=[real>0]
+@item model.kappa2=[real>0]
 Initial value or fixed value for parameter kappa2 in model TN93
 
-@item theta=[real[0,1]]
+@item model.theta=[real]0,1[]
 Initial value or fixed value for parameter theta (GC content) in model
-T92
+T92, HKY85, F84, TN93 and GTR.
 
-@item piA,piC,piG,piT = [real[0,1]]
-Equilibrium frequencies of nucleotides A, C, G and T/U in models
+@item model.theta1 = [real]0,1[]
+Proportion of G / (G + C) in models
 HKY85, F84, TN93 and GTR
 
-@item a,b,c,d,e = [real>0]
+@item model.theta2 = [real]0,1[]
+Proportion of A / (A + T/U) in models
+HKY85, F84, TN93 and GTR
+
+@item model.a,b,c,d,e = [real>0]
 Parameters of the GTR model
 
 @item model.use_observed_freq = [boolean]
-Tell if we have to use observed frequencies as parameter values (for @command{piA}, @command{piT}, @command{piG}, @command{piC} and @command{theta}).
+Tell if we have to use observed frequencies as parameter values (for @option{theta}, @option{theta1}, @option{theta2}, etc).
 For proteins, this is equivalent to the -F model family.
 
 @item model_empirical.file = [path]
 Meaningful only if the @option{empirical} option is selected.
 Specify the path where to find the model (in PAML format).
 
-@item rate_distribution = [constant|gamma]
-Specify the rate across sites distribution, as constant or gamma.
+@end table
 
-@item rate_distribution_gamma.alpha = [real>0]
+
+
+@section Non-homogeneous models
+
+You can specify a wide range of non-homogeneous models.
+The novelty from the homogeenous case is that the likelihood depends on the position of the root.
+Root frequencies are hence distinct parameters:
+
+@table @command
+
+@item nonhomogeneous.root_freq=[balanced|observed|init|balancedGC|observedGC|initGC]
+The @option{balanced} option set all the frequencies to 1/size of the alphabet.
+The @option{balancedGC} option is for nucleotides only, and set the G content equal to the C content equal to 0.5.
+The @option{observed} option set frequencies equal to their values in the data set,, and @option{observedGC} does the same for the GC content.
+The @option{init} and @option{initGC} options allows you to set the values of the frequencies by hand.
+
+@item model.ancA, ancC,..., ancA, ancR, ancN, ..., ancTheta
+Initial values of ancestral frequencies if the @option{init} or @option{initGC} have been specified.
+
+@end table
+
+@table @command
+
+@item nonhomogeneous = [no|one_per_branch|general]
+Homogeneous model, Galtier & Gouy 1997 model family or the general case.
+
+@end table
+
+@subsection One-per-branch non-homogeneous models
+
+This option share the same parameters as the homogeneous case, since the same kind of model is used for each branch. The additional options are the following:
+@table @command
+@item nonhomogeneous_one_per_branch.shared_parameters = [list]
+List the names of the parameters that are shared by all branches.
+In Galtier & Gouy model, that would be model.kappa, since only the theta parameter is branch-specific.
+
+@end table
+
+@subsection General non-homogeneous models
+
+Bio++ provides a general syntaxe to specify almost any non-homogeneous model.
+
+@table @command
+
+@item nonhomogeneous.number_of_models
+Set the number of distinct models to use.
+
+@end table
+
+You now have to configure each model individually, using the syntaxe introduced for the homogeneous case, excepted that model will be numbered, for instance:
+
+@example
+model1.name = T92
+model1.theta = 0.39
+model1.kappa = 2.79
+@end example
+
+The additional option is available to attach the model to branches in the tree, specified by the id of the upper node in the tree:
+
+@table @command
+
+@item model1.nodes_id = 1,5,10:15,19
+Specify the ids of the nodes to which the node is attached.
+Id ranges can be specified using the @option{begin:end} syntaxe.
+
+@end table
+
+You can also make a given model share parameters with another one by writting for instance:
+@example
+model2.name = T92
+model2.theta = 0.39
+model2.kappa = model1.kappa
+@end example
+
+Finally, you may find useful the following options:
+
+@table @command
+
+@item output.tags.file = [[path]|none]
+A tree file in newick format, with node ids instead of bootstrap
+values.
+The node ids are the same as in the the vector file. 
+
+@item output.tags.translation = [[path]|none]
+Write a file whith the correspondance between leaf names and ids.
+
+@end table
+
+
+
+@section Rate across site distribution
+
+@table @command
+
+@item rate_distribution = [constant|gamma@{+invariant@}]
+Specify the rate across sites distribution, as constant or gamma, optionally with an invariant class.
+
+@item rate_distribution.alpha = [real>0]
 The gamma distribution's shape parameter
 
 @item rate_distribution.classes_number = [int>=2]
-The number of classes to use in discretization.
+The number of classes to use in discretization (not including the invariant class if any)
+
+@item rate_distribution.p = [real[0,1]]
+Proportion of invariant sites
 
 @end table
 
@@ -290,13 +396,11 @@ These parameters include
 Branch lengths
 
 @item
-Entries of the substitution matrices, excepted base frequencies (piA,
-piC, piG and piT parameters, which must be taken as there observed
+Entries of the substitution matrices, included base frequencies.
 values)
 
 @item
-Parameters of the rate distribution (currently only the shape
-parameter of the gamma law)
+Parameters of the rate distribution (shape parameter of the gamma law, proportion of invariant sites).
 
 @end itemize
 
@@ -306,18 +410,26 @@ parameter of the gamma law)
 Tells if numerical  parameters should be estimated.
 Topology estimation is not supported.
 
-@item optimization.method=[NB|NND]
+@item optimization.method=[DB|fullD]
 The optimization method to use.
-NB (default) stands for Newton-Raphson for branch lengths + Brent for
-other parameters, and
-the NND options uses Newton-Raphson for all parameters, with numerical derivatives for non-branch lengths parameters.
+DB (default) uses derivatives-based optimization for branch lengths + Brent for
+other parameters, and the fullD options uses derivatives for all parameters, with numerical derivatives for non-branch lengths parameters.
 
-@item optimization_NB.nstep=[int>=1]
+@item optimization_DB.nstep=[int>=1]
 Number of progressive steps to perform during optimization.
 If nstep=3 and precision=E-6, a first optimization with precision =
 E-2, will be performed, then a round with precision set to E-4 and
 finally precision will be set to E-6. This approcah generally saves
 significant computation time.
+
+@item optimization.method.derivatives = [newton|gradient]
+Derivatives-based algorithm to use.
+The Newton algorithm uses derivatives up to the second order, and is the recommanded choice.
+The gradient algortihm uses only first order derivatives and can also be used.
+
+@item optimization.final = [powell|simplex]
+Optinal final optimization step, useful if numerical derivatives are to be used.
+Leave the field empty in order to skip this step.
 
 @item optimization.profiler = [[path]|std]|none
 A file where to dump optimization steps (a file path or std for
@@ -387,14 +499,6 @@ This option should be set to "no" for testing compensation.
 @item output.vectors.file = [[path]|none]
 Where to write the substitution mapping.
 
-@item output.tags.file = [[path]|none]
-A tree file in newick format, with node ids instead of bootstrap
-values.
-The node ids are the same as in the the vector file. 
-
-@item output.tags.translation = [[path]|none]
-Write a file whith the correspondance between leaf names and ids.
-
 @end table
 
 @section Optional commands
@@ -426,8 +530,15 @@ most cases.
 
 @table @command
 
-@item statistic = [correlation|none]
-If @option{none} is selected, no pairwise analysis is performed.
+@item analysis = pairwise
+Use this option for performing a pairwise analysis.
+If another option or @option{none} is selected, no pairwise analysis is performed.
+
+@item statistic = [correlation|compensation|cosubstitutions]
+The coevolution statistic to use.
+The @option{correlation} option is to be used in order to perform the MBE 2005 analysis.
+Uses option @option{compensation} to perform a pairwise analysis with the compensation statistics introduced in the BMC Evol Biol 2007 paper.
+You can also use the @option{cosubstitution} option to perform Tuffery & Darlu's MBE 2000 analysis.
 
 @item statistic.output.file = [path]
 Where to write the statistic value for each pair of sites.
@@ -501,10 +612,14 @@ printing all simulated pairs.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node Clustering, Pvalue, Pairwise, Top
+@node Clustering, Candidates, Pairwise, Top
 @chapter Clustering analysis
 
 @table @command
+
+@item analysis = clustering
+Use this option for performing a clustering.
+If another option or @option{none} is selected, no pairwise analysis is performed.
 
 @item clustering.distance = [cor|euclidian|comp|none]
 Distance to use: cor (correlation), euclidian, comp (compensation) or none (no clustering).
@@ -513,9 +628,8 @@ Distance to use: cor (correlation), euclidian, comp (compensation) or none (no c
 Tell is mapping should be normalized (each row (=branch) will be
 divided by its sum.
 
-@item clustering.method = [complete|sum]
-Clustering algorithm: complete linkage or sum.
-The sum option should be used only when testing compensation, i.e. in conjunction with the @option{nijt_aadist.sym=no} and @option{clustering.distance=comp} options.
+@item clustering.method = [complete]
+Clustering algorithm: complete linkage. Other linkage types are available, but the complete one gives the better results.
 
 @item clustering.output.matrix.file = [[path]|none]
 Where to write the distance matrix (in phylip format).
@@ -539,7 +653,14 @@ Where to write the simulated clusters (CSV format).
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node Pvalue,  , Clustering, Top
+@node Candidates, Pvalue, Clustering, Top
+@chapter Candidate groups analysis
+
+This method is under development and is not yet available, sorry.
+
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Pvalue,  , Candidates, Top
 @chapter P-value computation
 
 CoMap do not compute p-values from the simulation.

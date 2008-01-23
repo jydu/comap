@@ -416,15 +416,37 @@ void CoETools::writeInfos(
 const Statistic * CoETools::getStatistic(map<string, string> & params) throw (Exception)
 {
   string statistic = ApplicationTools::getStringParameter("statistic", params, "none");
-  if(statistic == "cosinus") {
+  if(statistic == "cosinus")
+  {
     return new CosinusStatistic();
-  } else if(statistic == "correlation") {
+  }
+  else if(statistic == "correlation")
+  {
     return new CorrelationStatistic();
-  } else if(statistic == "covariance") {
+  }
+  else if(statistic == "covariance")
+  {
     return new CovarianceStatistic();
-  } else if(statistic == "cosubstitution") {
+  }
+  else if(statistic == "cosubstitution")
+  {
     return new CosubstitutionNumberStatistic();
-  } else {
+  }
+  else if(statistic == "compensation")
+  {
+    string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", "", true);
+    bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", params, true, "", true); 
+    if(nijtOption != "aadist" || sym)
+    {
+      throw Exception("Compensation distance must be used with 'nijt=aadist' and 'nijt_aadist.sym=no' options.");
+    }
+    else
+    {
+		  return new CompensationStatistic();
+    }
+  }
+  else
+  {
     throw Exception("Unknown statistic used: " + statistic);
   }
 }
@@ -868,7 +890,7 @@ vector<unsigned int> CandidateGroupSet::nextCandidateSite() const throw (Excepti
   unsigned int startSearch = _groupPos;
   if(_n2[_groupPos] >= _minSim)
   {
-    while(_n2[_groupPos] >= _minSim)
+    while(_n2[_groupPos] >= _minSim || !_candidates[_groupPos].isAnalysable())
     {
       _groupPos++;
 
@@ -927,7 +949,7 @@ bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMappin
       if(testNorm)
       {
         addSimulatedSite(pos[0], pos[1], &mapping[i]);
-        if(_nbCompleted == size()) test = false;
+        if(_nbCompleted == _nbAnalysable) test = false;
       }
     }
   }

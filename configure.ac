@@ -1,4 +1,4 @@
-#Copyright or © or Copr. CNRS, (November 16, 2004, 2005, 2006)
+#Copyright or © or Copr. CNRS, (November 16, 2004-2008)
 #
 #This software is a computer program whose purpose is to map substitutions
 #on a tree and to detect co-evolving positions in a dataset.
@@ -29,7 +29,7 @@
 #The fact that you are presently reading this means that you have had
 #knowledge of the CeCILL license and that you accept its terms.
 
-AC_INIT(CoMap, 1.2.0, Julien.Dutheil@univ-montp2.fr, CoMap)
+AC_INIT(CoMap, 1.3.0, Julien.Dutheil@univ-montp2.fr, CoMap)
 AC_CONFIG_SRCDIR(CoMap/CoMap.cpp)
 
 dnl We'll use automake:
@@ -77,7 +77,7 @@ AC_ARG_ENABLE(static,
              esac],[static=false])
 AM_CONDITIONAL(STATIC, test x$static = xtrue)
 
-VERSION="1.2.0"
+VERSION="1.3.0"
 AC_SUBST(VERSION)
 AC_OUTPUT(Makefile CoMap/Makefile doc/Makefile)
 
