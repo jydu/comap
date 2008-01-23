@@ -1,4 +1,4 @@
-#Copyright or © or Copr. CNRS, (November 16, 2004, 2005, 2006)
+#Copyright or © or Copr. CNRS, (November 16, 2004-2008)
 #
 #This software is a computer program whose purpose is to map substitutions
 #on a tree and to detect co-evolving positions in a dataset.

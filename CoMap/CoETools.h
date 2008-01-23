@@ -127,7 +127,7 @@ class CandidateGroup:
         (*this)[i].setNormRange(norm - omega, norm + omega);
       }
     }
-    bool setAnalysable(bool yn) { _analysable = yn; }
+    void setAnalysable(bool yn) { _analysable = yn; }
     bool isAnalysable() const { return _analysable; }
 };
 

@@ -1,5 +1,5 @@
 %define name CoMap
-%define version 1.2.0
+%define version 1.3.0
 %define release 1
 %define _prefix /usr/local
 
@@ -14,10 +14,10 @@ Group: System Environment/Libraries
 BuildRoot: %{_builddir}/%{name}-root
 Packager: Julien Dutheil
 Prefix: %{_prefix}
-Requires: Bpp-Utils = 1.1.0
-Requires: Bpp-NumCalc = 1.3.0
-Requires: Bpp-Seq = 1.3.0
-Requires: Bpp-Phyl = 1.4.0
+Requires: Bpp-Utils = 1.2.0
+Requires: Bpp-NumCalc = 1.4.0
+Requires: Bpp-Seq = 1.4.0
+Requires: Bpp-Phyl = 1.5.0
 
 %description
 CoMap is a program for substitution mapping and molecular co-evolution analysis.
@@ -47,6 +47,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_infodir}/comap.info
 
 %changelog
+* Wed Jan 23 2008 Julien Dutheil <Julien.Dutheil@univ-montp2.fr>
+- CoMap 1.3.0 release
 * Tue Jul 19 2007 Julien Dutheil <Julien.Dutheil@univ-montp2.fr>
 - CoMap 1.2.0 release
 * Mon Jul 31 2006 Julien Dutheil <Julien.Dutheil@univ-montp2.fr>
