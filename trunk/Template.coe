@@ -1,3 +1,5 @@
+DATA = mygene
+
 # ----------------------------------------------------------------------------------------
 #                                     Data loading
 # ----------------------------------------------------------------------------------------
@@ -7,7 +9,7 @@
 alphabet = DNA
 
 # The sequence file to use (sequences must be aligned!)
-sequence.file = myfile.mase
+sequence.file = $(DATA).mase
 # The alignment format:
 # Must be one of Mase, Fasta, Phylip, Clustal 
 sequence.format = Mase
@@ -32,24 +34,24 @@ sequence.file2 = none
 
 # The tree file to use. Branch lengths are optional.
 # Only newick format is supported.
-tree.file = mytree.dnd
+tree.file = $(DATA).dnd
 
 # ----------------------------------------------------------------------------------------
 #                                     Model specification
 # ----------------------------------------------------------------------------------------
 
-# Available models.
+# Available models. See the documentation or the BppML program of the BppSuite package for a more complete description.
 # For proteins, the DCmutt method is used for JTT92 and DSO78.
 # You can use the 'empirical' option to specify another model.
 # JCnuc, K80, T92, HKY85, F84, TN93, GTR, JCprot, DSO78, JTT92 or empirical
-model = HKY85
+model.name = HKY85
 # Initial values for parameters:
 #kappa (K80, T92, HKY85, F84)
 #kappa1, kappa2 (TN93)
 #theta (T92)
 #piA, piT, piC and piG (HKY85, F84, TN93 and GTR)
 #a,b,c,d,e (GTR)
-kappa = 2.843
+model.kappa = 2.843
 #Tell if we have to use observed frequencies as parameter values (for piA, piT, piG, piC and theta).
 #For proteins, this is equivalent to the -F model family.
 model.use_observed_freq = yes
@@ -60,7 +62,7 @@ model_empirical.file =
 # gamma or constant
 rate_distribution = gamma
 # The gamma distribution's shape parameter
-rate_distribution_gamma.alpha = 0.358
+rate_distribution.alpha = 0.358
 # Number of classes for discretization:
 rate_distribution.classes_number = 4
 
@@ -73,31 +75,46 @@ rate_distribution.classes_number = 4
 optimization = yes
 
 # Method to use for optimizing numerical parameters:
-# -NB (default) Newton-Raphson for branch lengths + Brent for other parameters
-# -NND Newton-Raphson for all parameters, using numerical derivatives for non-branch lengths parameters.
+# -DB (default) derivatives for branch lengths + Brent for other parameters
+# -fullD derivatives for all parameters, using numerical derivatives for non-branch lengths parameters.
+optimization.method = DB
 
-optimization.method=NB
-
-# Number of progressive steps to use in NB optimization (a value of 5 is often fine).
+# Number of progressive steps to use in DB optimization (a value of 5 is often fine).
 # 1 means no progressive optimization.
-optimization_NB.nstep=1
+optimization.method_DB.nstep = 1
+
+# Derivatives-based algorithm to us:
+# - newton (recommanded) uses first and second order derivatives
+# - gradient uses only first-order derivatives
+optimization.method.derivatives = newton
+
+# Final optimization step, may be useful if numerical derivatives are used:
+# powell or simplex, leave the field empty for no final optimization step.
+optimization.final = 
+
+# Parameters to ignore (for instance equilibrium frequencies)
+optimization.ignore_parameter =
 
 # A file where to dump optimization steps (a file path or std for standard output)
-optimization.profiler = myfile.profile
+optimization.profiler = $(DATA).profile
+
 # idem for error or warning messages:
-optimization.message_handler = myfile.messages
+optimization.message_handler = $(DATA).messages
+
 # Maximum number of likelihood evaluations:
 optimization.max_number_f_eval = 1000000
-# Parameters to ignore (there is currently no estimation methods for equilibrium frequencies)
-optimization.ignore_parameter = piA,piC,piG,piT
+
 # Precision to reach:
 optimization.tolerance = 0.000001
 
+# Set the quantity of output to the screen:
+optimization.verbose = 1
+
 # Should we write the optimized tree? none or file name.
-output.tree.file = myfile.opt.dnd
+output.tree.file = $(DATA).opt.dnd
 
 # A file where site-specific information will be written (posterior rate, constant site, etc.):
-output.infos = myfile.infos
+output.infos = $(DATA).infos
 
 # ----------------------------------------------------------------------------------------
 #                                     Substitution vectors
@@ -106,7 +123,7 @@ output.infos = myfile.infos
 # We may restart an analysis by specifying the already computed vectors:
 input.vectors.file = none
 # Otherwise, tell where to write vectors:
-output.vectors.file = myfile.vec
+output.vectors.file = $(DATA).vec
 
 # The method to use to compute vectors:
 # One of
@@ -129,24 +146,39 @@ nijt.average = yes
 nijt.joint = yes
 #!!! The 2 previous options are mainly for method comparisons, see article.
 
+# ----------------------------------------------------------------------------------------
+#                                     Additionnal stuff
+# ----------------------------------------------------------------------------------------
+
+# A file where site-specific information will be written (posterior rate, constant site, etc.):
+output.infos = $(DATA).infos
 # Should we write a tree with inner node names? none or file name.
-output.tags.file = myfile.tags.dnd
+output.tags.file = $(DATA).tags.dnd
 # Write a file whith the correspondance between leaf names and ids.
-output.tags.translation = myfile.tags.tln
+output.tags.translation = $(DATA).tags.tln
 
 # ----------------------------------------------------------------------------------------
 #                                     Coevolution analysis
 # ----------------------------------------------------------------------------------------
 
+# 'pairwise', 'clustering' or 'candidates'
+# The pairwise method corresponds to the 2005 paper
+# The clustering method to the 2007 paper
+# The candidates method is not published yet and is still under development, use with care!
+analysis = clustering
+
+# Coevolution statistic to use, for the pairwise and candidates methods:
+# - correlation: Dutheil et al 2005/2007's method.
+# - cosubstitution: Tuffery and Darlu 2000's method
+# - compensation: Dutheil & Galtier 2007's method.
+statistic = correlation
+
 # ----------------------------------------------------------------------------------------
 #                                     Pairwise analysis
 # ----------------------------------------------------------------------------------------
 
-# correlation or covariance or none (only mapping):
-statistic = correlation
-
 # where to write the results:
-statistic.output.file = myfile.sta
+statistic.output.file = $(DATA).sta
 
 # Minimum statistic to write in file:
 statistic.min = 0
@@ -172,7 +204,7 @@ statistic.null.nb_rep_CPU = 100
 statistic.null.nb_rep_RAM = 1000
 
 # Where to write the null distribution
-statistic.null.output.file = myfile.null
+statistic.null.output.file = $(DATA).null
 
 # Should we write the null distribution has an histogram?
 # Otherwise prints all similated pairs.
@@ -189,29 +221,40 @@ statistic.null.nb_int =
 # ----------------------------------------------------------------------------------------
 
 # Distance to use: cor (correlation) or euclidian or comp (compensation) or none
-clustering.distance=cor
+clustering.distance = cor
 # Tell is mapping should be normalized (each row (=branch) will be divided by its sum).
-clustering.scale=no
-# Clustering algorithm: complete or sum (for compensation).
+clustering.scale = no
+# Clustering algorithm: 'complete'.
 # Options 'single' and 'average' are also provided, but have not been fully tested.
-clustering.method=complete
+clustering.method = complete
 
 # Where to write the distance matrix (in phylip format):
-clustering.output.matrix.file=none
+clustering.output.matrix.file = none
 # Where to write the clustering tree (newick format):
-clustering.output.tree.file=myfile_clusters.dnd
+clustering.output.tree.file = $(DATA)_clusters.dnd
 # Where to write the clusters (CSV format):
-clustering.output.groups.file=myfile_groups.csv
+clustering.output.groups.file = $(DATA)_groups.csv
 
 # Tell if the null distribution of clusters must be computed:
-clustering.null=yes
+clustering.null = yes
 # Number of data sets to simulate:
-clustering.null.number=1000
+clustering.null.number = 1000
 # Where to write the simulated clusters (CSV format):
-clustering.null.output.file=myfile_simulation.csv
+clustering.null.output.file = $(DATA)_simulation.csv
 
 # ----------------------------------------------------------------------------------------
 #                                     Selected Groups Analysis
 # ----------------------------------------------------------------------------------------
 
+candidates.input.file = $(DATA)interactions.csv
+candidates.input.column_name = Group
+candidates.input.column_sep = ,
+ 
+candidates.omega = 0.2
+candidates.null.min = 1000
+candidates.null.nb_rep_RAM = 5000
+candidates.null.verbose = 3
+
+candidates.output.file = $(DATA)interactions_pvalues.csv
+candidates.output.column_sep= , 
 

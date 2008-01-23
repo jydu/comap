@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 	cout << endl;
 	cout << endl;
 	cout << "***********************************************************" << endl;
-	cout << "* This is CoMap        version 1.3.0       date: 05/08/07 *" << endl;
+	cout << "* This is CoMap        version 1.3.0       date: 21/01/08 *" << endl;
 	cout << "*     A C++ shell program to detect co-evolving sites.    *" << endl;
 	cout << "***********************************************************" << endl;
 	cout << endl;
@@ -338,7 +338,7 @@ int main(int argc, char *argv[])
 	// * Clustering analysis *
 	// ***********************
 	
-  if(analysis == "clustering")
+  else if(analysis == "clustering")
   {
 		CoETools::writeInfos(*sites1, *tl1, params);
 
@@ -590,7 +590,7 @@ int main(int argc, char *argv[])
 
   
 
-  if(analysis == "candidates")
+  else if(analysis == "candidates")
   {
     // *****************************
   	// * Candidate groups analysis *
@@ -618,7 +618,8 @@ int main(int argc, char *argv[])
       //Create positions index first:
       map<int, unsigned int> posIndex;
       vector<int> positions = sites1->getSitePositions();
-      for(unsigned int i = 0; i < positions.size(); i++) posIndex[positions[i]] = i;
+      for(unsigned int i = 0; i < positions.size(); i++)
+        posIndex[positions[i]] = i;
 
       //Parse file:
       string groupsColumnSep = ApplicationTools::getStringParameter("candidates.input.column_sep", params, "\t", "", true, true);
@@ -641,7 +642,7 @@ int main(int argc, char *argv[])
       string group, tmp, strok = "0123456789;,";
       for(unsigned int i = 0; i < groups.size(); i++)
       {
-        if(groups.size() > 10) ApplicationTools::displayGauge(i, groups.size() - 1, '=');
+        if(groups.size() >100) ApplicationTools::displayGauge(i, groups.size() - 1, '=');
         tmp = TextTools::removeWhiteSpaces(groups[i]);
         group = "";
         //Clean group description:
@@ -660,10 +661,19 @@ int main(int argc, char *argv[])
         while(st.hasMoreToken())
         {
           pos = TextTools::toInt(st.nextToken());
+          if(posIndex.find(pos) == posIndex.end())
+          {
+            candidate.setAnalysable(false);
+            ApplicationTools::displayWarning("Position " + TextTools::toString(pos) + " is not included in the selected sites. The group will be ignored (line " + TextTools::toString(i+1) + " in input file).");
+            break;
+          }
           candidate.push_back(CandidateSite(posIndex[pos]));
         }
-        candidate.computeStatisticValue(*statistic, *mapping1);
-        candidate.computeNormRanges(omega, *mapping1);
+        if(candidate.isAnalysable())
+        {
+          candidate.computeStatisticValue(*statistic, *mapping1);
+          candidate.computeNormRanges(omega, *mapping1);
+        }
         candidates.addCandidate(candidate);
       }
       ApplicationTools::displayTaskDone();
@@ -675,9 +685,12 @@ int main(int argc, char *argv[])
       vector<string> stats(table->getNumberOfRows()), pvalues(table->getNumberOfRows());
       for(unsigned int i = 0; i < table->getNumberOfRows(); i++)
       {
-        stats[i] = TextTools::toString(candidates[i].getStatisticValue(), 6);
-        //cout << candidates.getN1ForGroup(i) << "\t" << candidates.getN2ForGroup(i) << endl;
-        pvalues[i] = TextTools::toString(candidates.getPValueForGroup(i), 6);
+        stats[i] = candidates[i].isAnalysable()
+          ? TextTools::toString(candidates[i].getStatisticValue(), 6)
+          : "NA";
+        pvalues[i] = candidates[i].isAnalysable()
+          ? TextTools::toString(candidates.getPValueForGroup(i), 6)
+          : "NA";
       }
       table->addColumn("Stat", stats);
       table->addColumn("p-value", pvalues);
@@ -696,6 +709,9 @@ int main(int argc, char *argv[])
 
     delete statistic;
   }
+
+
+  else throw Exception("Unknown analysis type: " + analysis);
 
 
   // ***********

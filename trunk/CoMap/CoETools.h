@@ -97,15 +97,17 @@ class CandidateGroup:
 {
   protected:
     double _statistic;
+    bool _analysable;
 
   public:
-    CandidateGroup(): _statistic(0) {}
+    CandidateGroup(): _statistic(0), _analysable(true) {}
 
   public:
     double getStatisticValue() const { return _statistic; }
     void setStatisticValue(double value) { _statistic = value; }
     void computeStatisticValue(const Statistic & stat, const ProbabilisticSubstitutionMapping & mapping) throw (Exception)
     {
+      if(!_analysable) throw Exception("CandidateGroup::computeStatisticValue. Group is not analysable.");
       if(size() == 0) throw Exception("CandidateGroup::computeStatisticValue. Group is empty!");
       vector<const Vdouble *> group;
       for(unsigned int i = 0; i < size(); i++)
@@ -115,15 +117,18 @@ class CandidateGroup:
       }
       _statistic = stat.getValueForGroup(group);
     }
-    void computeNormRanges(double omega, const ProbabilisticSubstitutionMapping & mapping)
+    void computeNormRanges(double omega, const ProbabilisticSubstitutionMapping & mapping) throw (Exception)
     {
+      if(!_analysable) throw Exception("CandidateGroup::computeNormRanges. Group is not analysable.");
+      if(size() == 0) throw Exception("CandidateGroup::computeNormRanges. Group is empty!");
       for(unsigned int i = 0; i < size(); i++)
       {
         double norm = VectorTools::norm<double, double>(mapping[(*this)[i].getIndex()]);
         (*this)[i].setNormRange(norm - omega, norm + omega);
       }
     }
-
+    bool setAnalysable(bool yn) { _analysable = yn; }
+    bool isAnalysable() const { return _analysable; }
 };
 
 class CandidateGroupSet
@@ -141,6 +146,8 @@ class CandidateGroupSet
     unsigned int _minSim;
 
     unsigned int _nbCompleted;
+
+    unsigned int _nbAnalysable;
 
     unsigned int _verbose;
 
@@ -166,6 +173,7 @@ class CandidateGroupSet
       _simulations.push_back(vector< deque<const Vdouble *> >(group.size()));
       _n1.push_back(0);
       _n2.push_back(0);
+      if(group.isAnalysable()) _nbAnalysable++;
     }
 
     double getPValueForGroup(unsigned int groupIndex) const
@@ -186,6 +194,9 @@ class CandidateGroupSet
       _simulations.resize(size);
       _n1.resize(size);
       _n2.resize(size);
+      _nbAnalysable = 0;
+      for(unsigned int i = 0; i < size; i++)
+        if(_candidates[i].isAnalysable()) _nbAnalysable++;
     }
 
     unsigned int getVerbose() const { return _verbose; }
