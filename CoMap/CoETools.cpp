@@ -121,7 +121,7 @@ void CoETools::readData(
     {
       rDist = PhylogeneticsApplicationTools::getRateDistribution(params);
     }
-    tl = new DRHomogeneousTreeLikelihood(*tree, *sites, model, rDist, true, true);
+    tl = new DRHomogeneousTreeLikelihood(*tree, *sites, model, rDist, true, false);
   }
   else if(nhOpt == "one_per_branch")
   {
@@ -148,7 +148,7 @@ void CoETools::readData(
     vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", params, ',', "");
     modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, globalParameters); 
     model = NULL;
-    tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, true);
+    tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false);
   }
   else if(nhOpt == "general")
   {
@@ -163,7 +163,7 @@ void CoETools::readData(
     {
       rDist = PhylogeneticsApplicationTools::getRateDistribution(params);
     }
-    tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, true); 
+    tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false); 
   }
   else throw Exception("Unknown option for nonhomogeneous: " + nhOpt);
   

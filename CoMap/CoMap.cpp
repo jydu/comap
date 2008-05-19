@@ -170,6 +170,9 @@ int main(int argc, char *argv[])
 	DiscreteDistribution *rDist1;
 	DRTreeLikelihood *tl1;
 	CoETools::readData(tree1, alphabet1, allSites1, sites1, model1, modelSet1, rDist1, tl1, params, "");
+	ApplicationTools::displayResult("Number of sites in file", allSites1->getNumberOfSites());
+	ApplicationTools::displayResult("Number of sites to analyse", sites1->getNumberOfSites());
+	ApplicationTools::displayResult("Number of site patterns", tl1->getLikelihoodData()->getNumberOfDistinctSites());
   
   bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", params, false, "", true, false);
 	ApplicationTools::displayResult("Rate distribution for simulations", (continuousSim ? "continuous" : "discrete"));
@@ -232,6 +235,9 @@ int main(int argc, char *argv[])
 		  DRTreeLikelihood *tl2;
 		  ApplicationTools::displayMessage("\nLoading second dataset...\n");
 		  CoETools::readData(tree2, alphabet2, allSites2, sites2, model2, modelSet2, rDist2, tl2, params, "2");
+	    ApplicationTools::displayResult("Number of sites in file", allSites2->getNumberOfSites());
+	    ApplicationTools::displayResult("Number of sites to analyse", sites2->getNumberOfSites());
+	    ApplicationTools::displayResult("Number of site patterns", tl2->getLikelihoodData()->getNumberOfDistinctSites());
 
 		  ApplicationTools::displayMessage("\n... and get its substitution vectors.\n");
 		
