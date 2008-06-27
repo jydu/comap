@@ -129,31 +129,9 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-	// Get the parameters from command line:
-	map<string, string> cmdParams = AttributesTools::getAttributesMap(
-	AttributesTools::getVector(argc, argv), "=");
-
-	// Look for a specified file with parameters:
-	map<string, string> params;
-	if(cmdParams.find("param") != cmdParams.end())
-  {
-		string file = cmdParams["param"];
-		if(!FileTools::fileExists(file))
-    {
-			ApplicationTools::displayError("Parameter file not found.");
-			exit(-1);
-		}
-    else
-    {
-			params = AttributesTools::getAttributesMapFromFile(file, "=");
-			// Actualize attributes with ones passed to command line:
-			AttributesTools::actualizeAttributesMap(params, cmdParams);
-		}
-	}
-  else
-  {
-		params = cmdParams;
-	}
+  cout << "Parsing options:" << endl;
+  
+  map<string, string> params = AttributesTools::parseOptions(argc, argv);
 
 	ApplicationTools::displayMessage("\n\n-*- Retrieve data and model -*-\n");
 
