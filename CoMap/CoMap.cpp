@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 	cout << endl;
 	cout << endl;
 	cout << "***********************************************************" << endl;
-	cout << "* This is CoMap        version 1.3.0       date: 21/01/08 *" << endl;
+	cout << "* This is CoMap        version 1.4.0       date: 14/02/09 *" << endl;
 	cout << "*     A C++ shell program to detect co-evolving sites.    *" << endl;
 	cout << "***********************************************************" << endl;
 	cout << endl;
@@ -316,8 +316,6 @@ int main(int argc, char *argv[])
 
 
 
-
-  
   // ***********************
 	// * Clustering analysis *
 	// ***********************
@@ -377,7 +375,7 @@ int main(int argc, char *argv[])
       vector<string> siteNames(nbSites);
       for(unsigned int i = 0; i < nbSites; i++)
       {
-        string siteName = "Site" + TextTools::toString(sites1->getSite(i)->getPosition());
+        string siteName = TextTools::toString(sites1->getSite(i)->getPosition());
         siteNames[i] = siteName; 
         norms[i] = VectorTools::norm<double, double>((*mapping1)[i]);
       }
@@ -574,6 +572,12 @@ int main(int argc, char *argv[])
 
   
 
+
+
+  // ****************************
+	// * Candidate sites analysis *
+	// ****************************
+	
   else if(analysis == "candidates")
   {
     // *****************************
@@ -693,6 +697,10 @@ int main(int argc, char *argv[])
 
     delete statistic;
   }
+
+
+
+
 
 
   else throw Exception("Unknown analysis type: " + analysis);

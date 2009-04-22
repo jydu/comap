@@ -48,6 +48,8 @@ knowledge of the CeCILL license and that you accept its terms.
 // From PhylLib:
 #include <Phyl/SubstitutionMappingTools.h>
 
+using namespace bpp;
+
 /******************************************************************************/
 
 AnalysisTools::AnalysisTools() {}
@@ -426,11 +428,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
   }
   for(unsigned int i = 0; i < repCPU; i++)
   {
-    if(verbose)
-    {
-      *ApplicationTools::message << ".";
-      ApplicationTools::message->flush();
-    }
+    if(verbose) ApplicationTools::displayGauge(i, repCPU - 1);
 
     SiteContainer * sites1 = seqSim.simulate(repRAM);
     drtl.setData(*sites1);
@@ -473,7 +471,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
     }
     delete sites2;
 
-     for(unsigned int j = 0; j < repRAM; j++)
+    for(unsigned int j = 0; j < repRAM; j++)
     {
       double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
       double minR = min(pr1[j], pr2[j]);
@@ -515,11 +513,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
   }
   for(unsigned int i = 0; i < repCPU; i++)
   {
-    if(verbose)
-    {
-      *ApplicationTools::message << ".";
-      ApplicationTools::message->flush();
-    }
+    if(verbose) ApplicationTools::displayGauge(i, repCPU - 1);
 
     SiteContainer * sites1 = seqSim1.simulate(repRAM);
     drtl1.setData(*sites1);
@@ -591,14 +585,10 @@ void AnalysisTools::getNullDistributionIntraDR(
   bool verbose)
 {
   // Write header line:
-  out << "statistic\tmin.rc\tmin.pr\tNmin" << endl;
+  out << "Stat\tRCmin\tPRmin\tNmin" << endl;
   for(unsigned int i = 0; i < repCPU; i++)
   {
-    if(verbose)
-    {
-      *ApplicationTools::message << ".";
-      ApplicationTools::message->flush();
-    }
+    if(verbose) ApplicationTools::displayGauge(i, repCPU - 1);
     
     SiteContainer * sites1 = seqSim.simulate(repRAM);
     drtl.setData(*sites1);
@@ -645,7 +635,7 @@ void AnalysisTools::getNullDistributionIntraDR(
       else
         mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, nijt, false);
     }
-    delete sites1;
+    delete sites2;
     Vdouble norm2 = computeNorms(*mapping2);
       
     for(unsigned int j = 0; j < repRAM; j++)
@@ -677,14 +667,10 @@ void AnalysisTools::getNullDistributionInterDR(
   bool verbose)
 {
   // Write header line:
-  out << "statistic\tmin.rc\tmin.pr\tNmin" << endl;
+  out << "Stat\tRCmin\tPRmin\tNmin" << endl;
   for(unsigned int i = 0; i < repCPU; i++)
   {
-    if(verbose)
-    {
-      *ApplicationTools::message << ".";
-      ApplicationTools::message->flush();
-    }
+    if(verbose) ApplicationTools::displayGauge(i, repCPU - 1);
 
     SiteContainer * sites1 = seqSim1.simulate(repRAM);
     drtl1.setData(*sites1);
@@ -754,7 +740,7 @@ void AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(
   bool verbose)
 {
   // Write header line:
-  out << "statistic\tr1\tr2" << endl;
+  out << "Stat\tr1\tr2" << endl;
   unsigned int c = 0;
   for(unsigned int i = 0; i < rep; i++)
   {

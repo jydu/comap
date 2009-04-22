@@ -79,6 +79,8 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Phyl/DRHomogeneousTreeLikelihood.h>
 #include <Phyl/DRNonHomogeneousTreeLikelihood.h>
 
+using namespace bpp;
+
 // From the STL:
 #include <fstream>
 #include <iomanip>
@@ -147,7 +149,7 @@ void CoETools::readData(
     FrequenciesSet * rootFreqs = PhylogeneticsApplicationTools::getFrequenciesSet(alphabet, sites, params, rateFreqs);
     vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", params, ',', "");
     modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, globalParameters); 
-    model = NULL;
+    model = modelSet->getModel(0)->clone();
     tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false);
   }
   else if(nhOpt == "general")
@@ -163,6 +165,7 @@ void CoETools::readData(
     {
       rDist = PhylogeneticsApplicationTools::getRateDistribution(params);
     }
+    model = modelSet->getModel(0)->clone();
     tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false); 
   }
   else throw Exception("Unknown option for nonhomogeneous: " + nhOpt);
@@ -395,9 +398,10 @@ void CoETools::writeInfos(
   ApplicationTools::displayResult("Alignment information logfile", outFile);
 
   ofstream out(outFile.c_str(), ios::out);
-  out << "is.complete\tis.constant\trc\tpr\tlogLn" << endl;
+  out << "Group\tIsComplete\tIsConstant\tRC\tPR\tlogLn" << endl;
 
-  for(unsigned int i = 0; i < completeSites.getNumberOfSites(); i++) {
+  for(unsigned int i = 0; i < completeSites.getNumberOfSites(); i++)
+  {
     const Site * currentSite = completeSites.getSite(i);
     int currentSitePosition = currentSite -> getPosition();
     int isCompl = (SiteTools::isComplete(* currentSite) ? 1 : 0);
@@ -587,7 +591,7 @@ void CoETools::computeIntraStats(
     TextTools::toString(nbSites * (nbSites + 1) / 2) +
     " pairs to compute!");
 
-  statOut << "Group\tstatistic\tmin.rc\tmin.pr\tNmin" << endl;
+  statOut << "Group\tStat\tRCmin\tPRmin\tNmin" << endl;
 
   ApplicationTools::displayTask("Analyse each site pair");
   
@@ -601,8 +605,7 @@ void CoETools::computeIntraStats(
     if(iClass < minRateClass) continue;
     if(iRate  < minRate     ) continue;
     double iNorm  = norms[i];
-    *ApplicationTools::message << ".";
-    ApplicationTools::message->flush();
+    ApplicationTools::displayGauge(i, nbSites - 1);
     for(unsigned int j = i + 1; j < nbSites; j++)
     {
       int    jClass = classes[j];
@@ -686,7 +689,7 @@ void CoETools::computeInterStats(
     TextTools::toString(indepComp ? nbSites1 : nbSites1 * nbSites2) +
     " pairs to compute!");
 
-  statOut << "Group\tstatistic\tmin.rc\tmin.pr\tNmin" << endl;
+  statOut << "Group\tStat\tRCmin\tPRmin\tNmin" << endl;
 
   ApplicationTools::displayTask("Analyse each site pair");
     
@@ -702,8 +705,7 @@ void CoETools::computeInterStats(
     if(iClass < minRateClass1) continue;
     if(iRate  < minRate1     ) continue;
     double iNorm  = norms1[i];
-    *ApplicationTools::message << ".";
-    ApplicationTools::message->flush();
+    ApplicationTools::displayGauge(i, nbSites1 - 1);
       
     unsigned int begin = indepComp ? i : 0;
     unsigned int end   = indepComp ? i + 1 : nbSites2;
