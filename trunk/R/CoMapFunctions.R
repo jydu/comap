@@ -46,48 +46,172 @@ progress<-function(i=0,max=NA,size=50)
 # group.sizes: A vector of sizes to test. 2:20 will test all groups with a size <= 20 for instance.
 # sim: The simulation result (data.frame).
 # window: The size of the sliding window, in percent.
+# grid.Nmin: precompute a grid of size round(1/window). This will speed up the computation, but may be unappropriate if there are not enough simulations.
+# grid.Stat: also precompute a grid for Statistics, for certain p-values (not fully tested yet, you should not use this option!).
+# verbose: Tell if progress bars and messages should be output.
 # Return a data.frame similar to data, with a new column named 'p.value'.
-test<-function(data, sim, group.sizes, window, min.nobs, statName="Stat", lower=FALSE)
+test<-function(data, sim, group.sizes, window, min.nobs, grid.Nmin=FALSE, grid.Stat=FALSE, statName="Stat", lower=FALSE, verbose=TRUE)
 { 
   data[,"p.value"]<-rep(NA,nrow(data))
   data[,"nobs"]<-rep(NA,nrow(data))
-  count<-0
-  tot<-nrow(data[data$Size %in% group.sizes,])
   for(i in group.sizes)
   {
-    data.group<-data[data$Size==i,]
-    if(nrow(data.group) > 0)
+    group.filter<-which(data$Size==i)
+    tot<-length(group.filter)
+    if(tot > 0)
     {
       sim.group<-sim[sim$Size==i,]
-      ws<-(max(sim.group$Nmin) - min(sim.group$Nmin)) * window / 2
-
-      for(j in 1:nrow(data.group))
+      if(grid.Nmin)
+      #We discretize Nmin for speeding up computations
       {
-        progress(count<-count+1, tot)
-        nmin<-data.group[j,"Nmin"]
-        d<-sim.group[sim.group$Nmin > nmin - ws & sim.group$Nmin < nmin + ws,]
-        gn<-which(data$Group==data.group[j, "Group"])
-        if(nmin < 0.01) data[gn,"p.value"]<-1. #Threshold for conserved sites.
-        else
+        if(verbose) cat("Computing grid for group size", i,".\n") 
+        grid.size<-round(1/window)
+        ma<-max(sim.group$Nmin)
+        mi<-min(sim.group$Nmin)
+        grid.bounds<-mi + (0:grid.size)*(ma - mi)/grid.size
+        grid.f<-cut(sim.group$Nmin, breaks=grid.bounds, labels=FALSE)
+        grid<-split(sim.group[, statName], grid.f)
+        if(grid.Stat)
+        #We also discretize Stat for speeding up computations
         {
-          stat<-data.group[j,"Stat"]
-          if(nrow(d) < min.nobs)
+          grid.stat<-c(1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,5e-2,1e-1,2e-1,3e-1,4e-1,5e-1,6e-1,7e-1,8e-1,9e-1,1)
+          if(!lower) grid.stat<-sort(1-grid.stat)
+          nobs<-list()
+          pval<-list()
+          for(j in as.character(1:length(unique(grid.f))))
           {
-            data[gn,"p.value"]<-NA
-          }
-          else
-          {
-            if(lower)
+            d<-grid[[j]]
+            nobs[[j]]<-length(d)
+            if(length(d) < min.nobs)
             {
-              data[gn,"p.value"]<-(sum(d[,statName] <= stat) + 1) / (nrow(d) + 1)
+              cat("Nmin category", j, "will be ignored because of unsuficient number of points.\n")
+            }
+            else
+            {      
+              d<-sort(d)
+              g<-unique(round(grid.stat * (length(d) + 1) - 1))
+              if(lower) pval[[j]]<-grid.stat[g > 0]
+              else pval[[j]]<-1. - grid.stat[g > 0]
+              g<-g[g > 0]
+              grid[[j]]<-c(-Inf, d[g])
+            }
+          }
+          if(verbose) progress()
+
+          tmp.pval<-numeric(tot)
+          tmp.nobs<-numeric(tot)
+          tmp.indx<-numeric(tot)
+          for(j in 1:tot)
+          {
+            progress(j, tot)
+            nmin<-as.character(findInterval(data[group.filter[j], "Nmin"], grid.bounds, rightmost.closed=TRUE))
+            d<-grid[[nmin]]
+            n<-nobs[[nmin]]
+            n<-length(d)
+            p<-pval[[nmin]]
+            stat<-data[group.filter[j], statName]
+            if(n < min.nobs)
+            {
+              tmp.pval[j]<-NA
             }
             else
             {
-              data[gn,"p.value"]<-(sum(d[,statName] >= stat) + 1) / (nrow(d) + 1)
-            }
+              tmp.pval[j]<-p[findInterval(stat, d, rightmost.closed=TRUE)]
+            } 
+            tmp.nobs[j]<-n
+            tmp.indx[j]<-group.filter[j]
           }
+          #Now update data:
+          data[tmp.indx, c("p.value", "nobs")]<-cbind(tmp.pval, tmp.nobs)
         }
-        data[gn,"nobs"]<-nrow(d)
+        else
+        # We do not descretize Stat and compute exact p-values.
+        {
+          for(j in as.character(1:length(unique(grid.f))))
+          {
+            d<-grid[[j]]
+          }
+          if(verbose) progress()
+
+          tmp.pval<-numeric(tot)
+          tmp.nobs<-numeric(tot)
+          tmp.indx<-numeric(tot)
+          for(j in 1:tot)
+          {
+            if(verbose) progress(j, tot)
+            nmin<-as.character(findInterval(data[group.filter[j], "Nmin"], grid.bounds, rightmost.closed=TRUE))
+            d<-grid[[nmin]]
+            n<-length(d)
+            stat<-data[group.filter[j], statName]
+            if(n < min.nobs)
+            {
+              tmp.pval[j]<-NA
+            }
+            else
+            {
+              if(lower)
+              {
+                tmp.pval[j]<-(sum(d <= stat) + 1) / (length(d) + 1)
+              }
+              else
+              {
+                tmp.pval[j]<-(sum(d >= stat) + 1) / (length(d) + 1)
+              }
+            }   
+            tmp.nobs[j]<-n
+            tmp.indx[j]<-group.filter[j]
+          }
+          #Now update data:
+          data[tmp.indx, c("p.value", "nobs")]<-cbind(tmp.pval, tmp.nobs)
+        }
+      }
+      else
+      #This is the exact procedure, without any discretization.
+      {
+        if(verbose) cat("Analysing groups of size", i, "\n")
+        ws<-(max(sim.group$Nmin) - min(sim.group$Nmin)) * window / 2
+        if(verbose) progress()
+        
+        tmp.pval<-numeric(tot)
+        tmp.nobs<-numeric(tot)
+        tmp.indx<-numeric(tot)
+        for(j in 1:tot)
+        {
+          if(verbose) progress(j, tot)
+          nmin<-data[group.filter, "Nmin"][j]
+          d<-sim.group[sim.group$Nmin > nmin - ws & sim.group$Nmin < nmin + ws,]
+          if(nmin < 0.01)
+          {
+            #data[group.filter[j], "p.value"]<-1. #Threshold for conserved sites.
+            tmp.pval[j]<-1.
+          }
+          else
+          {
+            stat<-data[group.filter, statName][j]
+            if(nrow(d) < min.nobs)
+            {
+              #data[group.filter[j], "p.value"]<-NA
+              tmp.pval[j]<-NA
+            }
+            else
+            {
+              if(lower)
+              {
+                #data[group.filter[j], "p.value"]<-(sum(d[, statName] <= stat) + 1) / (nrow(d) + 1)
+                tmp.pval[j]<-(sum(d[, statName] <= stat) + 1) / (nrow(d) + 1)
+              }
+              else
+              {
+                #data[group.filter[j], "p.value"]<-(sum(d[, statName] >= stat) + 1) / (nrow(d) + 1)
+                tmp.pval[j]<-(sum(d[, statName] >= stat) + 1) / (nrow(d) + 1)
+              }
+            } 
+          }
+          #data[group.filter[j], "nobs"]<-nrow(d)
+          tmp.nobs[j]<-nrow(d)
+          tmp.indx[j]<-group.filter[j]
+        }
+        data[tmp.indx, c("p.value", "nobs")]<-cbind(tmp.pval, tmp.nobs)
       }
     }
   }
@@ -222,9 +346,12 @@ build.cliques<-function(pred,cng,logFile="")
 
 # New correction for nested groups:
 # erase nested (!)
-ernest<-function(pred,logFile="")
+ernest<-function(pred, logFile="", verbose=TRUE)
 {
-  cat("Building cliques...\n")
+  tmp<-unique(pred$Size)
+  if(length(tmp)==1 && tmp==2) return(pred) #Nothing nested here (pairwise analysis).
+
+  if(verbose) cat("Building cliques...\n")
   if(!is.null(logFile))
     cat(file=logFile,date(),"\n")
   groups<-as.character(pred$Group)
@@ -298,26 +425,30 @@ ernest<-function(pred,logFile="")
 # sim: The simulation result (data.frame).
 # group.sizes: A vector of sizes to test. 2:20 will test all groups with a size <= 20 for instance.
 # window: The size of the sliding window, in percent.
-get.pred<-function(data, sim, group.sizes, window, min.nobs)
+# verbose: Tell if progress bars and messages should be output.
+get.pred<-function(data, sim, group.sizes, window, min.nobs, grid.Nmin, verbose=TRUE)
 {
-  pred<-test(data, sim, group.sizes, window, min.nobs)
+  pred<-test(data, sim, group.sizes, window, min.nobs, grid.Nmin, FALSE, verbose=verbose)
   pred<-pred[!is.na(pred$p.value),]
   pred$p.value<-round.pval(pred$p.value)
   return(pred)
 }
 
 # Correction for multiple testing:
-fdrcalc<-function(sim, fdr, simindex, group.sizes, window, min.nobs, cng)
+fdrcalc<-function(sim, fdr, simindex, group.sizes, window, min.nobs, grid.Nmin, cng)
 {
   sim<-sim[sim$Size %in% group.sizes,]
   p<-numeric(0)
   progress()
+  count<-1
   for(i in simindex)
   {
+    progress(count, length(simindex))
+    count<-count+1
     sima<-sim[sim$Rep + 1 == i,]
     simr<-sim[sim$Rep + 1 != i,]
-    pred<-get.pred(sima, simr, group.sizes, window, min.nobs)
-    if(cng) pred<-ernest(pred,NULL)
+    pred<-get.pred(sima, simr, group.sizes, window, min.nobs, grid.Nmin, verbose=FALSE)
+    if(cng) pred<-ernest(pred, NULL, verbose=FALSE)
     p<-c(p,pred$p.value)
   }
   p<-sort(p)
@@ -333,11 +464,23 @@ fdrcalc<-function(sim, fdr, simindex, group.sizes, window, min.nobs, cng)
 # level: The maximum p-value level for groups to output.
 # cng: Tell if correction for nested groups must be applied.
 # logFile: Where to write the groups removed.
-format.pred<-function(data, sim, group.sizes, window, min.nobs, method="", level=0.05, cng, logFile, fdr=0.05, nfdr=10)
+format.pred<-function(data, sim, group.sizes, window, min.nobs, grid.Nmin, method="", level=0.05, cng, logFile, fdr=0.05, nfdr=10)
 {
   cat("Computing p-values for data set...\n");
-  progress()
-  pred<-get.pred(data, sim, group.sizes, window, min.nobs)
+  pairs<-FALSE
+  if(is.null(data$Size)) #For pairwise analysis. 
+  {
+    if(!is.null(sim$Size) && (length(unique(sim$Size)) > 1 || unique(sim$Size)  != 2))
+    {
+       error("Data are from a pairwise analysis, but simulations result from a clustering analysis.")
+    }
+    data$Size<-2
+    sim$Size<-2
+    group.sizes<-2
+    pairs<-TRUE
+  }
+  pred<-get.pred(data, sim, group.sizes, window, min.nobs, grid.Nmin)
+  nbtests<-sum(pred$nobs >= min.nobs)
   pred<-pred[pred$p.value <= level,]
   if(nrow(pred)==0) return(pred)
   pred<-pred[order(pred$p.value),]
@@ -359,11 +502,25 @@ format.pred<-function(data, sim, group.sizes, window, min.nobs, method="", level
   if(!is.na(fdr))
   {
     cat("Computing FDR...\n");
-    f<-fdrcalc(sim, fdr, 1:nfdr, group.sizes, window, min.nobs, cng)
-    pred$FDR<-ifelse(pred$p.value <= f$threshold, "yes", "no")
-    n4<-sum(pred$FDR=="yes")
+    if(pairs)
+    {
+      cat("Only pairs are tested, perform Benjamini and Hochberg FDR procedure.\n")
+      x<-sort(pred[,"p.value"])
+      test <- which(x <= ((1:length(x)) * fdr/nbtests))
+      t<-ifelse(length(test) == 0, 0, x[max(test)])
+      cat("Significance threshold at level", fdr, "is", t, "(", nbtests, "performed )\n")
+      pred$FDR<-ifelse(pred$p.value <= t, "yes", "no")
+    }
+    else
+    {
+      cat("Groups result from a clustering approach, perform Dutheil and Galtier FDR procedure.\n")
+      
+      f<-fdrcalc(sim, fdr, 1:nfdr, group.sizes, window, min.nobs, grid.Nmin, cng)
+      pred$FDR<-ifelse(pred$p.value <= f$threshold, "yes", "no")
+    }
+    n4<-sum(pred$FDR == "yes")
     cat(n4, "groups remain significant after correction for multiple testing.\n")
   }
-  return(pred[,-which(colnames(pred) %in% c("Const","Nmax","Nmean","Delta"))])
+  return(pred)
 }
 
