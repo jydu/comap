@@ -193,7 +193,7 @@ void CoETools::readData(
   if(optimize)
   {
     ApplicationTools::displayResult("Optimization", (optimize ? "yes" : "no"));
-    PhylogeneticsApplicationTools::optimizeParameters(tl, params, suffix, true, true);
+    PhylogeneticsApplicationTools::optimizeParameters(tl, tl->getParameters(), params, suffix, true, true);
     TreeTemplate<Node> *treeOpt = dynamic_cast<TreeTemplate<Node> *>(tl->getTree()->clone());
     PhylogeneticsApplicationTools::writeTree(*treeOpt, params, suffix);
   

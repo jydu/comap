@@ -39,32 +39,13 @@ tree.file = $(DATA).dnd
 # ----------------------------------------------------------------------------------------
 #                                     Model specification
 # ----------------------------------------------------------------------------------------
+# Read the Bio++ Program Suite manual for a detail description of all available models.
+# Non-homogeneous models can be used here, and also covarions. The latter however will probably
+# do not do what you want, as it will map both states and rates... use with care then.
 
-# Available models. See the documentation or the BppML program of the BppSuite package for a more complete description.
-# For proteins, the DCmutt method is used for JTT92 and DSO78.
-# You can use the 'empirical' option to specify another model.
-# JCnuc, K80, T92, HKY85, F84, TN93, GTR, JCprot, DSO78, JTT92 or empirical
-model.name = HKY85
-# Initial values for parameters:
-#kappa (K80, T92, HKY85, F84)
-#kappa1, kappa2 (TN93)
-#theta (T92)
-#piA, piT, piC and piG (HKY85, F84, TN93 and GTR)
-#a,b,c,d,e (GTR)
-model.kappa = 2.843
-#Tell if we have to use observed frequencies as parameter values (for piA, piT, piG, piC and theta).
-#For proteins, this is equivalent to the -F model family.
-model.use_observed_freq = yes
-#If empirical is set, specify the path where to find model (in PAML format).
-model_empirical.file = 
+model = HKY85(kappa=2.843, theta=0.5, useObservedFreqs=yes)
 
-# Rate Across Sites variation:
-# gamma or constant
-rate_distribution = gamma
-# The gamma distribution's shape parameter
-rate_distribution.alpha = 0.358
-# Number of classes for discretization:
-rate_distribution.classes_number = 4
+rate_distribution = Gamma(n=4, alpha=0.358)
 
 # ----------------------------------------------------------------------------------------
 #                                     Parameter estimation
