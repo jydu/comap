@@ -88,10 +88,6 @@ void help()
   cout << "output.vectors  | the vectors output file." << endl;
   cout << "output.tree     | the tree with estimated branches lengths output file." << endl;
 	cout << endl;
-	PhylogeneticsApplicationTools::printSubstitutionModelHelp();
-	cout << endl;
-	PhylogeneticsApplicationTools::printRateDistributionHelp();
-	cout << endl;
 	PhylogeneticsApplicationTools::printOptimizationHelp(false, false);
 	cout << endl;
 }
