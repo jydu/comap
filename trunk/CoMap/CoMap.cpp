@@ -131,7 +131,9 @@ int main(int argc, char *argv[])
 
 	ApplicationTools::displayMessage("\n\n-*- Retrieve data and model -*-\n");
 
-	TreeTemplate<Node> * tree1 = PhylogeneticsApplicationTools::getTree(params);
+	Tree* tmpTree = PhylogeneticsApplicationTools::getTree(params);
+	TreeTemplate<Node>* tree1 = new TreeTemplate<Node>(*tmpTree);
+  delete tmpTree;
 	ApplicationTools::displayResult("Number of leaves", TextTools::toString(tree1->getNumberOfLeaves()));
 	ApplicationTools::displayResult("Number of sons at root", TextTools::toString(tree1->getRootNode()->getNumberOfSons()));
 	
@@ -192,9 +194,11 @@ int main(int argc, char *argv[])
 		  if(params.find("tree.file2") != params.end() && params["tree.file2"] != "none")
       {
 		    ApplicationTools::displayMessage("WARNING!!! Second tree file specified.\n Tree 1 and Tree 2 must differ only by their branch lengths, otherwise results may be uninterpretable.\n");			
-  	    tree2 = PhylogeneticsApplicationTools::getTree(params, "2", true);
-	      ApplicationTools::displayResult("# number of leaves", TextTools::toString(tree2 -> getNumberOfLeaves()));
-    	  ApplicationTools::displayResult("# number of sons at root", TextTools::toString(tree2 -> getRootNode() -> getNumberOfSons()));
+  	    Tree* tmpTree = PhylogeneticsApplicationTools::getTree(params, "input.", "2", true);
+  	    tree2 = new TreeTemplate<Node>(*tmpTree);
+        delete tmpTree;
+	      ApplicationTools::displayResult("# number of leaves", TextTools::toString(tree2->getNumberOfLeaves()));
+    	  ApplicationTools::displayResult("# number of sons at root", TextTools::toString(tree2->getRootNode()->getNumberOfSons()));
 		  }
       else
       {
