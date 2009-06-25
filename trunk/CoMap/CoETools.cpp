@@ -402,8 +402,8 @@ void CoETools::writeInfos(
 
   for(unsigned int i = 0; i < completeSites.getNumberOfSites(); i++)
   {
-    const Site * currentSite = completeSites.getSite(i);
-    int currentSitePosition = currentSite -> getPosition();
+    const Site * currentSite = &completeSites.getSite(i);
+    int currentSitePosition = currentSite->getPosition();
     int isCompl = (SiteTools::isComplete(* currentSite) ? 1 : 0);
     int isConst = (SiteTools::isConstant(* currentSite, true) ? 1 : 0);
     out << "[" << currentSitePosition << "]\t";
@@ -623,9 +623,9 @@ void CoETools::computeIntraStats(
 
       //Then print to file:
       statOut << "[";
-      statOut << completeSites.getSite(i)->getPosition();
+      statOut << completeSites.getSite(i).getPosition();
       statOut << ",";
-      statOut << completeSites.getSite(j)->getPosition();
+      statOut << completeSites.getSite(j).getPosition();
       statOut << "]\t";
       statOut << stat;
       statOut << "\t";
@@ -727,9 +727,9 @@ void CoETools::computeInterStats(
 
       //Then print to file:
       statOut << "[";
-      statOut << completeSites1.getSite(i)->getPosition();
+      statOut << completeSites1.getSite(i).getPosition();
       statOut << ",";
-      statOut << completeSites2.getSite(j)->getPosition();
+      statOut << completeSites2.getSite(j).getPosition();
       statOut << "]\t";
       statOut << stat;
       statOut << "\t";

@@ -364,13 +364,13 @@ void AnalysisTools::writeMatrix(
   out << "\tMean";
   for(unsigned int i = 0; i < matrix.size() - 1; i++)
   {
-    out << "\tSite" << sites.getSite(i)->getPosition();
+    out << "\tSite" << sites.getSite(i).getPosition();
   }
   out << endl;
   for(unsigned int j = 0; j < matrix[0].size(); j++)
   {
     if(j == 0) out << "Mean";
-    else out << "Site" << sites.getSite(j - 1)->getPosition();
+    else out << "Site" << sites.getSite(j - 1).getPosition();
     for(unsigned int i = 0; i < matrix.size(); i++)
     {
       out << "\t" << matrix[i][j];
@@ -390,13 +390,13 @@ void AnalysisTools::writeMatrix(
   out << "\tMean";
   for(unsigned int i = 0; i < matrix.size() - 1; i++)
   {
-    out << "\tSite" << sites1.getSite(i)->getPosition();
+    out << "\tSite" << sites1.getSite(i).getPosition();
   }
   out << endl;
   for(unsigned int j = 0; j < matrix[0].size(); j++)
   {
     if(j == 0) out << "Mean";
-    else out << "Site" << sites2.getSite(j - 1)->getPosition();
+    else out << "Site" << sites2.getSite(j - 1).getPosition();
     for(unsigned int i = 0; i < matrix.size(); i++)
     {
       out << "\t" << matrix[i][j];

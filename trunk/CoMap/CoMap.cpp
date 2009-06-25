@@ -375,7 +375,7 @@ int main(int argc, char *argv[])
       vector<string> siteNames(nbSites);
       for(unsigned int i = 0; i < nbSites; i++)
       {
-        string siteName = TextTools::toString(sites1->getSite(i)->getPosition());
+        string siteName = TextTools::toString(sites1->getSite(i).getPosition());
         siteNames[i] = siteName; 
         norms[i] = VectorTools::norm<double, double>((*mapping1)[i]);
       }
@@ -490,7 +490,7 @@ int main(int argc, char *argv[])
 	    vector<double> rates = tl1->getPosteriorRateOfEachSite();
       vector<bool> isConst(nbSites);
       for(unsigned int i = 0; i < nbSites; i++)
-        isConst[i] = SiteTools::isConstant(*(sites1->getSite(i)), true);
+        isConst[i] = SiteTools::isConstant(sites1->getSite(i), true);
   
       vector<Group> groups = ClusterTools::getGroups(&clusteringTree);
       //vector<double> minNorms(groups.size());
