@@ -176,8 +176,8 @@ void SimpleClustering::finalStep(int idRoot)
 	unsigned int i2 = it->first;
 	Node * n2       = it->second;
 	double d = _matrix(i1, i2) / 2;
-	root->addSon(*n1);
-	root->addSon(*n2);
+	root->addSon(n1);
+	root->addSon(n2);
 	n1->setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n1)->getInfos().length); 
 	n2->setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n2)->getInfos().length); 
 	_tree = new TreeTemplate<NodeTemplate<ClusterInfos> >(*root);
@@ -197,13 +197,13 @@ Node * SimpleClustering::getParentNode(int id, Node * son1, Node * son2)
 {
 	ClusterInfos infos;
 	infos.numberOfLeaves = 
-		dynamic_cast<NodeTemplate<ClusterInfos> *>(son1) -> getInfos().numberOfLeaves
-	+ dynamic_cast<NodeTemplate<ClusterInfos> *>(son2) -> getInfos().numberOfLeaves;
-	infos.length = dynamic_cast<NodeTemplate<ClusterInfos> *>(son1) -> getInfos().length + son1 -> getDistanceToFather();
-	Node * parent = new NodeTemplate<ClusterInfos>(id);
-	dynamic_cast<NodeTemplate<ClusterInfos> *>(parent) -> setInfos(infos);
-	parent -> addSon(* son1);
-	parent -> addSon(* son2);
+		dynamic_cast<NodeTemplate<ClusterInfos> *>(son1)->getInfos().numberOfLeaves
+	+ dynamic_cast<NodeTemplate<ClusterInfos> *>(son2)->getInfos().numberOfLeaves;
+	infos.length = dynamic_cast<NodeTemplate<ClusterInfos> *>(son1)->getInfos().length + son1 -> getDistanceToFather();
+	Node* parent = new NodeTemplate<ClusterInfos>(id);
+	dynamic_cast<NodeTemplate<ClusterInfos> *>(parent)->setInfos(infos);
+	parent->addSon(son1);
+	parent->addSon(son2);
 	return parent;
 }
 
@@ -266,8 +266,8 @@ void SumClustering::finalStep(int idRoot)
 	unsigned int i2 = it->first;
 	Node * n2       = it->second;
 	double d = _matrix(i1, i2) / 2;
-	root->addSon(*n1);
-	root->addSon(*n2);
+	root->addSon(n1);
+	root->addSon(n2);
 	n1->setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n1)->getInfos().length); 
 	n2->setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n2)->getInfos().length); 
 	//n1->setDistanceToFather(d); 
@@ -294,8 +294,8 @@ Node * SumClustering::getParentNode(int id, Node * son1, Node * son2)
 	infos.length = dynamic_cast<NodeTemplate<ClusterInfos> *>(son1)->getInfos().length + son1->getDistanceToFather();
 	Node * parent = new NodeTemplate<ClusterInfos>(id);
 	dynamic_cast<NodeTemplate<ClusterInfos> *>(parent)->setInfos(infos);
-	parent->addSon(* son1);
-	parent->addSon(* son2);
+	parent->addSon(son1);
+	parent->addSon(son2);
 	return parent;
 }
 
