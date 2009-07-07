@@ -107,13 +107,13 @@ void CoETools::readData(
   string nhOpt = ApplicationTools::getStringParameter("nonhomogeneous", params, "no", "", true, false);
   ApplicationTools::displayResult("Heterogeneous model", nhOpt);
 
-  model = NULL;
-  modelSet = NULL;
+  model = 0;
+  modelSet = 0;
 
-  if(nhOpt == "no")
+  if (nhOpt == "no")
   {  
     model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, sites, params);
-    if(model->getNumberOfStates() > model->getAlphabet()->getSize())
+    if (model->getNumberOfStates() > model->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
       //rDist = new ConstantDistribution(1.);
@@ -125,10 +125,10 @@ void CoETools::readData(
     }
     tl = new DRHomogeneousTreeLikelihood(*tree, *sites, model, rDist, true, false);
   }
-  else if(nhOpt == "one_per_branch")
+  else if (nhOpt == "one_per_branch")
   {
     model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, sites, params);
-    if(model->getNumberOfStates() > model->getAlphabet()->getSize())
+    if (model->getNumberOfStates() > model->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
       //rDist = new ConstantDistribution(1.);
@@ -139,7 +139,7 @@ void CoETools::readData(
       rDist = PhylogeneticsApplicationTools::getRateDistribution(params);
     }
     vector<double> rateFreqs;
-    if(model->getNumberOfStates() != alphabet->getSize())
+    if (model->getNumberOfStates() != alphabet->getSize())
     {
       //Markov-Modulated Markov Model...
       unsigned int n =(unsigned int)(model->getNumberOfStates() / alphabet->getSize());
@@ -152,10 +152,10 @@ void CoETools::readData(
     model = modelSet->getModel(0)->clone();
     tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false);
   }
-  else if(nhOpt == "general")
+  else if (nhOpt == "general")
   {
-    modelSet = PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet,NULL, params);
-    if(modelSet->getNumberOfStates() > modelSet->getAlphabet()->getSize())
+    modelSet = PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet,0, params);
+    if (modelSet->getNumberOfStates() > modelSet->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
       //rDist = new ConstantDistribution(1.);
@@ -174,13 +174,13 @@ void CoETools::readData(
 
   ApplicationTools::displayTask("Tree likelihood");
   double ll = tl->getValue();
-  if(isinf(ll))
+  if (isinf(ll))
   {
     ApplicationTools::displayError("!!! Unexpected initial likelihood == 0.");
     ApplicationTools::displayError("!!! You should consider reestimating all branch lengths parameters.");
     ApplicationTools::displayError("!!! Site-specific likelihood have been written in file DEBUG_likelihoods.txt .");
     ofstream debug ("DEBUG_likelihoods.txt", ios::out);
-    for(unsigned int i = 0; i < allSites->getNumberOfSites(); i++)
+    for (unsigned int i = 0; i < allSites->getNumberOfSites(); i++)
     {
       debug << "Position " << i+1 << " = " << tl->getLogLikelihoodForASite(i) << endl; 
     }
@@ -190,11 +190,11 @@ void CoETools::readData(
   *ApplicationTools::message << setprecision(20) << ll << endl;
   
   bool optimize = ApplicationTools::getBooleanParameter("optimization", params, true, suffix, true, false);
-  if(optimize)
+  if (optimize)
   {
     ApplicationTools::displayResult("Optimization", (optimize ? "yes" : "no"));
     PhylogeneticsApplicationTools::optimizeParameters(tl, tl->getParameters(), params, suffix, true, true);
-    TreeTemplate<Node> *treeOpt = dynamic_cast<TreeTemplate<Node> *>(tl->getTree()->clone());
+    TreeTemplate<Node> *treeOpt = dynamic_cast<TreeTemplate<Node> *>(tl->getTree().clone());
     PhylogeneticsApplicationTools::writeTree(*treeOpt, params, suffix);
   
     // Actualize tree.
@@ -206,11 +206,11 @@ void CoETools::readData(
     ApplicationTools::displayResult("Final likelihood, -lnL =", TextTools::toString(tl -> getLogLikelihood(), 20));
   }
   string tags = ApplicationTools::getAFilePath("output.tags.file", params, false, false, suffix, false);
-  if(tags != "none")
+  if (tags != "none")
   {
     TreeTemplate<Node> treeCopy(*tree);
     vector<Node *> nodes = treeCopy.getInnerNodes();
-    for(unsigned int i = 0; i < nodes.size(); i++)
+    for (unsigned int i = 0; i < nodes.size(); i++)
     {
       nodes[i]->setNodeProperty("name", String(TextTools::toString(nodes[i]->getId())));
     }
@@ -218,11 +218,11 @@ void CoETools::readData(
 
     // Writing leaf names translation:
     string tlnPath = ApplicationTools::getAFilePath("output.tags.translation", params, false, false, suffix, false);
-    if(tlnPath != "none")
+    if (tlnPath != "none")
     {
       ofstream tln(tlnPath.c_str(), ios::out);
       tln << "Name\tId" << endl;
-      for(unsigned int i = 0; i < nodes.size(); i++)
+      for (unsigned int i = 0; i < nodes.size(); i++)
       {
         tln << nodes[i]->getName() << "\t" << nodes[i]->getId() << endl;
       }
@@ -230,7 +230,7 @@ void CoETools::readData(
     }
 
     // Translate names:
-    for(unsigned int i = 0; i < nodes.size(); i++)
+    for (unsigned int i = 0; i < nodes.size(); i++)
     {
       nodes[i]->setName(TextTools::toString(nodes[i]->getId()));
     }
@@ -249,16 +249,16 @@ ProbabilisticSubstitutionMapping * CoETools::getVectors(
   map<string, string>    & params,
   const string           & suffix)
 {
-  ProbabilisticSubstitutionMapping * substitutions = NULL;
+  ProbabilisticSubstitutionMapping * substitutions = 0;
   string inputVectorsFilePath = ApplicationTools::getAFilePath("input.vectors.file", params, false, false, suffix, false);
 
-  if(inputVectorsFilePath != "none")
+  if (inputVectorsFilePath != "none")
   {
     //We try to load the substitution vector directly from file:
     int nbSites = drtl.getNumberOfSites();
     ApplicationTools::displayResult("Substitution mapping in file:", inputVectorsFilePath);
     ifstream sc(inputVectorsFilePath.c_str(), ios::in);
-    substitutions = new ProbabilisticSubstitutionMapping(*drtl.getTree(), nbSites);
+    substitutions = new ProbabilisticSubstitutionMapping(drtl.getTree(), nbSites);
     SubstitutionMappingTools::readFromStream(sc, *substitutions);
   }
   else
@@ -270,9 +270,9 @@ ProbabilisticSubstitutionMapping * CoETools::getVectors(
 
     bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
     bool joint   = ApplicationTools::getBooleanParameter("nijt.joint"  , params, true);
-    if(average)
+    if (average)
     {
-      if(joint)
+      if (joint)
       {
         substitutions = SubstitutionMappingTools::computeSubstitutionVectors(drtl, substitutionCount);
       }
@@ -283,7 +283,7 @@ ProbabilisticSubstitutionMapping * CoETools::getVectors(
     }
     else
     {
-      if(joint)
+      if (joint)
       {
         substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, substitutionCount);
       }
@@ -292,7 +292,7 @@ ProbabilisticSubstitutionMapping * CoETools::getVectors(
         substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, substitutionCount);
       }
     }
-    if(outputVectorsFilePath != "none")
+    if (outputVectorsFilePath != "none")
     {
       ofstream outputVectors(outputVectorsFilePath.c_str(), ios::out);
       SubstitutionMappingTools::writeToStream(*substitutions, completeSites, outputVectors);
@@ -308,7 +308,7 @@ ProbabilisticSubstitutionMapping * CoETools::getVectors(
 int CoETools::getMinRateClass(map<string, string> & params, string suffix)
 {
   int minRateClass = ApplicationTools::getIntParameter("statistic.min_rate_class", params, 0, suffix, true);
-  if(minRateClass > 0)
+  if (minRateClass > 0)
     ApplicationTools::displayMessage(
         "Only sites with posterior rate class >= " +
         TextTools::toString(minRateClass) +
@@ -321,7 +321,7 @@ int CoETools::getMinRateClass(map<string, string> & params, string suffix)
 double CoETools::getMinRate(map<string, string> & params, string suffix)
 {
   double minRate = ApplicationTools::getDoubleParameter("statistic.min_rate", params, 0., suffix, true);
-  if(minRate > 0.)
+  if (minRate > 0.)
     ApplicationTools::displayMessage(
         "Only sites with posterior rate > = " +
         TextTools::toString(minRate) +
@@ -334,7 +334,7 @@ double CoETools::getMinRate(map<string, string> & params, string suffix)
 int CoETools::getMaxRateClassDiff(map<string, string> & params)
 {
   int maxRateClassDiff = ApplicationTools::getIntParameter("statistic.max_rate_class_diff", params, -1);
-  if(maxRateClassDiff >= 0) 
+  if (maxRateClassDiff >= 0) 
     ApplicationTools::displayMessage(
       "Only pairs of sites with difference in posterior rate class <= " +
       TextTools::toString(maxRateClassDiff) +
@@ -347,7 +347,7 @@ int CoETools::getMaxRateClassDiff(map<string, string> & params)
 double CoETools::getMaxRateDiff(map<string, string> & params)
 {
   double maxRateDiff = ApplicationTools::getDoubleParameter("statistic.max_rate_diff", params, -1.);
-  if(maxRateDiff >= 0.)
+  if (maxRateDiff >= 0.)
     ApplicationTools::displayMessage(
         "Only pairs of sites with difference in posterior rate <= " +
         TextTools::toString(maxRateDiff) +
@@ -360,7 +360,7 @@ double CoETools::getMaxRateDiff(map<string, string> & params)
 double CoETools::getStatisticMin(map<string, string> & params)
 {
   double minStatistic = ApplicationTools::getDoubleParameter("statistic.min", params, 0);
-  if(minStatistic > 0)
+  if (minStatistic > 0)
     ApplicationTools::displayMessage(
       "Only pairs of sites with abs(statistic) >= " +
       TextTools::toString(minStatistic) +
@@ -372,7 +372,7 @@ double CoETools::getStatisticMin(map<string, string> & params)
 
 bool CoETools::haveToPerformIndependantComparisons(map<string, string> & params) {
   bool indepComp = ApplicationTools::getBooleanParameter("independant_comparisons", params, false);
-  if(indepComp)
+  if (indepComp)
     ApplicationTools::displayMessage(
       "Only independant comparisons will be performed.");
   return indepComp;
@@ -387,7 +387,7 @@ void CoETools::writeInfos(
   const string & suffix)
 {
   string outFile = ApplicationTools::getAFilePath("output.infos", params, false, false, suffix, true);
-  if(outFile == "none") return;
+  if (outFile == "none") return;
 
   // Get the rate class with maximum posterior probability:
   vector<unsigned int> classes = ras.getRateClassWithMaxPostProbOfEachSite();
@@ -400,7 +400,7 @@ void CoETools::writeInfos(
   ofstream out(outFile.c_str(), ios::out);
   out << "Group\tIsComplete\tIsConstant\tRC\tPR\tlogLn" << endl;
 
-  for(unsigned int i = 0; i < completeSites.getNumberOfSites(); i++)
+  for (unsigned int i = 0; i < completeSites.getNumberOfSites(); i++)
   {
     const Site * currentSite = &completeSites.getSite(i);
     int currentSitePosition = currentSite->getPosition();
@@ -420,27 +420,27 @@ void CoETools::writeInfos(
 const Statistic * CoETools::getStatistic(map<string, string> & params) throw (Exception)
 {
   string statistic = ApplicationTools::getStringParameter("statistic", params, "none");
-  if(statistic == "cosinus")
+  if (statistic == "cosinus")
   {
     return new CosinusStatistic();
   }
-  else if(statistic == "correlation")
+  else if (statistic == "correlation")
   {
     return new CorrelationStatistic();
   }
-  else if(statistic == "covariance")
+  else if (statistic == "covariance")
   {
     return new CovarianceStatistic();
   }
-  else if(statistic == "cosubstitution")
+  else if (statistic == "cosubstitution")
   {
     return new CosubstitutionNumberStatistic();
   }
-  else if(statistic == "compensation")
+  else if (statistic == "compensation")
   {
     string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", "", true);
     bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", params, true, "", true); 
-    if(nijtOption != "aadist" || sym)
+    if (nijtOption != "aadist" || sym)
     {
       throw Exception("Compensation distance must be used with 'nijt=aadist' and 'nijt_aadist.sym=no' options.");
     }
@@ -464,68 +464,69 @@ SubstitutionCount * CoETools::getSubstitutionCount(
   map<string, string> & params,
   string suffix)
 {
-  SubstitutionCount* substitutionCount = NULL;
+  SubstitutionCount* substitutionCount = 0;
   string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", suffix, true);
 
-  if(nijtOption == "laplace")
+  if (nijtOption == "laplace")
   {
     int trunc = ApplicationTools::getIntParameter("nijt_laplace.trunc", params, 10, suffix, true);
     substitutionCount = new AnalyticalSubstitutionCount(model, trunc);
   }
-  else if(nijtOption == "simple")
+  else if (nijtOption == "simple")
   {
     substitutionCount = new SimpleSubstitutionCount(alphabet);
   }
-  else if(nijtOption == "aadist")
+  else if (nijtOption == "aadist")
   {
-    if(!AlphabetTools::isProteicAlphabet(alphabet))
+    if (!AlphabetTools::isProteicAlphabet(alphabet))
     {
       ApplicationTools::displayError("Chemical distance can only be used with protein data.");
       exit(-1);
     }
     string dist = ApplicationTools::getStringParameter("nijt_aadist.type", params, "grantham", suffix, true);
     bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", params, true, suffix, true);
-    if(dist == "grantham")
+    if (dist == "grantham")
     {
-      GranthamAAChemicalDistance * M = new GranthamAAChemicalDistance();
+      GranthamAAChemicalDistance* M = new GranthamAAChemicalDistance();
+      M->setSymmetric(sym);
+      if (!sym) M->setPC1Sign(true);
+      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+    }
+    else if (dist == "miyata")
+    {
+      MiyataAAChemicalDistance* M = new MiyataAAChemicalDistance();
       M->setSymmetric(sym);
       substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
-    else if(dist == "miyata")
-    {
-      MiyataAAChemicalDistance * M = new MiyataAAChemicalDistance();
-      M->setSymmetric(sym);
-      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
-    }
-    else if(dist == "grantham.polarity")
+    else if (dist == "grantham.polarity")
     {
       GranthamAAPolarityIndex I;
       SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
       M->setSymmetric(sym);
       substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
-    else if(dist == "grantham.volume")
+    else if (dist == "grantham.volume")
     {
       GranthamAAVolumeIndex I;
       SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
       M->setSymmetric(sym);
       substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
-    else if(dist == "klein.charge")
+    else if (dist == "klein.charge")
     {
       KleinAANetChargeIndex I;
       SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
       M->setSymmetric(sym);
       substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
-    else if(dist == "charge")
+    else if (dist == "charge")
     {
       AAChargeIndex I;
       SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
       M->setSymmetric(sym);
       substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
-    else if(dist == "user1")
+    else if (dist == "user1")
     {
       string aax1FilePath = ApplicationTools::getAFilePath("nijt_aadist.type_user1.file", params, true, true, suffix, false);
       ifstream aax1File(aax1FilePath.c_str(), ios::in);
@@ -535,7 +536,7 @@ SubstitutionCount * CoETools::getSubstitutionCount(
       M->setSymmetric(sym);
       substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
-    else if(dist == "user2")
+    else if (dist == "user2")
     {
       string aax2FilePath = ApplicationTools::getAFilePath("nijt_aadist.type_user2.file", params, true, true, suffix, false);
       ifstream aax2File(aax2FilePath.c_str(), ios::in);
@@ -598,28 +599,28 @@ void CoETools::computeIntraStats(
   vector<unsigned int> classes = tl.getRateClassWithMaxPostProbOfEachSite();
   Vdouble rates   = tl.getPosteriorRateOfEachSite();
 
-  for(unsigned int i = 0; i < nbSites; i++)
+  for (unsigned int i = 0; i < nbSites; i++)
   {
     int    iClass = classes[i];
     double iRate  = rates[i];
-    if(iClass < minRateClass) continue;
-    if(iRate  < minRate     ) continue;
+    if (iClass < minRateClass) continue;
+    if (iRate  < minRate     ) continue;
     double iNorm  = norms[i];
     ApplicationTools::displayGauge(i, nbSites - 1);
-    for(unsigned int j = i + 1; j < nbSites; j++)
+    for (unsigned int j = i + 1; j < nbSites; j++)
     {
       int    jClass = classes[j];
       double jRate  = rates[j];
-      if(jClass < minRateClass) continue;
-      if(jRate  < minRate     ) continue;
+      if (jClass < minRateClass) continue;
+      if (jRate  < minRate     ) continue;
       double jNorm  = norms[j];
     
       //Sites which are in too different rate classes are not compared:
-      if(maxRateClassDiff >= 0  && NumTools::abs(jClass - iClass) > maxRateClassDiff) continue;
-      if(maxRateDiff      >= 0. && NumTools::abs(jRate  - iRate ) > maxRateDiff)      continue;
+      if (maxRateClassDiff >= 0  && NumTools::abs(jClass - iClass) > maxRateClassDiff) continue;
+      if (maxRateDiff      >= 0. && NumTools::abs(jRate  - iRate ) > maxRateDiff)      continue;
 
       double stat = statistic.getValueForPair(mapping[i], mapping[j]);
-      if(NumTools::abs(stat) < minStatistic) continue;
+      if (NumTools::abs(stat) < minStatistic) continue;
 
       //Then print to file:
       statOut << "[";
@@ -657,7 +658,7 @@ void CoETools::computeInterStats(
   // Compute statistics from data:
 
   bool indepComp = haveToPerformIndependantComparisons(params);
-  if(indepComp && mapping1.getNumberOfSites() != mapping2.getNumberOfSites())
+  if (indepComp && mapping1.getNumberOfSites() != mapping2.getNumberOfSites())
   {
     ApplicationTools::displayError("When performing independant comparisons, the two datasets must have the same length.");
     exit(-1);
@@ -698,32 +699,32 @@ void CoETools::computeInterStats(
   Vdouble rates1   = tl1.getPosteriorRateOfEachSite();
   Vdouble rates2   = tl2.getPosteriorRateOfEachSite();
 
-  for(unsigned int i = 0; i < nbSites1; i++)
+  for (unsigned int i = 0; i < nbSites1; i++)
   {
     int    iClass = classes1[i];
     double iRate  = rates1[i];
-    if(iClass < minRateClass1) continue;
-    if(iRate  < minRate1     ) continue;
+    if (iClass < minRateClass1) continue;
+    if (iRate  < minRate1     ) continue;
     double iNorm  = norms1[i];
     ApplicationTools::displayGauge(i, nbSites1 - 1);
       
     unsigned int begin = indepComp ? i : 0;
     unsigned int end   = indepComp ? i + 1 : nbSites2;
-    for(unsigned int j = begin; j < end; j++)
+    for (unsigned int j = begin; j < end; j++)
     {
       int    jClass = classes2[j];
       double jRate  = rates2[j];
-      if(jClass < minRateClass2) continue;
-      if(jRate  < minRate2     ) continue;
+      if (jClass < minRateClass2) continue;
+      if (jRate  < minRate2     ) continue;
       double jNorm  = norms2[i];
     
       //Sites which are in too different rate classes are not compared:
-      if(maxRateClassDiff >= 0  && NumTools::abs(jClass - iClass) > maxRateClassDiff) continue;
-      if(maxRateDiff      >= 0. && NumTools::abs(jRate  - iRate ) > maxRateDiff     ) continue;
+      if (maxRateClassDiff >= 0  && NumTools::abs(jClass - iClass) > maxRateClassDiff) continue;
+      if (maxRateDiff      >= 0. && NumTools::abs(jRate  - iRate ) > maxRateDiff     ) continue;
 
       //double stat = table[i + 1][j + 1];
       double stat = statistic.getValueForPair(mapping1[i], mapping2[j]);
-      if(NumTools::abs(stat) < minStatistic) continue;
+      if (NumTools::abs(stat) < minStatistic) continue;
 
       //Then print to file:
       statOut << "[";
@@ -768,7 +769,7 @@ void CoETools::computeIntraNullDistribution(
   bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
   bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true);
 
-  if(cumul)
+  if (cumul)
   {
     // Building domain:
     double lowerSB = ApplicationTools::getDoubleParameter("statistic.null.lower", params, -1.);
@@ -782,7 +783,7 @@ void CoETools::computeIntraNullDistribution(
     id = AnalysisTools::getNullDistributionIntraDR(drtl, seqSim, nijt, statistic, statDomain, rateDomain, nbRepCPU, nbRepRAM, average, joint, true);
   
     // Print to file:
-    for(unsigned int i = 0; i < rateDomain.getSize(); i++)
+    for (unsigned int i = 0; i < rateDomain.getSize(); i++)
     {
       outFile << "# Distribution with minimum rate " << rateDomain.getValue(i) << endl;
       id[i]->print(outFile);
@@ -790,7 +791,7 @@ void CoETools::computeIntraNullDistribution(
     }
 
     // Free memory:
-    for(unsigned int i = 0; i < id.size(); i++) delete id[i];
+    for (unsigned int i = 0; i < id.size(); i++) delete id[i];
   }
   else
   {
@@ -821,7 +822,7 @@ void CoETools::computeInterNullDistribution(
   bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true);
 
   ApplicationTools::displayMessage("Compute statistic under null hypothesis...");
-  if(cumul)
+  if (cumul)
   {
     // Building domain:
     double lowerSB = ApplicationTools::getDoubleParameter("statistic.null.lower", params, -1.);
@@ -831,7 +832,7 @@ void CoETools::computeInterNullDistribution(
     Vdouble bounds = ApplicationTools::getVectorParameter<double>("statistic.null.rate.bounds", params, ',', "");
     Domain rateDomain = Domain(bounds);
     ApplicationTools::displayMessage("The following rate domain will be used:");
-    for(unsigned int i = 0; i < rateDomain.getSize(); i++)
+    for (unsigned int i = 0; i < rateDomain.getSize(); i++)
     {
       *ApplicationTools::message
         << "["
@@ -856,7 +857,7 @@ void CoETools::computeInterNullDistribution(
       true);
   
     // Print to file:
-    for(unsigned int i = 0; i < rateDomain.getSize(); i++)
+    for (unsigned int i = 0; i < rateDomain.getSize(); i++)
     {
       outFile << "# Distribution with minimum rate " << rateDomain.getValue(i) << endl;
       id[i]->print(outFile);
@@ -864,7 +865,7 @@ void CoETools::computeInterNullDistribution(
     }
   
     // Free memory:
-    for(unsigned int i = 0; i < id.size(); i++) delete id[i];
+    for (unsigned int i = 0; i < id.size(); i++) delete id[i];
   }
   else
   {
@@ -877,27 +878,27 @@ void CoETools::computeInterNullDistribution(
 
 vector<unsigned int> CandidateGroupSet::nextCandidateSite() const throw (Exception)
 {
-  if(_nbCompleted == size()) throw Exception("CandidateGroupSet::nextCandidateSite. enough simulations!!");
+  if (_nbCompleted == size()) throw Exception("CandidateGroupSet::nextCandidateSite. enough simulations!!");
   //Site increment:
-  if(_n2[_groupPos] < _minSim)
+  if (_n2[_groupPos] < _minSim)
   {
     _sitePos++;
-    if(_sitePos >= (*this)[_groupPos].size())
+    if (_sitePos >= (*this)[_groupPos].size())
     {
       _groupPos++;
-      if(_groupPos >= size()) _groupPos = 0;
+      if (_groupPos >= size()) _groupPos = 0;
       _sitePos = 0;
     }
   }
   unsigned int startSearch = _groupPos;
-  if(_n2[_groupPos] >= _minSim)
+  if (_n2[_groupPos] >= _minSim)
   {
     while(_n2[_groupPos] >= _minSim || !_candidates[_groupPos].isAnalysable())
     {
       _groupPos++;
 
-      if(_groupPos >= size()) _groupPos = 0;
-      if(_groupPos == startSearch)
+      if (_groupPos >= size()) _groupPos = 0;
+      if (_groupPos == startSearch)
       {
         //No more site to complete!
         throw Exception("DEBUG: something wrong happened, this message should never appear!");
@@ -915,7 +916,7 @@ vector<unsigned int> CandidateGroupSet::nextCandidateSite() const throw (Excepti
 
 vector<unsigned int> CandidateGroupSet::currentCandidateSite() const throw (Exception)
 {
-  if(_nbCompleted == size()) throw Exception("CandidateGroupSet::nextCandidateSite. enough simulations!!");
+  if (_nbCompleted == size()) throw Exception("CandidateGroupSet::nextCandidateSite. enough simulations!!");
   vector<unsigned int> pos(2);
   pos[0] = _groupPos;
   pos[1] = _sitePos;
@@ -930,28 +931,28 @@ bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMappin
   //Analyse each site in the set:
   bool test = true, testNorm, first;
   vector<unsigned int> pos, start;
-  for(unsigned int i = 0; test && i < mapping.getNumberOfSites(); i++)
+  for (unsigned int i = 0; test && i < mapping.getNumberOfSites(); i++)
   {
     first = true;
     testNorm = false;
     while(test && !testNorm)
     {
       pos = nextCandidateSite();
-      if(first)
+      if (first)
       {
         start = pos;
         first = false;
       }
       else
       {
-        if(currentCandidateSite() == start) //We looped over all set, drop this simulated site:
+        if (currentCandidateSite() == start) //We looped over all set, drop this simulated site:
           break;
       }
       testNorm = _candidates[pos[0]][pos[1]].checkNorm(norms[i]);
-      if(testNorm)
+      if (testNorm)
       {
         addSimulatedSite(pos[0], pos[1], &mapping[i]);
-        if(_nbCompleted == _nbAnalysable) test = false;
+        if (_nbCompleted == _nbAnalysable) test = false;
       }
     }
   }
@@ -964,35 +965,35 @@ bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMappin
 
 void CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const Vdouble * v) throw (IndexOutOfBoundsException)
 {
-  if(groupIndex >= _simulations.size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad group index.", groupIndex, 0, _simulations.size());
-  if(siteIndex >= _simulations[groupIndex].size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad site index.", siteIndex, 0, _simulations[groupIndex].size());
+  if (groupIndex >= _simulations.size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad group index.", groupIndex, 0, _simulations.size());
+  if (siteIndex >= _simulations[groupIndex].size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad site index.", siteIndex, 0, _simulations[groupIndex].size());
   vector< deque<const Vdouble *> > * group = &_simulations[groupIndex];
   (*group)[siteIndex].push_back(v);
   //Test if the group is complete:
   bool test = true;
-  for(unsigned int i = 0; test && i < group->size(); i++)
+  for (unsigned int i = 0; test && i < group->size(); i++)
   {
-    if((*group)[i].size() == 0) test = false;
+    if ((*group)[i].size() == 0) test = false;
   }
-  if(test)
+  if (test)
   {
     vector<const Vdouble *> groupVectors;
-    for(unsigned int i = 0; i < group->size(); i++)
+    for (unsigned int i = 0; i < group->size(); i++)
     {
       groupVectors.push_back((*group)[i][0]);
       (*group)[i].pop_front();
     }
     _n2[groupIndex]++;
     double stat = _statistic->getValueForGroup(groupVectors);
-    if(stat >= (*this)[groupIndex].getStatisticValue()) _n1[groupIndex]++;
-    if(_n2[groupIndex] == _minSim)
+    if (stat >= (*this)[groupIndex].getStatisticValue()) _n1[groupIndex]++;
+    if (_n2[groupIndex] == _minSim)
     {
       _nbCompleted++;
-      if(_verbose == 1)
+      if (_verbose == 1)
       {
         ApplicationTools::displayGauge(_nbCompleted, size(), '=');
       }
-      if(_verbose > 1)
+      if (_verbose > 1)
       {
         ApplicationTools::displayResult("Group completed", TextTools::toString(groupIndex));
       }
@@ -1016,15 +1017,15 @@ void CoETools::computePValuesForCandidateGroups(
   bool test = true;
   while(test)
   {
-    if(candidates.getVerbose() >= 2)
+    if (candidates.getVerbose() >= 2)
       ApplicationTools::displayResult("Simulate ", TextTools::toString(repRAM) + " sites.");
     SiteContainer * sites = seqSim.simulate(repRAM);
     drtl.setData(*sites);
     drtl.initialize();
     ProbabilisticSubstitutionMapping * mapping;
-		if(average)
+		if (average)
     {
-			if(joint)
+			if (joint)
       {
 				mapping = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
 			}
@@ -1035,7 +1036,7 @@ void CoETools::computePValuesForCandidateGroups(
 		}
     else
     {
-			if(joint)
+			if (joint)
       {
 				mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, nijt, false);
 			}

@@ -1,3 +1,7 @@
+07/07/09 Julien Dutheil
+* New sign in Granthem distance, so that it makes more sense to use it with
+  the compensation method.
+
 22/04/09 Julien Dutheil
 * Code and output file format updated + new pairwise analysis.
 
