@@ -3,7 +3,7 @@
 # | Julien Dutheil <Julien.Dutheil@univ-montp2.fr> 28/06/06 |
 # | Modified on: 15/01/2007                                 |
 # | Use a sliding window and conditional p-values           |
-# | Modified on: 04/08/2007                                 |
+# | Modified on: 10/07/2009                                 |
 # | Compute threshold p-value for a given FDR               |
 # +---------------------------------------------------------+
 
@@ -60,7 +60,7 @@ test<-function(data, sim, group.sizes, window, min.nobs, grid.Nmin=FALSE, grid.S
     tot<-length(group.filter)
     if(tot > 0)
     {
-      sim.group<-sim[sim$Size==i,]
+      sim.group<-sim[sim$Size == i,]
       if(grid.Nmin)
       #We discretize Nmin for speeding up computations
       {
@@ -430,7 +430,9 @@ get.pred<-function(data, sim, group.sizes, window, min.nobs, grid.Nmin, verbose=
 {
   pred<-test(data, sim, group.sizes, window, min.nobs, grid.Nmin, FALSE, verbose=verbose)
   pred<-pred[!is.na(pred$p.value),]
-  pred$p.value<-round.pval(pred$p.value)
+  if (!is.null(pred$Const)) pred<-pred[as.character(pred$Const) == "no",]
+  if (nrow(pred) > 0)
+    pred$p.value<-round.pval(pred$p.value)
   return(pred)
 }
 
@@ -522,5 +524,12 @@ format.pred<-function(data, sim, group.sizes, window, min.nobs, grid.Nmin, metho
     cat(n4, "groups remain significant after correction for multiple testing.\n")
   }
   return(pred)
+}
+
+merge2<-function(d1, d2, ...)
+{
+  if (is.null(d1)) return(d2)
+  if (is.null(d2)) return(d1)
+  return(merge(d1, d2, ...))
 }
 
