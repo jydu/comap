@@ -79,17 +79,12 @@ using namespace bpp;
 
 void help()
 {
-  cout << "Parameters reminder. For a complete description, see the help files." << endl;
- 	cout << "____________________________________________________________________" << endl;
-	cout << "param           | parameters file." << endl;
-	cout << "alphabet        | the datatype (RNA, DNA or Protein)." << endl;
-  cout << "tree_file       | the tree file." << endl;
-  cout << "sequence_file   | the sequence file." << endl;
-  cout << "output.vectors  | the vectors output file." << endl;
-  cout << "output.tree     | the tree with estimated branches lengths output file." << endl;
-	cout << endl;
-	PhylogeneticsApplicationTools::printOptimizationHelp(false, false);
-	cout << endl;
+  *ApplicationTools::message << "__________________________________________________________________________" << endl;
+  *ApplicationTools::message << "comap parameter1_name=parameter1_value parameter2_name=parameter2_value"    << endl;
+  *ApplicationTools::message << "      ... param=option_file" << endl;
+  *ApplicationTools::message << endl;
+  *ApplicationTools::message << "      Refer to the CoMap Manual for a list of available options." << endl;
+  *ApplicationTools::message << "__________________________________________________________________________" << endl;
 }
 
 /******************************************************************************/
@@ -188,10 +183,10 @@ int main(int argc, char *argv[])
     // *******************************************
 	  // * The same for a putative second dataset: *
 	  // *******************************************
-	  if(params.find("sequence.file2") != params.end() && params["sequence.file2"] != "none")
+	  if(params.find("input.sequence.file2") != params.end() && params["input.sequence.file2"] != "none")
     {
 		  TreeTemplate<Node> * tree2;
-		  if(params.find("tree.file2") != params.end() && params["tree.file2"] != "none")
+		  if(params.find("input.tree.file2") != params.end() && params["input.tree.file2"] != "none")
       {
 		    ApplicationTools::displayMessage("WARNING!!! Second tree file specified.\n Tree 1 and Tree 2 must differ only by their branch lengths, otherwise results may be uninterpretable.\n");			
   	    Tree* tmpTree = PhylogeneticsApplicationTools::getTree(params, "input.", "2", true);

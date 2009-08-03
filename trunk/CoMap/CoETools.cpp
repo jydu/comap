@@ -195,7 +195,7 @@ void CoETools::readData(
     ApplicationTools::displayResult("Optimization", (optimize ? "yes" : "no"));
     PhylogeneticsApplicationTools::optimizeParameters(tl, tl->getParameters(), params, suffix, true, true);
     TreeTemplate<Node> *treeOpt = dynamic_cast<TreeTemplate<Node> *>(tl->getTree().clone());
-    PhylogeneticsApplicationTools::writeTree(*treeOpt, params, suffix);
+    PhylogeneticsApplicationTools::writeTree(*treeOpt, params, "output.", suffix);
   
     // Actualize tree.
     // Substitution model and rate distribution are actualized automatically by
