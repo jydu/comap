@@ -46,10 +46,10 @@ knowledge of the CeCILL license and that you accept its terms.
 using namespace std;
 
 // From Utils:
-#include <Utils/AttributesTools.h>
+#include <Utils/BppApplication.h>
+#include <Utils/ApplicationTools.h>
 #include <Utils/FileTools.h>
 #include <Utils/TextTools.h>
-#include <Utils/ApplicationTools.h>
 
 // From NumCalc:
 #include <NumCalc/DataTable.h>
@@ -117,16 +117,15 @@ int main(int argc, char *argv[])
   { 
     // No argument, show display some help and leave.
 		help();
-		exit(-1);
+		return 0;
 	}
 
-  cout << "Parsing options:" << endl;
-  
-  map<string, string> params = AttributesTools::parseOptions(argc, argv);
+  BppApplication comap(argc, argv, "CoMap");
+  comap.startTimer();
 
 	ApplicationTools::displayMessage("\n\n-*- Retrieve data and model -*-\n");
 
-	Tree* tmpTree = PhylogeneticsApplicationTools::getTree(params);
+	Tree* tmpTree = PhylogeneticsApplicationTools::getTree(comap.getParams());
 	TreeTemplate<Node>* tree1 = new TreeTemplate<Node>(*tmpTree);
   delete tmpTree;
 	ApplicationTools::displayResult("Number of leaves", TextTools::toString(tree1->getNumberOfLeaves()));
@@ -140,12 +139,12 @@ int main(int argc, char *argv[])
 	SubstitutionModelSet *modelSet1;
 	DiscreteDistribution *rDist1;
 	DRTreeLikelihood *tl1;
-	CoETools::readData(tree1, alphabet1, allSites1, sites1, model1, modelSet1, rDist1, tl1, params, "");
+	CoETools::readData(tree1, alphabet1, allSites1, sites1, model1, modelSet1, rDist1, tl1, comap.getParams(), "");
 	ApplicationTools::displayResult("Number of sites in file", allSites1->getNumberOfSites());
 	ApplicationTools::displayResult("Number of sites to analyse", sites1->getNumberOfSites());
 	ApplicationTools::displayResult("Number of site patterns", tl1->getLikelihoodData()->getNumberOfDistinctSites());
   
-  bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", params, false, "", true, false);
+  bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", comap.getParams(), false, "", true, false);
 	ApplicationTools::displayResult("Rate distribution for simulations", (continuousSim ? "continuous" : "discrete"));
 
 	ApplicationTools::displayMessage("\n\n-*- Get substitution vectors -*-\n");
@@ -164,32 +163,32 @@ int main(int argc, char *argv[])
   }
 
 	// Getting the substitutions count function:
-	SubstitutionCount* substitutionCount1 = CoETools::getSubstitutionCount(alphabet1, model1, rDist1, params);
+	SubstitutionCount* substitutionCount1 = CoETools::getSubstitutionCount(alphabet1, model1, rDist1, comap.getParams());
 		
 	// Getting the substitution vectors:
-	ProbabilisticSubstitutionMapping* mapping1 = CoETools::getVectors(*tl1, *substitutionCount1, *sites1, params);
+	ProbabilisticSubstitutionMapping* mapping1 = CoETools::getVectors(*tl1, *substitutionCount1, *sites1, comap.getParams());
 
-  string analysis = ApplicationTools::getStringParameter("analysis", params, "pairwise");
+  string analysis = ApplicationTools::getStringParameter("analysis", comap.getParams(), "pairwise");
   ApplicationTools::displayResult("Analysis type", analysis);
 
   if(analysis == "pairwise")
   {
-	  const Statistic * statistic = CoETools::getStatistic(params);
+	  const Statistic * statistic = CoETools::getStatistic(comap.getParams());
 
     bool computeNullHyp = false;
-	  computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", params, false);
+	  computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", comap.getParams(), false);
 	
   
     // *******************************************
 	  // * The same for a putative second dataset: *
 	  // *******************************************
-	  if(params.find("input.sequence.file2") != params.end() && params["input.sequence.file2"] != "none")
+	  if(comap.getParams().find("input.sequence.file2") != comap.getParams().end() && comap.getParams()["input.sequence.file2"] != "none")
     {
 		  TreeTemplate<Node> * tree2;
-		  if(params.find("input.tree.file2") != params.end() && params["input.tree.file2"] != "none")
+		  if(comap.getParams().find("input.tree.file2") != comap.getParams().end() && comap.getParams()["input.tree.file2"] != "none")
       {
 		    ApplicationTools::displayMessage("WARNING!!! Second tree file specified.\n Tree 1 and Tree 2 must differ only by their branch lengths, otherwise results may be uninterpretable.\n");			
-  	    Tree* tmpTree = PhylogeneticsApplicationTools::getTree(params, "input.", "2", true);
+  	    Tree* tmpTree = PhylogeneticsApplicationTools::getTree(comap.getParams(), "input.", "2", true);
   	    tree2 = new TreeTemplate<Node>(*tmpTree);
         delete tmpTree;
 	      ApplicationTools::displayResult("# number of leaves", TextTools::toString(tree2->getNumberOfLeaves()));
@@ -207,7 +206,7 @@ int main(int argc, char *argv[])
 		  DiscreteDistribution *rDist2;
 		  DRTreeLikelihood *tl2;
 		  ApplicationTools::displayMessage("\nLoading second dataset...\n");
-		  CoETools::readData(tree2, alphabet2, allSites2, sites2, model2, modelSet2, rDist2, tl2, params, "2");
+		  CoETools::readData(tree2, alphabet2, allSites2, sites2, model2, modelSet2, rDist2, tl2, comap.getParams(), "2");
 	    ApplicationTools::displayResult("Number of sites in file", allSites2->getNumberOfSites());
 	    ApplicationTools::displayResult("Number of sites to analyse", sites2->getNumberOfSites());
 	    ApplicationTools::displayResult("Number of site patterns", tl2->getLikelihoodData()->getNumberOfDistinctSites());
@@ -228,10 +227,10 @@ int main(int argc, char *argv[])
       }
 
 		  // Getting the substitutions count function:
-		  SubstitutionCount* substitutionCount2 = CoETools::getSubstitutionCount(alphabet2, model2, rDist2, params);
+		  SubstitutionCount* substitutionCount2 = CoETools::getSubstitutionCount(alphabet2, model2, rDist2, comap.getParams());
 		
 		  // Getting the substitution vectors:
-		  ProbabilisticSubstitutionMapping * mapping2 = CoETools::getVectors(*tl2, *substitutionCount2, *sites2, params, "2");
+		  ProbabilisticSubstitutionMapping * mapping2 = CoETools::getVectors(*tl2, *substitutionCount2, *sites2, comap.getParams(), "2");
 		
 	  	ApplicationTools::displayMessage("\n\n-*- Compute statistics -*-\n");
 		
@@ -248,9 +247,9 @@ int main(int argc, char *argv[])
 			  *mapping1,
 			  *mapping2,
 			  *statistic,
-			  params);
+			  comap.getParams());
 			
-		  CoETools::writeInfos(*sites2, *tl2, params, "2");
+		  CoETools::writeInfos(*sites2, *tl2, comap.getParams(), "2");
 		  
       //tl2 will be modified after the simulations!
       if(computeNullHyp)
@@ -263,7 +262,7 @@ int main(int argc, char *argv[])
 			    *substitutionCount1,
           *substitutionCount2,
 			    *statistic,
-			    params);
+			    comap.getParams());
       }
 
       delete tree2;
@@ -287,9 +286,9 @@ int main(int argc, char *argv[])
 				*sites1,
 				*mapping1,
 				*statistic,
-				params);
+				comap.getParams());
 
-		  CoETools::writeInfos(*sites1, *tl1, params);
+		  CoETools::writeInfos(*sites1, *tl1, comap.getParams());
       
       //tl2 will be modified after the simulations!
       if(computeNullHyp)
@@ -299,7 +298,7 @@ int main(int argc, char *argv[])
 				  *seqSim1,
 				  *substitutionCount1,
 				  *statistic,
-				  params);
+				  comap.getParams());
 		  }
 	  }
 
@@ -317,20 +316,20 @@ int main(int argc, char *argv[])
 	
   else if(analysis == "clustering")
   {
-		CoETools::writeInfos(*sites1, *tl1, params);
+		CoETools::writeInfos(*sites1, *tl1, comap.getParams());
 
     ApplicationTools::displayMessage("\n\n-*- Perform clustering analysis -*-\n");
 	
-    string clusteringMethod = ApplicationTools::getStringParameter("clustering.method", params, "none", "", false, false);
+    string clusteringMethod = ApplicationTools::getStringParameter("clustering.method", comap.getParams(), "none", "", false, false);
 	  if(clusteringMethod != "none")
     {
       unsigned int nbBranches = mapping1->getNumberOfBranches();
       unsigned int nbSites    = mapping1->getNumberOfSites();
-      bool scale = ApplicationTools::getBooleanParameter("clustering.scale", params, false, "", true, true);
+      bool scale = ApplicationTools::getBooleanParameter("clustering.scale", comap.getParams(), false, "", true, true);
       vector<double> scales(nbBranches, 1.);
       vector<double> weights(nbBranches, 1.);
 	    vector<double> brLens = mapping1->getBranchLengths();
-  	  double minLen = ApplicationTools::getDoubleParameter("clustering.min_length", params, false, "", 0.000001, false);
+  	  double minLen = ApplicationTools::getDoubleParameter("clustering.min_length", comap.getParams(), false, "", 0.000001, false);
       vector<double> meanVector(nbBranches);
       for(unsigned int j = 0; j < nbBranches; j++)
       {
@@ -377,7 +376,7 @@ int main(int argc, char *argv[])
   
 	    // Get the distance to use
 	
-	    string distanceMethod = ApplicationTools::getStringParameter("clustering.distance", params, "cor", "", true, true);
+	    string distanceMethod = ApplicationTools::getStringParameter("clustering.distance", comap.getParams(), "cor", "", true, true);
 	    Distance * dist = NULL;
 	    if(distanceMethod == "euclidian")
       {
@@ -390,8 +389,8 @@ int main(int argc, char *argv[])
       }
       else if(distanceMethod == "comp")
       {
-        string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", "", true);
-        bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", params, true, "", true); 
+        string nijtOption = ApplicationTools::getStringParameter("nijt", comap.getParams(), "simule", "", true);
+        bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", comap.getParams(), true, "", true); 
         if(nijtOption != "aadist" || sym)
         {
           throw Exception("Compensation distance must be used with 'nijt=aadist' and 'nijt_aadist.sym=no' options.");
@@ -420,7 +419,7 @@ int main(int argc, char *argv[])
 		    }
 	    }
 
-	    string matrixFile = ApplicationTools::getAFilePath("clustering.output.matrix.file", params, false, false, "", false);
+	    string matrixFile = ApplicationTools::getAFilePath("clustering.output.matrix.file", comap.getParams(), false, false, "", false);
 	    if(matrixFile != "none")
       {
 		    //Write out matrix to a file, in Phylip format:
@@ -469,7 +468,7 @@ int main(int argc, char *argv[])
       dist->setStatisticAsProperty(*clusteringTree.getRootNode(), *mapping1);
 	
       // Dumping groups to file, with more or less information, depending on the method used.
-	    string groupsPath = ApplicationTools::getAFilePath("clustering.output.groups.file", params, true, false, "", false);
+	    string groupsPath = ApplicationTools::getAFilePath("clustering.output.groups.file", comap.getParams(), true, false, "", false);
       ApplicationTools::displayResult("Site clusters output file", groupsPath);
       vector<string> colNames(6);
       colNames[0] = "Group";
@@ -528,7 +527,7 @@ int main(int argc, char *argv[])
       groupsFile.close();
 
       //Write clustering tree to file:
-	    string treeFile = ApplicationTools::getAFilePath("clustering.output.tree.file", params, false, false, "", false);
+	    string treeFile = ApplicationTools::getAFilePath("clustering.output.tree.file", comap.getParams(), false, false, "", false);
 	    if(treeFile != "none")
       {
 	      // First we retranslate leaves names:
@@ -541,13 +540,13 @@ int main(int argc, char *argv[])
       // Now test each group:
       ApplicationTools::displayMessage("\n\n-*- Compute null distribution of clusters -*-\n");
   
-      bool testGroupsGlobal = ApplicationTools::getBooleanParameter("clustering.null", params, false, "", true, false);
-      unsigned int maxGroupSize = ApplicationTools::getParameter<unsigned int>("clustering.maximum_group_size", params, 10, "", true, false);
+      bool testGroupsGlobal = ApplicationTools::getBooleanParameter("clustering.null", comap.getParams(), false, "", true, false);
+      unsigned int maxGroupSize = ApplicationTools::getParameter<unsigned int>("clustering.maximum_group_size", comap.getParams(), 10, "", true, false);
       ApplicationTools::displayResult("Maximum group size to test", TextTools::toString(maxGroupSize));
       if(testGroupsGlobal)
       {       
-	      string simPath = ApplicationTools::getAFilePath("clustering.null.output.file", params, true, false, "", false);
-        unsigned int nrep = ApplicationTools::getParameter<unsigned int>("clustering.null.number", params, 1, "", true);
+	      string simPath = ApplicationTools::getAFilePath("clustering.null.output.file", comap.getParams(), true, false, "", false);
+        unsigned int nrep = ApplicationTools::getParameter<unsigned int>("clustering.null.number", comap.getParams(), 1, "", true);
         ApplicationTools::displayResult("Number of simulations", TextTools::toString(nrep));
         ApplicationTools::displayResult("Simulations output file", simPath);
         ofstream * out = NULL;
@@ -580,11 +579,11 @@ int main(int argc, char *argv[])
   	// *****************************
     // We only deal with the one data set case for now.
 	  
-		CoETools::writeInfos(*sites1, *tl1, params);
+		CoETools::writeInfos(*sites1, *tl1, comap.getParams());
     
-    const Statistic * statistic = CoETools::getStatistic(params);
+    const Statistic * statistic = CoETools::getStatistic(comap.getParams());
 	
-    string groupsPath = ApplicationTools::getAFilePath("candidates.input.file", params, false, true);
+    string groupsPath = ApplicationTools::getAFilePath("candidates.input.file", comap.getParams(), false, true);
     if(groupsPath != "none")
     {
       ApplicationTools::displayResult("Candidate groups are in file", groupsPath);
@@ -592,9 +591,9 @@ int main(int argc, char *argv[])
       ifstream groupsFile(groupsPath.c_str(), ios::in);
 
       //Store all positions and norm ranges in site container for each site in each candidate group:
-      unsigned int minSim = ApplicationTools::getParameter<unsigned int>("candidates.null.min", params, 1000, "", true, true);
+      unsigned int minSim = ApplicationTools::getParameter<unsigned int>("candidates.null.min", comap.getParams(), 1000, "", true, true);
       ApplicationTools::displayResult("Minimum number of simulations", TextTools::toString(minSim));
-      unsigned int verbose = ApplicationTools::getParameter<unsigned int>("candidates.null.verbose", params, 1, "", true, true);
+      unsigned int verbose = ApplicationTools::getParameter<unsigned int>("candidates.null.verbose", comap.getParams(), 1, "", true, true);
       ApplicationTools::displayResult("Verbose level", TextTools::toString(verbose));
       CandidateGroupSet candidates(statistic, minSim, verbose);
     
@@ -605,14 +604,14 @@ int main(int argc, char *argv[])
         posIndex[positions[i]] = i;
 
       //Parse file:
-      string groupsColumnSep = ApplicationTools::getStringParameter("candidates.input.column_sep", params, "\t", "", true, true);
+      string groupsColumnSep = ApplicationTools::getStringParameter("candidates.input.column_sep", comap.getParams(), "\t", "", true, true);
       DataTable* table = DataTable::read(groupsFile, groupsColumnSep, true, -1);
       groupsFile.close();
-      string groupsColumnName = ApplicationTools::getStringParameter("candidates.input.column_name", params, "Group", "", true, true);
+      string groupsColumnName = ApplicationTools::getStringParameter("candidates.input.column_name", comap.getParams(), "Group", "", true, true);
       vector<string> groups = table->getColumn(groupsColumnName);
 
       //Get range value:
-      double omega = ApplicationTools::getDoubleParameter("candidates.omega", params, 0.25, "", true, true);
+      double omega = ApplicationTools::getDoubleParameter("candidates.omega", comap.getParams(), 0.25, "", true, true);
       ApplicationTools::displayResult("Norm interval", TextTools::toString(omega));
       if(omega < 0)
       {
@@ -662,7 +661,7 @@ int main(int argc, char *argv[])
       ApplicationTools::displayTaskDone();
 
       //Now compute p-values:
-      CoETools::computePValuesForCandidateGroups(candidates, *tl1, *seqSim1, *substitutionCount1, params);
+      CoETools::computePValuesForCandidateGroups(candidates, *tl1, *seqSim1, *substitutionCount1, comap.getParams());
 
       //Now fill data table:
       vector<string> stats(table->getNumberOfRows()), pvalues(table->getNumberOfRows());
@@ -679,8 +678,8 @@ int main(int argc, char *argv[])
       table->addColumn("p-value", pvalues);
 
       //Write result to file:
-      string outputPath = ApplicationTools::getAFilePath("candidates.output.file", params, true, false);
-      groupsColumnSep = ApplicationTools::getStringParameter("candidates.output.column_sep", params, groupsColumnSep, "", true, true);
+      string outputPath = ApplicationTools::getAFilePath("candidates.output.file", comap.getParams(), true, false);
+      groupsColumnSep = ApplicationTools::getStringParameter("candidates.output.column_sep", comap.getParams(), groupsColumnSep, "", true, true);
       ofstream outputFile(outputPath.c_str(), ios::out);
       DataTable::write(*table, outputFile, groupsColumnSep);
       outputFile.close();
@@ -705,7 +704,7 @@ int main(int argc, char *argv[])
 	// * The End *
 	// ***********
 	
-	ApplicationTools::displayTask("CoMap's done. Freeing memory");
+	ApplicationTools::displayTask("Freeing memory");
   
   // Dataset 1 memory freeing:
   delete tree1;
@@ -721,7 +720,7 @@ int main(int argc, char *argv[])
 	
   ApplicationTools::displayTaskDone();
 
-  ApplicationTools::displayTime("Total execution time:");
+  comap.done();
 	
   ApplicationTools::displayMessage("Bye bye ;-)");	
 
