@@ -929,7 +929,7 @@ bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMappin
 {
   Vdouble norms = AnalysisTools::computeNorms(mapping);
   //Analyse each site in the set:
-  bool test = true, testNorm, first;
+  bool test = true, testNorm, first, testFree = true;
   vector<unsigned int> pos, start;
   for (unsigned int i = 0; test && i < mapping.getNumberOfSites(); i++)
   {
@@ -951,19 +951,30 @@ bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMappin
       testNorm = _candidates[pos[0]][pos[1]].checkNorm(norms[i]);
       if (testNorm)
       {
-        addSimulatedSite(pos[0], pos[1], &mapping[i]);
+        //cout << pos[0] << "\t" << pos[1] << "\t" << _simulations[pos[0]][pos[1]].size() << endl;
+        if(addSimulatedSite(pos[0], pos[1], &mapping[i]))
+        {
+          testFree = false; //At least one groupe was completed!
+        }
         if (_nbCompleted == _nbAnalysable) test = false;
       }
     }
   }
-  //Reset pointers:
+  if(testFree)
+  {
+    if(_verbose)
+      ApplicationTools::displayMessage("This simulation set did not provide sites with appropriate norm :(");
+    _nbTrials++;
+  }
+
+  //Reset pointers: (we need to do that since we do not recopy the vectors!)
   resetSimulations();
   return test;
 }
 
 /******************************************************************************/
 
-void CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const Vdouble * v) throw (IndexOutOfBoundsException)
+bool CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const Vdouble * v) throw (IndexOutOfBoundsException)
 {
   if (groupIndex >= _simulations.size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad group index.", groupIndex, 0, _simulations.size());
   if (siteIndex >= _simulations[groupIndex].size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad site index.", siteIndex, 0, _simulations[groupIndex].size());
@@ -995,10 +1006,11 @@ void CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int s
       }
       if (_verbose > 1)
       {
-        ApplicationTools::displayResult("Group completed", TextTools::toString(groupIndex));
+        ApplicationTools::displayResult("Group completed", TextTools::toString(groupIndex) + " (" + TextTools::toString(_nbCompleted) + "/" + TextTools::toString(_nbAnalysable) + ")");
       }
     }
   }
+  return test;
 }
 
 /******************************************************************************/
@@ -1008,7 +1020,8 @@ void CoETools::computePValuesForCandidateGroups(
     DRTreeLikelihood & drtl,
     const SequenceSimulator& seqSim,
     SubstitutionCount & nijt,
-	  map<string, string> & params)
+	  map<string, string> & params,
+    unsigned int maxTrials)
 {
   unsigned int repRAM = ApplicationTools::getParameter<unsigned int>("candidates.null.nb_rep_RAM", params, 1000, "", true, true);
   bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
@@ -1045,7 +1058,7 @@ void CoETools::computePValuesForCandidateGroups(
 				mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, nijt, false);
 			}
 		}
-		test = candidates.analyseSimulations(*mapping);
+		test = candidates.analyseSimulations(*mapping) && (candidates.getNumberOfTrials() < maxTrials);
 
     delete sites;
     delete mapping;

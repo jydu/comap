@@ -484,6 +484,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
     delete mapping1;
     delete mapping2;
   }
+  if(verbose) *ApplicationTools::message << endl;
   return id;
 }
 
@@ -566,6 +567,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
     delete mapping1;
     delete mapping2;
   }
+  if(verbose) *ApplicationTools::message << endl;
   return id;
 }
 
@@ -647,6 +649,7 @@ void AnalysisTools::getNullDistributionIntraDR(
     delete mapping1;
     delete mapping2;
   }
+  if(verbose) *ApplicationTools::message << endl;
 }
 
 /******************************************************************************/
@@ -728,6 +731,7 @@ void AnalysisTools::getNullDistributionInterDR(
     delete mapping1;
     delete mapping2;
   }
+  if(verbose) *ApplicationTools::message << endl;
 }
 
 /******************************************************************************/
@@ -741,11 +745,9 @@ void AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(
 {
   // Write header line:
   out << "Stat\tr1\tr2" << endl;
-  unsigned int c = 0;
   for(unsigned int i = 0; i < rep; i++)
   {
-    if(c == 1000) { cout << "."; cout.flush(); c = 0; }
-    c++;
+    ApplicationTools::displayGauge(i, rep - 1);
     RASiteSimulationResult * hssr1 = 
       dynamic_cast<RASiteSimulationResult *>(seqSim.dSimulate());
     vector<double> vector1 = hssr1->getSubstitutionVector();
@@ -760,6 +762,7 @@ void AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(
     double stat = statistic.getValueForPair(vector1, vector2);
     out << stat << "\t" << rate1 << "\t" << rate2 << endl;
   }
+  *ApplicationTools::message << endl;
 }
 
 /******************************************************************************/

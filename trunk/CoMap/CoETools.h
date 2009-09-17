@@ -148,14 +148,24 @@ class CandidateGroupSet
     unsigned int _nbCompleted;
 
     unsigned int _nbAnalysable;
-
+    
+    unsigned int _nbTrials;
+    
     unsigned int _verbose;
 
     //Iterator:
     mutable unsigned int _groupPos, _sitePos;
 
   public:
-    CandidateGroupSet(const Statistic * statistic, unsigned int minSim, unsigned int verbose = 1): _statistic(statistic), _minSim(minSim), _nbCompleted(0), _verbose(verbose), _groupPos(0), _sitePos(0) {}
+    CandidateGroupSet(const Statistic* statistic, unsigned int minSim, unsigned int verbose = 1):
+      _statistic(statistic),
+      _minSim(minSim),
+      _nbCompleted(0),
+      _nbTrials(0),
+      _verbose(verbose),
+      _groupPos(0),
+      _sitePos(0)
+  {}
 
   public:
     /**
@@ -200,6 +210,8 @@ class CandidateGroupSet
     }
 
     unsigned int getVerbose() const { return _verbose; }
+    
+    unsigned int getNumberOfTrials() const { return _nbTrials; }
 
  protected:
 
@@ -223,8 +235,9 @@ class CandidateGroupSet
      * @param groupIndex Position of the group.
      * @param siteIndex  Position of the site in the group.
      * @param v          A pointer toward the substitution vector to add.
+     * @return 'true' if a group was completed.
      */
-    void addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const Vdouble * v) throw (IndexOutOfBoundsException);
+    bool addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const Vdouble * v) throw (IndexOutOfBoundsException);
 
     /**
      * @brief Remove all pointers in _simulations, but do not modify _n1 and _n2.
@@ -345,7 +358,8 @@ class CoETools
         DRTreeLikelihood & drtl,
 			  const SequenceSimulator& seqSim,
         SubstitutionCount & nijt,
-			  map<string, string> & params);
+			  map<string, string> & params,
+        unsigned int maxTrials);
 	
 };
 
