@@ -107,8 +107,6 @@ int main(int argc, char *argv[])
 	try
   {
   
-  ApplicationTools::startTimer();
-
 	// **************************
 	// * Retrieving parameters: *
 	// **************************
@@ -624,7 +622,7 @@ int main(int argc, char *argv[])
       string group, tmp, strok = "0123456789;,";
       for(unsigned int i = 0; i < groups.size(); i++)
       {
-        if(groups.size() >100) ApplicationTools::displayGauge(i, groups.size() - 1, '=');
+        if(groups.size() > 100) ApplicationTools::displayGauge(i, groups.size() - 1, '=');
         tmp = TextTools::removeWhiteSpaces(groups[i]);
         group = "";
         //Clean group description:
@@ -661,7 +659,8 @@ int main(int argc, char *argv[])
       ApplicationTools::displayTaskDone();
 
       //Now compute p-values:
-      CoETools::computePValuesForCandidateGroups(candidates, *tl1, *seqSim1, *substitutionCount1, comap.getParams());
+      unsigned int nbMaxTrials = ApplicationTools::getParameter<unsigned int>("candidates.nb_max_trials", comap.getParams(), 10, "", true, true);
+      CoETools::computePValuesForCandidateGroups(candidates, *tl1, *seqSim1, *substitutionCount1, comap.getParams(), nbMaxTrials);
 
       //Now fill data table:
       vector<string> stats(table->getNumberOfRows()), pvalues(table->getNumberOfRows());
