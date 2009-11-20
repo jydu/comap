@@ -43,6 +43,7 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From NumCalc:
 #include <NumCalc/VectorTools.h>
+#include <NumCalc/Domain.h>
 
 using namespace bpp;
 using namespace std;
@@ -106,11 +107,11 @@ class Statistic
 class AbstractMinimumStatistic: public Statistic
 {
   protected:
-    Vdouble * _weights;
+    Vdouble * weight_s;
 
   public:
-    AbstractMinimumStatistic(): _weights(NULL) {}
-    virtual ~AbstractMinimumStatistic() { if(_weights) delete _weights; }
+    AbstractMinimumStatistic(): weight_s(0) {}
+    virtual ~AbstractMinimumStatistic() { if(weight_s) delete weight_s; }
 
   public:
     virtual double getValueForGroup(const vector<const Vdouble *> & v) const throw (DimensionException)
@@ -126,22 +127,25 @@ class AbstractMinimumStatistic: public Statistic
       }
       return mini;
     }
+
     void setWeights(const Vdouble & w)
     { 
-      if(_weights) delete _weights;
-      _weights = new Vdouble(w);
-      *_weights /= VectorTools::sum(w);
+      if(weight_s) delete weight_s;
+      weight_s = new Vdouble(w);
+      *weight_s /= VectorTools::sum(w);
     }
+
     void deleteWeights()
     {
-      if(_weights) delete _weights;
-      _weights = NULL;
+      if(weight_s) delete weight_s;
+      weight_s = 0;
     }
+
     bool hasWeights() const
     {
-      return _weights != NULL;
+      return weight_s != 0;
     }
-    const Vdouble * getWeights() const { return _weights; }
+    const Vdouble* getWeights() const { return weight_s; }
 
 };
 
@@ -150,8 +154,8 @@ class CorrelationStatistic: public AbstractMinimumStatistic
 	public:
 		double getValueForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException)
     {
-      if(_weights)
-        return VectorTools::cor<double, double>(v1, v2, *_weights, false);
+      if(weight_s)
+        return VectorTools::cor<double, double>(v1, v2, *weight_s, false);
       else 
 			  return VectorTools::cor<double, double>(v1, v2);
 		}
@@ -162,8 +166,8 @@ class CovarianceStatistic: public AbstractMinimumStatistic
 	public:
 		double getValueForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException)
     {
-      if(_weights)
-        return VectorTools::cov<double, double>(v1, v2, *_weights, false, false);
+      if(weight_s)
+        return VectorTools::cov<double, double>(v1, v2, *weight_s, false, false);
       else
 			  return VectorTools::cov<double, double>(v1, v2);
 		}
@@ -174,8 +178,8 @@ class CosinusStatistic: public AbstractMinimumStatistic
 	public:
 		double getValueForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException)
     {
-      if(_weights)
-        return VectorTools::cos<double, double>(v1, v2, *_weights);
+      if(weight_s)
+        return VectorTools::cos<double, double>(v1, v2, *weight_s);
       else
 			  return VectorTools::cos<double, double>(v1, v2);
 		}
@@ -206,13 +210,14 @@ class CompensationStatistic: public AbstractMinimumStatistic
       double sumsq1 = 0., sumsq2 = 0., sumsq3 = 0., w = 1.;
       for(unsigned int i = 0; i < v1.size(); i++)
       {
-        if(_weights) w = (*_weights)[i];
+        if(weight_s) w = (*weight_s)[i];
         sumsq1 += pow(v1[i], 2) * w;
         sumsq2 += pow(v2[i], 2) * w;
         sumsq3 += pow(v1[i] + v2[i], 2) * w;
       }
       return 1. - sqrt(sumsq3) / (sqrt(sumsq1) + sqrt(sumsq2));
     }
+
     double getValueForGroup(const vector<const Vdouble *> & v) const throw (DimensionException)
     {
       for(unsigned int j = 1; j < v.size(); j++)
@@ -223,7 +228,7 @@ class CompensationStatistic: public AbstractMinimumStatistic
       double s = 0., sumsq2 = 0., w = 1.;
       for(unsigned int i = 0; i < v[0]->size(); i++)
       {
-        if(_weights) w = (*_weights)[i];
+        if (weight_s) w = (*weight_s)[i];
         s = 0.;
         for(unsigned int j = 0; j < v.size(); j++)
         {
@@ -240,6 +245,31 @@ class CompensationStatistic: public AbstractMinimumStatistic
       return 1. - sqrt(sumsq2) / (sumnorms);
     }
 };
+
+class DiscreteMutualInformationStatistic: public AbstractMinimumStatistic
+{
+  private:
+    Domain domain_;
+
+  public:
+    DiscreteMutualInformationStatistic(const Vdouble& bounds) :
+      AbstractMinimumStatistic(), domain_(bounds) {}
+
+	public:
+		double getValueForPair(const Vdouble& v1, const Vdouble& v2) const throw (DimensionException)
+    {
+      vector<unsigned int> c1(v1.size());
+      vector<unsigned int> c2(v2.size());
+      for (unsigned int i = 0; i < c1.size(); i++)
+      {
+        c1[i] = domain_.getIndex(v1[i]);
+        c2[i] = domain_.getIndex(v2[i]);
+      }
+      return VectorTools::miDiscrete<unsigned int, double>(c1, c2); //Weights ignored for now.
+		}
+    //NB: also define a group statistic if it works...
+};
+
 
 #endif	//_STATISTICS_H_
 

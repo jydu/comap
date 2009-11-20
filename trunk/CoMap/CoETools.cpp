@@ -370,7 +370,8 @@ double CoETools::getStatisticMin(map<string, string> & params)
 
 /******************************************************************************/
 
-bool CoETools::haveToPerformIndependantComparisons(map<string, string> & params) {
+bool CoETools::haveToPerformIndependantComparisons(map<string, string>& params)
+{
   bool indepComp = ApplicationTools::getBooleanParameter("independant_comparisons", params, false);
   if (indepComp)
     ApplicationTools::displayMessage(
@@ -417,7 +418,7 @@ void CoETools::writeInfos(
 
 /******************************************************************************/
 
-const Statistic * CoETools::getStatistic(map<string, string> & params) throw (Exception)
+const Statistic* CoETools::getStatistic(map<string, string>& params) throw (Exception)
 {
   string statistic = ApplicationTools::getStringParameter("statistic", params, "none");
   if (statistic == "cosinus")
@@ -449,6 +450,20 @@ const Statistic * CoETools::getStatistic(map<string, string> & params) throw (Ex
 		  return new CompensationStatistic();
     }
   }
+  else if (statistic == "MI")
+  {
+    string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", "", true);
+    if (nijtOption == "simple" || nijtOption == "laplace")
+    {
+      vector<double> b(3);
+      b[0] = 0.; b[1] = 0.5; b[2] = 10000.;
+		  return new DiscreteMutualInformationStatistic(b);
+    }
+    else
+    {
+      throw Exception("MI distance can only be used with 'nijt=simple' or 'nijt=laplace' options for now.");
+    }
+  }
   else
   {
     throw Exception("Unknown statistic used: " + statistic);
@@ -457,11 +472,11 @@ const Statistic * CoETools::getStatistic(map<string, string> & params) throw (Ex
 
 /******************************************************************************/
 
-SubstitutionCount * CoETools::getSubstitutionCount(
-  const Alphabet * alphabet,
+SubstitutionCount* CoETools::getSubstitutionCount(
+  const Alphabet* alphabet,
   const SubstitutionModel* model,
   const DiscreteDistribution* rDist,
-  map<string, string> & params,
+  map<string, string>& params,
   string suffix)
 {
   SubstitutionCount* substitutionCount = 0;
