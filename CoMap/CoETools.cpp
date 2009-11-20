@@ -146,7 +146,7 @@ void CoETools::readData(
       rateFreqs = vector<double>(n, 1./(double)n); // Equal rates assumed for now, may be changed later (actually, in the most general case,
                                                     // we should assume a rate distribution for the root also!!!  
     }
-    FrequenciesSet * rootFreqs = PhylogeneticsApplicationTools::getFrequenciesSet(alphabet, sites, params, rateFreqs);
+    FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, sites, params, rateFreqs);
     vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", params, ',', "");
     modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, globalParameters); 
     model = modelSet->getModel(0)->clone();
@@ -212,7 +212,7 @@ void CoETools::readData(
     vector<Node *> nodes = treeCopy.getInnerNodes();
     for (unsigned int i = 0; i < nodes.size(); i++)
     {
-      nodes[i]->setNodeProperty("name", String(TextTools::toString(nodes[i]->getId())));
+      nodes[i]->setNodeProperty("name", BppString(TextTools::toString(nodes[i]->getId())));
     }
     nodes = treeCopy.getLeaves();
 
