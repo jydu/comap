@@ -1,8 +1,8 @@
-# CMake script for Bio++ Program Suite
+# CMake script for Bio++ CoMap
 # Author: Julien Dutheil
 # Created: 17/09/2009
 
-set(comap_CPP
+SET(comap_CPP
  CoETools.cpp
  CoMap.cpp
  Cluster.cpp
@@ -10,8 +10,8 @@ set(comap_CPP
  AnalysisTools.cpp
 )
 
-add_executable(comap ${comap_CPP})
-target_link_libraries(comap ${LIBS})
+ADD_EXECUTABLE(comap ${comap_CPP})
+TARGET_LINK_LIBRARIES(comap ${LIBS})
 
 # Install libs
-install(TARGETS comap DESTINATION bin)
+INSTALL(TARGETS comap DESTINATION bin)

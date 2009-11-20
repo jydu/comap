@@ -45,6 +45,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <NumCalc/VectorTools.h>
 
 using namespace bpp;
+using namespace std;
 
 /**
  * @brief Coevolution measure.
