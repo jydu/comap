@@ -42,6 +42,7 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From Utils:
 #include <Utils/TextTools.h>
+#include <Utils/KeyvalTools.h>
 #include <Utils/StringTokenizer.h>
 #include <Utils/ApplicationTools.h>
 #include <Utils/BppString.h>
@@ -243,11 +244,11 @@ void CoETools::readData(
 /******************************************************************************/
   
 ProbabilisticSubstitutionMapping * CoETools::getVectors(
-  const DRTreeLikelihood & drtl,
-  SubstitutionCount      & substitutionCount,
-  const SiteContainer    & completeSites,
-  map<string, string>    & params,
-  const string           & suffix)
+  const DRTreeLikelihood& drtl,
+  SubstitutionCount     & substitutionCount,
+  const SiteContainer   & completeSites,
+  map<string, string>   & params,
+  const string          & suffix)
 {
   ProbabilisticSubstitutionMapping * substitutions = 0;
   string inputVectorsFilePath = ApplicationTools::getAFilePath("input.vectors.file", params, false, false, suffix, false);
@@ -421,23 +422,26 @@ void CoETools::writeInfos(
 const Statistic* CoETools::getStatistic(map<string, string>& params) throw (Exception)
 {
   string statistic = ApplicationTools::getStringParameter("statistic", params, "none");
-  if (statistic == "cosinus")
+  string name;
+  map<string,string> args;
+  KeyvalTools::parseProcedure(statistic, name, args);
+  if (name == "Cosinus")
   {
     return new CosinusStatistic();
   }
-  else if (statistic == "correlation")
+  else if (name == "Correlation")
   {
     return new CorrelationStatistic();
   }
-  else if (statistic == "covariance")
+  else if (name == "Covariance")
   {
     return new CovarianceStatistic();
   }
-  else if (statistic == "cosubstitution")
+  else if (name == "Cosubstitution")
   {
     return new CosubstitutionNumberStatistic();
   }
-  else if (statistic == "compensation")
+  else if (name == "Compensation")
   {
     string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", "", true);
     bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", params, true, "", true); 
@@ -450,18 +454,19 @@ const Statistic* CoETools::getStatistic(map<string, string>& params) throw (Exce
 		  return new CompensationStatistic();
     }
   }
-  else if (statistic == "MI")
+  else if (name == "MI")
   {
     string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", "", true);
-    if (nijtOption == "simple" || nijtOption == "laplace")
+    if (nijtOption == "simple" || nijtOption == "laplace" || nijtOption == "prob_one_jump")
     {
+      double threshold = ApplicationTools::getDoubleParameter("threshold", args, 0.99, "", true);
       vector<double> b(3);
-      b[0] = 0.; b[1] = 0.5; b[2] = 10000.;
+      b[0] = 0.; b[1] = threshold; b[2] = 10000.;
 		  return new DiscreteMutualInformationStatistic(b);
     }
     else
     {
-      throw Exception("MI distance can only be used with 'nijt=simple' or 'nijt=laplace' options for now.");
+      throw Exception("MI distance can only be used with 'nijt=simple', 'nijt=laplace', 'nijt=prob_one_jump' options for now.");
     }
   }
   else
@@ -564,6 +569,10 @@ SubstitutionCount* CoETools::getSubstitutionCount(
       ApplicationTools::displayError("Invalid distance '" + dist + ", in 'nijt_aadist' parameter.");
       exit(-1);
     }
+  }
+  else if (nijtOption == "prob_one_jump")
+  {
+    substitutionCount = new OneJumpSubstitutionCount(model);
   }
   else
   {

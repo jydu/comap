@@ -1,6 +1,11 @@
+24/11/09 Julien Dutheil
+* Added new MI statistic
+* New substitution mapping procedure, base on the probability of observing at
+least one jump.
+
 17/09/09 Julien Dutheil
 * Switched to CMake building system.
-* Comapt update with Bio++ devel version.
+* Compat update with Bio++ devel version.
 * A few warnings removed.
 
 07/07/09 Julien Dutheil
