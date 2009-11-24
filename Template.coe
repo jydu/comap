@@ -9,32 +9,26 @@ DATA = mygene
 alphabet = DNA
 
 # The sequence file to use (sequences must be aligned!)
-sequence.file = $(DATA).mase
+input.sequence.file = $(DATA).mase
 # The alignment format:
 # Must be one of Mase, Fasta, Phylip, Clustal 
-sequence.format = Mase
-# Mase format option:
-sequence.format_mase.site_selection =
-# Phylip format options:
-# interleaved or sequential:
-sequence.format_phylip.order =
-# classic or extended (PAML):
-sequence.format_phylip.ext = 
+input.sequence.format = Mase
 
 #Sites to use:
 # all, nogap or complete (=only resolved chars)
-sequence.sites_to_use = nogap
+input.sequence.sites_to_use = nogap
 # Specify a maximum amount of gaps: may be an absolute number or a percentage.
-sequence.max_gap_allowed=100%
+input.sequence.max_gap_allowed=100%
 
 # Second file:
-sequence.file2 = none
+input.sequence.file2 = none
 # All previous options can be set up for second file, just append '2' at option names.
 # The default is to use options of file1 for file2.
 
 # The tree file to use. Branch lengths are optional.
 # Only newick format is supported.
-tree.file = $(DATA).dnd
+input.tree.file = $(DATA).dnd
+input.tree.format = Newick
 
 # ----------------------------------------------------------------------------------------
 #                                     Model specification
@@ -111,6 +105,7 @@ output.vectors.file = $(DATA).vec
 # - laplace: real mapping
 # - simple: naive mapping (1 substitution if x<>y, 0 if x==y)
 # - aadist: weighted mapping (proteins)
+# - prob_one_jump: compute the porbability of observing at least one jump.
 nijt = laplace
 # Where to trunc the series (see article):
 nijt_laplace.trunc = 10
@@ -149,10 +144,11 @@ output.tags.translation = $(DATA).tags.tln
 analysis = clustering
 
 # Coevolution statistic to use, for the pairwise and candidates methods:
-# - correlation: Dutheil et al 2005/2007's method.
-# - cosubstitution: Tuffery and Darlu 2000's method
-# - compensation: Dutheil & Galtier 2007's method.
-statistic = correlation
+# - Correlation: Dutheil et al 2005/2007's method.
+# - Cosubstitution: Tuffery and Darlu 2000's method
+# - Compensation: Dutheil & Galtier 2007's method.
+# - MI(threshold=0.99) Mutual Information after discretization given a certain threshold (only with simple, laplace and prob_one_jump).
+statistic = Correlation
 
 # ----------------------------------------------------------------------------------------
 #                                     Pairwise analysis
