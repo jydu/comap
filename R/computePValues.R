@@ -2,6 +2,7 @@
 # 06/06/2006
 # 15/11/2007
 # 04/08/2007
+# 04/12/2009
 
 # ----------------------------------------------------------------------------------------------------------------
 # EDITABLE SECTION:
@@ -38,7 +39,8 @@ window.Nmin<-0.2
 
 # General options:
 
-#Maximum p-value level or groups in the output files:
+#Maximum p-value level or groups in the output files.
+#Use NA if you don't want to filter the output.
 level<-0.05
 #Minimum number of simulated points required for computing p-value:
 min.nobs<-1000

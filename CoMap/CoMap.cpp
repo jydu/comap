@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 	ApplicationTools::displayMessage("\n\n-*- Get substitution vectors -*-\n");
 
 	// Building a simulator object:
-  SequenceSimulator* seqSim1 = NULL;
+  SequenceSimulator* seqSim1 = 0;
   if(modelSet1)
   {
     seqSim1 = new NonHomogeneousSequenceSimulator(modelSet1, rDist1, tree1);
@@ -169,9 +169,13 @@ int main(int argc, char *argv[])
   string analysis = ApplicationTools::getStringParameter("analysis", comap.getParams(), "pairwise");
   ApplicationTools::displayResult("Analysis type", analysis);
 
+  // *********************
+	// * Pariwise analysis *
+	// *********************
+	
   if(analysis == "pairwise")
   {
-	  const Statistic * statistic = CoETools::getStatistic(comap.getParams());
+	  const Statistic* statistic = CoETools::getStatistic(comap.getParams());
 
     bool computeNullHyp = false;
 	  computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", comap.getParams(), false);
