@@ -483,7 +483,8 @@ format.pred<-function(data, sim, group.sizes, window, min.nobs, grid.Nmin, metho
   }
   pred<-get.pred(data, sim, group.sizes, window, min.nobs, grid.Nmin)
   nbtests<-sum(pred$nobs >= min.nobs)
-  pred<-pred[pred$p.value <= level,]
+  if (!is.na(level))
+    pred<-pred[!is.na(pred$p.value) & pred$p.value <= level,]
   if(nrow(pred)==0) return(pred)
   pred<-pred[order(pred$p.value),]
   if(method != "")

@@ -246,6 +246,16 @@ class CompensationStatistic: public AbstractMinimumStatistic
     }
 };
 
+class MutualInformationStatistic: public AbstractMinimumStatistic
+{
+	public:
+		double getValueForPair(const Vdouble& v1, const Vdouble& v2) const throw (DimensionException)
+    {
+      //Forn now weights are ignored
+			return VectorTools::miContinuous<double, double>(v1, v2);
+		}
+};
+
 class DiscreteMutualInformationStatistic: public AbstractMinimumStatistic
 {
   private:

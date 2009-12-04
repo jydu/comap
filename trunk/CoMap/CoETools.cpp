@@ -618,7 +618,7 @@ void CoETools::computeIntraStats(
 
   statOut << "Group\tStat\tRCmin\tPRmin\tNmin" << endl;
 
-  ApplicationTools::displayTask("Analyse each site pair");
+  ApplicationTools::displayTask("Analyse each site pair", true);
   
   vector<unsigned int> classes = tl.getRateClassWithMaxPostProbOfEachSite();
   Vdouble rates   = tl.getPosteriorRateOfEachSite();
@@ -716,7 +716,7 @@ void CoETools::computeInterStats(
 
   statOut << "Group\tStat\tRCmin\tPRmin\tNmin" << endl;
 
-  ApplicationTools::displayTask("Analyse each site pair");
+  ApplicationTools::displayTask("Analyse each site pair", true);
     
   vector<unsigned int> classes1 = tl1.getRateClassWithMaxPostProbOfEachSite();
   vector<unsigned int> classes2 = tl2.getRateClassWithMaxPostProbOfEachSite();
