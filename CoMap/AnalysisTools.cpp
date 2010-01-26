@@ -484,7 +484,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
     delete mapping1;
     delete mapping2;
   }
-  if(verbose) *ApplicationTools::message << endl;
+  if(verbose) ApplicationTools::message->endLine();
   return id;
 }
 
@@ -567,7 +567,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
     delete mapping1;
     delete mapping2;
   }
-  if(verbose) *ApplicationTools::message << endl;
+  if(verbose) ApplicationTools::message->endLine();
   return id;
 }
 
@@ -649,7 +649,7 @@ void AnalysisTools::getNullDistributionIntraDR(
     delete mapping1;
     delete mapping2;
   }
-  if(verbose) *ApplicationTools::message << endl;
+  if(verbose) ApplicationTools::message->endLine();
 }
 
 /******************************************************************************/
@@ -731,7 +731,7 @@ void AnalysisTools::getNullDistributionInterDR(
     delete mapping1;
     delete mapping2;
   }
-  if(verbose) *ApplicationTools::message << endl;
+  if(verbose) ApplicationTools::message->endLine();
 }
 
 /******************************************************************************/
@@ -762,7 +762,7 @@ void AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(
     double stat = statistic.getValueForPair(vector1, vector2);
     out << stat << "\t" << rate1 << "\t" << rate2 << endl;
   }
-  *ApplicationTools::message << endl;
+  ApplicationTools::message->endLine();
 }
 
 /******************************************************************************/

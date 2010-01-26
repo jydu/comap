@@ -79,12 +79,12 @@ using namespace bpp;
 
 void help()
 {
-  *ApplicationTools::message << "__________________________________________________________________________" << endl;
-  *ApplicationTools::message << "comap parameter1_name=parameter1_value parameter2_name=parameter2_value"    << endl;
-  *ApplicationTools::message << "      ... param=option_file" << endl;
-  *ApplicationTools::message << endl;
-  *ApplicationTools::message << "      Refer to the CoMap Manual for a list of available options." << endl;
-  *ApplicationTools::message << "__________________________________________________________________________" << endl;
+  (*ApplicationTools::message << "__________________________________________________________________________").endLine();
+  (*ApplicationTools::message << "comap parameter1_name=parameter1_value parameter2_name=parameter2_value").endLine();
+  (*ApplicationTools::message << "      ... param=option_file").endLine();
+  (*ApplicationTools::message).endLine();
+  (*ApplicationTools::message << "      Refer to the CoMap Manual for a list of available options.").endLine();
+  (*ApplicationTools::message << "__________________________________________________________________________").endLine();
 }
 
 /******************************************************************************/
