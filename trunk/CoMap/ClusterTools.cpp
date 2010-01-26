@@ -308,7 +308,7 @@ void ClusterTools::computeGlobalDistanceDistribution(
     delete mapping;
     delete mat;
   }
-  *ApplicationTools::message << endl;
+  ApplicationTools::message->endLine();
 }
 
 void ClusterTools::computeNormProperties(TreeTemplate<Node> & tree, const ProbabilisticSubstitutionMapping & mapping)

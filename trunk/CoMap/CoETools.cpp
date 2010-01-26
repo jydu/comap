@@ -188,7 +188,7 @@ void CoETools::readData(
     debug.close();
     exit(-1);
   }
-  *ApplicationTools::message << setprecision(20) << ll << endl;
+  (ApplicationTools::message->setPrecision(20) << ll).endLine();
   
   bool optimize = ApplicationTools::getBooleanParameter("optimization", params, true, suffix, true, false);
   if (optimize)
@@ -864,8 +864,8 @@ void CoETools::computeInterNullDistribution(
         << ", "
         << rateDomain.getBound(i+1)
         << "[, "
-        << rateDomain.getValue(i)
-        << endl;
+        << rateDomain.getValue(i);
+      ApplicationTools::message->endLine();
     }
   
     // Simulate:
