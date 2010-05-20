@@ -10,13 +10,13 @@
 @copying
 This is the manual of CoMap, version @value{VERSION}, @value{UPDATED}.
 
-Copyright @copyright{} 2006, 2007, 2008, 2009 Julien Dutheil
+Copyright @copyright{} 2006, 2007, 2008, 2009, 2010 Julien Dutheil
 @end copying
 
 @titlepage
 @title CoMap Manual
 @author Julien Dutheil
-@author @email{julien.dutheil@@cs.au.dk}
+@author @email{julien.dutheil@@univ-montp2.fr}
 
 @c The following two commands start the copyright page.
 @page
@@ -320,7 +320,35 @@ Where to write the simulated clusters (CSV format).
 @node Candidates, Pvalue, Clustering, Top
 @chapter Candidate groups analysis
 
-This method is under development and is not yet available, sorry.
+This method is used to test candidate groups of sites.
+It perform a more powerful test by taking into account the precise rate of each site,
+and no longer relies on the minimum rate of the group as in the pairwise or clustering method.
+As a consequence, it is much slower, and should therefore only be used when some candidate groups are to be tested.
+It can't be used in an exhaustive manner.
+
+Important note: This method does not require the R scripts to be used! It directly outputs p-values :)
+
+@table @command
+
+@item candidates.input.file = @{path@}
+The file to read. It must be in CSV-like format, with one group per line, and column names.
+@item candidates.input.column_name = @{string@}
+The name of the column that will contain groups. Groups should be described as [pos1;pos2;etc], refering to alignment positions, starting at 1.
+@item candidates.input.column_sep = @{char@}
+The character used to separate columns in the input file.
+@item candidates.omega = @{float@}
+The width of the window for telling whether two sites have similar rates or not. A value of 0.2 is usually good enough. The smaller the value, the more precise the computations, but the slower the execution time.
+@item candidates.null.min = @{int>0@}
+Minimum number of simulations to perform for each group.
+@item candidates.null.nb_rep_RAM = @{int<0@}
+Controles the number of sites to simulate at a time. The higher the value, the faster the execution, but at the expense of more memory usage.
+@item candidates.null.verbose = @{int>=0@}
+Controles the amount of output to terminal.
+@item candidates.output.file = @{path@}
+The file to write, identical to the input one but with extra columns, in CSV format.
+@item candidates.output.column_sep = @{char@}
+The column separator for output file.
+@end table
 
 @c ------------------------------------------------------------------------------------------------------------------
 
