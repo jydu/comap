@@ -96,644 +96,653 @@ void help()
 
 int main(int argc, char *argv[])
 {
-	cout << endl;
-	cout << endl;
-	cout << "***********************************************************" << endl;
-	cout << "* This is CoMap        version 1.4.0       date: 14/02/09 *" << endl;
-	cout << "*     A C++ shell program to detect co-evolving sites.    *" << endl;
-	cout << "***********************************************************" << endl;
-	cout << endl;
+  cout << endl;
+  cout << endl;
+  cout << "***********************************************************" << endl;
+  cout << "* This is CoMap        version 1.4.0       date: 14/02/09 *" << endl;
+  cout << "*     A C++ shell program to detect co-evolving sites.    *" << endl;
+  cout << "***********************************************************" << endl;
+  cout << endl;
   
-	try
+  try
   {
   
-	// **************************
-	// * Retrieving parameters: *
-	// **************************
-	
-	if(argc == 1)
+  // **************************
+  // * Retrieving parameters: *
+  // **************************
+  
+  if(argc == 1)
   { 
     // No argument, show display some help and leave.
-		help();
-		return 0;
-	}
+    help();
+    return 0;
+  }
 
   BppApplication comap(argc, argv, "CoMap");
   comap.startTimer();
 
-	ApplicationTools::displayMessage("\n\n-*- Retrieve data and model -*-\n");
+  ApplicationTools::displayMessage("\n\n-*- Retrieve data and model -*-\n");
 
-	Tree* tmpTree = PhylogeneticsApplicationTools::getTree(comap.getParams());
-	TreeTemplate<Node>* tree1 = new TreeTemplate<Node>(*tmpTree);
+  Tree* tmpTree = PhylogeneticsApplicationTools::getTree(comap.getParams());
+  TreeTemplate<Node>* tree1 = new TreeTemplate<Node>(*tmpTree);
   delete tmpTree;
-	ApplicationTools::displayResult("Number of leaves", TextTools::toString(tree1->getNumberOfLeaves()));
-	ApplicationTools::displayResult("Number of sons at root", TextTools::toString(tree1->getRootNode()->getNumberOfSons()));
-	
-	// Get data 1:
-	//Tree * tree1 = new Tree(* tree); // Copy tree.
-	Alphabet *alphabet1;
-	VectorSiteContainer *allSites1, *sites1;
-	SubstitutionModel *model1;
-	SubstitutionModelSet *modelSet1;
-	DiscreteDistribution *rDist1;
-	DRTreeLikelihood *tl1;
-	CoETools::readData(tree1, alphabet1, allSites1, sites1, model1, modelSet1, rDist1, tl1, comap.getParams(), "");
-	ApplicationTools::displayResult("Number of sites in file", allSites1->getNumberOfSites());
-	ApplicationTools::displayResult("Number of sites to analyse", sites1->getNumberOfSites());
-	ApplicationTools::displayResult("Number of site patterns", tl1->getLikelihoodData()->getNumberOfDistinctSites());
+  ApplicationTools::displayResult("Number of leaves", TextTools::toString(tree1->getNumberOfLeaves()));
+  ApplicationTools::displayResult("Number of sons at root", TextTools::toString(tree1->getRootNode()->getNumberOfSons()));
+  
+  // Get data 1:
+  //Tree * tree1 = new Tree(* tree); // Copy tree.
+  Alphabet *alphabet1;
+  VectorSiteContainer *allSites1, *sites1;
+  SubstitutionModel *model1;
+  SubstitutionModelSet *modelSet1;
+  DiscreteDistribution *rDist1;
+  DRTreeLikelihood *tl1;
+  CoETools::readData(tree1, alphabet1, allSites1, sites1, model1, modelSet1, rDist1, tl1, comap.getParams(), "");
+  ApplicationTools::displayResult("Number of sites in file", allSites1->getNumberOfSites());
+  ApplicationTools::displayResult("Number of sites to analyse", sites1->getNumberOfSites());
+  ApplicationTools::displayResult("Number of site patterns", tl1->getLikelihoodData()->getNumberOfDistinctSites());
   
   bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", comap.getParams(), false, "", true, false);
-	ApplicationTools::displayResult("Rate distribution for simulations", (continuousSim ? "continuous" : "discrete"));
+  ApplicationTools::displayResult("Rate distribution for simulations", (continuousSim ? "continuous" : "discrete"));
 
-	ApplicationTools::displayMessage("\n\n-*- Get substitution vectors -*-\n");
+  ApplicationTools::displayMessage("\n\n-*- Get substitution vectors -*-\n");
 
-	// Building a simulator object:
-  SequenceSimulator* seqSim1 = 0;
-  if(modelSet1)
-  {
-    seqSim1 = new NonHomogeneousSequenceSimulator(modelSet1, rDist1, tree1);
-    dynamic_cast<NonHomogeneousSequenceSimulator *>(seqSim1)->enableContinuousRates(continuousSim);
-  }
-  else
-  {
-    seqSim1 = new HomogeneousSequenceSimulator(model1, rDist1, tree1);
-    dynamic_cast<HomogeneousSequenceSimulator *>(seqSim1)->enableContinuousRates(continuousSim);
-  }
-
-	// Getting the substitutions count function:
-	SubstitutionCount* substitutionCount1 = CoETools::getSubstitutionCount(alphabet1, model1, rDist1, comap.getParams());
-		
-	// Getting the substitution vectors:
-	ProbabilisticSubstitutionMapping* mapping1 = CoETools::getVectors(*tl1, *substitutionCount1, *sites1, comap.getParams());
+  // Getting the substitutions count function:
+  SubstitutionCount* substitutionCount1 = CoETools::getSubstitutionCount(alphabet1, model1, rDist1, comap.getParams());
+    
+  // Getting the substitution vectors:
+  ProbabilisticSubstitutionMapping* mapping1 = CoETools::getVectors(*tl1, *substitutionCount1, *sites1, comap.getParams());
 
   string analysis = ApplicationTools::getStringParameter("analysis", comap.getParams(), "pairwise");
   ApplicationTools::displayResult("Analysis type", analysis);
 
-  // *********************
-	// * Pariwise analysis *
-	// *********************
-	
-  if(analysis == "pairwise")
+  if (analysis == "none")
   {
-	  const Statistic* statistic = CoETools::getStatistic(comap.getParams());
-
-    bool computeNullHyp = false;
-	  computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", comap.getParams(), false);
-	
-  
-    // *******************************************
-	  // * The same for a putative second dataset: *
-	  // *******************************************
-	  if(comap.getParams().find("input.sequence.file2") != comap.getParams().end() && comap.getParams()["input.sequence.file2"] != "none")
+    //No coevolution analysis, just do mapping!
+  }
+  else
+  {
+    // Building a simulator object:
+    SequenceSimulator* seqSim1 = 0;
+    if(modelSet1)
     {
-		  TreeTemplate<Node> * tree2;
-		  if(comap.getParams().find("input.tree.file2") != comap.getParams().end() && comap.getParams()["input.tree.file2"] != "none")
-      {
-		    ApplicationTools::displayMessage("WARNING!!! Second tree file specified.\n Tree 1 and Tree 2 must differ only by their branch lengths, otherwise results may be uninterpretable.\n");			
-  	    Tree* tmpTree = PhylogeneticsApplicationTools::getTree(comap.getParams(), "input.", "2", true);
-  	    tree2 = new TreeTemplate<Node>(*tmpTree);
-        delete tmpTree;
-	      ApplicationTools::displayResult("# number of leaves", TextTools::toString(tree2->getNumberOfLeaves()));
-    	  ApplicationTools::displayResult("# number of sons at root", TextTools::toString(tree2->getRootNode()->getNumberOfSons()));
-		  }
-      else
-      {
-			  tree2 = new TreeTemplate<Node>(* tree1); // Copy tree.
-		  }
-
-		  Alphabet *alphabet2;
-		  VectorSiteContainer *allSites2, *sites2;
-		  SubstitutionModel *model2;
-		  SubstitutionModelSet *modelSet2;
-		  DiscreteDistribution *rDist2;
-		  DRTreeLikelihood *tl2;
-		  ApplicationTools::displayMessage("\nLoading second dataset...\n");
-		  CoETools::readData(tree2, alphabet2, allSites2, sites2, model2, modelSet2, rDist2, tl2, comap.getParams(), "2");
-	    ApplicationTools::displayResult("Number of sites in file", allSites2->getNumberOfSites());
-	    ApplicationTools::displayResult("Number of sites to analyse", sites2->getNumberOfSites());
-	    ApplicationTools::displayResult("Number of site patterns", tl2->getLikelihoodData()->getNumberOfDistinctSites());
-
-		  ApplicationTools::displayMessage("\n... and get its substitution vectors.\n");
-		
-		  // Building a simulator object:
-      SequenceSimulator* seqSim2 = NULL;
-      if(modelSet2)
-      {
-        seqSim2 = new NonHomogeneousSequenceSimulator(modelSet2, rDist2, tree2);
-        dynamic_cast<NonHomogeneousSequenceSimulator *>(seqSim2)->enableContinuousRates(continuousSim);
-      }
-      else
-      {
-        seqSim2 = new HomogeneousSequenceSimulator(model2, rDist2, tree2);
-        dynamic_cast<HomogeneousSequenceSimulator *>(seqSim2)->enableContinuousRates(continuousSim);
-      }
-
-		  // Getting the substitutions count function:
-		  SubstitutionCount* substitutionCount2 = CoETools::getSubstitutionCount(alphabet2, model2, rDist2, comap.getParams());
-		
-		  // Getting the substitution vectors:
-		  ProbabilisticSubstitutionMapping * mapping2 = CoETools::getVectors(*tl2, *substitutionCount2, *sites2, comap.getParams(), "2");
-		
-	  	ApplicationTools::displayMessage("\n\n-*- Compute statistics -*-\n");
-		
-		  // *************************
-		  // * Now the stat stuff... *
-		  // *************************
-		
-		  ApplicationTools::displayMessage("Compares data set 1 with data set 2.");
-		  CoETools::computeInterStats(
-			  *tl1,
-			  *tl2,
-			  *sites1,
-			  *sites2,
-			  *mapping1,
-			  *mapping2,
-			  *statistic,
-			  comap.getParams());
-			
-		  CoETools::writeInfos(*sites2, *tl2, comap.getParams(), "2");
-		  
-      //tl2 will be modified after the simulations!
-      if(computeNullHyp)
-      {
-        CoETools::computeInterNullDistribution(
-          *tl1,
-          *tl2,
-			    *seqSim1,
-			    *seqSim2,
-			    *substitutionCount1,
-          *substitutionCount2,
-			    *statistic,
-			    comap.getParams());
-      }
-
-      delete tree2;
-		  delete allSites2;
-		  delete sites2;
-		  if(model2) delete model2;
-		  if(modelSet2) delete modelSet2;
-		  delete rDist2;
-		  delete tl2;
-		  delete substitutionCount2;
-      delete seqSim2;
-		  ApplicationTools::displayTaskDone();
-	  }
+      seqSim1 = new NonHomogeneousSequenceSimulator(modelSet1, rDist1, tree1);
+      dynamic_cast<NonHomogeneousSequenceSimulator *>(seqSim1)->enableContinuousRates(continuousSim);
+    }
     else
     {
-			ApplicationTools::displayMessage("\n\n-*- Compute statistics -*- \n");
-		
-			ApplicationTools::displayMessage("Analyse dataset.");
-			CoETools::computeIntraStats(
-				*tl1,
-				*sites1,
-				*mapping1,
-				*statistic,
-				comap.getParams());
-
-		  CoETools::writeInfos(*sites1, *tl1, comap.getParams());
-      
-      //tl2 will be modified after the simulations!
-      if(computeNullHyp)
-      {
-			  CoETools::computeIntraNullDistribution(
-          *tl1,
-				  *seqSim1,
-				  *substitutionCount1,
-				  *statistic,
-				  comap.getParams());
-		  }
-	  }
-
-    delete statistic;
-  }
+      seqSim1 = new HomogeneousSequenceSimulator(model1, rDist1, tree1);
+      dynamic_cast<HomogeneousSequenceSimulator *>(seqSim1)->enableContinuousRates(continuousSim);
+    }
 
 
 
+    // *********************
+    // * Pariwise analysis *
+    // *********************
 
-
-
-  // ***********************
-	// * Clustering analysis *
-	// ***********************
-	
-  else if(analysis == "clustering")
-  {
-		CoETools::writeInfos(*sites1, *tl1, comap.getParams());
-
-    ApplicationTools::displayMessage("\n\n-*- Perform clustering analysis -*-\n");
-	
-    string clusteringMethod = ApplicationTools::getStringParameter("clustering.method", comap.getParams(), "none", "", false, false);
-	  if(clusteringMethod != "none")
+    if (analysis == "pairwise")
     {
-      unsigned int nbBranches = mapping1->getNumberOfBranches();
-      unsigned int nbSites    = mapping1->getNumberOfSites();
-      bool scale = ApplicationTools::getBooleanParameter("clustering.scale", comap.getParams(), false, "", true, true);
-      vector<double> scales(nbBranches, 1.);
-      vector<double> weights(nbBranches, 1.);
-	    vector<double> brLens = mapping1->getBranchLengths();
-  	  double minLen = ApplicationTools::getDoubleParameter("clustering.min_length", comap.getParams(), false, "", 0.000001, false);
-      vector<double> meanVector(nbBranches);
-      for(unsigned int j = 0; j < nbBranches; j++)
-      {
-	  	  double sum = 0;
-        for(unsigned int i = 0; i < nbSites; i++)
-        {
-          sum += (*mapping1)(j, i);
-        }
-        meanVector[j] = sum / nbSites;
-      }
+      const Statistic* statistic = CoETools::getStatistic(comap.getParams());
+
+      bool computeNullHyp = false;
+      computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", comap.getParams(), false);
   
-      // Scale if required (i.e., devide each vector by the mean vector):
-	    for(unsigned int j = 0; j < nbBranches; j++)
-      {
-        double len = brLens[j];
-        if(len <= minLen) weights[j] = 0.; // Branch ignored, considered as a multifurcation.
-        if(scale)
-        {
-          double scale = 0;
-          if(len > minLen)
-          {
-            double m = meanVector[j];
-            if(m > 0) scale = 1./m; // if mean==0, hence the susbstitution number is 0 too, the scale does not matter... 0/0=>0.
-            //else scale = 0.;
-          }// else: weight[j] == 0, so the position will not be used in distance calculation whatever...
-          for(unsigned int i = 0; i < nbSites; i++)
-          {
-            (*mapping1)(j, i) *= scale ;
-          }
-          scales[j] = scale;
-        }
-	    }  
-	    ApplicationTools::displayResult("Scale by row", scale ? "yes" : "no");
   
-      // Compute norms:
-      vector<double> norms(nbSites);
-      vector<string> siteNames(nbSites);
-      for(unsigned int i = 0; i < nbSites; i++)
+      // *******************************************
+      // * The same for a putative second dataset: *
+      // *******************************************
+      if (comap.getParams().find("input.sequence.file2") != comap.getParams().end() && comap.getParams()["input.sequence.file2"] != "none")
       {
-        string siteName = TextTools::toString(sites1->getSite(i).getPosition());
-        siteNames[i] = siteName; 
-        norms[i] = VectorTools::norm<double, double>((*mapping1)[i]);
-      }
-  
-	    // Get the distance to use
-	
-	    string distanceMethod = ApplicationTools::getStringParameter("clustering.distance", comap.getParams(), "cor", "", true, true);
-	    Distance * dist = NULL;
-	    if(distanceMethod == "euclidian")
-      {
-		    dist = new EuclidianDistance();
-	    }
-      else if(distanceMethod == "cor")
-      {
-        Statistic * cor = new CorrelationStatistic();
-		    dist = new StatisticBasedDistance(cor, 1.);
-      }
-      else if(distanceMethod == "comp")
-      {
-        string nijtOption = ApplicationTools::getStringParameter("nijt", comap.getParams(), "simule", "", true);
-        bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", comap.getParams(), true, "", true); 
-        if(nijtOption != "aadist" || sym)
+        TreeTemplate<Node>* tree2;
+        if(comap.getParams().find("input.tree.file2") != comap.getParams().end() && comap.getParams()["input.tree.file2"] != "none")
         {
-          throw Exception("Compensation distance must be used with 'nijt=aadist' and 'nijt_aadist.sym=no' options.");
+          ApplicationTools::displayMessage("WARNING!!! Second tree file specified.\n Tree 1 and Tree 2 must differ only by their branch lengths, otherwise results may be uninterpretable.\n");      
+          Tree* tmpTree2 = PhylogeneticsApplicationTools::getTree(comap.getParams(), "input.", "2", true);
+          tree2 = new TreeTemplate<Node>(*tmpTree2);
+          delete tmpTree2;
+          ApplicationTools::displayResult("# number of leaves", TextTools::toString(tree2->getNumberOfLeaves()));
+          ApplicationTools::displayResult("# number of sons at root", TextTools::toString(tree2->getRootNode()->getNumberOfSons()));
         }
         else
         {
-		      dist = new CompensationDistance();
+          tree2 = new TreeTemplate<Node>(* tree1); // Copy tree.
         }
-      }
-      else
-      {
-		    ApplicationTools::displayError("Unknown distance method.");
-		    exit(-1);
-	    }
-      dist->setWeights(weights);
-	    ApplicationTools::displayResult("Distance to use", distanceMethod);
 
-	    // Compute the distance matrix.
-	    DistanceMatrix * mat = new DistanceMatrix(siteNames);
-	    for(unsigned int i = 0; i < nbSites; i++)
-      {
-		    (*mat)(i,i) = 0.;
-		    for(unsigned int j = 0; j < i; j++)
+        Alphabet *alphabet2;
+        VectorSiteContainer *allSites2, *sites2;
+        SubstitutionModel *model2;
+        SubstitutionModelSet *modelSet2;
+        DiscreteDistribution *rDist2;
+        DRTreeLikelihood *tl2;
+        ApplicationTools::displayMessage("\nLoading second dataset...\n");
+        CoETools::readData(tree2, alphabet2, allSites2, sites2, model2, modelSet2, rDist2, tl2, comap.getParams(), "2");
+        ApplicationTools::displayResult("Number of sites in file", allSites2->getNumberOfSites());
+        ApplicationTools::displayResult("Number of sites to analyse", sites2->getNumberOfSites());
+        ApplicationTools::displayResult("Number of site patterns", tl2->getLikelihoodData()->getNumberOfDistinctSites());
+
+        ApplicationTools::displayMessage("\n... and get its substitution vectors.\n");
+    
+        // Building a simulator object:
+        SequenceSimulator* seqSim2 = 0;
+        if (modelSet2)
         {
-		  	  (*mat)(i,j) = (*mat)(j,i) = dist->getDistanceForPair((*mapping1)[i], (*mapping1)[j]);
-		    }
-	    }
+          seqSim2 = new NonHomogeneousSequenceSimulator(modelSet2, rDist2, tree2);
+          dynamic_cast<NonHomogeneousSequenceSimulator *>(seqSim2)->enableContinuousRates(continuousSim);
+        }
+        else
+        {
+          seqSim2 = new HomogeneousSequenceSimulator(model2, rDist2, tree2);
+          dynamic_cast<HomogeneousSequenceSimulator *>(seqSim2)->enableContinuousRates(continuousSim);
+        }
 
-	    string matrixFile = ApplicationTools::getAFilePath("clustering.output.matrix.file", comap.getParams(), false, false, "", false);
-	    if(matrixFile != "none")
-      {
-		    //Write out matrix to a file, in Phylip format:
-		    PhylipDistanceMatrixFormat phylip;
-		    phylip.write(*mat, matrixFile, true);
-		    ApplicationTools::displayResult("Wrote matrix to file", matrixFile);
-	    }
-  
-  	  // Clustering
-	
-      // The leaves in the clustering tree are the position in the mapping.
-      // We will translate them before writing it to file.
-      vector<string> matNames(nbSites);
-      for(unsigned int i = 0; i < nbSites; i++) matNames[i] = TextTools::toString(i);
-      mat->setNames(matNames);
-	 
-	    AgglomerativeDistanceMethod * clustering = NULL;
-	    if(clusteringMethod == "complete")
-      {
-		    clustering = new SimpleClustering(SimpleClustering::COMPLETE, *mat, false);
-	    }
-      else if(clusteringMethod == "single")
-      {
-		    clustering = new SimpleClustering(SimpleClustering::SINGLE, *mat, false);
-	    }
-      else if(clusteringMethod == "average")
-      {
-		    clustering = new SimpleClustering(SimpleClustering::AVERAGE, *mat, false);
-	    }
-      //else if(clusteringMethod == "sum")
-      //{
-  	  //	clustering = new SumClustering(*mapping1, *dist, *mat);
-	    //}
-      else
-      {
-		    ApplicationTools::displayError("Unknown clustering method.");
-		    exit(-1);
-	    }
-	    ApplicationTools::displayResult("Clustering method", clusteringMethod);
-	
-	    // Build tree:
-	    TreeTemplate<Node> clusteringTree(* clustering->getTree());
-
-      // Add information to tree:
-      ClusterTools::computeNormProperties(clusteringTree, *mapping1);
-      dist->setStatisticAsProperty(*clusteringTree.getRootNode(), *mapping1);
-	
-      // Dumping groups to file, with more or less information, depending on the method used.
-	    string groupsPath = ApplicationTools::getAFilePath("clustering.output.groups.file", comap.getParams(), true, false, "", false);
-      ApplicationTools::displayResult("Site clusters output file", groupsPath);
-      vector<string> colNames(6);
-      colNames[0] = "Group";
-      colNames[1] = "Size";
-      colNames[2] = "Const";
-      colNames[3] = "Dmax";
-      colNames[4] = "Stat";
-      colNames[5] = "Nmin";
-      //colNames[6] = "Delta"; //Distance From Mean Vector
-      DataTable groupsData(colNames);
-
-      // A few infos we will need:
-	    vector<double> rates = tl1->getPosteriorRateOfEachSite();
-      vector<bool> isConst(nbSites);
-      for(unsigned int i = 0; i < nbSites; i++)
-        isConst[i] = SiteTools::isConstant(sites1->getSite(i), true);
-  
-      vector<Group> groups = ClusterTools::getGroups(&clusteringTree);
-      //vector<double> minNorms(groups.size());
-  
-      for(unsigned int i = 0; i < groups.size(); i++)
-      {
-        Group * group = &groups[i];
+        // Getting the substitutions count function:
+        SubstitutionCount* substitutionCount2 = CoETools::getSubstitutionCount(alphabet2, model2, rDist2, comap.getParams());
+    
+        // Getting the substitution vectors:
+        ProbabilisticSubstitutionMapping* mapping2 = CoETools::getVectors(*tl2, *substitutionCount2, *sites2, comap.getParams(), "2");
+    
+        ApplicationTools::displayMessage("\n\n-*- Compute statistics -*-\n");
+    
+        // *************************
+        // * Now the stat stuff... *
+        // *************************
+    
+        ApplicationTools::displayMessage("Compares data set 1 with data set 2.");
+        CoETools::computeInterStats(
+          *tl1,
+          *tl2,
+          *sites1,
+          *sites2,
+          *mapping1,
+          *mapping2,
+          *statistic,
+          comap.getParams());
       
-        // Does the group contain a constant site?
-        bool test = false;
-        for(unsigned int j = 0; j < group->size() && !test; j++)
+        CoETools::writeInfos(*sites2, *tl2, comap.getParams(), "2");
+      
+        //tl2 will be modified after the simulations!
+        if (computeNullHyp)
         {
-          if(isConst[TextTools::to<unsigned int>((*group)[j])]) test = true;
+          CoETools::computeInterNullDistribution(
+            *tl1,
+            *tl2,
+            *seqSim1,
+            *seqSim2,
+            *substitutionCount1,
+            *substitutionCount2,
+            *statistic,
+            comap.getParams());
         }
 
-        //// Compute distance from mean vector:
-        //vector<double> groupMeanVector(nbBranches, 0.);
-        //for(unsigned int j = 0; j < group->size(); j++)
-        //{
-        //  groupMeanVector += (*mapping1)[TextTools::to<unsigned int>((*group)[j])]; 
-        //}
-        //double distFromMeanVector = dist->getDistanceForPair(groupMeanVector/group->size(), meanVector);   
-
-        //?minNorms[i] = minNorm;
-        // Store results:
-        vector<string> row(6);
-        row[0] = group->toString(siteNames);
-        row[1] = TextTools::toString(group->size());
-        row[2] = test ? "yes" : "no";
-        row[3] = TextTools::toString(group->getHeight() * 2.);
-        row[4] = TextTools::toString(dynamic_cast<const Number<double> *>(group->getProperty("Stat"))->getValue());
-        row[5] = TextTools::toString(dynamic_cast<const Number<double> *>(group->getProperty("Nmin"))->getValue());
-        //row[6] = TextTools::toString(distFromMeanVector);
-        groupsData.addRow(row);
-      }
-
-      //Write detected groups to file:
-      ofstream groupsFile(groupsPath.c_str(), ios::out);
-      DataTable::write(groupsData, groupsFile);
-      groupsFile.close();
-
-      //Write clustering tree to file:
-	    string treeFile = ApplicationTools::getAFilePath("clustering.output.tree.file", comap.getParams(), false, false, "", false);
-	    if(treeFile != "none")
-      {
-	      // First we retranslate leaves names:
-        ClusterTools::translate(clusteringTree, siteNames);
-        Newick newick;
-	      newick.write(clusteringTree, treeFile, true);
-	      ApplicationTools::displayResult("Wrote tree to file", treeFile);
-      }
-    
-      // Now test each group:
-      ApplicationTools::displayMessage("\n\n-*- Compute null distribution of clusters -*-\n");
-  
-      bool testGroupsGlobal = ApplicationTools::getBooleanParameter("clustering.null", comap.getParams(), false, "", true, false);
-      unsigned int maxGroupSize = ApplicationTools::getParameter<unsigned int>("clustering.maximum_group_size", comap.getParams(), 10, "", true, false);
-      ApplicationTools::displayResult("Maximum group size to test", TextTools::toString(maxGroupSize));
-      if(testGroupsGlobal)
-      {       
-	      string simPath = ApplicationTools::getAFilePath("clustering.null.output.file", comap.getParams(), true, false, "", false);
-        unsigned int nrep = ApplicationTools::getParameter<unsigned int>("clustering.null.number", comap.getParams(), 1, "", true);
-        ApplicationTools::displayResult("Number of simulations", TextTools::toString(nrep));
-        ApplicationTools::displayResult("Simulations output file", simPath);
-        ofstream * out = NULL;
-        if(simPath != "none") out = new ofstream(simPath.c_str(), ios::out);
-        ApplicationTools::displayTask("Simulating groups", true);
-        ClusterTools::computeGlobalDistanceDistribution(*tl1, *seqSim1, *substitutionCount1, *dist, *clustering, scales, nbSites, nrep, maxGroupSize, out);
+        delete tree2;
+        delete allSites2;
+        delete sites2;
+        if (model2) delete model2;
+        if (modelSet2) delete modelSet2;
+        delete rDist2;
+        delete tl2;
+        delete substitutionCount2;
+        delete seqSim2;
         ApplicationTools::displayTaskDone();
-        if(out != NULL) out->close();
+      }
+      else
+      {
+        ApplicationTools::displayMessage("\n\n-*- Compute statistics -*- \n");
+    
+        ApplicationTools::displayMessage("Analyse dataset.");
+        CoETools::computeIntraStats(
+          *tl1,
+          *sites1,
+          *mapping1,
+          *statistic,
+          comap.getParams());
+ 
+        CoETools::writeInfos(*sites1, *tl1, comap.getParams());
+      
+        //tl2 will be modified after the simulations!
+        if (computeNullHyp)
+        { 
+          CoETools::computeIntraNullDistribution(
+            *tl1,
+            *seqSim1,
+            *substitutionCount1,
+            *statistic,
+            comap.getParams());
+        }
       }
 
-      // Clustering memory freeing:
-	    delete dist;
-	    delete mat;
-	    delete clustering;
+      delete statistic;
     }
-  }
+
+
+
+
+
+
+    // ***********************
+    // * Clustering analysis *
+    // ***********************
+  
+    else if(analysis == "clustering")
+    {
+      CoETools::writeInfos(*sites1, *tl1, comap.getParams());
+
+      ApplicationTools::displayMessage("\n\n-*- Perform clustering analysis -*-\n");
+  
+      string clusteringMethod = ApplicationTools::getStringParameter("clustering.method", comap.getParams(), "none", "", false, false);
+      if(clusteringMethod != "none")
+      {
+        unsigned int nbBranches = mapping1->getNumberOfBranches();
+        unsigned int nbSites    = mapping1->getNumberOfSites();
+        bool scale = ApplicationTools::getBooleanParameter("clustering.scale", comap.getParams(), false, "", true, true);
+        vector<double> scales(nbBranches, 1.);
+        vector<double> weights(nbBranches, 1.);
+        vector<double> brLens = mapping1->getBranchLengths();
+        double minLen = ApplicationTools::getDoubleParameter("clustering.min_length", comap.getParams(), false, "", 0.000001, false);
+        vector<double> meanVector(nbBranches);
+        for (unsigned int j = 0; j < nbBranches; j++)
+        {
+          double sum = 0;
+          for (unsigned int i = 0; i < nbSites; i++)
+          {
+            sum += (*mapping1)(j, i);
+          }
+          meanVector[j] = sum / nbSites;
+        }
+  
+        // Scale if required (i.e., devide each vector by the mean vector):
+        for (unsigned int j = 0; j < nbBranches; j++)
+        {
+          double len = brLens[j];
+          if (len <= minLen) weights[j] = 0.; // Branch ignored, considered as a multifurcation.
+          if (scale)
+          {
+            double scaleVal = 0;
+            if (len > minLen)
+            {
+              double m = meanVector[j];
+              if (m > 0) scaleVal = 1./m; // if mean==0, hence the susbstitution number is 0 too, the scale does not matter... 0/0=>0.
+              //else scaleVal = 0.;
+            }// else: weight[j] == 0, so the position will not be used in distance calculation whatever...
+            for (unsigned int i = 0; i < nbSites; i++)
+            {
+              (*mapping1)(j, i) *= scaleVal;
+            }
+            scales[j] = scaleVal;
+          }
+        }  
+        ApplicationTools::displayResult("Scale by row", scale ? "yes" : "no");
+  
+        // Compute norms:
+        vector<double> norms(nbSites);
+        vector<string> siteNames(nbSites);
+        for (unsigned int i = 0; i < nbSites; i++)
+        {
+          string siteName = TextTools::toString(sites1->getSite(i).getPosition());
+          siteNames[i] = siteName; 
+          norms[i] = VectorTools::norm<double, double>((*mapping1)[i]);
+        }
+  
+        // Get the distance to use
+    
+        string distanceMethod = ApplicationTools::getStringParameter("clustering.distance", comap.getParams(), "cor", "", true, true);
+        Distance* dist = 0;
+        if (distanceMethod == "euclidian")
+        {
+          dist = new EuclidianDistance();
+        }
+        else if (distanceMethod == "cor")
+        {
+          Statistic* cor = new CorrelationStatistic();
+          dist = new StatisticBasedDistance(cor, 1.);
+        }
+        else if(distanceMethod == "comp")
+        {
+          string nijtOption = ApplicationTools::getStringParameter("nijt", comap.getParams(), "simule", "", true);
+          bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", comap.getParams(), true, "", true); 
+          if (nijtOption != "aadist" || sym)
+          {
+            throw Exception("Compensation distance must be used with 'nijt=aadist' and 'nijt_aadist.sym=no' options.");
+          }
+          else
+          {
+            dist = new CompensationDistance();
+          }
+        }
+        else
+        {
+          ApplicationTools::displayError("Unknown distance method.");
+          exit(-1);
+        }
+        dist->setWeights(weights);
+        ApplicationTools::displayResult("Distance to use", distanceMethod);
+
+        // Compute the distance matrix.
+        DistanceMatrix* mat = new DistanceMatrix(siteNames);
+        for (unsigned int i = 0; i < nbSites; i++)
+        {
+          (*mat)(i,i) = 0.;
+          for (unsigned int j = 0; j < i; j++)
+          {
+            (*mat)(i,j) = (*mat)(j,i) = dist->getDistanceForPair((*mapping1)[i], (*mapping1)[j]);
+          }
+        }
+
+        string matrixFile = ApplicationTools::getAFilePath("clustering.output.matrix.file", comap.getParams(), false, false, "", false);
+        if (matrixFile != "none")
+        {
+          //Write out matrix to a file, in Phylip format:
+          PhylipDistanceMatrixFormat phylip;
+          phylip.write(*mat, matrixFile, true);
+          ApplicationTools::displayResult("Wrote matrix to file", matrixFile);
+        }
+  
+        // Clustering
+  
+        // The leaves in the clustering tree are the position in the mapping.
+        // We will translate them before writing it to file.
+        vector<string> matNames(nbSites);
+        for (unsigned int i = 0; i < nbSites; i++) matNames[i] = TextTools::toString(i);
+        mat->setNames(matNames);
+   
+        AgglomerativeDistanceMethod * clustering = 0;
+        if (clusteringMethod == "complete")
+        {
+          clustering = new SimpleClustering(SimpleClustering::COMPLETE, *mat, false);
+        }
+        else if (clusteringMethod == "single")
+        {
+          clustering = new SimpleClustering(SimpleClustering::SINGLE, *mat, false);
+        }
+        else if (clusteringMethod == "average")
+        {
+          clustering = new SimpleClustering(SimpleClustering::AVERAGE, *mat, false);
+        }
+        //else if(clusteringMethod == "sum")
+        //{
+        //  clustering = new SumClustering(*mapping1, *dist, *mat);
+        //}
+        else
+        {
+          ApplicationTools::displayError("Unknown clustering method.");
+          exit(-1);
+        }
+        ApplicationTools::displayResult("Clustering method", clusteringMethod);
+  
+        // Build tree:
+        TreeTemplate<Node> clusteringTree(* clustering->getTree());
+
+        // Add information to tree:
+        ClusterTools::computeNormProperties(clusteringTree, *mapping1);
+        dist->setStatisticAsProperty(*clusteringTree.getRootNode(), *mapping1);
+  
+        // Dumping groups to file, with more or less information, depending on the method used.
+        string groupsPath = ApplicationTools::getAFilePath("clustering.output.groups.file", comap.getParams(), true, false, "", false);
+        ApplicationTools::displayResult("Site clusters output file", groupsPath);
+        vector<string> colNames(6);
+        colNames[0] = "Group";
+        colNames[1] = "Size";
+        colNames[2] = "Const";
+        colNames[3] = "Dmax";
+        colNames[4] = "Stat";
+        colNames[5] = "Nmin";
+        //colNames[6] = "Delta"; //Distance From Mean Vector
+        DataTable groupsData(colNames);
+
+        // A few infos we will need:
+        vector<double> rates = tl1->getPosteriorRateOfEachSite();
+        vector<bool> isConst(nbSites);
+        for (unsigned int i = 0; i < nbSites; i++)
+          isConst[i] = SiteTools::isConstant(sites1->getSite(i), true);
+  
+        vector<Group> groups = ClusterTools::getGroups(&clusteringTree);
+        //vector<double> minNorms(groups.size());
+  
+        for (unsigned int i = 0; i < groups.size(); i++)
+        {
+          Group* group = &groups[i];
+      
+          // Does the group contain a constant site?
+          bool test = false;
+          for (unsigned int j = 0; j < group->size() && !test; j++)
+          {
+            if (isConst[TextTools::to<unsigned int>((*group)[j])]) test = true;
+          }
+
+          //// Compute distance from mean vector:
+          //vector<double> groupMeanVector(nbBranches, 0.);
+          //for(unsigned int j = 0; j < group->size(); j++)
+          //{
+          //  groupMeanVector += (*mapping1)[TextTools::to<unsigned int>((*group)[j])]; 
+          //}
+          //double distFromMeanVector = dist->getDistanceForPair(groupMeanVector/group->size(), meanVector);   
+
+          //?minNorms[i] = minNorm;
+          // Store results:
+          vector<string> row(6);
+          row[0] = group->toString(siteNames);
+          row[1] = TextTools::toString(group->size());
+          row[2] = test ? "yes" : "no";
+          row[3] = TextTools::toString(group->getHeight() * 2.);
+          row[4] = TextTools::toString(dynamic_cast<const Number<double> *>(group->getProperty("Stat"))->getValue());
+          row[5] = TextTools::toString(dynamic_cast<const Number<double> *>(group->getProperty("Nmin"))->getValue());
+          //row[6] = TextTools::toString(distFromMeanVector);
+          groupsData.addRow(row);
+        }
+
+        //Write detected groups to file:
+        ofstream groupsFile(groupsPath.c_str(), ios::out);
+        DataTable::write(groupsData, groupsFile);
+        groupsFile.close();
+
+        //Write clustering tree to file:
+        string treeFile = ApplicationTools::getAFilePath("clustering.output.tree.file", comap.getParams(), false, false, "", false);
+        if (treeFile != "none")
+        {
+          // First we retranslate leaves names:
+          ClusterTools::translate(clusteringTree, siteNames);
+          Newick newick;
+          newick.write(clusteringTree, treeFile, true);
+          ApplicationTools::displayResult("Wrote tree to file", treeFile);
+        }
+    
+        // Now test each group:
+        ApplicationTools::displayMessage("\n\n-*- Compute null distribution of clusters -*-\n");
+  
+        bool testGroupsGlobal = ApplicationTools::getBooleanParameter("clustering.null", comap.getParams(), false, "", true, false);
+        unsigned int maxGroupSize = ApplicationTools::getParameter<unsigned int>("clustering.maximum_group_size", comap.getParams(), 10, "", true, false);
+        ApplicationTools::displayResult("Maximum group size to test", TextTools::toString(maxGroupSize));
+        if (testGroupsGlobal)
+        {       
+          string simPath = ApplicationTools::getAFilePath("clustering.null.output.file", comap.getParams(), true, false, "", false);
+          unsigned int nrep = ApplicationTools::getParameter<unsigned int>("clustering.null.number", comap.getParams(), 1, "", true);
+          ApplicationTools::displayResult("Number of simulations", TextTools::toString(nrep));
+          ApplicationTools::displayResult("Simulations output file", simPath);
+          ofstream* out = 0;
+          if (simPath != "none") out = new ofstream(simPath.c_str(), ios::out);
+          ApplicationTools::displayTask("Simulating groups", true);
+          ClusterTools::computeGlobalDistanceDistribution(*tl1, *seqSim1, *substitutionCount1, *dist, *clustering, scales, nbSites, nrep, maxGroupSize, out);
+          ApplicationTools::displayTaskDone();
+          if (out != 0) out->close();
+        }
+
+        // Clustering memory freeing:
+        delete dist;
+        delete mat;
+        delete clustering;
+      }
+    }
 
   
 
 
 
-  // ****************************
-	// * Candidate sites analysis *
-	// ****************************
-	
-  else if(analysis == "candidates")
-  {
-    // *****************************
-  	// * Candidate groups analysis *
-  	// *****************************
-    // We only deal with the one data set case for now.
-	  
-		CoETools::writeInfos(*sites1, *tl1, comap.getParams());
-    
-    const Statistic * statistic = CoETools::getStatistic(comap.getParams());
-	
-    string groupsPath = ApplicationTools::getAFilePath("candidates.input.file", comap.getParams(), false, true);
-    if(groupsPath != "none")
+    // ****************************
+    // * Candidate sites analysis *
+    // ****************************
+  
+    else if (analysis == "candidates")
     {
-      ApplicationTools::displayResult("Candidate groups are in file", groupsPath);
-
-      ifstream groupsFile(groupsPath.c_str(), ios::in);
-
-      //Store all positions and norm ranges in site container for each site in each candidate group:
-      unsigned int minSim = ApplicationTools::getParameter<unsigned int>("candidates.null.min", comap.getParams(), 1000, "", true, true);
-      ApplicationTools::displayResult("Minimum number of simulations", TextTools::toString(minSim));
-      unsigned int verbose = ApplicationTools::getParameter<unsigned int>("candidates.null.verbose", comap.getParams(), 1, "", true, true);
-      ApplicationTools::displayResult("Verbose level", TextTools::toString(verbose));
-      CandidateGroupSet candidates(statistic, minSim, verbose);
+      // *****************************
+      // * Candidate groups analysis *
+      // *****************************
+      // We only deal with the one data set case for now.
     
-      //Create positions index first:
-      map<int, unsigned int> posIndex;
-      vector<int> positions = sites1->getSitePositions();
-      for(unsigned int i = 0; i < positions.size(); i++)
-        posIndex[positions[i]] = i;
-
-      //Parse file:
-      string groupsColumnSep = ApplicationTools::getStringParameter("candidates.input.column_sep", comap.getParams(), "\t", "", true, true);
-      DataTable* table = DataTable::read(groupsFile, groupsColumnSep, true, -1);
-      groupsFile.close();
-      string groupsColumnName = ApplicationTools::getStringParameter("candidates.input.column_name", comap.getParams(), "Group", "", true, true);
-      vector<string> groups = table->getColumn(groupsColumnName);
-
-      //Get range value:
-      double omega = ApplicationTools::getDoubleParameter("candidates.omega", comap.getParams(), 0.25, "", true, true);
-      ApplicationTools::displayResult("Norm interval", TextTools::toString(omega));
-      if(omega < 0)
+      CoETools::writeInfos(*sites1, *tl1, comap.getParams());
+    
+      const Statistic* statistic = CoETools::getStatistic(comap.getParams());
+  
+      string groupsPath = ApplicationTools::getAFilePath("candidates.input.file", comap.getParams(), false, true);
+      if (groupsPath != "none")
       {
-        ApplicationTools::displayWarning("Norm range parameter 'omega' must be positive... |omega| was used instead.");
-        omega = -omega;
-      }
+        ApplicationTools::displayResult("Candidate groups are in file", groupsPath);
 
-      //Now parse each group, compute index and corresponding norm ranges and statistic value:
-      ApplicationTools::displayTask("Compute statistic for each group", true);
-      string group, tmp, strok = "0123456789;,";
-      for(unsigned int i = 0; i < groups.size(); i++)
-      {
-        if(groups.size() > 100) ApplicationTools::displayGauge(i, groups.size() - 1, '=');
-        tmp = TextTools::removeWhiteSpaces(groups[i]);
-        group = "";
-        //Clean group description:
-        for(unsigned int j = 0; j < tmp.length(); j++)
+        ifstream groupsFile(groupsPath.c_str(), ios::in);
+
+        //Store all positions and norm ranges in site container for each site in each candidate group:
+        unsigned int minSim = ApplicationTools::getParameter<unsigned int>("candidates.null.min", comap.getParams(), 1000, "", true, true);
+        ApplicationTools::displayResult("Minimum number of simulations", TextTools::toString(minSim));
+        unsigned int verbose = ApplicationTools::getParameter<unsigned int>("candidates.null.verbose", comap.getParams(), 1, "", true, true);
+        ApplicationTools::displayResult("Verbose level", TextTools::toString(verbose));
+        CandidateGroupSet candidates(statistic, minSim, verbose);
+    
+        //Create positions index first:
+        map<int, unsigned int> posIndex;
+        vector<int> positions = sites1->getSitePositions();
+        for (unsigned int i = 0; i < positions.size(); i++)
+          posIndex[positions[i]] = i;
+
+        //Parse file:
+        string groupsColumnSep = ApplicationTools::getStringParameter("candidates.input.column_sep", comap.getParams(), "\t", "", true, true);
+        DataTable* table = DataTable::read(groupsFile, groupsColumnSep, true, -1);
+        groupsFile.close();
+        string groupsColumnName = ApplicationTools::getStringParameter("candidates.input.column_name", comap.getParams(), "Group", "", true, true);
+        vector<string> groups = table->getColumn(groupsColumnName);
+
+        //Get range value:
+        double omega = ApplicationTools::getDoubleParameter("candidates.omega", comap.getParams(), 0.25, "", true, true);
+        ApplicationTools::displayResult("Norm interval", TextTools::toString(omega));
+        if (omega < 0)
         {
-          if(strok.find(tmp[j]) != string::npos) group += tmp[j];
+          ApplicationTools::displayWarning("Norm range parameter 'omega' must be positive... |omega| was used instead.");
+          omega = -omega;
         }
-        //Now parse group for each site:
-        StringTokenizer st(group, ";,", false);
-        int pos;
-        if(st.numberOfRemainingTokens() <= 1)
+
+        //Now parse each group, compute index and corresponding norm ranges and statistic value:
+        ApplicationTools::displayTask("Compute statistic for each group", true);
+        string group, tmp, strok = "0123456789;,";
+        for (unsigned int i = 0; i < groups.size(); i++)
         {
-          throw Exception("Error, group " + TextTools::toString(i) + " has " + TextTools::toString(st.numberOfRemainingTokens()) + "sites.");
-        }
-        CandidateGroup candidate;
-        while(st.hasMoreToken())
-        {
-          pos = TextTools::toInt(st.nextToken());
-          if(posIndex.find(pos) == posIndex.end())
+          if(groups.size() > 100) ApplicationTools::displayGauge(i, groups.size() - 1, '=');
+          tmp = TextTools::removeWhiteSpaces(groups[i]);
+          group = "";
+          //Clean group description:
+          for (unsigned int j = 0; j < tmp.length(); j++)
           {
-            candidate.setAnalysable(false);
-            ApplicationTools::displayWarning("Position " + TextTools::toString(pos) + " is not included in the selected sites. The group will be ignored (line " + TextTools::toString(i+1) + " in input file).");
-            break;
+            if (strok.find(tmp[j]) != string::npos) group += tmp[j];
           }
-          candidate.push_back(CandidateSite(posIndex[pos]));
+          //Now parse group for each site:
+          StringTokenizer st(group, ";,", false);
+          int pos;
+          if (st.numberOfRemainingTokens() <= 1)
+          {
+            throw Exception("Error, group " + TextTools::toString(i) + " has " + TextTools::toString(st.numberOfRemainingTokens()) + "sites.");
+          }
+          CandidateGroup candidate;
+          while (st.hasMoreToken())
+          {
+            pos = TextTools::toInt(st.nextToken());
+            if (posIndex.find(pos) == posIndex.end())
+            {
+              candidate.setAnalysable(false);
+              ApplicationTools::displayWarning("Position " + TextTools::toString(pos) + " is not included in the selected sites. The group will be ignored (line " + TextTools::toString(i+1) + " in input file).");
+              break;
+            }
+            candidate.addSite(CandidateSite(posIndex[pos]));
+          }
+          if (candidate.isAnalysable())
+          {
+            candidate.computeStatisticValue(*statistic, *mapping1);
+            candidate.computeNormRanges(omega, *mapping1);
+          }
+          candidates.addCandidate(candidate);
         }
-        if(candidate.isAnalysable())
+        ApplicationTools::displayTaskDone();
+
+        //Now compute p-values:
+        unsigned int nbMaxTrials = ApplicationTools::getParameter<unsigned int>("candidates.nb_max_trials", comap.getParams(), 10, "", true, true);
+        CoETools::computePValuesForCandidateGroups(candidates, *tl1, *seqSim1, *substitutionCount1, comap.getParams(), nbMaxTrials);
+
+        //Now fill data table:
+        vector<string> stats(table->getNumberOfRows()), pvalues(table->getNumberOfRows());
+        for (unsigned int i = 0; i < table->getNumberOfRows(); i++)
         {
-          candidate.computeStatisticValue(*statistic, *mapping1);
-          candidate.computeNormRanges(omega, *mapping1);
+          stats[i] = candidates[i].isAnalysable()
+            ? TextTools::toString(candidates[i].getStatisticValue(), 6)
+            : "NA";
+          pvalues[i] = candidates[i].isAnalysable()
+            ? TextTools::toString(candidates.getPValueForGroup(i), 6)
+            : "NA";
         }
-        candidates.addCandidate(candidate);
+        table->addColumn("Stat", stats);
+        table->addColumn("p-value", pvalues);
+
+        //Write result to file:
+        string outputPath = ApplicationTools::getAFilePath("candidates.output.file", comap.getParams(), true, false);
+        groupsColumnSep = ApplicationTools::getStringParameter("candidates.output.column_sep", comap.getParams(), groupsColumnSep, "", true, true);
+        ofstream outputFile(outputPath.c_str(), ios::out);
+        DataTable::write(*table, outputFile, groupsColumnSep);
+        outputFile.close();
+        ApplicationTools::displayResult("Wrote results in file", outputPath);
+
+        //Free memory.
+        delete table;
       }
-      ApplicationTools::displayTaskDone();
 
-      //Now compute p-values:
-      unsigned int nbMaxTrials = ApplicationTools::getParameter<unsigned int>("candidates.nb_max_trials", comap.getParams(), 10, "", true, true);
-      CoETools::computePValuesForCandidateGroups(candidates, *tl1, *seqSim1, *substitutionCount1, comap.getParams(), nbMaxTrials);
-
-      //Now fill data table:
-      vector<string> stats(table->getNumberOfRows()), pvalues(table->getNumberOfRows());
-      for(unsigned int i = 0; i < table->getNumberOfRows(); i++)
-      {
-        stats[i] = candidates[i].isAnalysable()
-          ? TextTools::toString(candidates[i].getStatisticValue(), 6)
-          : "NA";
-        pvalues[i] = candidates[i].isAnalysable()
-          ? TextTools::toString(candidates.getPValueForGroup(i), 6)
-          : "NA";
-      }
-      table->addColumn("Stat", stats);
-      table->addColumn("p-value", pvalues);
-
-      //Write result to file:
-      string outputPath = ApplicationTools::getAFilePath("candidates.output.file", comap.getParams(), true, false);
-      groupsColumnSep = ApplicationTools::getStringParameter("candidates.output.column_sep", comap.getParams(), groupsColumnSep, "", true, true);
-      ofstream outputFile(outputPath.c_str(), ios::out);
-      DataTable::write(*table, outputFile, groupsColumnSep);
-      outputFile.close();
-      ApplicationTools::displayResult("Wrote results in file", outputPath);
-
-      //Free memory.
-      delete table;
+      delete statistic;
     }
 
-    delete statistic;
+
+
+
+
+
+    else throw Exception("Unknown analysis type: " + analysis);
+    
+    delete seqSim1;
   }
-
-
-
-
-
-
-  else throw Exception("Unknown analysis type: " + analysis);
-
 
   // ***********
-	// * The End *
-	// ***********
-	
-	ApplicationTools::displayTask("Freeing memory");
+  // * The End *
+  // ***********
+  
+  ApplicationTools::displayTask("Freeing memory");
   
   // Dataset 1 memory freeing:
   delete tree1;
-	delete allSites1;
-	delete sites1;
-	if(model1) delete model1;
-	if(modelSet1) delete modelSet1;
-	delete rDist1;
-	delete tl1;
-	delete substitutionCount1;
+  delete allSites1;
+  delete sites1;
+  if(model1) delete model1;
+  if(modelSet1) delete modelSet1;
+  delete rDist1;
+  delete tl1;
+  delete substitutionCount1;
   delete mapping1;
-  delete seqSim1;
-	
+  
   ApplicationTools::displayTaskDone();
 
   comap.done();
-	
-  ApplicationTools::displayMessage("Bye bye ;-)");	
+  
+  ApplicationTools::displayMessage("Bye bye ;-)");  
 
-	}
+  }
   catch(Exception e)
   {
-		cout << e.what() << endl;
-		exit(-1);
-	}
+    cout << e.what() << endl;
+    exit(-1);
+  }
 
-	return (0);
+  return (0);
 }
 

@@ -107,10 +107,15 @@ class Statistic
 class AbstractMinimumStatistic: public Statistic
 {
   protected:
-    Vdouble * weight_s;
+    Vdouble* weight_s;
 
   public:
     AbstractMinimumStatistic(): weight_s(0) {}
+    AbstractMinimumStatistic(const AbstractMinimumStatistic& stat) : weight_s(new Vdouble(*stat.weight_s)) {}
+    AbstractMinimumStatistic& operator=(const AbstractMinimumStatistic& stat) {
+      weight_s = new Vdouble(*stat.weight_s);
+      return *this;
+    }
     virtual ~AbstractMinimumStatistic() { if(weight_s) delete weight_s; }
 
   public:

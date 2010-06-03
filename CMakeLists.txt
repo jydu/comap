@@ -3,7 +3,7 @@
 # Created: 22/08/2009
 
 # Global parameters
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(CoMap CXX)
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
@@ -11,7 +11,7 @@ IF(NOT CMAKE_BUILD_TYPE)
       FORCE)
 ENDIF()
 
-SET(CMAKE_CXX_FLAGS "-Wall")
+SET(CMAKE_CXX_FLAGS "-Wall -Weffc++ -Wshadow")
 IF(NOT NO_VIRTUAL_COV)
   SET(NO_VIRTUAL_COV FALSE CACHE BOOL
       "Disable covariant return type with virtual inheritance, for compilers that do not support it."
@@ -31,21 +31,27 @@ IF(NOT BUILD_STATIC)
 ENDIF()
 IF(BUILD_STATIC)
   MESSAGE("-- Static linkage requested.")
-  SET(CMAKE_CXX_FLAGS "-static ${CMAKE_CXX_FLAGS}")
+  SET(CMAKE_CXX_FLAGS "-static -static-libgcc ${CMAKE_CXX_FLAGS}")
 ENDIF()
+
+#build info?
+IF(NOT DEFINED INFO)
+  SET(INFO UNIX)
+ENDIF(NOT DEFINED INFO)
+
+#find executables for documentation
+FIND_PROGRAM(MAKEINFO_EXE NAMES makeinfo)
+FIND_PROGRAM(PDFTEX_EXE NAMES pdftex)
 
 #here is a useful function:
 MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
   #start:
   FIND_PATH(${lib_name}_INCLUDE_DIR ${include_to_find})
+  UNSET(${lib_name}_LIBRARY CACHE) #Reset the cache.
 
   IF(BUILD_STATIC)
-    FIND_PATH(${lib_name}_LIBRARY_DIR lib${lib_name}.a HINTS ${CMAKE_PREFIX_PATH} ${CMAKE_PREFIX_PATH}/lib)
-    IF(${lib_name}_LIBRARY_DIR)
-      SET(${lib_name}_LIBRARY ${${lib_name}_LIBRARY_DIR}/lib${lib_name}.a)
-    ELSE(${lib_name}_LIBRARY_DIR)
-      MESSAGE(FATAL_ERROR "${lib_name} static library could not be found.")
-    ENDIF(${lib_name}_LIBRARY_DIR)
+    SET(${lib_name}_NAMES lib${lib_name}.a)
+    FIND_LIBRARY(${lib_name}_LIBRARY NAMES ${${lib_name}_NAMES})
   ELSE(BUILD_STATIC)
     SET(${lib_name}_NAMES ${lib_name} ${lib_name}lib ${lib_name}dll)
     FIND_LIBRARY(${lib_name}_LIBRARY NAMES ${${lib_name}_NAMES})
@@ -77,27 +83,36 @@ IMPROVED_FIND_LIBRARY(LIBS bpp-seq Seq/Alphabet.h)
 IMPROVED_FIND_LIBRARY(LIBS bpp-numcalc NumCalc/NumTools.h)
 IMPROVED_FIND_LIBRARY(LIBS bpp-utils Utils/Clonable.h)
 
+IF(MAKEINFO_EXE)
+  MESSAGE("-- Found makeinfo here: ${MAKEINFO_EXE}")
+  MESSAGE("   Adding targets: info, html")
 
-# Set the CMAKE_PREFIX_PATH for the find_library fonction when using non
-# standard install location
-IF(CMAKE_INSTALL_PREFIX)
-  SET(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
-ENDIF(CMAKE_INSTALL_PREFIX)
+  IF(INFO)
+    SET(ADD_INFO_TO "ALL")
+    MESSAGE("   Adding target info to target all")
+  ENDIF(INFO)
 
-# We should check for the Texinfo dependecy, but no FindPackage is available here...
-ADD_CUSTOM_TARGET(info
-  COMMAND makeinfo comap.texi
-  WORKING_DIRECTORY doc
-  )
-ADD_CUSTOM_TARGET(pdf
-  COMMAND pdftex comap.texi
-  WORKING_DIRECTORY doc
-  )
-ADD_CUSTOM_TARGET(html
-  COMMAND makeinfo --html --css-ref=http://www.w3.org/StyleSheets/Core/Steely comap.texi
-  WORKING_DIRECTORY doc
-  )
+  ADD_CUSTOM_TARGET(info
+    ${ADD_INFO_TO}
+    COMMAND ${MAKEINFO_EXE} comap.texi
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
+    )
 
+  ADD_CUSTOM_TARGET(html
+    COMMAND ${MAKEINFO_EXE} --html --css-ref=http://www.w3.org/StyleSheets/Core/Steely bppsuite.texi
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
+    )
+ENDIF(MAKEINFO_EXE)
+
+IF(PDFTEX_EXE)
+  MESSAGE("-- Found pdftex here: ${PDFTEX_EXE}")
+  MESSAGE("   Adding target: pdf")
+
+  ADD_CUSTOM_TARGET(pdf
+    COMMAND ${PDFTEX_EXE} bppsuite.texi
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
+    )
+ENDIF(PDFTEX_EXE)
 
 # Subdirectories
 ADD_SUBDIRECTORY(CoMap)
@@ -113,28 +128,39 @@ SET(CPACK_PACKAGE_VERSION_PATCH "0")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CoMap: a program for mapping substitutions and detecting molecular co-evolution.")
 SET(CPACK_RESOURCE_FILE_LICENSE "COPYING")
 SET(CPACK_RESOURCE_FILE_AUTHORS "AUTHORS")
-SET(CPACK_GENERATOR "DEB;RPM")
 SET(CPACK_SOURCE_GENERATOR "TGZ")
-SET(CPACK_SYSTEM_NAME x86_64)
-SET(CPACK_TOPLEVEL_TAG x86_64)
-SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE amd64)
-SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6")
-SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Julien Dutheil <julien.dutheil@univ-montp2.fr>")
 SET(CPACK_SOURCE_IGNORE_FILES
- ".*CMakeFiles"
- ".*Makefile"
- ".*_CPack_Packages"
- ".*CMakeCache.txt"
+ "CMakeFiles"
+ "Makefile"
+ "_CPack_Packages"
+ "CMakeCache.txt"
  ".*\\\\.cmake"
- ".*\\\\.svn/"
- ".*.gz"
- ".*~"
+ ".*\\\\.svn"
+ ".*\\\\.gz"
+ ".*\\\\.deb"
+ ".*\\\\.rpm"
+ "\\\\..*\\\\.swp"
  "CoMap/\\\\..*"
- "doc/\\\\..*"
+ "CoMap/comap"
+ "doc/comap/"
+ "doc/comap.info"
+ "debian/tmp"
+ "debian/comap"
  ${CPACK_SOURCE_IGNORE_FILES}
 )
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 INCLUDE(CPack)
 
 #This adds the 'dist' target
-ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+IF (UNIX)
+#This creates deb packages:
+ADD_CUSTOM_TARGET(deb fakeroot debian/rules binary)
+ADD_DEPENDENCIES(deb dist info)
+
+#This creates rpm packages:
+ADD_CUSTOM_TARGET(rpm rpmbuild -ta ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz)
+ADD_DEPENDENCIES(rpm dist info)
+
+#ADD_DEPENDENCIES(info install)
+ENDIF(UNIX)
