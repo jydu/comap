@@ -37,8 +37,8 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL license and that you accept its terms.
 */
 
-#ifndef _COETOOLS_H_
-#define _COETOOLS_H_
+#ifndef COETOOLS_H__
+#define COETOOLS_H__
 
 #include "Statistics.h"
 
@@ -73,99 +73,140 @@ using namespace std;
 class CandidateSite
 {
   protected:
-    unsigned int _index;
-    double _normMin, _normMax;
+    unsigned int index_;
+    double normMin_, normMax_;
 
   public:
-    CandidateSite(unsigned int index): _index(index), _normMin(0), _normMax(0) {}
+    CandidateSite(unsigned int index): index_(index), normMin_(0), normMax_(0) {}
 
   public:
     void setNormRange(double min, double max)
     {
-      _normMin = min;
-      _normMax = max;
+      normMin_ = min;
+      normMax_ = max;
     }
     bool checkNorm(double norm) const
     {
-      return norm >= _normMin && norm <= _normMax;
+      return norm >= normMin_ && norm <= normMax_;
     }
-    unsigned int getIndex() const { return _index; }
+    unsigned int getIndex() const { return index_; }
 };
 
-class CandidateGroup:
-  public vector<CandidateSite>
+class CandidateGroup
 {
   protected:
-    double _statistic;
-    bool _analysable;
+    vector<CandidateSite> sites_;
+    double statistic_;
+    bool analysable_;
 
   public:
-    CandidateGroup(): _statistic(0), _analysable(true) {}
+    CandidateGroup(): sites_(), statistic_(0), analysable_(true) {}
 
   public:
-    double getStatisticValue() const { return _statistic; }
-    void setStatisticValue(double value) { _statistic = value; }
-    void computeStatisticValue(const Statistic & stat, const ProbabilisticSubstitutionMapping & mapping) throw (Exception)
+    double getStatisticValue() const { return statistic_; }
+    void setStatisticValue(double value) { statistic_ = value; }
+    void computeStatisticValue(const Statistic& stat, const ProbabilisticSubstitutionMapping& mapping) throw (Exception)
     {
-      if(!_analysable) throw Exception("CandidateGroup::computeStatisticValue. Group is not analysable.");
-      if(size() == 0) throw Exception("CandidateGroup::computeStatisticValue. Group is empty!");
-      vector<const Vdouble *> group;
-      for(unsigned int i = 0; i < size(); i++)
+      if (!analysable_) throw Exception("CandidateGroup::computeStatisticValue. Group is not analysable.");
+      if (sites_.size() == 0) throw Exception("CandidateGroup::computeStatisticValue. Group is empty!");
+      vector<const Vdouble*> group;
+      for (unsigned int i = 0; i < sites_.size(); i++)
       {
-        unsigned int index = (*this)[i].getIndex();
+        unsigned int index = sites_[i].getIndex();
         group.push_back(&mapping[index]);
       }
-      _statistic = stat.getValueForGroup(group);
+      statistic_ = stat.getValueForGroup(group);
     }
     void computeNormRanges(double omega, const ProbabilisticSubstitutionMapping & mapping) throw (Exception)
     {
-      if(!_analysable) throw Exception("CandidateGroup::computeNormRanges. Group is not analysable.");
-      if(size() == 0) throw Exception("CandidateGroup::computeNormRanges. Group is empty!");
-      for(unsigned int i = 0; i < size(); i++)
+      if (!analysable_) throw Exception("CandidateGroup::computeNormRanges. Group is not analysable.");
+      if (sites_.size() == 0) throw Exception("CandidateGroup::computeNormRanges. Group is empty!");
+      for (unsigned int i = 0; i < sites_.size(); i++)
       {
-        double norm = VectorTools::norm<double, double>(mapping[(*this)[i].getIndex()]);
-        (*this)[i].setNormRange(norm - omega, norm + omega);
+        double norm = VectorTools::norm<double, double>(mapping[sites_[i].getIndex()]);
+        sites_[i].setNormRange(norm - omega, norm + omega);
       }
     }
-    void setAnalysable(bool yn) { _analysable = yn; }
-    bool isAnalysable() const { return _analysable; }
+    void setAnalysable(bool yn) { analysable_ = yn; }
+    bool isAnalysable() const { return analysable_; }
+    unsigned int size() const { return sites_.size(); }
+
+    const CandidateSite& operator[](unsigned int i) const { return sites_[i]; }
+    CandidateSite& operator[](unsigned int i) { return sites_[i]; }
+
+    void addSite(const CandidateSite& cs) { sites_.push_back(cs); }
 };
 
 class CandidateGroupSet
 {
   protected:
-    const Statistic * _statistic;
-    vector<CandidateGroup> _candidates;
+    const Statistic* statistic_;
+    vector<CandidateGroup> candidates_;
 
     //Simulated site(s) for each group, each site...
     //_simulations[i][j][k] is the kth simulated site for site j in group i.
-    vector< vector< deque<const Vdouble *> > > _simulations;
+    vector< vector< deque<const Vdouble *> > > simulations_;
     //Contain the number of simulations for each group.
-    vector<unsigned int> _n1, _n2;
+    vector<unsigned int> n1_, n2_;
     //The minimum number of simulation for each group:
-    unsigned int _minSim;
+    unsigned int minSim_;
 
-    unsigned int _nbCompleted;
+    unsigned int nbCompleted_;
 
-    unsigned int _nbAnalysable;
+    unsigned int nbAnalysable_;
     
-    unsigned int _nbTrials;
+    unsigned int nbTrials_;
     
-    unsigned int _verbose;
+    unsigned int verbose_;
 
     //Iterator:
-    mutable unsigned int _groupPos, _sitePos;
+    mutable unsigned int groupPos_, sitePos_;
 
   public:
     CandidateGroupSet(const Statistic* statistic, unsigned int minSim, unsigned int verbose = 1):
-      _statistic(statistic),
-      _minSim(minSim),
-      _nbCompleted(0),
-      _nbTrials(0),
-      _verbose(verbose),
-      _groupPos(0),
-      _sitePos(0)
-  {}
+      statistic_(statistic),
+      candidates_(),
+      simulations_(),
+      n1_(), n2_(),
+      minSim_(minSim),
+      nbCompleted_(0),
+      nbAnalysable_(0),
+      nbTrials_(0),
+      verbose_(verbose),
+      groupPos_(0),
+      sitePos_(0)
+    {}
+
+    CandidateGroupSet(const CandidateGroupSet& cgs) :
+      statistic_(cgs.statistic_),
+      candidates_(cgs.candidates_),
+      simulations_(cgs.simulations_),
+      n1_(cgs.n1_), n2_(cgs.n2_),
+      minSim_(cgs.minSim_),
+      nbCompleted_(cgs.nbCompleted_),
+      nbAnalysable_(cgs.nbAnalysable_),
+      nbTrials_(cgs.nbTrials_),
+      verbose_(cgs.verbose_),
+      groupPos_(cgs.groupPos_),
+      sitePos_(cgs.sitePos_)
+    {}
+
+    CandidateGroupSet& operator=(const CandidateGroupSet& cgs)
+    {
+      statistic_ = cgs.statistic_;
+      candidates_ = cgs.candidates_;
+      simulations_ = cgs.simulations_;
+      n1_ = cgs.n1_;
+      n2_ = cgs.n2_;
+      minSim_ = cgs.minSim_;
+      nbCompleted_ = cgs.nbCompleted_;
+      nbAnalysable_ = cgs.nbAnalysable_;
+      nbTrials_ = cgs.nbTrials_;
+      verbose_ = cgs.verbose_;
+      groupPos_ = cgs.groupPos_;
+      sitePos_ = cgs.sitePos_;
+      return *this;
+    }
 
   public:
     /**
@@ -175,50 +216,50 @@ class CandidateGroupSet
      * @param simMap Simulated sites.
      * @eturn true if the minimum number of simulations is reached for every group.
      */
-    bool analyseSimulations(const ProbabilisticSubstitutionMapping & simMap);
+    bool analyseSimulations(const ProbabilisticSubstitutionMapping& simMap);
 
-    void addCandidate(const CandidateGroup & group)
+    void addCandidate(const CandidateGroup& group)
     {
-      _candidates.push_back(group);
-      _simulations.push_back(vector< deque<const Vdouble *> >(group.size()));
-      _n1.push_back(0);
-      _n2.push_back(0);
-      if(group.isAnalysable()) _nbAnalysable++;
+      candidates_.push_back(group);
+      simulations_.push_back(vector< deque<const Vdouble*> >(group.size()));
+      n1_.push_back(0);
+      n2_.push_back(0);
+      if (group.isAnalysable()) nbAnalysable_++;
     }
 
     double getPValueForGroup(unsigned int groupIndex) const
     {
-      return ((double)_n1[groupIndex] + 1.) / ((double)_n2[groupIndex] + 1.);
+      return (static_cast<double>(n1_[groupIndex]) + 1.) / (static_cast<double>(n2_[groupIndex]) + 1.);
     }
 
-    double getN1ForGroup(unsigned int groupIndex) const { return _n1[groupIndex]; }
-    double getN2ForGroup(unsigned int groupIndex) const { return _n2[groupIndex]; }
+    double getN1ForGroup(unsigned int groupIndex) const { return n1_[groupIndex]; }
+    double getN2ForGroup(unsigned int groupIndex) const { return n2_[groupIndex]; }
 
-    unsigned int size() const { return _candidates.size(); }
+    unsigned int size() const { return candidates_.size(); }
 
-    const CandidateGroup & operator[](unsigned int index) const { return _candidates[index]; }
+    const CandidateGroup& operator[](unsigned int index) const { return candidates_[index]; }
 
-    void resize(unsigned int size)
+    void resize(unsigned int newSize)
     {
-      _candidates.resize(size);
-      _simulations.resize(size);
-      _n1.resize(size);
-      _n2.resize(size);
-      _nbAnalysable = 0;
-      for(unsigned int i = 0; i < size; i++)
-        if(_candidates[i].isAnalysable()) _nbAnalysable++;
+      candidates_.resize(newSize);
+      simulations_.resize(newSize);
+      n1_.resize(newSize);
+      n2_.resize(newSize);
+      nbAnalysable_ = 0;
+      for (unsigned int i = 0; i < newSize; i++)
+        if (candidates_[i].isAnalysable()) nbAnalysable_++;
     }
 
-    unsigned int getVerbose() const { return _verbose; }
+    unsigned int getVerbose() const { return verbose_; }
     
-    unsigned int getNumberOfTrials() const { return _nbTrials; }
+    unsigned int getNumberOfTrials() const { return nbTrials_; }
 
  protected:
 
     /**
      * @brief Candidate site iterator.
      *
-     * This iterator loop over all sites and over all groups for which _n2 is lovaer than _minSim.
+     * This iterator loop over all sites and over all groups for which n2_ is lovaer than minSim_.
      *
      * @return A 2-vector, the first dimenson giving the group index, and the second one the index of the site in the group.
      * @throw Exception If there is no more candidate site!
@@ -230,7 +271,7 @@ class CandidateGroupSet
     /**
      * @brief Add a new simulated vector to the set.
      *
-     * This will check each site in the group, and actualize _n1 and _n2.
+     * This will check each site in the group, and actualize n1_ and n2_.
      *
      * @param groupIndex Position of the group.
      * @param siteIndex  Position of the site in the group.
@@ -240,13 +281,13 @@ class CandidateGroupSet
     bool addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const Vdouble * v) throw (IndexOutOfBoundsException);
 
     /**
-     * @brief Remove all pointers in _simulations, but do not modify _n1 and _n2.
+     * @brief Remove all pointers in simulations_, but do not modify n1_ and n2_.
      */
     void resetSimulations()
     {
-      for(unsigned int i = 0; i < _simulations.size(); i++)
-        for(unsigned int j = 0; j < _simulations[i].size(); j++)
-          _simulations[i][j].clear();
+      for(unsigned int i = 0; i < simulations_.size(); i++)
+        for(unsigned int j = 0; j < simulations_[i].size(); j++)
+          simulations_[i][j].clear();
     }
 
 };

@@ -70,7 +70,7 @@ vector<unsigned int> SimpleClustering::getBestPair() throw (Exception)
 {
 	vector<unsigned int> bestPair(2);
 	double distMin = -std::log(0.);
-	for(map<unsigned int, Node *>::iterator i = currentNodes_.begin(); i != currentNodes_.end(); i++)
+	for (map<unsigned int, Node *>::iterator i = currentNodes_.begin(); i != currentNodes_.end(); i++)
   {
 		unsigned int id = i->first;
 		map<unsigned int, Node *>::iterator j = i;
@@ -109,7 +109,7 @@ vector<unsigned int> SimpleClustering::getBestPair() throw (Exception)
 
 	return bestPair;	
 }
-vector<double> SimpleClustering::computeBranchLengthsForPair(const vector<unsigned int> & pair)
+vector<double> SimpleClustering::computeBranchLengthsForPair(const vector<unsigned int>& pair)
 {
 	vector<double> d(2);
 	double dist = matrix_(pair[0], pair[1]) / 2.;
@@ -121,30 +121,30 @@ vector<double> SimpleClustering::computeBranchLengthsForPair(const vector<unsign
 double SimpleClustering::computeDistancesFromPair(const vector<unsigned int> & pair, const vector<double> & branchLengths, unsigned int pos)
 {
 	double w1, w2, w3, w4;
-	if(_method == "Single")
+	if (method_ == "Single")
   {
 		w1 = .5;
 		w2 = .5;
 		w3 = 0.;
 		w4 = -.5;
-	} else if(_method == "Complete") {
+	} else if (method_ == "Complete") {
 		w1 = .5;
 		w2 = .5;
 		w3 = 0.;
 		w4 = .5;
-	} else if(_method == "Median") {
+	} else if (method_ == "Median") {
 		w1 = .5;
 		w2 = .5;
 		w3 = -0.25;
 		w4 = 0.;
-	} else if(_method == "Average") {
+	} else if (method_ == "Average") {
 		double n1 = dynamic_cast<NodeTemplate<ClusterInfos> *>(currentNodes_[pair[0]]) -> getInfos().numberOfLeaves;
 		double n2 = dynamic_cast<NodeTemplate<ClusterInfos> *>(currentNodes_[pair[1]]) -> getInfos().numberOfLeaves;
 		w1 = n1/(n1+n2);
 		w2 = n2/(n1+n2);
 		w3 = 0.;
 		w4 = 0.;
-	} else if(_method == "Ward") {
+	} else if(method_ == "Ward") {
 		double n1 = dynamic_cast<NodeTemplate<ClusterInfos> *>(currentNodes_[pair[0]]) -> getInfos().numberOfLeaves;
 		double n2 = dynamic_cast<NodeTemplate<ClusterInfos> *>(currentNodes_[pair[1]]) -> getInfos().numberOfLeaves;
 		double n3 = dynamic_cast<NodeTemplate<ClusterInfos> *>(currentNodes_[pos])     -> getInfos().numberOfLeaves;
@@ -152,14 +152,14 @@ double SimpleClustering::computeDistancesFromPair(const vector<unsigned int> & p
 		w2 = (n2+n3)/(n1+n2+n3);
 		w3 = -n3/(n1+n2+n3);
 		w4 = 0.;
-	} else if(_method == "Centroid") {
+	} else if (method_ == "Centroid") {
 		double n1 = dynamic_cast<NodeTemplate<ClusterInfos> *>(currentNodes_[pair[0]]) -> getInfos().numberOfLeaves;
 		double n2 = dynamic_cast<NodeTemplate<ClusterInfos> *>(currentNodes_[pair[1]]) -> getInfos().numberOfLeaves;
 		w1 = n1/(n1+n2);
 		w2 = n2/(n1+n2);
 		w3 = -n1*n2/pow(n1+n2, 2.);
 		w4 = 0.;
-	} else throw Exception("SimpleClustering::computeBranchLengthsForPair. unknown method '" + _method + "'.");
+	} else throw Exception("SimpleClustering::computeBranchLengthsForPair. unknown method '" + method_ + "'.");
 	double d1 = matrix_(pair[0], pos);
 	double d2 = matrix_(pair[1], pos);
 	double d3 = matrix_(pair[0], pair[1]);
@@ -237,7 +237,7 @@ vector<unsigned int> SumClustering::getBestPair() throw (Exception)
 		}
 	}
 	// actualize vectors:
-	_mapping[bestPair[0]] += _mapping[bestPair[1]];
+	mapping_[bestPair[0]] += mapping_[bestPair[1]];
 	return bestPair;	
 }
 vector<double> SumClustering::computeBranchLengthsForPair(const vector<unsigned int>& pair)
@@ -253,7 +253,7 @@ vector<double> SumClustering::computeBranchLengthsForPair(const vector<unsigned 
 
 double SumClustering::computeDistancesFromPair(const vector<unsigned int>& pair, const vector<double>& branchLengths, unsigned int pos)
 {
-	return _distance->getDistanceForPair(_mapping[pos], _mapping[pair[0]]);
+	return distance_->getDistanceForPair(mapping_[pos], mapping_[pair[0]]);
 }
 
 void SumClustering::finalStep(int idRoot)

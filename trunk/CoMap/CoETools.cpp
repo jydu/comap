@@ -902,37 +902,37 @@ void CoETools::computeInterNullDistribution(
 
 vector<unsigned int> CandidateGroupSet::nextCandidateSite() const throw (Exception)
 {
-  if (_nbCompleted == size()) throw Exception("CandidateGroupSet::nextCandidateSite. enough simulations!!");
+  if (nbCompleted_ == size()) throw Exception("CandidateGroupSet::nextCandidateSite. enough simulations!!");
   //Site increment:
-  if (_n2[_groupPos] < _minSim)
+  if (n2_[groupPos_] < minSim_)
   {
-    _sitePos++;
-    if (_sitePos >= (*this)[_groupPos].size())
+    sitePos_++;
+    if (sitePos_ >= (*this)[groupPos_].size())
     {
-      _groupPos++;
-      if (_groupPos >= size()) _groupPos = 0;
-      _sitePos = 0;
+      groupPos_++;
+      if (groupPos_ >= size()) groupPos_ = 0;
+      sitePos_ = 0;
     }
   }
-  unsigned int startSearch = _groupPos;
-  if (_n2[_groupPos] >= _minSim)
+  unsigned int startSearch = groupPos_;
+  if (n2_[groupPos_] >= minSim_)
   {
-    while(_n2[_groupPos] >= _minSim || !_candidates[_groupPos].isAnalysable())
+    while (n2_[groupPos_] >= minSim_ || !candidates_[groupPos_].isAnalysable())
     {
-      _groupPos++;
+      groupPos_++;
 
-      if (_groupPos >= size()) _groupPos = 0;
-      if (_groupPos == startSearch)
+      if (groupPos_ >= size()) groupPos_ = 0;
+      if (groupPos_ == startSearch)
       {
         //No more site to complete!
         throw Exception("DEBUG: something wrong happened, this message should never appear!");
       }
     }
-    _sitePos = 0;
+    sitePos_ = 0;
   }
   vector<unsigned int> pos(2);
-  pos[0] = _groupPos;
-  pos[1] = _sitePos;
+  pos[0] = groupPos_;
+  pos[1] = sitePos_;
   return pos;
 }
 
@@ -940,10 +940,10 @@ vector<unsigned int> CandidateGroupSet::nextCandidateSite() const throw (Excepti
 
 vector<unsigned int> CandidateGroupSet::currentCandidateSite() const throw (Exception)
 {
-  if (_nbCompleted == size()) throw Exception("CandidateGroupSet::nextCandidateSite. enough simulations!!");
+  if (nbCompleted_ == size()) throw Exception("CandidateGroupSet::nextCandidateSite. enough simulations!!");
   vector<unsigned int> pos(2);
-  pos[0] = _groupPos;
-  pos[1] = _sitePos;
+  pos[0] = groupPos_;
+  pos[1] = sitePos_;
   return pos;
 }
 
@@ -972,23 +972,23 @@ bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMappin
         if (currentCandidateSite() == start) //We looped over all set, drop this simulated site:
           break;
       }
-      testNorm = _candidates[pos[0]][pos[1]].checkNorm(norms[i]);
+      testNorm = candidates_[pos[0]][pos[1]].checkNorm(norms[i]);
       if (testNorm)
       {
-        //cout << pos[0] << "\t" << pos[1] << "\t" << _simulations[pos[0]][pos[1]].size() << endl;
+        //cout << pos[0] << "\t" << pos[1] << "\t" << simulations_[pos[0]][pos[1]].size() << endl;
         if(addSimulatedSite(pos[0], pos[1], &mapping[i]))
         {
           testFree = false; //At least one groupe was completed!
         }
-        if (_nbCompleted == _nbAnalysable) test = false;
+        if (nbCompleted_ == nbAnalysable_) test = false;
       }
     }
   }
-  if(testFree)
+  if (testFree)
   {
-    if(_verbose)
+    if (verbose_)
       ApplicationTools::displayMessage("This simulation set did not provide sites with appropriate norm :(");
-    _nbTrials++;
+    nbTrials_++;
   }
 
   //Reset pointers: (we need to do that since we do not recopy the vectors!)
@@ -1000,9 +1000,9 @@ bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMappin
 
 bool CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const Vdouble * v) throw (IndexOutOfBoundsException)
 {
-  if (groupIndex >= _simulations.size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad group index.", groupIndex, 0, _simulations.size());
-  if (siteIndex >= _simulations[groupIndex].size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad site index.", siteIndex, 0, _simulations[groupIndex].size());
-  vector< deque<const Vdouble *> > * group = &_simulations[groupIndex];
+  if (groupIndex >= simulations_.size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad group index.", groupIndex, 0, simulations_.size());
+  if (siteIndex >= simulations_[groupIndex].size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad site index.", siteIndex, 0, simulations_[groupIndex].size());
+  vector< deque<const Vdouble*> >* group = &simulations_[groupIndex];
   (*group)[siteIndex].push_back(v);
   //Test if the group is complete:
   bool test = true;
@@ -1018,19 +1018,19 @@ bool CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int s
       groupVectors.push_back((*group)[i][0]);
       (*group)[i].pop_front();
     }
-    _n2[groupIndex]++;
-    double stat = _statistic->getValueForGroup(groupVectors);
-    if (stat >= (*this)[groupIndex].getStatisticValue()) _n1[groupIndex]++;
-    if (_n2[groupIndex] == _minSim)
+    n2_[groupIndex]++;
+    double stat = statistic_->getValueForGroup(groupVectors);
+    if (stat >= (*this)[groupIndex].getStatisticValue()) n1_[groupIndex]++;
+    if (n2_[groupIndex] == minSim_)
     {
-      _nbCompleted++;
-      if (_verbose == 1)
+      nbCompleted_++;
+      if (verbose_ == 1)
       {
-        ApplicationTools::displayGauge(_nbCompleted, size(), '=');
+        ApplicationTools::displayGauge(nbCompleted_, size(), '=');
       }
-      if (_verbose > 1)
+      if (verbose_ > 1)
       {
-        ApplicationTools::displayResult("Group completed", TextTools::toString(groupIndex) + " (" + TextTools::toString(_nbCompleted) + "/" + TextTools::toString(_nbAnalysable) + ")");
+        ApplicationTools::displayResult("Group completed", TextTools::toString(groupIndex) + " (" + TextTools::toString(nbCompleted_) + "/" + TextTools::toString(nbAnalysable_) + ")");
       }
     }
   }

@@ -55,85 +55,92 @@ knowledge of the CeCILL license and that you accept its terms.
 
 using namespace bpp;
 
-class Group:
-  public vector<string>
+class Group
 {
   protected:
-    double _height;
-    vector< vector<unsigned int> > _subgroups;
-    vector<double> _subgroupsHeights;
-    map<string, const Clonable *> _properties;
+    vector<string> names_;
+    double height_;
+    vector< vector<unsigned int> > subgroups_;
+    vector<double> subgroupsHeights_;
+    map<string, const Clonable*> properties_;
 
   public:
-    Group() { _height = 0; }
+    Group() : names_(), height_(0), subgroups_(), subgroupsHeights_(), properties_() {}
     virtual ~Group() {}
 
   public:
-    void setHeight(double height) { _height = height; }
-    const double getHeight() const { return  _height; }
-    void addSubgroup(const vector<unsigned int> & subgroup, double height)
+    void setHeight(double height) { height_ = height; }
+    const double getHeight() const { return  height_; }
+    void addSubgroup(const vector<unsigned int>& subgroup, double height)
     {
-      _subgroups.push_back(subgroup);
-      _subgroupsHeights.push_back(height);
+      subgroups_.push_back(subgroup);
+      subgroupsHeights_.push_back(height);
     }
     const vector< vector<unsigned int> > & getSubgroups() const
     {
-      return _subgroups;
+      return subgroups_;
     }
     const vector<unsigned int> & getSubgroup(unsigned int i) const
     {
-      return _subgroups[i];
+      return subgroups_[i];
     }
     const vector<string> getSubgroupNames(unsigned int i) const
     {
       vector<string> names;
-      for(unsigned int j = 0; j < _subgroups[i].size(); j++)
+      for(unsigned int j = 0; j < subgroups_[i].size(); j++)
       {
-        names.push_back((*this)[_subgroups[i][j]]);
+        names.push_back(names_[subgroups_[i][j]]);
       }
       return names;
     }
-    double getSubgroupHeight(unsigned int i) const { return _subgroupsHeights[i]; }
+    double getSubgroupHeight(unsigned int i) const { return subgroupsHeights_[i]; }
     string toString() const
     {
-      if(size() == 0) return "[]";
-      string text = "[" + at(0);
-      for(unsigned int i = 1; i < size(); i++)
+      if (names_.size() == 0) return "[]";
+      string text = "[" + names_[0];
+      for (unsigned int i = 1; i < names_.size(); i++)
       {
-        text += ";" + at(i);
+        text += ";" + names_[i];
       }
       text += "]";
       return text;
     }
     // In case we are using indices instead of site names in tree:
-    string toString(const vector<string> & tln) const
+    string toString(const vector<string>& tln) const
     {
-      if(size() == 0) return "[]";
-      string text = "[" + tln[TextTools::to<unsigned int>(at(0))];
-      for(unsigned int i = 1; i < size(); i++)
+      if (names_.size() == 0) return "[]";
+      string text = "[" + tln[TextTools::to<unsigned int>(names_[0])];
+      for(unsigned int i = 1; i < names_.size(); i++)
       {
-        text += ";" + tln[TextTools::to<unsigned int>(at(i))];
+        text += ";" + tln[TextTools::to<unsigned int>(names_[i])];
       }
       text += "]";
       return text;
     }
     string toString(unsigned int i) const
     {
-      if(_subgroups[i].size() == 0) return "[]";
-      string text = "[" + at(_subgroups[i][0]);
-      for(unsigned int j = 1; j < _subgroups[i].size(); j++)
+      if (subgroups_[i].size() == 0) return "[]";
+      string text = "[" + names_[subgroups_[i][0]];
+      for(unsigned int j = 1; j < subgroups_[i].size(); j++)
       {
-        text += ";" + at(_subgroups[i][j]);
+        text += ";" + names_[subgroups_[i][j]];
       }
       text += "]";
       return text;
     }
 
-    const Clonable * getProperty(const string & name) { return _properties[name]; }
+    unsigned int size() const { return names_.size(); }
 
-    void setProperty(const string & name, const Clonable * value) { _properties[name] = value; }
+    const string& operator[](unsigned int i) const { return names_[i]; }
+    string& operator[](unsigned int i) { return names_[i]; }
 
-    vector<string> getPropertyNames() const { return MapTools::getKeys(_properties); }
+    void add(const string& name) { names_.push_back(name); }
+
+    const Clonable* getProperty(const string& name) { return properties_[name]; }
+
+    void setProperty(const string& name, const Clonable* value) { properties_[name] = value; }
+
+    vector<string> getPropertyNames() const { return MapTools::getKeys(properties_); }
 };
 
 class ClusterTools
@@ -179,9 +186,9 @@ class ClusterTools
       if(node->isLeaf()) node->setName(tln[TextTools::to<unsigned int>(node->getName())]);
       for(unsigned int i = 0; i < node->getNumberOfSons(); i++) translate(node->getSon(i), tln);
     }
-    static void _computeNormProperties(Node * node, const ProbabilisticSubstitutionMapping & mapping, double & minNorm);
+    static void computeNormProperties_(Node * node, const ProbabilisticSubstitutionMapping & mapping, double & minNorm);
 
 };
 
-#endif // _CLUSTERTOOLS_H_
+#endif // CLUSTERTOOLS_H__
 

@@ -82,30 +82,40 @@ class Distance
 class AbstractDistance : public Distance 
 {
   protected:
-    vector<double> * _weights;
+    vector<double>* weights_;
     
 	public:
-		AbstractDistance(): _weights(NULL) {}
-		virtual ~AbstractDistance() { if(_weights != NULL) delete _weights; }
+		AbstractDistance() : weights_(0) {}
+
+    AbstractDistance(const AbstractDistance& ad) : weights_(ad.weights_ ? new vector<double>(*ad.weights_) : 0) {}
+    
+    AbstractDistance& operator=(const AbstractDistance& ad)
+    {
+      if (weights_) delete weights_;
+      weights_ = ad.weights_ ? new vector<double>(*ad.weights_) : 0;
+      return *this;
+    }
+		virtual ~AbstractDistance() { if (weights_) delete weights_; }
 
 	public:
-    void setWeights(const Vdouble & weights)
+    void setWeights(const Vdouble& weights)
     { 
-      _weights = new Vdouble(weights);
-      double s = VectorTools::sum(*_weights);
-      *_weights /= s;
+      if (weights_) delete weights_;
+      weights_ = new Vdouble(weights);
+      double s = VectorTools::sum(*weights_);
+      *weights_ /= s;
     }
-    void deleteWeights() { delete _weights; _weights = NULL; }
-    const Vdouble * getWeights() const { return _weights; }
-    bool hasWeights() const { return _weights != NULL; }
-    void setStatisticAsProperty(Node & node, const ProbabilisticSubstitutionMapping & mapping) const
+    void deleteWeights() { delete weights_; weights_ = 0; }
+    const Vdouble* getWeights() const { return weights_; }
+    bool hasWeights() const { return weights_ != 0; }
+    void setStatisticAsProperty(Node& node, const ProbabilisticSubstitutionMapping& mapping) const
     {
-      _setStatisticAsProperty(node, mapping);
+      setStatisticAsProperty_(node, mapping);
     }
 
   protected:
     //Use statistic from the tree:
-    double _setStatisticAsProperty(Node & node, const ProbabilisticSubstitutionMapping & mapping) const
+    double setStatisticAsProperty_(Node & node, const ProbabilisticSubstitutionMapping & mapping) const
     {
       double height = 0;
       if(!node.isLeaf())
@@ -113,7 +123,7 @@ class AbstractDistance : public Distance
         for(unsigned int i = 0; i < node.getNumberOfSons(); i++)
         {
           Node * son = node.getSon(i);
-          height = _setStatisticAsProperty(*son, mapping) + son->getDistanceToFather();
+          height = setStatisticAsProperty_(*son, mapping) + son->getDistanceToFather();
         }
         node.setNodeProperty("Stat", Number<double>(2*height));
       }
@@ -150,11 +160,11 @@ class EuclidianDistance: public AbstractMaximumDistance
 			throw (DimensionException)
 		{
 			if(v1.size() != v2.size()) throw DimensionException("EuclidianDistance::d(...).", v2.size(), v1.size());
-      if(_weights != NULL && _weights->size() != v1.size()) throw DimensionException("EuclidianDistance::d(...).", v1.size(), _weights->size());
+      if (weights_ && weights_->size() != v1.size()) throw DimensionException("EuclidianDistance::d(...).", v1.size(), weights_->size());
 			double d = 0;
 			for(unsigned int i = 0; i < v1.size(); i++)
       {
-				d += (_weights == NULL) ? std::pow(v2[i] - v1[i], 2) : (*_weights)[i] * std::pow(v2[i] - v1[i], 2) ;
+				d += (weights_ == 0) ? std::pow(v2[i] - v1[i], 2) : (*weights_)[i] * std::pow(v2[i] - v1[i], 2) ;
 			}
 			return sqrt(d);
 		}
@@ -305,36 +315,43 @@ class CompensationDistance: public AbstractDistance
 class StatisticBasedDistance: public Distance
 {
   protected:
-    Statistic * _stat;
-    double _comp;
+    Statistic* stat_;
+    double comp_;
 
   public:
-    StatisticBasedDistance(Statistic * stat, double comp = 0.): _stat(stat), _comp(comp) {}
+    StatisticBasedDistance(Statistic* stat, double comp = 0.) : stat_(stat), comp_(comp) {}
+    StatisticBasedDistance(const StatisticBasedDistance& sbd) : stat_(sbd.stat_), comp_(sbd.comp_) {}
+    StatisticBasedDistance& operator=(const StatisticBasedDistance& sbd)
+    {
+      stat_ = sbd.stat_;
+      comp_ = sbd.comp_;
+      return *this;
+    }
     virtual ~StatisticBasedDistance() {}
 
   public:
 		double getDistanceForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException)
     {
-      return _comp - _stat->getValueForPair(v1, v2);
+      return comp_ - stat_->getValueForPair(v1, v2);
     }
 		double getDistanceForGroup(const vector<const Vdouble *> & v) const throw (DimensionException)
     {
-      return _comp - _stat->getValueForGroup(v);
+      return comp_ - stat_->getValueForGroup(v);
     }
-    void setWeights(const vector<double> & weights) { _stat->setWeights(weights); }
-    void deleteWeights() { _stat->deleteWeights(); }
-    const vector<double> * getWeights() const { return _stat->getWeights(); }
-    bool hasWeights() const { return _stat->hasWeights(); }
+    void setWeights(const vector<double> & weights) { stat_->setWeights(weights); }
+    void deleteWeights() { stat_->deleteWeights(); }
+    const vector<double> * getWeights() const { return stat_->getWeights(); }
+    bool hasWeights() const { return stat_->hasWeights(); }
     void setStatisticAsProperty(Node & node, const ProbabilisticSubstitutionMapping & mapping) const
     {
-      _setStatisticAsProperty(node, mapping);
+      setStatisticAsProperty_(node, mapping);
     }
 
-    Statistic * getStatistic() { return _stat; }
-    const Statistic * getStatistic() const { return _stat; }
+    Statistic * getStatistic() { return stat_; }
+    const Statistic * getStatistic() const { return stat_; }
     
   protected:
-    double _setStatisticAsProperty(Node & node, const ProbabilisticSubstitutionMapping & mapping) const
+    double setStatisticAsProperty_(Node & node, const ProbabilisticSubstitutionMapping & mapping) const
     {
       double height = 0;
       if(!node.isLeaf())
@@ -342,9 +359,9 @@ class StatisticBasedDistance: public Distance
         for(unsigned int i = 0; i < node.getNumberOfSons(); i++)
         {
           Node * son = node.getSon(i);
-          height = _setStatisticAsProperty(*son, mapping) + son->getDistanceToFather();
+          height = setStatisticAsProperty_(*son, mapping) + son->getDistanceToFather();
         }
-        node.setNodeProperty("Stat", Number<double>(_comp - 2*height));
+        node.setNodeProperty("Stat", Number<double>(comp_ - 2*height));
       }
       return height;
     }
@@ -354,35 +371,35 @@ class StatisticBasedDistance: public Distance
 class CompensationDistance: public Distance
 {
   protected:
-    CompensationStatistic _stat;
+    CompensationStatistic stat_;
 
   public:
-    CompensationDistance() {}
+    CompensationDistance() : stat_() {}
     virtual ~CompensationDistance() {}
 
   public:
 		double getDistanceForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException)
     {
-      return 1. - _stat.getValueForPair(v1, v2);
+      return 1. - stat_.getValueForPair(v1, v2);
     }
 		double getDistanceForGroup(const vector<const Vdouble *> & v) const throw (DimensionException)
     {
-      return 1. - _stat.getValueForGroup(v);
+      return 1. - stat_.getValueForGroup(v);
     }
     void setStatisticAsProperty(Node & node, const ProbabilisticSubstitutionMapping & mapping) const
     {
       Vdouble sigma(mapping.getNumberOfBranches(), 0.);
       double sumNorms = 0;
-      _setStatisticAsProperty(node, mapping, sigma, sumNorms);
+      setStatisticAsProperty_(node, mapping, sigma, sumNorms);
     }
 
-    void setWeights(const vector<double> & weights) { _stat.setWeights(weights); }
-    void deleteWeights() { _stat.deleteWeights(); }
-    const vector<double> * getWeights() const { return _stat.getWeights(); }
-    virtual bool hasWeights() const { return _stat.hasWeights(); }
+    void setWeights(const vector<double> & weights) { stat_.setWeights(weights); }
+    void deleteWeights() { stat_.deleteWeights(); }
+    const vector<double> * getWeights() const { return stat_.getWeights(); }
+    virtual bool hasWeights() const { return stat_.hasWeights(); }
 
   protected:
-    void _setStatisticAsProperty(Node & node, const ProbabilisticSubstitutionMapping & mapping, Vdouble & sigma, double & sumNorms) const
+    void setStatisticAsProperty_(Node & node, const ProbabilisticSubstitutionMapping & mapping, Vdouble & sigma, double & sumNorms) const
     {
       if(node.isLeaf())
       {
@@ -395,7 +412,7 @@ class CompensationDistance: public Distance
         {
           Vdouble sigmaGroup(mapping.getNumberOfBranches(), 0.);
           double sumNormsGroup = 0;
-          _setStatisticAsProperty(*node.getSon(i), mapping, sigmaGroup, sumNormsGroup);
+          setStatisticAsProperty_(*node.getSon(i), mapping, sigmaGroup, sumNormsGroup);
           sigma += sigmaGroup;
           sumNorms += sumNormsGroup;
         }

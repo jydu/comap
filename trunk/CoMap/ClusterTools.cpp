@@ -69,24 +69,24 @@ vector<Group> ClusterTools::getGroups(const TreeTemplate<Node> * tree)
 Group ClusterTools::getGroups(const Node & subtree, vector<Group> & groups)
 {
   Group group;
-  if(subtree.isLeaf())
+  if (subtree.isLeaf())
   {
-    group.push_back(subtree.getName());
+    group.add(subtree.getName());
   }
   else
   {
     unsigned int subcount = 0;
     vector<unsigned int> thisgroup;
-    for(unsigned int i = 0; i < subtree.getNumberOfSons(); i++)
+    for (unsigned int i = 0; i < subtree.getNumberOfSons(); i++)
     {
       const Node * son = subtree.getSon(i);
       // Get group for each son node:
       Group sonGroup = getGroups(*son, groups); 
       vector<unsigned int> subgroup(sonGroup.size());
       unsigned int index = subcount;
-      for(unsigned int j = 0; j < sonGroup.size(); j++)
+      for (unsigned int j = 0; j < sonGroup.size(); j++)
       {
-        group.push_back(sonGroup[j]);
+        group.add(sonGroup[j]);
         subgroup[j] = subcount;
         thisgroup.push_back(subcount);
         subcount++;
@@ -119,29 +119,29 @@ Group ClusterTools::getGroups(const Node & subtree, vector<Group> & groups)
 Group ClusterTools::getGroup(const Node & subtree)
 {
   Group group;
-  if(subtree.isLeaf())
+  if (subtree.isLeaf())
   {
-    group.push_back(subtree.getName());
+    group.add(subtree.getName());
   }
   else
   {
     unsigned int subcount = 0;
     vector<unsigned int> thisgroup;
-    for(unsigned int i = 0; i < subtree.getNumberOfSons(); i++)
+    for (unsigned int i = 0; i < subtree.getNumberOfSons(); i++)
     {
       const Node * son = subtree.getSon(i);
       // Get group for each son node:
       Group sonGroup = getGroup(*son); 
       vector<unsigned int> subgroup(sonGroup.size());
       unsigned int index = subcount;
-      for(unsigned int j = 0; j < sonGroup.size(); j++)
+      for (unsigned int j = 0; j < sonGroup.size(); j++)
       {
-        group.push_back(sonGroup[j]);
+        group.add(sonGroup[j]);
         subgroup[j] = subcount;
         thisgroup.push_back(subcount);
         subcount++;
       }
-      if(subgroup.size() > 1)
+      if (subgroup.size() > 1)
       {
         //group.addSubgroup(subgroup, sonGroup.getHeight());
         // Recursively add subgroups:
@@ -314,10 +314,10 @@ void ClusterTools::computeGlobalDistanceDistribution(
 void ClusterTools::computeNormProperties(TreeTemplate<Node> & tree, const ProbabilisticSubstitutionMapping & mapping)
 {
   double min;
-  _computeNormProperties(tree.getRootNode(), mapping, min);
+  computeNormProperties_(tree.getRootNode(), mapping, min);
 }
     
-void ClusterTools::_computeNormProperties(Node * node, const ProbabilisticSubstitutionMapping & mapping, double & minNorm)
+void ClusterTools::computeNormProperties_(Node* node, const ProbabilisticSubstitutionMapping & mapping, double & minNorm)
 {
   minNorm = -log(0.);
   if(node->isLeaf())
@@ -329,7 +329,7 @@ void ClusterTools::_computeNormProperties(Node * node, const ProbabilisticSubsti
     for(unsigned int i = 0; i < node->getNumberOfSons(); i++)
     {
       double minNormSon;
-      _computeNormProperties(node->getSon(i), mapping, minNormSon);
+      computeNormProperties_(node->getSon(i), mapping, minNormSon);
       if(minNormSon < minNorm) minNorm = minNormSon;
     }
     node->setNodeProperty("Nmin", Number<double>(minNorm));

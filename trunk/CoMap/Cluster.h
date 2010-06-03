@@ -64,11 +64,11 @@ class SimpleClustering:
 		static const string CENTROID; 
 	
 	protected:
-		string _method;
+		string method_;
 	
 	public:
-		SimpleClustering(const string & method, bool verbose = false): AbstractAgglomerativeDistanceMethod(verbose), _method(method) {}
-		SimpleClustering(const string & method, const DistanceMatrix & matrix, bool verbose = false) throw (Exception): AbstractAgglomerativeDistanceMethod(matrix, verbose), _method(method) 
+		SimpleClustering(const string & method, bool verbose = false): AbstractAgglomerativeDistanceMethod(verbose), method_(method) {}
+		SimpleClustering(const string & method, const DistanceMatrix & matrix, bool verbose = false) throw (Exception): AbstractAgglomerativeDistanceMethod(matrix, verbose), method_(method) 
 		{
 			computeTree(true);
 		}
@@ -95,21 +95,32 @@ class SimpleClustering:
 class SumClustering : public AbstractAgglomerativeDistanceMethod
 {
 	protected:
-		ProbabilisticSubstitutionMapping _mapping;
-		const Distance * _distance;
+		ProbabilisticSubstitutionMapping mapping_;
+		const Distance* distance_;
 	
 	public:
-		SumClustering(const ProbabilisticSubstitutionMapping & mapping, const Distance & distance, const DistanceMatrix & matrix) throw (Exception): AbstractAgglomerativeDistanceMethod(matrix), _mapping(mapping), _distance(&distance)
+		SumClustering(const ProbabilisticSubstitutionMapping& mapping, const Distance* distance, const DistanceMatrix& matrix) throw (Exception) :
+      AbstractAgglomerativeDistanceMethod(matrix), mapping_(mapping), distance_(distance)
 		{
 			computeTree(true);
 		}
+    SumClustering(const SumClustering& sc) :
+      AbstractAgglomerativeDistanceMethod(sc), mapping_(sc.mapping_), distance_(sc.distance_) 
+    {}
+    SumClustering& operator=(const SumClustering& sc)
+    {
+      AbstractAgglomerativeDistanceMethod::operator=(sc);
+      mapping_ = sc.mapping_;
+      distance_ = sc.distance_;
+      return *this;
+    }
 		virtual ~SumClustering() {}
 
 	public:
-		TreeTemplate<Node> * getTree() const;
+		TreeTemplate<Node>* getTree() const;
 		void setMapping(const ProbabilisticSubstitutionMapping & mapping)
 		{
-			_mapping = mapping;
+			mapping_ = mapping;
 		}
 
 	protected:
