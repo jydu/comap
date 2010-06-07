@@ -649,7 +649,7 @@ void CoETools::computeIntraStats(
       //Then print to file:
       statOut << "[";
       statOut << completeSites.getSite(i).getPosition();
-      statOut << ",";
+      statOut << ";";
       statOut << completeSites.getSite(j).getPosition();
       statOut << "]\t";
       statOut << stat;
@@ -753,7 +753,7 @@ void CoETools::computeInterStats(
       //Then print to file:
       statOut << "[";
       statOut << completeSites1.getSite(i).getPosition();
-      statOut << ",";
+      statOut << ";";
       statOut << completeSites2.getSite(j).getPosition();
       statOut << "]\t";
       statOut << stat;
