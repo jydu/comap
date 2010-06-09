@@ -211,16 +211,14 @@ void CoETools::readData(
   {
     TreeTemplate<Node> treeCopy(*tree);
     vector<Node *> nodes = treeCopy.getInnerNodes();
-    for (unsigned int i = 0; i < nodes.size(); i++)
-    {
+    for (unsigned int i = 0; i < nodes.size(); i++) {
       nodes[i]->setNodeProperty("name", BppString(TextTools::toString(nodes[i]->getId())));
     }
     nodes = treeCopy.getLeaves();
 
     // Writing leaf names translation:
     string tlnPath = ApplicationTools::getAFilePath("output.tags.translation", params, false, false, suffix, false);
-    if (tlnPath != "none")
-    {
+    if (tlnPath != "none") {
       ofstream tln(tlnPath.c_str(), ios::out);
       tln << "Name\tId" << endl;
       for (unsigned int i = 0; i < nodes.size(); i++)
@@ -231,19 +229,34 @@ void CoETools::readData(
     }
 
     // Translate names:
-    for (unsigned int i = 0; i < nodes.size(); i++)
-    {
+    for (unsigned int i = 0; i < nodes.size(); ++i) {
       nodes[i]->setName(TextTools::toString(nodes[i]->getId()));
     }
     Newick newick;
     newick.enableExtendedBootstrapProperty("name");
     newick.write(treeCopy, tags, true);
   }
+
+  bool removeConst = ApplicationTools::getBooleanParameter("input.remove_const", params, true);
+  if (removeConst) {
+    ApplicationTools::displayTask("Remove conserved positions", true);
+    unsigned int n = sites->getNumberOfSites();
+    for (unsigned int i = n; i > 0; --i) {
+      ApplicationTools::displayGauge(n - i, n - 1, '=');
+      if (SiteTools::isConstant(sites->getSite(i - 1), true))
+        sites->deleteSite(i - 1);
+    }
+    ApplicationTools::message->endLine();
+    ApplicationTools::displayResult("Number of conserved sites ignored", n - sites->getNumberOfSites());
+    tl->setData(*sites);
+    tl->initialize();
+  }
+
 }
   
 /******************************************************************************/
   
-ProbabilisticSubstitutionMapping * CoETools::getVectors(
+ProbabilisticSubstitutionMapping* CoETools::getVectors(
   const DRTreeLikelihood& drtl,
   SubstitutionCount     & substitutionCount,
   const SiteContainer   & completeSites,
@@ -306,7 +319,7 @@ ProbabilisticSubstitutionMapping * CoETools::getVectors(
 
 /******************************************************************************/
 
-int CoETools::getMinRateClass(map<string, string> & params, string suffix)
+int CoETools::getMinRateClass(map<string, string>& params, string suffix)
 {
   int minRateClass = ApplicationTools::getIntParameter("statistic.min_rate_class", params, 0, suffix, true);
   if (minRateClass > 0)
@@ -319,7 +332,7 @@ int CoETools::getMinRateClass(map<string, string> & params, string suffix)
 
 /******************************************************************************/
 
-double CoETools::getMinRate(map<string, string> & params, string suffix)
+double CoETools::getMinRate(map<string, string>& params, string suffix)
 {
   double minRate = ApplicationTools::getDoubleParameter("statistic.min_rate", params, 0., suffix, true);
   if (minRate > 0.)
@@ -332,7 +345,7 @@ double CoETools::getMinRate(map<string, string> & params, string suffix)
 
 /******************************************************************************/
 
-int CoETools::getMaxRateClassDiff(map<string, string> & params)
+int CoETools::getMaxRateClassDiff(map<string, string>& params)
 {
   int maxRateClassDiff = ApplicationTools::getIntParameter("statistic.max_rate_class_diff", params, -1);
   if (maxRateClassDiff >= 0) 
@@ -345,7 +358,7 @@ int CoETools::getMaxRateClassDiff(map<string, string> & params)
 
 /******************************************************************************/
 
-double CoETools::getMaxRateDiff(map<string, string> & params)
+double CoETools::getMaxRateDiff(map<string, string>& params)
 {
   double maxRateDiff = ApplicationTools::getDoubleParameter("statistic.max_rate_diff", params, -1.);
   if (maxRateDiff >= 0.)
@@ -358,7 +371,7 @@ double CoETools::getMaxRateDiff(map<string, string> & params)
 
 /******************************************************************************/
 
-double CoETools::getStatisticMin(map<string, string> & params)
+double CoETools::getStatisticMin(map<string, string>& params)
 {
   double minStatistic = ApplicationTools::getDoubleParameter("statistic.min", params, 0);
   if (minStatistic > 0)
@@ -587,11 +600,11 @@ SubstitutionCount* CoETools::getSubstitutionCount(
 /******************************************************************************/
 
 void CoETools::computeIntraStats(
-  const DiscreteRatesAcrossSitesTreeLikelihood & tl,
-  const SiteContainer & completeSites,
-  ProbabilisticSubstitutionMapping & mapping,
-  const Statistic & statistic,
-  map<string, string> & params)
+  const DiscreteRatesAcrossSitesTreeLikelihood& tl,
+  const SiteContainer& completeSites,
+  ProbabilisticSubstitutionMapping& mapping,
+  const Statistic& statistic,
+  map<string, string>& params)
 {
   //Vdouble branchLengths = vectors[0];
   //vectors.erase(vectors.begin());//remove branch lengths.

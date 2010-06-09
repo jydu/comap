@@ -171,6 +171,7 @@ int main(int argc, char *argv[])
     }
     else
     {
+      cout << model1->getAlphabet()->getAlphabetType() << endl;
       seqSim1 = new HomogeneousSequenceSimulator(model1, rDist1, tree1);
       dynamic_cast<HomogeneousSequenceSimulator *>(seqSim1)->enableContinuousRates(continuousSim);
     }
@@ -483,7 +484,7 @@ int main(int argc, char *argv[])
         vector<string> colNames(6);
         colNames[0] = "Group";
         colNames[1] = "Size";
-        colNames[2] = "Const";
+        colNames[2] = "IsConstant";
         colNames[3] = "Dmax";
         colNames[4] = "Stat";
         colNames[5] = "Nmin";

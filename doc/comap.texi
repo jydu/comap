@@ -87,6 +87,7 @@ We will only report the difference between CoMap and BppML in this manual.
 
 CoMap inputs two kinds of data: a sequence alignment file and a phylogenetic tree. The corresponding options are fully described in the Bio++ Program Suite manual.
 
+CoMap adds an option to remove conserved sites from the analysis. The removal will occur after parameter optimization, if relevent.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
