@@ -20,6 +20,9 @@ input.sequence.sites_to_use = nogap
 # Specify a maximum amount of gaps: may be an absolute number or a percentage.
 input.sequence.max_gap_allowed=100%
 
+# Tell if constant sites should be removed (recomanded).
+input.remove_const = yes
+
 # Second file:
 input.sequence.file2 = none
 # All previous options can be set up for second file, just append '2' at option names.
@@ -45,23 +48,11 @@ rate_distribution = Gamma(n=4, alpha=0.358)
 #                                     Parameter estimation
 # ----------------------------------------------------------------------------------------
 
-# Should we reestimate likelihood parameters? Tree topology will not be optimized.
-# (recommanded)
-optimization = yes
-
 # Method to use for optimizing numerical parameters:
-# -DB (default) derivatives for branch lengths + Brent for other parameters
-# -fullD derivatives for all parameters, using numerical derivatives for non-branch lengths parameters.
-optimization.method = DB
-
-# Number of progressive steps to use in DB optimization (a value of 5 is often fine).
-# 1 means no progressive optimization.
-optimization.method_DB.nstep = 1
-
-# Derivatives-based algorithm to us:
-# - newton (recommanded) uses first and second order derivatives
-# - gradient uses only first-order derivatives
-optimization.method.derivatives = newton
+# - None for no optimization
+# - DB derivatives for branch lengths + Brent for other parameters
+# - FullD derivatives for all parameters, using numerical derivatives for non-branch lengths parameters.
+optimization = FullD(derivatives=Newton)
 
 # Final optimization step, may be useful if numerical derivatives are used:
 # powell or simplex, leave the field empty for no final optimization step.
