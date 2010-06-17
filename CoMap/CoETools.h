@@ -37,8 +37,8 @@ The fact that you are presently reading this means that you have had
 knowledge of the CeCILL license and that you accept its terms.
 */
 
-#ifndef COETOOLS_H__
-#define COETOOLS_H__
+#ifndef _COETOOLS_H_
+#define _COETOOLS_H_
 
 #include "Statistics.h"
 
@@ -303,16 +303,16 @@ class CoETools
 	public:
 		
 		static void readData(
-			TreeTemplate<Node> *   tree,
-			Alphabet *             &alphabet,
-			VectorSiteContainer *  &allSites,
-			VectorSiteContainer *  &sites,
-			SubstitutionModel *    &model,
-			SubstitutionModelSet * &modelSet,
-			DiscreteDistribution * &rDist,
-			DRTreeLikelihood *     &tl,
-			map<string, string>    &params,
-			const string           &suffix = "");
+			TreeTemplate<Node>*   &tree,
+			Alphabet*             &alphabet,
+			VectorSiteContainer*  &allSites,
+			VectorSiteContainer*  &sites,
+			SubstitutionModel*    &model,
+			SubstitutionModelSet* &modelSet,
+			DiscreteDistribution* &rDist,
+			DRTreeLikelihood*     &tl,
+			map<string, string>   &params,
+			const string          &suffix = "");
 
 		static ProbabilisticSubstitutionMapping * getVectors(
 			const DRTreeLikelihood & drtl, 

@@ -138,6 +138,7 @@ int main(int argc, char *argv[])
   DiscreteDistribution *rDist1;
   DRTreeLikelihood *tl1;
   CoETools::readData(tree1, alphabet1, allSites1, sites1, model1, modelSet1, rDist1, tl1, comap.getParams(), "");
+ 
   ApplicationTools::displayResult("Number of sites in file", allSites1->getNumberOfSites());
   ApplicationTools::displayResult("Number of sites to analyse", sites1->getNumberOfSites());
   ApplicationTools::displayResult("Number of site patterns", tl1->getLikelihoodData()->getNumberOfDistinctSites());
@@ -164,14 +165,13 @@ int main(int argc, char *argv[])
   {
     // Building a simulator object:
     SequenceSimulator* seqSim1 = 0;
-    if(modelSet1)
+    if (modelSet1)
     {
       seqSim1 = new NonHomogeneousSequenceSimulator(modelSet1, rDist1, tree1);
       dynamic_cast<NonHomogeneousSequenceSimulator *>(seqSim1)->enableContinuousRates(continuousSim);
     }
     else
     {
-      cout << model1->getAlphabet()->getAlphabetType() << endl;
       seqSim1 = new HomogeneousSequenceSimulator(model1, rDist1, tree1);
       dynamic_cast<HomogeneousSequenceSimulator *>(seqSim1)->enableContinuousRates(continuousSim);
     }
