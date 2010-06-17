@@ -54,6 +54,9 @@ rate_distribution = Gamma(n=4, alpha=0.358)
 # - FullD derivatives for all parameters, using numerical derivatives for non-branch lengths parameters.
 optimization = FullD(derivatives=Newton)
 
+# Using 'yes' there can lead to a better optimization, but is slower.
+optimization.reparametrization = no
+
 # Final optimization step, may be useful if numerical derivatives are used:
 # powell or simplex, leave the field empty for no final optimization step.
 optimization.final = 

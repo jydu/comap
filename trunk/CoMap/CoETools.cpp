@@ -90,16 +90,16 @@ using namespace std;
 /******************************************************************************/
 
 void CoETools::readData(
-  TreeTemplate<Node> *          tree,
-  Alphabet *                    &alphabet,
-  VectorSiteContainer *         &allSites,
-  VectorSiteContainer *         &sites,
-  SubstitutionModel *           &model,
-  SubstitutionModelSet *        &modelSet,
-  DiscreteDistribution *        &rDist,
-  DRTreeLikelihood *            &tl,
-  map<string, string>           &params,
-  const string                  &suffix)
+  TreeTemplate<Node>*          &tree,
+  Alphabet*                    &alphabet,
+  VectorSiteContainer*         &allSites,
+  VectorSiteContainer*         &sites,
+  SubstitutionModel*           &model,
+  SubstitutionModelSet*        &modelSet,
+  DiscreteDistribution*        &rDist,
+  DRTreeLikelihood*            &tl,
+  map<string, string>          &params,
+  const string                 &suffix)
 {
   alphabet = SequenceApplicationTools::getAlphabet(params, suffix, true);
   allSites = SequenceApplicationTools::getSiteContainer(alphabet, params, suffix, false);
@@ -190,10 +190,10 @@ void CoETools::readData(
   }
   (ApplicationTools::message->setPrecision(20) << ll).endLine();
   
-  bool optimize = ApplicationTools::getBooleanParameter("optimization", params, true, suffix, true, false);
-  if (optimize)
+  string optimization = ApplicationTools::getStringParameter("optimization", params, "None", suffix, true, false);
+  if (optimization != "None")
   {
-    ApplicationTools::displayResult("Optimization", (optimize ? "yes" : "no"));
+    ApplicationTools::displayResult("Optimization", string("yes"));
     PhylogeneticsApplicationTools::optimizeParameters(tl, tl->getParameters(), params, suffix, true, true);
     TreeTemplate<Node> *treeOpt = new TreeTemplate<Node>(tl->getTree());
     PhylogeneticsApplicationTools::writeTree(*treeOpt, params, "output.", suffix);
@@ -201,7 +201,8 @@ void CoETools::readData(
     // Actualize tree.
     // Substitution model and rate distribution are actualized automatically by
     // the likelihood function.
-    tree  = treeOpt;
+    delete tree;
+    tree = treeOpt;
     
     // Print parameters:
     ApplicationTools::displayResult("Final likelihood, -lnL =", TextTools::toString(tl -> getLogLikelihood(), 20));
