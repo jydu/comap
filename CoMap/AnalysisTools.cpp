@@ -39,14 +39,11 @@ knowledge of the CeCILL license and that you accept its terms.
 
 #include "AnalysisTools.h"
 
-// From the NumCalc library:
-#include <NumCalc/VectorTools.h>
-
-// From Utils
-#include <Utils/ApplicationTools.h>
+#include <Bpp/App/ApplicationTools.h>
+#include <Bpp/Numeric/VectorTools.h>
 
 // From PhylLib:
-#include <Phyl/SubstitutionMappingTools.h>
+#include <Bpp/Phyl/Mapping/SubstitutionMappingTools.h>
 
 using namespace bpp;
 

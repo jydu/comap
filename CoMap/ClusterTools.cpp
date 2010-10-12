@@ -40,19 +40,16 @@ knowledge of the CeCILL license and that you accept its terms.
 #include "ClusterTools.h"
 #include "Cluster.h"
 
-// From Utils:
-#include <Utils/ApplicationTools.h>
-#include <Utils/Number.h>
-
-// From NumCalc:
-#include <NumCalc/VectorTools.h>
+#include <Bpp/App/ApplicationTools.h>
+#include <Bpp/Numeric/Number.h>
+#include <Bpp/Numeric/VectorTools.h>
 
 // From SeqLib:
-#include <Seq/VectorSiteContainer.h>
+#include <Bpp/Seq/Container/VectorSiteContainer.h>
 
 // From PhylLib:
-#include <Phyl/DRHomogeneousTreeLikelihood.h>
-#include <Phyl/SubstitutionMappingTools.h>
+#include <Bpp/Phyl/Likelihood/DRHomogeneousTreeLikelihood.h>
+#include <Bpp/Phyl/Mapping/SubstitutionMappingTools.h>
 
 #include <iostream>
 #include <fstream>

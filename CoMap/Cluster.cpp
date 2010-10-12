@@ -39,13 +39,12 @@ knowledge of the CeCILL license and that you accept its terms.
 
 #include "Cluster.h"
 
-// From NumCalc:
-#include <NumCalc/VectorTools.h>
+#include <Bpp/Numeric/VectorTools.h>
 
 // From PhylLib:
-#include <Phyl/NodeTemplate.h>
-#include <Phyl/Tree.h>
-#include <Phyl/TreeTemplate.h>
+#include <Bpp/Phyl/NodeTemplate.h>
+#include <Bpp/Phyl/Tree.h>
+#include <Bpp/Phyl/TreeTemplate.h>
 
 // From the STL:
 #include <cmath>

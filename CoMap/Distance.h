@@ -42,16 +42,13 @@ knowledge of the CeCILL license and that you accept its terms.
 
 #include "Statistics.h"
 
-// From Utils:
-#include <Utils/Number.h>
-
-// From NumCalc:
-#include <NumCalc/VectorExceptions.h>
-#include <NumCalc/VectorTools.h>
+#include <Bpp/Numeric/Number.h>
+#include <Bpp/Numeric/VectorExceptions.h>
+#include <Bpp/Numeric/VectorTools.h>
 
 // From PhylLib:
-#include <Phyl/Node.h>
-#include <Phyl/ProbabilisticSubstitutionMapping.h>
+#include <Bpp/Phyl/Node.h>
+#include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
 
 using namespace bpp;
 

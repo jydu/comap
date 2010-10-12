@@ -42,16 +42,15 @@ knowledge of the CeCILL license and that you accept its terms.
 
 #include "Distance.h"
 
-// From NumCalc:
-#include <NumCalc/DiscreteDistribution.h>
+#include <Bpp/Numeric/Prob/DiscreteDistribution.h>
 
 // From Phylib:
-#include <Phyl/TreeTemplate.h>
-#include <Phyl/DRTreeLikelihood.h>
-#include <Phyl/SequenceSimulator.h>
-#include <Phyl/AgglomerativeDistanceMethod.h>
-#include <Phyl/SubstitutionCount.h>
-#include <Phyl/ProbabilisticSubstitutionMapping.h>
+#include <Bpp/Phyl/TreeTemplate.h>
+#include <Bpp/Phyl/Likelihood/DRTreeLikelihood.h>
+#include <Bpp/Phyl/Simulation/SequenceSimulator.h>
+#include <Bpp/Phyl/Distance/AgglomerativeDistanceMethod.h>
+#include <Bpp/Phyl/Mapping/SubstitutionCount.h>
+#include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
 
 using namespace bpp;
 

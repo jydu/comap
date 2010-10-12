@@ -40,45 +40,28 @@ knowledge of the CeCILL license and that you accept its terms.
 #include "CoETools.h"
 #include "AnalysisTools.h"
 
-// From Utils:
-#include <Utils/TextTools.h>
-#include <Utils/KeyvalTools.h>
-#include <Utils/StringTokenizer.h>
-#include <Utils/ApplicationTools.h>
-#include <Utils/BppString.h>
-
-// From NumCalc:
-#include <NumCalc/Domain.h>
-#include <NumCalc/IntervalData.h>
-#include <NumCalc/ParameterExceptions.h>
+#include <Bpp/Text.all>
+#include <Bpp/App/ApplicationTools.h>
+#include <Bpp/BppString.h>
+#include <Bpp/Numeric/Domain.h>
+#include <Bpp/Numeric/IntervalData.h>
+#include <Bpp/Numeric/ParameterExceptions.h>
 
 // From SeqLib:
-#include <Seq/SiteTools.h>
-#include <Seq/SequenceApplicationTools.h>
-#include <Seq/GranthamAAChemicalDistance.h>
-#include <Seq/MiyataAAChemicalDistance.h>
-#include <Seq/KleinAANetChargeIndex.h>
-#include <Seq/AAChargeIndex.h>
-#include <Seq/GranthamAAPolarityIndex.h>
-#include <Seq/GranthamAAVolumeIndex.h>
-#include <Seq/SimpleIndexDistance.h>
-#include <Seq/AAIndex1Entry.h>
-#include <Seq/AAIndex2Entry.h>
+#include <Bpp/Seq/SiteTools.h>
+#include <Bpp/Seq/App/SequenceApplicationTools.h>
+#include <Bpp/Seq/StateProperties.all>
 
 // From PhylLib:
-#include <Phyl/PhylogeneticsApplicationTools.h>
-#include <Phyl/PatternTools.h>
-#include <Phyl/OptimizationTools.h>
-#include <Phyl/SubstitutionCount.h>
-#include <Phyl/AnalyticalSubstitutionCount.h>
-#include <Phyl/SimpleSubstitutionCount.h>
-#include <Phyl/IndexToCount.h>
-#include <Phyl/SubstitutionMappingTools.h>
-#include <Phyl/Newick.h>
-#include <Phyl/SubstitutionModelSet.h>
-#include <Phyl/SubstitutionModelSetTools.h>
-#include <Phyl/DRHomogeneousTreeLikelihood.h>
-#include <Phyl/DRNonHomogeneousTreeLikelihood.h>
+#include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
+#include <Bpp/Phyl/PatternTools.h>
+#include <Bpp/Phyl/OptimizationTools.h>
+#include <Bpp/Phyl/Mapping.all>
+#include <Bpp/Phyl/Io/Newick.h>
+#include <Bpp/Phyl/Model/SubstitutionModelSet.h>
+#include <Bpp/Phyl/Model/SubstitutionModelSetTools.h>
+#include <Bpp/Phyl/Likelihood/DRHomogeneousTreeLikelihood.h>
+#include <Bpp/Phyl/Likelihood/DRNonHomogeneousTreeLikelihood.h>
 
 using namespace bpp;
 
