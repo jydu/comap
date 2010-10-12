@@ -42,24 +42,22 @@ knowledge of the CeCILL license and that you accept its terms.
 
 #include "Statistics.h"
 
-// From the NumCalc library:
-#include <NumCalc/VectorTools.h>
-#include <NumCalc/Domain.h>
-#include <NumCalc/IntervalData.h>
+#include <Bpp/Numeric/VectorTools.h>
+#include <Bpp/Numeric/Domain.h>
+#include <Bpp/Numeric/IntervalData.h>
 
 // From SeqLib:
-#include <Seq/SiteContainer.h>
+#include <Bpp/Seq/Container/SiteContainer.h>
 
 // From PhylLib:
-#include <Phyl/SequenceSimulator.h>
-#include <Phyl/DetailedSiteSimulator.h>
-#include <Phyl/SubstitutionCount.h>
-#include <Phyl/ProbabilisticSubstitutionMapping.h>
-#include <Phyl/DRTreeLikelihood.h>
+#include <Bpp/Phyl/Simulation.all>
+#include <Bpp/Phyl/Model.all>
+#include <Bpp/Phyl/Likelihood.all>
+#include <Bpp/Phyl/Mapping.all>
 
 using namespace bpp;
 
-// From the stl:
+// From the STL:
 #include <iostream>
 #include <vector>
 
@@ -202,7 +200,7 @@ class AnalysisTools
 		 * @param mapping A substitution mapping.
 		 * @return A vector containing the norms of each vector in the list.
 		 */
-		static Vdouble computeNorms(const ProbabilisticSubstitutionMapping & mapping);
+		static Vdouble computeNorms(const ProbabilisticSubstitutionMapping& mapping);
 	
 		static void writeMatrix(
 			const VVdouble & matrix,

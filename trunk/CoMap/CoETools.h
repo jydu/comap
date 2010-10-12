@@ -42,24 +42,19 @@ knowledge of the CeCILL license and that you accept its terms.
 
 #include "Statistics.h"
 
-// From NumCalc:
-#include <NumCalc/DiscreteDistribution.h>
-#include <NumCalc/VectorTools.h>
+#include <Bpp/Numeric/Prob/DiscreteDistribution.h>
+#include <Bpp/Numeric/VectorTools.h>
 
 // From SeqLib:
-#include <Seq/Alphabet.h>
-#include <Seq/VectorSiteContainer.h>
+#include <Bpp/Seq/Alphabet/Alphabet.h>
+#include <Bpp/Seq/Container/VectorSiteContainer.h>
 
 // From PhylLib:
-#include <Phyl/Tree.h>
-#include <Phyl/SubstitutionModel.h>
-#include <Phyl/DRTreeLikelihood.h>
-#include <Phyl/MutationProcess.h>
-#include <Phyl/DRTreeLikelihood.h>
-#include <Phyl/DiscreteRatesAcrossSitesTreeLikelihood.h>
-#include <Phyl/SubstitutionCount.h>
-#include <Phyl/ProbabilisticSubstitutionMapping.h>
-#include <Phyl/SequenceSimulator.h>
+#include <Bpp/Phyl/Tree.h>
+#include <Bpp/Phyl/Model/SubstitutionModel.h>
+#include <Bpp/Phyl/Likelihood.all>
+#include <Bpp/Phyl/Simulation.all>
+#include <Bpp/Phyl/Mapping.all>
 
 using namespace bpp;
 

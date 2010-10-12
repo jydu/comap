@@ -43,8 +43,8 @@ knowledge of the CeCILL license and that you accept its terms.
 #include "Distance.h"
 
 // From PhyLib:
-#include <Phyl/AbstractAgglomerativeDistanceMethod.h>
-#include <Phyl/ProbabilisticSubstitutionMapping.h>
+#include <Bpp/Phyl/Distance/AbstractAgglomerativeDistanceMethod.h>
+#include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
 
 struct ClusterInfos
 {
