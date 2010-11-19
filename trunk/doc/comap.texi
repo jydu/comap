@@ -5,10 +5,8 @@
 @afourpaper
 @c %**end of header
 
-@include version.texi
-
 @copying
-This is the manual of CoMap, version @value{VERSION}, @value{UPDATED}.
+This is the manual of CoMap, version 1.4.0-1.
 
 Copyright @copyright{} 2006, 2007, 2008, 2009, 2010 Julien Dutheil
 @end copying
@@ -44,6 +42,7 @@ Copyright @copyright{} 2006, 2007, 2008, 2009, 2010 Julien Dutheil
 * Clustering::                  Performing the clustering analysis of Dutheil et al. (2007).              
 * Candidates::                  Candidate groups analysis (under development)
 * Pvalue::                      Using the R scripts to compute p-values.                            
+* Mica::                        Using the R scripts to compute p-values.                            
 
 @end menu
 
@@ -353,7 +352,7 @@ The column separator for output file.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
-@node Pvalue,  , Candidates, Top
+@node Pvalue, Mica, Candidates, Top
 @chapter Output format and P-value computation
 
 Apart from the candidate analysis, CoMap do not compute p-values from the simulation.
@@ -414,6 +413,18 @@ R --vanilla < computePValues.R
 @end example
 @end cartouche
 
+@c ------------------------------------------------------------------------------------------------------------------
+
+@node Mica,  , Pvalue, Top
+@chapter Mica: Mutual Information Coevolution Analysis
+
+The Mica program perform several standard mutual information (MI) analyses.
+Basically, it computes the MI value for all pairs of sites in an alignment, and optionally compute the MI value on randomized data.
+The resulting values can be compared in R in order to get a simple p-value.
+Mica also computes various rate measures, so that the CoMap R scripts and algorithms can be used with Mica's output.
+Mica can generate replicates using either parametric bootstrap, like CoMap, or non-parametric bootstrap like in Caporaso et al (2008).
+
+@section Output format
 @c ------------------------------------------------------------------------------------------------------------------
 
 

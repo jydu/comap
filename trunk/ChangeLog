@@ -1,3 +1,6 @@
+19/11/10 Julien Dutheil
+* Added new Program Mica, and started to implement efficient pvalue computation.
+
 24/11/09 Julien Dutheil
 * Added new MI statistic
 * New substitution mapping procedure, base on the probability of observing at

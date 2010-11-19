@@ -334,21 +334,21 @@ class CoETools
 			map<string, string> & params,
 			const string & suffix = "");
 
-		static int getMinRateClass(map<string, string> & params, string suffix = "");
+		static int getMinRateClass(map<string, string>& params, string suffix = "");
 		
-		static double  getMinRate(map<string, string> & params, string suffix = "");
+		static double  getMinRate(map<string, string>& params, string suffix = "");
 		
-		static int getMaxRateClassDiff(map<string, string> & params);
+		static int getMaxRateClassDiff(map<string, string>& params);
 		
-		static double getMaxRateDiff(map<string, string> & params);
+		static double getMaxRateDiff(map<string, string>& params);
 
-		static double getStatisticMin(map<string, string> & params);
+		static double getStatisticMin(map<string, string>& params);
 		
-		static bool haveToPerformIndependantComparisons(map<string, string> & params);
+		static bool haveToPerformIndependantComparisons(map<string, string>& params);
 		
-		static const Statistic * getStatistic(map<string, string> & params) throw (Exception);
+		static Statistic* getStatistic(map<string, string>& params, const Alphabet* alphabet) throw (Exception);
 		
-		static SubstitutionCount * getSubstitutionCount(
+		static SubstitutionCount* getSubstitutionCount(
 			const Alphabet* alphabet,
 			const SubstitutionModel* model,
 			const DiscreteDistribution* rDist,

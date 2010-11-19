@@ -141,7 +141,7 @@ class AbstractMinimumStatistic: public Statistic
 
     void deleteWeights()
     {
-      if(weight_s) delete weight_s;
+      if (weight_s) delete weight_s;
       weight_s = 0;
     }
 
@@ -156,21 +156,51 @@ class AbstractMinimumStatistic: public Statistic
 class CorrelationStatistic: public AbstractMinimumStatistic
 {
 	public:
-		double getValueForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException)
+		double getValueForPair(const Vdouble& v1, const Vdouble& v2) const throw (DimensionException)
     {
-      if(weight_s)
+      if (weight_s)
         return VectorTools::cor<double, double>(v1, v2, *weight_s, false);
       else 
 			  return VectorTools::cor<double, double>(v1, v2);
 		}
 };
 
+class CorrectedCorrelationStatistic: public AbstractMinimumStatistic
+{
+  private:
+    Vdouble meanVector1_;
+    Vdouble meanVector2_;
+
+	public:
+    CorrectedCorrelationStatistic(const Vdouble& meanVector): meanVector1_(meanVector), meanVector2_(meanVector) {}
+    CorrectedCorrelationStatistic(const Vdouble& meanVector1, const Vdouble& meanVector2): meanVector1_(meanVector1), meanVector2_(meanVector2) {}
+    CorrectedCorrelationStatistic(): meanVector1_(), meanVector2_() {}
+
+  public:
+		double getValueForPair(const Vdouble& v1, const Vdouble& v2) const throw (DimensionException)
+    {
+      if (weight_s)
+        return VectorTools::cor<double, double>(v1 - meanVector1_, v2 - meanVector2_, *weight_s, false);
+      else 
+			  return VectorTools::cor<double, double>(v1 - meanVector1_, v2 - meanVector2_);
+		}
+
+    void setMeanVector(const Vdouble& meanVector) {
+      meanVector1_ = meanVector;
+      meanVector2_ = meanVector;
+    }
+    void setMeanVectors(const Vdouble& meanVector1, const Vdouble& meanVector2) {
+      meanVector1_ = meanVector1;
+      meanVector2_ = meanVector2;
+    }
+};
+
 class CovarianceStatistic: public AbstractMinimumStatistic
 {
 	public:
-		double getValueForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException)
+		double getValueForPair(const Vdouble& v1, const Vdouble& v2) const throw (DimensionException)
     {
-      if(weight_s)
+      if (weight_s)
         return VectorTools::cov<double, double>(v1, v2, *weight_s, false, false);
       else
 			  return VectorTools::cov<double, double>(v1, v2);
@@ -180,7 +210,7 @@ class CovarianceStatistic: public AbstractMinimumStatistic
 class CosinusStatistic: public AbstractMinimumStatistic
 {
 	public:
-		double getValueForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException)
+		double getValueForPair(const Vdouble& v1, const Vdouble& v2) const throw (DimensionException)
     {
       if(weight_s)
         return VectorTools::cos<double, double>(v1, v2, *weight_s);
