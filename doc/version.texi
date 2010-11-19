@@ -1,2 +1,0 @@
-@set VERSION 1.4
-@set UPDATED 1

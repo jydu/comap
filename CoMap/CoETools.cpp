@@ -247,7 +247,7 @@ ProbabilisticSubstitutionMapping* CoETools::getVectors(
   map<string, string>   & params,
   const string          & suffix)
 {
-  ProbabilisticSubstitutionMapping * substitutions = 0;
+  ProbabilisticSubstitutionMapping* substitutions = 0;
   string inputVectorsFilePath = ApplicationTools::getAFilePath("input.vectors.file", params, false, false, suffix, false);
 
   if (inputVectorsFilePath != "none")
@@ -416,7 +416,7 @@ void CoETools::writeInfos(
 
 /******************************************************************************/
 
-const Statistic* CoETools::getStatistic(map<string, string>& params) throw (Exception)
+Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* alphabet) throw (Exception)
 {
   string statistic = ApplicationTools::getStringParameter("statistic", params, "none");
   string name;
@@ -429,6 +429,10 @@ const Statistic* CoETools::getStatistic(map<string, string>& params) throw (Exce
   else if (name == "Correlation")
   {
     return new CorrelationStatistic();
+  }
+  else if (name == "CorrectedCorrelation")
+  {
+    return new CorrectedCorrelationStatistic();
   }
   else if (name == "Covariance")
   {
@@ -454,16 +458,24 @@ const Statistic* CoETools::getStatistic(map<string, string>& params) throw (Exce
   else if (name == "MI")
   {
     string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", "", true);
-    if (nijtOption == "simple" || nijtOption == "laplace" || nijtOption == "prob_one_jump")
-    {
+    if (nijtOption == "label") { //Warning, does not work with a second data set with a different alphabet :s
+      bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true);
+      if (average) {
+        throw Exception("MI distance with 'nijt=label' can't be used with 'nijt.average=yes'.");
+      }
+      unsigned int n = alphabet->getSize() * (alphabet->getSize() - 1);
+      vector<double> b(n + 2);
+      b[0] = -0.5;
+      for (unsigned int i = 0; i < n + 1; ++i)
+        b[i + 1] = b [i] + 1;
+      return new DiscreteMutualInformationStatistic(b);  
+    } else if (nijtOption == "simple" || nijtOption == "laplace" || nijtOption == "prob_one_jump") {
       double threshold = ApplicationTools::getDoubleParameter("threshold", args, 0.99, "", true);
       vector<double> b(3);
       b[0] = 0.; b[1] = threshold; b[2] = 10000.;
 		  return new DiscreteMutualInformationStatistic(b);
-    }
-    else
-    {
-      throw Exception("MI distance can only be used with 'nijt=simple', 'nijt=laplace', 'nijt=prob_one_jump' options for now.");
+    } else {
+      throw Exception("MI distance can only be used with 'nijt=label', 'nijt=simple', 'nijt=laplace', 'nijt=prob_one_jump' options for now.");
     }
   }
   else
@@ -491,7 +503,11 @@ SubstitutionCount* CoETools::getSubstitutionCount(
   }
   else if (nijtOption == "simple")
   {
-    substitutionCount = new SimpleSubstitutionCount(alphabet);
+    substitutionCount = reinterpret_cast<SubstitutionCount*>(new SimpleSubstitutionCount(alphabet));
+  }
+  else if (nijtOption == "label")
+  {
+    substitutionCount = reinterpret_cast<SubstitutionCount*>(new LabelSubstitutionCount(alphabet));
   }
   else if (nijtOption == "aadist")
   {
@@ -569,7 +585,7 @@ SubstitutionCount* CoETools::getSubstitutionCount(
   }
   else if (nijtOption == "prob_one_jump")
   {
-    substitutionCount = new OneJumpSubstitutionCount(model);
+    substitutionCount = reinterpret_cast<SubstitutionCount*>(new OneJumpSubstitutionCount(model));
   }
   else
   {

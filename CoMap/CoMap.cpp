@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
 
     if (analysis == "pairwise")
     {
-      const Statistic* statistic = CoETools::getStatistic(comap.getParams());
+      Statistic* statistic = CoETools::getStatistic(comap.getParams(), alphabet1);
 
       bool computeNullHyp = false;
       computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", comap.getParams(), false);
@@ -236,7 +236,24 @@ int main(int argc, char *argv[])
     
         // Getting the substitution vectors:
         ProbabilisticSubstitutionMapping* mapping2 = CoETools::getVectors(*tl2, *substitutionCount2, *sites2, comap.getParams(), "2");
-    
+ 
+        CorrectedCorrelationStatistic* cstat = dynamic_cast<CorrectedCorrelationStatistic*>(statistic);
+        if (cstat) {
+          Vdouble mv1(mapping1->getNumberOfBranches());
+          //Compute mean vector:
+          for (unsigned int i = 0; i < mapping1->getNumberOfSites(); ++i) {
+            mv1 += (*mapping1)[i];
+          }
+          mv1 /= mapping1->getNumberOfSites();
+          Vdouble mv2(mapping2->getNumberOfBranches());
+          //Compute mean vector:
+          for (unsigned int i = 0; i < mapping2->getNumberOfSites(); ++i) {
+            mv2 += (*mapping2)[i];
+          }
+          mv2 /= mapping2->getNumberOfSites();
+          cstat->setMeanVectors(mv1, mv2);
+        }
+   
         ApplicationTools::displayMessage("\n\n-*- Compute statistics -*-\n");
     
         // *************************
@@ -283,6 +300,17 @@ int main(int argc, char *argv[])
       }
       else
       {
+        CorrectedCorrelationStatistic* cstat = dynamic_cast<CorrectedCorrelationStatistic*>(statistic);
+        if (cstat) {
+          Vdouble mv1(mapping1->getNumberOfBranches());
+          //Compute mean vector:
+          for (unsigned int i = 0; i < mapping1->getNumberOfSites(); ++i) {
+            mv1 += (*mapping1)[i];
+          }
+          mv1 /= mapping1->getNumberOfSites();
+          cstat->setMeanVector(mv1);
+        }
+
         ApplicationTools::displayMessage("\n\n-*- Compute statistics -*- \n");
     
         ApplicationTools::displayMessage("Analyse dataset.");
@@ -586,7 +614,7 @@ int main(int argc, char *argv[])
     
       CoETools::writeInfos(*sites1, *tl1, comap.getParams());
     
-      const Statistic* statistic = CoETools::getStatistic(comap.getParams());
+      const Statistic* statistic = CoETools::getStatistic(comap.getParams(), alphabet1);
   
       string groupsPath = ApplicationTools::getAFilePath("candidates.input.file", comap.getParams(), false, true);
       if (groupsPath != "none")

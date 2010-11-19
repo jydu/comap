@@ -10,8 +10,15 @@ SET(comap_CPP
  AnalysisTools.cpp
 )
 
+SET(mica_CPP
+ Mica.cpp
+)
+
 ADD_EXECUTABLE(comap ${comap_CPP})
 TARGET_LINK_LIBRARIES(comap ${LIBS})
 
+ADD_EXECUTABLE(mica ${mica_CPP})
+TARGET_LINK_LIBRARIES(mica ${LIBS})
+
 # Install libs
-INSTALL(TARGETS comap DESTINATION bin)
+INSTALL(TARGETS comap mica DESTINATION bin)

@@ -98,7 +98,7 @@ IF(MAKEINFO_EXE)
     )
 
   ADD_CUSTOM_TARGET(html
-    COMMAND ${MAKEINFO_EXE} --html --css-ref=http://www.w3.org/StyleSheets/Core/Steely bppsuite.texi
+    COMMAND ${MAKEINFO_EXE} --html --css-ref=http://www.w3.org/StyleSheets/Core/Steely comap.texi
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
     )
 ENDIF(MAKEINFO_EXE)
@@ -108,7 +108,7 @@ IF(PDFTEX_EXE)
   MESSAGE("   Adding target: pdf")
 
   ADD_CUSTOM_TARGET(pdf
-    COMMAND ${PDFTEX_EXE} bppsuite.texi
+    COMMAND ${PDFTEX_EXE} comap.texi
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
     )
 ENDIF(PDFTEX_EXE)

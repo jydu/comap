@@ -82,9 +82,6 @@ optimization.verbose = 1
 # Should we write the optimized tree? none or file name.
 output.tree.file = $(DATA).opt.dnd
 
-# A file where site-specific information will be written (posterior rate, constant site, etc.):
-output.infos = $(DATA).infos
-
 # ----------------------------------------------------------------------------------------
 #                                     Substitution vectors
 # ----------------------------------------------------------------------------------------
