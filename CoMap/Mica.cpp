@@ -512,13 +512,6 @@ int main(int argc, char *argv[])
     else if (nullMethod == "z-score")
     {
       ApplicationTools::displayTask("Computing total distribution", true);
-    
-      ofstream simout(simpath.c_str(), ios::out);
-      simout << "MI\tHjoint\tHmin";
-      if (withModel)
-        simout << "\tNmin";
-      simout << endl;
-    
       OutputStream* os = ApplicationTools::warning;
       ApplicationTools::warning = 0;
       for (unsigned int i = 0; i < nbSites - 2; i++)
@@ -527,13 +520,13 @@ int main(int argc, char *argv[])
         for (unsigned int j = i + 1; j < nbSites - 1; j++)
         {
           site2 = &sites->getSite(j);
-          ApplicationTools::displayGauge(i * nbSites + j, nbSites * (nbsites - 1) / 2, '>');
+          ApplicationTools::displayGauge(i * nbSites + j, nbSites * (nbSites - 1) / 2, '>');
           stat  = SiteTools::mutualInformation(*site1, *site2, true);
           hj    = SiteTools::jointEntropy(*site1, *site2, true);
-          hm    = std::min(entropy[index1[j]], entropy[index2[j]]);
+          hm    = std::min(entropy[i], entropy[j]);
   
           if (withModel) {
-            nmin  = min((*norms)[index1[j]], (*norms)[index2[j]]);
+            nmin  = min((*norms)[i], (*norms)[j]);
             if (computePValues) {
               try {
                 unsigned int cat = rateDomain->getIndex(nmin);
