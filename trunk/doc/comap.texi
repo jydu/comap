@@ -418,13 +418,125 @@ R --vanilla < computePValues.R
 @node Mica,  , Pvalue, Top
 @chapter Mica: Mutual Information Coevolution Analysis
 
-The Mica program perform several standard mutual information (MI) analyses.
+The Mica program performs several standard mutual information (MI) analyses.
 Basically, it computes the MI value for all pairs of sites in an alignment, and optionally compute the MI value on randomized data.
 The resulting values can be compared in R in order to get a simple p-value.
 Mica also computes various rate measures, so that the CoMap R scripts and algorithms can be used with Mica's output.
 Mica can generate replicates using either parametric bootstrap, like CoMap, or non-parametric bootstrap like in Caporaso et al (2008).
+It can also compute corrected MI (MIp from Gloor et al), and the associated p-values using a Z-score approach. 
 
-@section Output format
+@section Input data.
+
+Mica needs a sequence alignment, which can be read as in CoMap, with the same formats available. It works with all types of alphabets.
+Optionally, Mica can also take a phylogenetic tree and a substitution model. Here again, all models supported in CoMap are supported by Mica.
+If such model and tree are provided, Mica will perform substitution mapping and compute the norm of the substitution vector for each site, a better measure of evolutionary rate than the Shannon entropy.
+Such a model is also required in order to perform parametric bootstrap.
+
+@section Output results.
+
+Mica outputs a CSV file with all tested pairs, with various statistics, including:
+
+@table @command
+
+@item MI
+The mutal information for the site.
+
+@item APC
+The average product correction of Dunn et al (2008). MIp can be computed using the formula @math{MI - APC}.
+
+@item RCW
+The row-column weighting, of Gouveia-Oliveira (2007). The corrected MI is computed using the formula @math{MI/RCW}.
+
+@item Hjoint
+The joint entroy of the two sites.
+
+@item Hmin
+The minimum entropy of the two sites, @math{Hmin = \min(H_i, H_j)}.
+
+@end table
+
+If a model and a phylogenetic tree were set up, the following extra information will also be available:
+
+@table @command
+
+@item Nmin
+The minimum norm of substitution vector for the pair.
+
+@end table
+
+@section Assessing significance of the coevolution statistics.
+
+Mica implements three possible ways to compute a significance value (p-value), which is specified by the command @command{null.method}.
+This command accepts 4 options:
+
+@table @command
+
+@item none
+Will disable the computation of the null distribution.
+
+@item nonparametric-bootstrap
+Will sample sites from the original data set.
+
+@item parametric-bootstrap
+Performs simulations using the tree and model set as input.
+
+@item z-score
+Use the set of all pairs in the original data set as a null distribution.
+
+@end table
+
+When a bootstrap analysis is performed, the following options are available:
+
+@table @command
+
+@item null.nb_rep_CPU = @{int > 0@}, null.nb_rep_RAM = @{int > 0@}
+will perform CPU * RAM replicates in total. Increasing the RAM components will be faster but require more memory, while increasing CPU will demand more CPU time, but will use less memory.
+
+@item null.output.file = @{path@}
+The file where all samples from the null distribution should be written. Setting @command{none} will disable output.
+The output file can be used for making the p-value computation by hand, using the R software for instance. 
+
+@item null.compute_pvalues = @{boolean@}
+Tells if p-values should be computed from the null distribution.
+If set to yes, then two columns will be added to the output file: @command{Bs.p.value}, which stores the actual computed p-value, and @command{Bs.nb}, storing the number of replicates on which the computation is based.
+This number of replicates is the specified one when no rate comditioning is performed (see below). Otherwise it depends on the number of classes used.
+P-values are always computed when Z-scores are used.
+@end table
+
+The bootstrap analyses will only be used for assessing the significance of MI.
+A Z-score approach is to be used for computing the p-value associated to the corrected MIs. One therefore specifies what is the statistic for wich p-value should be computed:
+
+@table @command
+@item null.method_zscore.stat = @{MI|MIp|MIc@}
+The statistic for which p-values should be computed.
+@end table
+
+@subsection Rate conditioning
+
+For all approaches, more specific null distributions can be obtained by conditioning over the evolutionary rate: 
+
+@table @command
+
+@item null.nb_rate_classes = @{int > 0@}
+If greater than 1, enables rate conditioning when computing the p-value.
+The classes are computed by cutting the interval [0, max observation] into the specified number of categories.
+By default, the minimum entropy is used as a rate measure. If a model is specified, the the minimum norm is used instead.
+
+@end table
+
+@subsection Permutation analysis.
+
+In addition to the bootsrap and Z-score analyses, a permutation test can be performed. The resulting p-value however does not account for the underlying shared ancestry and will be unreliable in most cases.
+Moreover, performing permutation is particularly slow. Use with extra care!
+
+@table @command
+
+@item max_number_of_permutations = @{int >= 0 @} 
+If set to 0, disables permutations. Otherwise set the number of permutations that can be performed. The minimal p-value that will be obtained is obtained by @math{1/(n+1)}.
+For speeding up computations, the p-value of the pairs that are far from the tail of the distribution (and therefore most-likely non-significant) will be computed from less observations (the computation will stop when at least 5 points from the null distribution with a higher statistic than the observed one are found).
+This option will add two colums, namely @command{Perm.p.value} and @command{Perm.nb}, with similar meaning as the bootstrap columns. 
+@end table
+
 @c ------------------------------------------------------------------------------------------------------------------
 
 

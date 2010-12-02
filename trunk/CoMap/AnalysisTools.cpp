@@ -305,8 +305,8 @@ VVdouble AnalysisTools::computeCovarianceMatrix(const VVdouble & vectors)
 /******************************************************************************/
 
 VVdouble AnalysisTools::computeCovarianceMatrix(
-  const VVdouble & vectors1,
-  const VVdouble & vectors2,
+  const VVdouble& vectors1,
+  const VVdouble& vectors2,
   bool independantComparisons
 ) throw (DimensionException)
 {
@@ -354,9 +354,9 @@ Vdouble AnalysisTools::computeNorms(const ProbabilisticSubstitutionMapping & map
 /******************************************************************************/
 
 void AnalysisTools::writeMatrix(
-  const VVdouble & matrix,
-  const SiteContainer & sites,
-  ostream & out)
+  const VVdouble& matrix,
+  const SiteContainer& sites,
+  ostream& out)
 {
   out << "\tMean";
   for(unsigned int i = 0; i < matrix.size() - 1; i++)
@@ -404,13 +404,13 @@ void AnalysisTools::writeMatrix(
 
 /******************************************************************************/
 
-vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
+vector<IntervalData*> AnalysisTools::getNullDistributionIntraDR(
   DRTreeLikelihood& drtl,
-  const SequenceSimulator & seqSim,
-  SubstitutionCount & nijt,
-  const Statistic & statistic,
-  const Domain & statDomain,
-  const Domain & rateDomain,
+  const SequenceSimulator& seqSim,
+  SubstitutionCount& nijt,
+  const Statistic& statistic,
+  const Domain& statDomain,
+  const Domain& rateDomain,
   unsigned int repCPU,
   unsigned int repRAM,
   bool average,
@@ -487,16 +487,16 @@ vector<IntervalData *> AnalysisTools::getNullDistributionIntraDR(
 
 /******************************************************************************/
 
-vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
+vector<IntervalData*> AnalysisTools::getNullDistributionInterDR(
   DRTreeLikelihood& drtl1,
   DRTreeLikelihood& drtl2,
-  const SequenceSimulator & seqSim1,
-  const SequenceSimulator & seqSim2,
-  SubstitutionCount & nijt1,
-  SubstitutionCount & nijt2,
-  const Statistic & statistic,
-  const Domain & statDomain,
-  const Domain & rateDomain,
+  const SequenceSimulator& seqSim1,
+  const SequenceSimulator& seqSim2,
+  SubstitutionCount& nijt1,
+  SubstitutionCount& nijt2,
+  const Statistic& statistic,
+  const Domain& statDomain,
+  const Domain& rateDomain,
   unsigned int repCPU,
   unsigned int repRAM,
   bool average,
@@ -504,12 +504,12 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
   bool verbose)
 {
   unsigned int nbClasses = rateDomain.getSize();
-  vector<IntervalData *> id(nbClasses);
-  for(unsigned int i = 0; i < nbClasses; i++)
+  vector<IntervalData*> id(nbClasses);
+  for (unsigned int i = 0; i < nbClasses; i++)
   {
     id[i] = new IntervalData(statDomain, "Null distribution (classe > " + TextTools::toString(rateDomain.getValue(i)) + ")");
   }
-  for(unsigned int i = 0; i < repCPU; i++)
+  for (unsigned int i = 0; i < repCPU; i++)
   {
     if(verbose) ApplicationTools::displayGauge(i, repCPU - 1);
 
@@ -534,11 +534,11 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
     }
     delete sites1;
 
-    SiteContainer * sites2 = seqSim2.simulate(repRAM);
+    SiteContainer* sites2 = seqSim2.simulate(repRAM);
     drtl2.setData(*sites2);
     drtl2.initialize();
     Vdouble pr2 = drtl2.getPosteriorRateOfEachSite();
-    ProbabilisticSubstitutionMapping * mapping2;
+    ProbabilisticSubstitutionMapping* mapping2;
     if(average)
     {
       if(joint)
@@ -564,7 +564,7 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
     delete mapping1;
     delete mapping2;
   }
-  if(verbose) ApplicationTools::message->endLine();
+  if (verbose) ApplicationTools::message->endLine();
   return id;
 }
 
@@ -572,11 +572,13 @@ vector<IntervalData *> AnalysisTools::getNullDistributionInterDR(
 /******************************************************************************/
 
 void AnalysisTools::getNullDistributionIntraDR(
-  DRTreeLikelihood & drtl,
-  const SequenceSimulator & seqSim,
-  SubstitutionCount & nijt,
-  const Statistic & statistic,
-  ostream & out,
+  DRTreeLikelihood& drtl,
+  const SequenceSimulator& seqSim,
+  SubstitutionCount& nijt,
+  const Statistic& statistic,
+  ostream* out,
+  vector< vector<double> >* simstats,
+  const Domain* rateDomain,
   unsigned int repCPU,
   unsigned int repRAM,
   bool average,
@@ -584,28 +586,35 @@ void AnalysisTools::getNullDistributionIntraDR(
   bool verbose)
 {
   // Write header line:
-  out << "Stat\tRCmin\tPRmin\tNmin" << endl;
-  for(unsigned int i = 0; i < repCPU; i++)
+  if (out)
+    *out << "Stat\tRCmin\tPRmin\tNmin" << endl;
+  if (simstats && rateDomain)
+    if (rateDomain->getSize() != simstats->size())
+      throw Exception("AnalysisTools::getNullDistributionIntraDR. Input vector should be of same size as rate domain.");
+  if (simstats && !rateDomain)
+    if (simstats->size() != 1)
+      throw Exception("AnalysisTools::getNullDistributionIntraDR. Input vector should be of same size 1 as no rate domain was specified.");
+  for (unsigned int i = 0; i < repCPU; i++)
   {
-    if(verbose) ApplicationTools::displayGauge(i, repCPU - 1);
+    if (verbose) ApplicationTools::displayGauge(i, repCPU - 1);
     
-    SiteContainer * sites1 = seqSim.simulate(repRAM);
+    SiteContainer* sites1 = seqSim.simulate(repRAM);
     drtl.setData(*sites1);
     drtl.initialize();
     vector<unsigned int> rc1 = drtl.getRateClassWithMaxPostProbOfEachSite();
     Vdouble pr1 = drtl.getPosteriorRateOfEachSite();
     
-    ProbabilisticSubstitutionMapping * mapping1;
-    if(average)
+    ProbabilisticSubstitutionMapping* mapping1;
+    if (average)
     {
-      if(joint)
+      if (joint)
         mapping1 = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
       else
         mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, nijt, false);
     }
     else
     {
-      if(joint)
+      if (joint)
         mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, nijt, false);
       else
         mapping1 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, nijt, false);
@@ -613,23 +622,23 @@ void AnalysisTools::getNullDistributionIntraDR(
     delete sites1;
     Vdouble norm1 = computeNorms(*mapping1);
      
-    SiteContainer * sites2 = seqSim.simulate(repRAM);
+    SiteContainer* sites2 = seqSim.simulate(repRAM);
     drtl.setData(*sites2);
     drtl.initialize();
     vector<unsigned int> rc2 = drtl.getRateClassWithMaxPostProbOfEachSite();
     Vdouble pr2 = drtl.getPosteriorRateOfEachSite();
     
-    ProbabilisticSubstitutionMapping * mapping2;
-    if(average)
+    ProbabilisticSubstitutionMapping* mapping2;
+    if (average)
     {
-      if(joint)
+      if (joint)
         mapping2 = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
       else
         mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, nijt, false);
     }
     else
     {
-      if(joint)
+      if (joint)
         mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, nijt, false);
       else
         mapping2 = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, nijt, false);
@@ -637,16 +646,29 @@ void AnalysisTools::getNullDistributionIntraDR(
     delete sites2;
     Vdouble norm2 = computeNorms(*mapping2);
       
-    for(unsigned int j = 0; j < repRAM; j++)
+    for (unsigned int j = 0; j < repRAM; j++)
     {
       double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
-      out << stat << "\t" << std::min(rc1[j], rc2[j]) << "\t" << std::min(pr1[j], pr2[j]) << "\t" << std::min(norm1[j], norm2[j]) << endl;
+      double nmin = std::min(norm1[j], norm2[j]);
+      if (out)
+        *out << stat << "\t" << std::min(rc1[j], rc2[j]) << "\t" << std::min(pr1[j], pr2[j]) << "\t" << nmin << endl;
+      if (simstats) {
+        if (rateDomain) {
+          try {
+            unsigned int cat = rateDomain->getIndex(nmin);
+            (*simstats)[cat].push_back(stat);
+          } catch (OutOfRangeException& oore) {}
+        } else {
+          (*simstats)[0].push_back(stat);
+        }
+      }
     }
     //cout << "Freeing memory." << endl;
     delete mapping1;
     delete mapping2;
   }
-  if(verbose) ApplicationTools::message->endLine();
+  if (verbose)
+    ApplicationTools::message->endLine();
 }
 
 /******************************************************************************/

@@ -355,12 +355,18 @@ class CoETools
 			map<string, string> & params,
 			string suffix = "");
 
+    /**
+     * This subroutine will call computeIntraNullDistribution on request.
+     */
     static void computeIntraStats(
-			const DiscreteRatesAcrossSitesTreeLikelihood & tl,
-			const SiteContainer & completeSites,
-			ProbabilisticSubstitutionMapping & mapping,
-			const Statistic & statistic,
-			map<string, string> & params);
+			const DRTreeLikelihood& tl,
+  		const SequenceSimulator& seqSim,
+			const SiteContainer& completeSites,
+			ProbabilisticSubstitutionMapping& mapping,
+	    SubstitutionCount& nijt,
+			const Statistic& statistic,
+      bool computeNull,
+			map<string, string>& params);
 
 		static void computeInterStats(
 			const DiscreteRatesAcrossSitesTreeLikelihood & tl1,
@@ -372,12 +378,13 @@ class CoETools
 			const Statistic & statistic,
 			map<string, string> & params);
 		
-		static void computeIntraNullDistribution(
-        DRTreeLikelihood & drtl,
+		static vector< vector<double> >* computeIntraNullDistribution(
+        DRTreeLikelihood& drtl,
+        const Domain* rateDomain,
   			const SequenceSimulator& seqSim,
-	  		SubstitutionCount & nijt,
-		  	const Statistic & statistic,
-			  map<string, string> & params);
+	  		SubstitutionCount& nijt,
+		  	const Statistic& statistic,
+			  map<string, string>& params);
 	
 		static void computeInterNullDistribution(
         DRTreeLikelihood & drtl1,
