@@ -493,12 +493,14 @@ format.pred<-function(data, sim, group.sizes, window, min.nobs, method="", level
   }
   n1<-sum(data$Size %in% group.sizes)
   n2<-nrow(pred)
+  #cat(n2,n1,level,"\n")
   p1<-sum(dbinom(n2:n1,n1,level))
   cat(n1, "tested,", n2, "sign., global p-value >", p1, "].\n")
   if(cng)
   {
     pred<-ernest(pred,logFile)
     n3<-nrow(pred)
+    #cat(n3,n1,level,"\n")
     p2<-sum(dbinom(n3:n1,n1,level))
     cat(n1, "tested,", n3, "indep., global p-value <", p2, "].\n")
   }

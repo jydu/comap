@@ -215,20 +215,20 @@ class AnalysisTools
 			
 		/**********************************************************************/
 		
-		static vector<IntervalData *> getNullDistributionIntraDR(
-      DRTreeLikelihood & drtl,
-			const SequenceSimulator & seqSim,
-			SubstitutionCount & nijt,
-			const Statistic & statistic,
-			const Domain & statDomain,
-			const Domain & rateDomain,
+		static vector<IntervalData*> getNullDistributionIntraDR(
+      DRTreeLikelihood& drtl,
+			const SequenceSimulator& seqSim,
+			SubstitutionCount& nijt,
+			const Statistic& statistic,
+			const Domain& statDomain,
+			const Domain& rateDomain,
 			unsigned int repCPU,
       unsigned int repRAM,
 			bool average,
 			bool joint,
 			bool verbose = true);
 
-		static vector<IntervalData *> getNullDistributionInterDR(
+		static vector<IntervalData*> getNullDistributionInterDR(
       DRTreeLikelihood & drtl1,
       DRTreeLikelihood & drtl2,
 			const SequenceSimulator & seqSim1,
@@ -244,12 +244,20 @@ class AnalysisTools
 			bool joint,
 			bool verbose = true);
 
+    /**
+     * @param out If not 0, where to output simulation results.
+     * @param simstats If not 0, where to store simulation results (statistic only).
+     * @param rateDomain A domain object describing rate categories in order to perform conditional p-value computations.
+     *                   If 0 or with one rate class, no rate conditionning will be done.
+     */
 		static void getNullDistributionIntraDR(
-      DRTreeLikelihood & drtl,
-			const SequenceSimulator & seqSim,
-			SubstitutionCount & nijt,
-			const Statistic & statistic,
-			ostream & out,
+      DRTreeLikelihood& drtl,
+			const SequenceSimulator& seqSim,
+			SubstitutionCount& nijt,
+			const Statistic& statistic,
+			ostream* out,
+      vector< vector<double> >* simstats,
+      const Domain* rateDomain,
 			unsigned int repCPU,
       unsigned int repRAM,
 			bool average,

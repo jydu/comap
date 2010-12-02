@@ -311,29 +311,18 @@ int main(int argc, char *argv[])
           cstat->setMeanVector(mv1);
         }
 
-        ApplicationTools::displayMessage("\n\n-*- Compute statistics -*- \n");
-    
         ApplicationTools::displayMessage("Analyse dataset.");
         CoETools::computeIntraStats(
           *tl1,
+          *seqSim1,
           *sites1,
           *mapping1,
+          *substitutionCount1,
           *statistic,
+          computeNullHyp,
           comap.getParams());
- 
         CoETools::writeInfos(*sites1, *tl1, comap.getParams());
-      
-        //tl2 will be modified after the simulations!
-        if (computeNullHyp)
-        { 
-          CoETools::computeIntraNullDistribution(
-            *tl1,
-            *seqSim1,
-            *substitutionCount1,
-            *statistic,
-            comap.getParams());
-        }
-      }
+     }
 
       delete statistic;
     }

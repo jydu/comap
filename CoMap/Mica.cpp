@@ -53,11 +53,11 @@ using namespace std;
 #include <Bpp/Numeric/Prob.all>
 #include <Bpp/Numeric/VectorTools.h>
 
-// From SeqLib:
+// From bpp-seq:
 #include <Bpp/Seq/SiteTools.h>
 #include <Bpp/Seq/App/SequenceApplicationTools.h>
 
-// From PhylLib:
+// From bpp-phyl:
 #include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
 #include <Bpp/Phyl/Likelihood/NonHomogeneousTreeLikelihood.h>
 #include <Bpp/Phyl/Likelihood/DRHomogeneousTreeLikelihood.h>
@@ -113,7 +113,7 @@ void miTest(const Site& site1, const Site& site2, unsigned int maxNbPermutations
 /******************************************************************************/
 
 
-vector<double> computeNorms(const ProbabilisticSubstitutionMapping & mapping)
+vector<double> computeNorms(const ProbabilisticSubstitutionMapping& mapping)
 {
   unsigned int nbVectors = mapping.getNumberOfSites();
   vector<double> vect(nbVectors);
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
   }
 
   unsigned int nbSites = sites->getNumberOfSites();
-  unsigned int nbSeqs = sites->getNumberOfSequences();
+  unsigned int nbSeqs  = sites->getNumberOfSequences();
  
   ApplicationTools::displayResult("Number of sequences", nbSeqs);
   ApplicationTools::displayResult("Number of sites", nbSites);
@@ -352,7 +352,10 @@ int main(int argc, char *argv[])
   if (nullMethod != "none")
   {
     //Shall we compute built-in p-values?
-    computePValues = ApplicationTools::getBooleanParameter("null.compute_pvalues", mica.getParams(), true);
+    if (nullMethod == "z-score")
+      computePValues = true;
+    else
+      computePValues = ApplicationTools::getBooleanParameter("null.compute_pvalues", mica.getParams(), true);
     if (computePValues)
     {
       nbRateClasses = ApplicationTools::getParameter<unsigned int>("null.nb_rate_classes", mica.getParams(), 10);
@@ -366,16 +369,19 @@ int main(int argc, char *argv[])
 
     if (nullMethod == "nonparametric-bootstrap")
     {
-      string simpath = ApplicationTools::getAFilePath("null.output.file", mica.getParams(), true, false);
-      ApplicationTools::displayResult("Null output file", simpath);
+      string simpath = ApplicationTools::getAFilePath("null.output.file", mica.getParams(), false, false);
+      bool outputToFile = (simpath != "none") && (!TextTools::isEmpty(simpath));
       ApplicationTools::displayTask("Computing null distribution", true);
-    
-      ofstream simout(simpath.c_str(), ios::out);
-      simout << "MI\tHjoint\tHmin";
-      if (withModel)
-        simout << "\tNmin";
-      simout << endl;
-  
+   
+      auto_ptr<ofstream> simout;
+      if (outputToFile) {
+        ApplicationTools::displayResult("Null output file", simpath);
+        simout.reset(new ofstream(simpath.c_str(), ios::out));
+        *simout << "MI\tHjoint\tHmin";
+        if (withModel)
+          *simout << "\tNmin";
+        *simout << endl;
+      }
     
       unsigned int nbRepCPU = ApplicationTools::getParameter<unsigned int>("null.nb_rep_CPU", mica.getParams(), 10);
       unsigned int nbRepRAM = ApplicationTools::getParameter<unsigned int>("null.nb_rep_RAM", mica.getParams(), 100);
@@ -400,25 +406,28 @@ int main(int argc, char *argv[])
           hj    = SiteTools::jointEntropy(*site1, *site2, true);
           hm    = std::min(entropy[index1[j]], entropy[index2[j]]);
   
-          simout << stat << "\t" << hj << "\t" << hm;
+          if (outputToFile)
+            *simout << stat << "\t" << hj << "\t" << hm;
           if (withModel) {
             nmin  = min((*norms)[index1[j]], (*norms)[index2[j]]);
-            simout << "\t" << nmin;
+            if (outputToFile)
+              *simout << "\t" << nmin;
             if (computePValues) {
               try {
                 unsigned int cat = rateDomain->getIndex(nmin);
                 (*simValues)[cat].push_back(stat);
-              } catch(OutOfRangeException& oore) {}
+              } catch (OutOfRangeException& oore) {}
             }
           } else {
             if (computePValues) {
               try {
                 unsigned int cat = rateDomain->getIndex(hm);
                 (*simValues)[cat].push_back(stat);
-              } catch(OutOfRangeException& oore) {}
+              } catch (OutOfRangeException& oore) {}
             }
           }
-          simout << endl;
+          if (outputToFile)
+            *simout << endl;
         }
   
         delete sites1;
@@ -426,7 +435,9 @@ int main(int argc, char *argv[])
       }
       ApplicationTools::warning = os;
   
-      simout.close();
+      if (outputToFile) {
+        simout->close();
+      }
       ApplicationTools::displayTaskDone();  
     }
     else if (nullMethod == "parametric-bootstrap")
@@ -435,7 +446,7 @@ int main(int argc, char *argv[])
         throw Exception("You need to specify a model of sequence evolution in order to use a parametric bootstrap approach!");
       bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", mica.getParams(), false, "", true, false);
       ApplicationTools::displayResult("Rate distribution for simulations", (continuousSim ? "continuous" : "discrete"));
-      SequenceSimulator * simulator;
+      SequenceSimulator* simulator;
       if (modelSet)
       {
         simulator = new NonHomogeneousSequenceSimulator(modelSet, rDist, tree);
@@ -447,13 +458,18 @@ int main(int argc, char *argv[])
         dynamic_cast<HomogeneousSequenceSimulator *>(simulator)->enableContinuousRates(continuousSim);
       }
    
-      string simpath = ApplicationTools::getAFilePath("null.output.file", mica.getParams(), true, false);
-      ApplicationTools::displayResult("Null output file", simpath);
+      string simpath = ApplicationTools::getAFilePath("null.output.file", mica.getParams(), false, false);
+      bool outputToFile = (simpath != "none") && (!TextTools::isEmpty(simpath));
       ApplicationTools::displayTask("Computing null distribution", true);
+ 
+      auto_ptr<ofstream> simout;
+      if (outputToFile) {
+        ApplicationTools::displayResult("Null output file", simpath);
+        simout.reset(new ofstream(simpath.c_str(), ios::out));
     
-      ofstream simout(simpath.c_str(), ios::out);
-      simout << "MI\tHjoint\tHmin\tNmin" << endl;
-    
+        *simout << "MI\tHjoint\tHmin\tNmin" << endl;
+      }
+
       unsigned int nbRepCPU = ApplicationTools::getParameter<unsigned int>("null.nb_rep_CPU", mica.getParams(), 10);
       unsigned int nbRepRAM = ApplicationTools::getParameter<unsigned int>("null.nb_rep_RAM", mica.getParams(), 100);
   
@@ -497,7 +513,8 @@ int main(int argc, char *argv[])
             } catch(OutOfRangeException& oore) {}
           }
 
-          simout << stat << "\t" << hj << "\t" << hm << "\t" << nmin << endl;
+          if (outputToFile)
+            *simout << stat << "\t" << hj << "\t" << hm << "\t" << nmin << endl;
         }
   
         delete sites1;
@@ -505,41 +522,64 @@ int main(int argc, char *argv[])
       }
       ApplicationTools::warning = os;
   
-      simout.close();
+      if (outputToFile)
+        simout->close();
       ApplicationTools::displayTaskDone(); 
       delete simulator;
     }
     else if (nullMethod == "z-score")
     {
+      string zScoreStat = ApplicationTools::getStringParameter("null.method_zscore.stat", mica.getParams(), "MIp", "", true, false);
+      ApplicationTools::displayResult("Compute p-value for", zScoreStat);
+      short correctStat = 0;
+      if (zScoreStat == "MIp")
+        correctStat = 1;
+      else if (zScoreStat == "MIc")
+        correctStat = 2;
+      else if (zScoreStat != "MI")
+        throw Exception("Unkown statistic, should be 'MI', 'MIp' or 'MIc'.");
       ApplicationTools::displayTask("Computing total distribution", true);
       OutputStream* os = ApplicationTools::warning;
       ApplicationTools::warning = 0;
-      for (unsigned int i = 0; i < nbSites - 2; i++)
+      unsigned int c = 0;
+      for (unsigned int i = 0; i < nbSites - 1; i++)
       {
         site1 = &sites->getSite(i);
         for (unsigned int j = i + 1; j < nbSites - 1; j++)
         {
           site2 = &sites->getSite(j);
-          ApplicationTools::displayGauge(i * nbSites + j, nbSites * (nbSites - 1) / 2, '>');
+          ApplicationTools::displayGauge(c++, nbSites * (nbSites - 1) / 2 - 1, '>');
           stat  = SiteTools::mutualInformation(*site1, *site2, true);
           hj    = SiteTools::jointEntropy(*site1, *site2, true);
           hm    = std::min(entropy[i], entropy[j]);
   
           if (withModel) {
             nmin  = min((*norms)[i], (*norms)[j]);
-            if (computePValues) {
-              try {
-                unsigned int cat = rateDomain->getIndex(nmin);
+            try {
+              unsigned int cat = rateDomain->getIndex(nmin);
+              if (correctStat == 1) {
+                apc = averageMI[i] * averageMI[j] / fullAverageMI;
+                (*simValues)[cat].push_back(stat - apc);
+              } else if (correctStat == 2) {
+                rcw = averageMI[i] * averageMI[j] / 2.;
+                (*simValues)[cat].push_back(stat / rcw);
+              } else {
                 (*simValues)[cat].push_back(stat);
-              } catch(OutOfRangeException& oore) {}
-            }
+              }
+            } catch (OutOfRangeException& oore) {}
           } else {
-            if (computePValues) {
-              try {
-                unsigned int cat = rateDomain->getIndex(hm);
+            try {
+              unsigned int cat = rateDomain->getIndex(hm);
+              if (correctStat == 1) {
+                apc = averageMI[i] * averageMI[j] / fullAverageMI;
+                (*simValues)[cat].push_back(stat - apc);
+              } else if (correctStat == 2) {
+                rcw = averageMI[i] * averageMI[j] / 2.;
+                (*simValues)[cat].push_back(stat / rcw);
+              } else {
                 (*simValues)[cat].push_back(stat);
-              } catch(OutOfRangeException& oore) {}
-            }
+              }
+            } catch (OutOfRangeException& oore) {}
           }
         }
       }
@@ -608,7 +648,7 @@ int main(int argc, char *argv[])
           for (count = 0; count < nsim && (*simValues)[cat][count] < stat; ++count) {}
           double pvalue = static_cast<double>(nsim - count + 1) / static_cast<double>(nsim + 1);
           out << "\t" << pvalue << "\t" << nsim;
-        } catch(OutOfRangeException& oore) {
+        } catch (OutOfRangeException& oore) {
           out << "\tNA\t0";
         }
         //MIp p-value:
@@ -624,8 +664,8 @@ int main(int argc, char *argv[])
   delete alphabet;
   delete sites;
   delete tl;
-  if(model)    delete model;
-  if(modelSet) delete modelSet;
+  if (model)    delete model;
+  if (modelSet) delete modelSet;
   delete rDist;
   delete tree;
 

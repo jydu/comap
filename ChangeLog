@@ -1,3 +1,8 @@
+24/11/10 Julien Dutheil
+* Debugged Z-score p-value computation.
+* Added example directory with simple cases.
+* TODO: add built-in p-value computation for CoMap pair test.
+
 19/11/10 Julien Dutheil
 * Added new Program Mica, and started to implement efficient pvalue computation.
 
