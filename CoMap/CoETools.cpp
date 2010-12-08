@@ -256,8 +256,8 @@ ProbabilisticSubstitutionMapping* CoETools::getVectors(
     int nbSites = drtl.getNumberOfSites();
     ApplicationTools::displayResult("Substitution mapping in file:", inputVectorsFilePath);
     ifstream sc(inputVectorsFilePath.c_str(), ios::in);
-    substitutions = new ProbabilisticSubstitutionMapping(drtl.getTree(), nbSites);
-    SubstitutionMappingTools::readFromStream(sc, *substitutions);
+    substitutions = new ProbabilisticSubstitutionMapping(drtl.getTree(), &substitutionCount, nbSites);
+    SubstitutionMappingTools::readFromStream(sc, *substitutions, 0);
   }
   else
   {
@@ -283,7 +283,7 @@ ProbabilisticSubstitutionMapping* CoETools::getVectors(
     }
     if (outputVectorsFilePath != "none") {
       ofstream outputVectors(outputVectorsFilePath.c_str(), ios::out);
-      SubstitutionMappingTools::writeToStream(*substitutions, completeSites, outputVectors);
+      SubstitutionMappingTools::writeToStream(*substitutions, completeSites, 0, outputVectors);
       outputVectors.close();
     }
 
@@ -493,7 +493,7 @@ SubstitutionCount* CoETools::getSubstitutionCount(
   }
   else if (nijtOption == "simple")
   {
-    substitutionCount = reinterpret_cast<SubstitutionCount*>(new SimpleSubstitutionCount(alphabet));
+    substitutionCount = reinterpret_cast<SubstitutionCount*>(new SimpleSubstitutionCount(new TotalSubstitutionRegister(alphabet)));
   }
   else if (nijtOption == "label")
   {
@@ -513,59 +513,59 @@ SubstitutionCount* CoETools::getSubstitutionCount(
       GranthamAAChemicalDistance* M = new GranthamAAChemicalDistance();
       M->setSymmetric(sym);
       if (!sym) M->setPC1Sign(true);
-      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+      substitutionCount = new IndexToCount(new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
     else if (dist == "miyata")
     {
       MiyataAAChemicalDistance* M = new MiyataAAChemicalDistance();
       M->setSymmetric(sym);
-      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+      substitutionCount = new IndexToCount(new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
     else if (dist == "grantham.polarity")
     {
       GranthamAAPolarityIndex I;
-      SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
+      SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
       M->setSymmetric(sym);
-      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+      substitutionCount = new IndexToCount(new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
     else if (dist == "grantham.volume")
     {
       GranthamAAVolumeIndex I;
-      SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
+      SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
       M->setSymmetric(sym);
-      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+      substitutionCount = new IndexToCount(new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
     else if (dist == "klein.charge")
     {
       KleinAANetChargeIndex I;
-      SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
+      SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
       M->setSymmetric(sym);
-      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+      substitutionCount = new IndexToCount(new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
     else if (dist == "charge")
     {
       AAChargeIndex I;
-      SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
+      SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
       M->setSymmetric(sym);
-      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+      substitutionCount = new IndexToCount(new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
     else if (dist == "user1")
     {
       string aax1FilePath = ApplicationTools::getAFilePath("nijt_aadist.type_user1.file", params, true, true, suffix, false);
       ifstream aax1File(aax1FilePath.c_str(), ios::in);
       AAIndex1Entry I(aax1File);
-      SimpleIndexDistance<double> * M = new SimpleIndexDistance<double>(I);
+      SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
       aax1File.close();
       M->setSymmetric(sym);
-      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+      substitutionCount = new IndexToCount(new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
     else if (dist == "user2")
     {
       string aax2FilePath = ApplicationTools::getAFilePath("nijt_aadist.type_user2.file", params, true, true, suffix, false);
       ifstream aax2File(aax2FilePath.c_str(), ios::in);
-      AAIndex2Entry * M = new AAIndex2Entry(aax2File, sym);
+      AAIndex2Entry* M = new AAIndex2Entry(aax2File, sym);
       aax2File.close();
-      substitutionCount = new IndexToCount(M, true); // M will be deleted when this substitutionsCount will be deleted.
+      substitutionCount = new IndexToCount(new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
     }
     else
     {
@@ -933,7 +933,7 @@ vector<unsigned int> CandidateGroupSet::currentCandidateSite() const throw (Exce
 
 /******************************************************************************/
 
-bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMapping & mapping)
+bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMapping& mapping)
 {
   Vdouble norms = AnalysisTools::computeNorms(mapping);
   //Analyse each site in the set:
@@ -960,7 +960,7 @@ bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMappin
       if (testNorm)
       {
         //cout << pos[0] << "\t" << pos[1] << "\t" << simulations_[pos[0]][pos[1]].size() << endl;
-        if(addSimulatedSite(pos[0], pos[1], &mapping[i]))
+        if (addSimulatedSite(pos[0], pos[1], &mapping[i]))
         {
           testFree = false; //At least one groupe was completed!
         }
@@ -982,21 +982,23 @@ bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMappin
 
 /******************************************************************************/
 
-bool CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const Vdouble * v) throw (IndexOutOfBoundsException)
+bool CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const VVdouble* v) throw (IndexOutOfBoundsException)
 {
-  if (groupIndex >= simulations_.size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad group index.", groupIndex, 0, simulations_.size());
-  if (siteIndex >= simulations_[groupIndex].size()) throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad site index.", siteIndex, 0, simulations_[groupIndex].size());
-  vector< deque<const Vdouble*> >* group = &simulations_[groupIndex];
+  if (groupIndex >= simulations_.size())
+    throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad group index.", groupIndex, 0, simulations_.size());
+  if (siteIndex >= simulations_[groupIndex].size())
+    throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad site index.", siteIndex, 0, simulations_[groupIndex].size());
+  vector< deque<const VVdouble*> >* group = &simulations_[groupIndex];
   (*group)[siteIndex].push_back(v);
   //Test if the group is complete:
   bool test = true;
-  for (unsigned int i = 0; test && i < group->size(); i++)
+  for (unsigned int i = 0; test && i < group->size(); ++i)
   {
     if ((*group)[i].size() == 0) test = false;
   }
   if (test)
   {
-    vector<const Vdouble *> groupVectors;
+    vector<const VVdouble*> groupVectors;
     for (unsigned int i = 0; i < group->size(); i++)
     {
       groupVectors.push_back((*group)[i][0]);

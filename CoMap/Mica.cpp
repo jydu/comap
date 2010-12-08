@@ -117,7 +117,8 @@ vector<double> computeNorms(const ProbabilisticSubstitutionMapping& mapping)
 {
   unsigned int nbVectors = mapping.getNumberOfSites();
   vector<double> vect(nbVectors);
-  for(unsigned int i = 0; i < nbVectors; i++) vect[i] = VectorTools::norm<double, double>(mapping[i]);
+  for (unsigned int i = 0; i < nbVectors; i++)
+    vect[i] = SubstitutionMappingTools::computeNormForSite(mapping, i);
   return vect;
 }
 
@@ -294,7 +295,8 @@ int main(int argc, char *argv[])
 
     //Get the substitution mapping in order to compute the rates:
 
-    simple = new SimpleSubstitutionCount(model->getAlphabet()); 
+    TotalSubstitutionRegister* reg = new TotalSubstitutionRegister(model->getAlphabet());
+    simple = new SimpleSubstitutionCount(reg); 
     ProbabilisticSubstitutionMapping* mapping = 
       SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, true);
     norms = new vector<double>(computeNorms(*mapping));

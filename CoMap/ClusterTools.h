@@ -1,5 +1,5 @@
 //
-// File: TestTools.h
+// File: ClusterTools.h
 // Created by: Julien Dutheil
 // Created on: Thu Mar 2 2006
 //

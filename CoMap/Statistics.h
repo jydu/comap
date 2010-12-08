@@ -51,7 +51,7 @@ using namespace std;
  * @brief Coevolution measure.
  *
  * A coevolution statistic can be computed for a pair of sites, or for a group of higher size.
- * It is computed from substitution vectors, passed as input.
+ * It is computed from substitution vectors, passed as input. The vectors have a second dimension allowing detailed counts if > 1.
  * A vector of weights (one weight per branch) can be specified, depending on the measure and its implementation.
  */
 class Statistic
@@ -64,12 +64,12 @@ class Statistic
     /**
      * @brief Get the value of the statistic for a pair of vectors.
      *
-     * @param v1 The first vector.
-     * @param v2 The second vector.
+     * @param v1 The first vector (with putative detailed mutation counts).
+     * @param v2 The second vector (with putative detailed mutation counts).
      * @return The value of the statistic for this pair.
      * @throw DimensionException If the two vectors do not have the same dimension or do not match the dimension of the weights if set up. 
      */
-		virtual double getValueForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException) = 0;
+		virtual double getValueForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException) = 0;
     /**
      * @brief Get the value of the statistic for a set of vectors.
      *
@@ -77,14 +77,14 @@ class Statistic
      * @return The value of the statistic for this group.
      * @throw DimensionException If the two vectors do not have the same dimension or do not match the dimension of the weights if set up. 
      */
-    virtual double getValueForGroup(const vector<const Vdouble *> & v) const throw (DimensionException) = 0;
+    virtual double getValueForGroup(const vector<const VVdouble*> & v) const throw (DimensionException) = 0;
 
     /**
      * @brief Set weights for this statistic.
      *
      * @param w A vector of weights.
      */
-    virtual void setWeights(const Vdouble & w) = 0;
+    virtual void setWeights(const Vdouble& w) = 0;
     /**
      * @brief Delete the weights associated to this statistic, if any.
      */
@@ -100,7 +100,7 @@ class Statistic
      *
      * @return A pointer toward weights, NULL if no weights are attached to this statistic.
      */
-    virtual const Vdouble * getWeights() const = 0;
+    virtual const Vdouble* getWeights() const = 0;
 };
 
 class AbstractMinimumStatistic: public Statistic
@@ -115,24 +115,24 @@ class AbstractMinimumStatistic: public Statistic
       weight_s = new Vdouble(*stat.weight_s);
       return *this;
     }
-    virtual ~AbstractMinimumStatistic() { if(weight_s) delete weight_s; }
+    virtual ~AbstractMinimumStatistic() { if (weight_s) delete weight_s; }
 
   public:
-    virtual double getValueForGroup(const vector<const Vdouble *> & v) const throw (DimensionException)
+    virtual double getValueForGroup(const vector<const VVdouble*>& v) const throw (DimensionException)
     {
       double mini = -log(0), val = 0.;
-      for(unsigned int i = 1; i < v.size(); i++)
+      for (unsigned int i = 1; i < v.size(); ++i)
       {
-        for(unsigned int j = 0; j < i; j++)
+        for(unsigned int j = 0; j < i; ++j)
         {
           val = getValueForPair(*v[i], *v[j]);
-          if(val < mini) mini = val;
+          if (val < mini) mini = val;
         }
       }
       return mini;
     }
 
-    void setWeights(const Vdouble & w)
+    void setWeights(const Vdouble& w)
     { 
       if(weight_s) delete weight_s;
       weight_s = new Vdouble(w);
@@ -151,17 +151,25 @@ class AbstractMinimumStatistic: public Statistic
     }
     const Vdouble* getWeights() const { return weight_s; }
 
+    static Vdouble getUD(const VVdouble& v, unsigned int type) {
+      Vdouble u(v.size());
+      for (size_t i = 0; i < v.size(); ++i) {
+        u[i] = v[i][type];
+      }
+      return u;
+    }
+
 };
 
 class CorrelationStatistic: public AbstractMinimumStatistic
 {
 	public:
-		double getValueForPair(const Vdouble& v1, const Vdouble& v2) const throw (DimensionException)
+		double getValueForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException)
     {
       if (weight_s)
-        return VectorTools::cor<double, double>(v1, v2, *weight_s, false);
+        return VectorTools::cor<double, double>(getUD(v1, 0), getUD(v2, 0), *weight_s, false);
       else 
-			  return VectorTools::cor<double, double>(v1, v2);
+			  return VectorTools::cor<double, double>(getUD(v1, 0), getUD(v2, 0));
 		}
 };
 
@@ -177,12 +185,12 @@ class CorrectedCorrelationStatistic: public AbstractMinimumStatistic
     CorrectedCorrelationStatistic(): meanVector1_(), meanVector2_() {}
 
   public:
-		double getValueForPair(const Vdouble& v1, const Vdouble& v2) const throw (DimensionException)
+		double getValueForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException)
     {
       if (weight_s)
-        return VectorTools::cor<double, double>(v1 - meanVector1_, v2 - meanVector2_, *weight_s, false);
+        return VectorTools::cor<double, double>(getUD(v1, 0) - meanVector1_, getUD(v2, 0) - meanVector2_, *weight_s, false);
       else 
-			  return VectorTools::cor<double, double>(v1 - meanVector1_, v2 - meanVector2_);
+			  return VectorTools::cor<double, double>(getUD(v1, 0) - meanVector1_, getUD(v2, 0) - meanVector2_);
 		}
 
     void setMeanVector(const Vdouble& meanVector) {
@@ -198,38 +206,39 @@ class CorrectedCorrelationStatistic: public AbstractMinimumStatistic
 class CovarianceStatistic: public AbstractMinimumStatistic
 {
 	public:
-		double getValueForPair(const Vdouble& v1, const Vdouble& v2) const throw (DimensionException)
+		double getValueForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException)
     {
       if (weight_s)
-        return VectorTools::cov<double, double>(v1, v2, *weight_s, false, false);
+        return VectorTools::cov<double, double>(getUD(v1, 0), getUD(v2, 0), *weight_s, false, false);
       else
-			  return VectorTools::cov<double, double>(v1, v2);
+			  return VectorTools::cov<double, double>(getUD(v1, 0), getUD(v2, 0));
 		}
 };
 
 class CosinusStatistic: public AbstractMinimumStatistic
 {
 	public:
-		double getValueForPair(const Vdouble& v1, const Vdouble& v2) const throw (DimensionException)
+		double getValueForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException)
     {
       if(weight_s)
-        return VectorTools::cos<double, double>(v1, v2, *weight_s);
+        return VectorTools::cos<double, double>(getUD(v1, 0), getUD(v2, 0), *weight_s);
       else
-			  return VectorTools::cos<double, double>(v1, v2);
+			  return VectorTools::cos<double, double>(getUD(v1, 0), getUD(v2, 0));
 		}
 };
 
 class CosubstitutionNumberStatistic: public AbstractMinimumStatistic
 {
 	public: 
-		double getValueForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException)
+		double getValueForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException)
     {
-			if(v1.size() != v2.size()) throw new Exception("CosubstitutionNumberStatistic::getValueForPair: vectors must have the same size.");
+			if (v1.size() != v2.size())
+        throw new Exception("CosubstitutionNumberStatistic::getValueForPair: vectors must have the same size.");
 			unsigned int n = v1.size();
 			double c = 0;
-			for(unsigned int i = 0; i < n; i++)
+			for (unsigned int i = 0; i < n; i++)
       {
-				if(v1[i] >= 1. && v2[i] >= 1.) c++;
+				if (VectorTools::sum(v1[i]) >= 1. && VectorTools::sum(v2[i]) >= 1.) c++;
 			}
 			return c;
 		}
@@ -238,41 +247,46 @@ class CosubstitutionNumberStatistic: public AbstractMinimumStatistic
 class CompensationStatistic: public AbstractMinimumStatistic
 {
   public:
-    double getValueForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException)
+    double getValueForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException)
     {
- 		  if(v1.size() != v2.size()) throw DimensionException("CompensationStatistic::getValueForPair.", v2.size(), v1.size());
+ 		  if (v1.size() != v2.size())
+        throw DimensionException("CompensationStatistic::getValueForPair.", v2.size(), v1.size());
       double sumsq1 = 0., sumsq2 = 0., sumsq3 = 0., w = 1.;
-      for(unsigned int i = 0; i < v1.size(); i++)
+      for (size_t i = 0; i < v1.size(); i++)
       {
-        if(weight_s) w = (*weight_s)[i];
-        sumsq1 += pow(v1[i], 2) * w;
-        sumsq2 += pow(v2[i], 2) * w;
-        sumsq3 += pow(v1[i] + v2[i], 2) * w;
+        double sv1 = VectorTools::sum(v1[i]);
+        double sv2 = VectorTools::sum(v2[i]);
+        if (weight_s) w = (*weight_s)[i];
+        sumsq1 += pow(sv1, 2) * w;
+        sumsq2 += pow(sv2, 2) * w;
+        sumsq3 += pow(sv1 + sv2, 2) * w;
       }
       return 1. - sqrt(sumsq3) / (sqrt(sumsq1) + sqrt(sumsq2));
     }
 
-    double getValueForGroup(const vector<const Vdouble *> & v) const throw (DimensionException)
+    double getValueForGroup(const vector<const VVdouble*>& v) const throw (DimensionException)
     {
-      for(unsigned int j = 1; j < v.size(); j++)
+      for (size_t j = 1; j < v.size(); j++)
       {
- 		    if(v[0]->size() != v[j]->size()) throw DimensionException("CompensationStatistic::getValueForGroup.", v[0]->size(), v[j]->size());
+ 		    if (v[0]->size() != v[j]->size())
+          throw DimensionException("CompensationStatistic::getValueForGroup.", v[0]->size(), v[j]->size());
       }
       vector<double> sumsq1(v.size(), 0);
       double s = 0., sumsq2 = 0., w = 1.;
-      for(unsigned int i = 0; i < v[0]->size(); i++)
+      for (size_t i = 0; i < v[0]->size(); i++)
       {
         if (weight_s) w = (*weight_s)[i];
         s = 0.;
-        for(unsigned int j = 0; j < v.size(); j++)
+        for (size_t j = 0; j < v.size(); j++)
         {
-          sumsq1[j] += pow((*v[j])[i], 2) * w;
-          s += (*v[j])[i];
+          double sv = VectorTools::sum((*v[j])[i]);
+          sumsq1[j] += pow(sv, 2) * w;
+          s += sv;
         }
         sumsq2 += pow(s, 2) * w;
       }
       double sumnorms = 0.;
-      for(unsigned int j = 0; j < v.size(); j++)
+      for (size_t j = 0; j < v.size(); j++)
       {
         sumnorms += sqrt(sumsq1[j]);
       }
@@ -283,10 +297,10 @@ class CompensationStatistic: public AbstractMinimumStatistic
 class MutualInformationStatistic: public AbstractMinimumStatistic
 {
 	public:
-		double getValueForPair(const Vdouble& v1, const Vdouble& v2) const throw (DimensionException)
+		double getValueForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException)
     {
       //Forn now weights are ignored
-			return VectorTools::miContinuous<double, double>(v1, v2);
+			return VectorTools::miContinuous<double, double>(getUD(v1, 0), getUD(v2, 0));
 		}
 };
 
@@ -300,14 +314,14 @@ class DiscreteMutualInformationStatistic: public AbstractMinimumStatistic
       AbstractMinimumStatistic(), domain_(bounds) {}
 
 	public:
-		double getValueForPair(const Vdouble& v1, const Vdouble& v2) const throw (DimensionException)
+		double getValueForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException)
     {
       vector<unsigned int> c1(v1.size());
       vector<unsigned int> c2(v2.size());
       for (unsigned int i = 0; i < c1.size(); i++)
       {
-        c1[i] = domain_.getIndex(v1[i]);
-        c2[i] = domain_.getIndex(v2[i]);
+        c1[i] = domain_.getIndex(VectorTools::sum(v1[i]));
+        c2[i] = domain_.getIndex(VectorTools::sum(v2[i]));
       }
       return VectorTools::miDiscrete<unsigned int, double>(c1, c2); //Weights ignored for now.
 		}

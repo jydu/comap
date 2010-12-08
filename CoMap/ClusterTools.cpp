@@ -198,29 +198,31 @@ vector<Group> ClusterTools::getGroupsWithSize(const TreeTemplate<Node> & tree, u
 }
 
 void ClusterTools::computeGlobalDistanceDistribution(
-  DRTreeLikelihood & drtl,
-  const SequenceSimulator & simulator,
-	SubstitutionCount & nijt,
-  const Distance & distance,
-  AgglomerativeDistanceMethod & clustering,
-  const vector<double> & scales,
+  DRTreeLikelihood& drtl,
+  const SequenceSimulator& simulator,
+	SubstitutionCount& nijt,
+  const Distance& distance,
+  AgglomerativeDistanceMethod& clustering,
+  const vector<double>& scales,
   unsigned int sizeOfDataSet,
   unsigned int nrep,
   unsigned int maxGroupSize,
-  ofstream * out)
+  ofstream* out)
 {
+  unsigned int nbTypes = nijt.getNumberOfSubstitutionTypes();
   vector<string> siteNames(sizeOfDataSet);
-  for(unsigned int i = 0; i < sizeOfDataSet; i++)
+  for (unsigned int i = 0; i < sizeOfDataSet; i++)
   {
     siteNames[i] = TextTools::toString(i);
   }
   
-  if(out != NULL) *out << "Rep\tGroup\tSize\tDmax\tStat\tNmin" << endl;
+  if (out)
+    *out << "Rep\tGroup\tSize\tDmax\tStat\tNmin" << endl;
 
-  for(unsigned int k = 0; k < nrep; k++)
+  for (unsigned int k = 0; k < nrep; k++)
   {
     ApplicationTools::displayGauge(k, nrep-1, '>');
-    SiteContainer * sites = simulator.simulate(sizeOfDataSet);
+    SiteContainer* sites = simulator.simulate(sizeOfDataSet);
     drtl.setData(*sites);
     drtl.initialize();
     ProbabilisticSubstitutionMapping * mapping = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
@@ -228,33 +230,31 @@ void ClusterTools::computeGlobalDistanceDistribution(
     
     //Mean vector:
     vector<double> meanVector(nbBranches);
-    for(unsigned int j = 0; j < nbBranches; j++)
+    for (unsigned int j = 0; j < nbBranches; j++)
     {
 		  double sum = 0;
-      for(unsigned int i = 0; i < sizeOfDataSet; i++)
-      {
-        sum += (*mapping)(j, i);
-      }
+      for (unsigned int i = 0; i < sizeOfDataSet; i++)
+        for (unsigned int t = 0; t < nbTypes; t++)
+          sum += (*mapping)(j, i, t);
       meanVector[j] = sum / sizeOfDataSet;
     }
 
     //Scale vectors:
-		for(unsigned int j = 0; j < nbBranches; j++)
+		for (unsigned int j = 0; j < nbBranches; ++j)
     {
       double scale = scales[j];
-		  for(unsigned int i = 0; i < sizeOfDataSet; i++)
-      {
-			  (*mapping)(j, i) *= scale;
-			}
+		  for (unsigned int i = 0; i < sizeOfDataSet; ++i)
+		    for (unsigned int t = 0; i < nbTypes; ++t)
+			  (*mapping)(j, i, t) *= scale;
 		}
     
     //Compute distance matrix:
-	  DistanceMatrix * mat = new DistanceMatrix(siteNames);
-	  for(unsigned int i = 0; i < sizeOfDataSet; i++)
+	  DistanceMatrix* mat = new DistanceMatrix(siteNames);
+	  for (unsigned int i = 0; i < sizeOfDataSet; ++i)
     {
-		  (*mat)(i,i) = 0.;
-      Vdouble * vec = &((*mapping)[i]);
-		  for(unsigned int j = 0; j < i; j++)
+		  (*mat)(i, i) = 0.;
+      VVdouble* vec = &((*mapping)[i]);
+		  for (unsigned int j = 0; j < i; ++j)
       {
 			  (*mat)(i,j) = (*mat)(j,i) = distance.getDistanceForPair(*vec, (*mapping)[j]);
 		  }
@@ -265,7 +265,7 @@ void ClusterTools::computeGlobalDistanceDistribution(
     {
       dynamic_cast<SumClustering&>(clustering).setMapping(*mapping);
     }
-    catch(exception & e) {}
+    catch(exception& e) {}
     
     clustering.setDistanceMatrix(*mat);
     clustering.computeTree(true);
@@ -317,17 +317,17 @@ void ClusterTools::computeNormProperties(TreeTemplate<Node> & tree, const Probab
 void ClusterTools::computeNormProperties_(Node* node, const ProbabilisticSubstitutionMapping & mapping, double & minNorm)
 {
   minNorm = -log(0.);
-  if(node->isLeaf())
+  if (node->isLeaf())
   {
-    minNorm = VectorTools::norm<double,double>(mapping[TextTools::to<unsigned int>(node->getName())]);
+    minNorm = SubstitutionMappingTools::computeNormForSite(mapping, TextTools::to<unsigned int>(node->getName()));
   }
   else
   {
-    for(unsigned int i = 0; i < node->getNumberOfSons(); i++)
+    for (unsigned int i = 0; i < node->getNumberOfSons(); ++i)
     {
       double minNormSon;
       computeNormProperties_(node->getSon(i), mapping, minNormSon);
-      if(minNormSon < minNorm) minNorm = minNormSon;
+      if (minNormSon < minNorm) minNorm = minNormSon;
     }
     node->setNodeProperty("Nmin", Number<double>(minNorm));
   }
