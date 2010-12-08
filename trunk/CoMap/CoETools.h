@@ -104,7 +104,7 @@ class CandidateGroup
     {
       if (!analysable_) throw Exception("CandidateGroup::computeStatisticValue. Group is not analysable.");
       if (sites_.size() == 0) throw Exception("CandidateGroup::computeStatisticValue. Group is empty!");
-      vector<const Vdouble*> group;
+      vector<const VVdouble*> group;
       for (unsigned int i = 0; i < sites_.size(); i++)
       {
         unsigned int index = sites_[i].getIndex();
@@ -112,13 +112,14 @@ class CandidateGroup
       }
       statistic_ = stat.getValueForGroup(group);
     }
-    void computeNormRanges(double omega, const ProbabilisticSubstitutionMapping & mapping) throw (Exception)
+    void computeNormRanges(double omega, const ProbabilisticSubstitutionMapping& mapping) throw (Exception)
     {
-      if (!analysable_) throw Exception("CandidateGroup::computeNormRanges. Group is not analysable.");
+      if (!analysable_) throw Exception("CandidateGroup::computeNormRanges. Group is not analyzable.");
       if (sites_.size() == 0) throw Exception("CandidateGroup::computeNormRanges. Group is empty!");
       for (unsigned int i = 0; i < sites_.size(); i++)
       {
-        double norm = VectorTools::norm<double, double>(mapping[sites_[i].getIndex()]);
+        //double norm = VectorTools::norm<double, double>(mapping[sites_[i].getIndex()]);
+        double norm = SubstitutionMappingTools::computeNormForSite(mapping, sites_[i].getIndex());
         sites_[i].setNormRange(norm - omega, norm + omega);
       }
     }
@@ -140,7 +141,7 @@ class CandidateGroupSet
 
     //Simulated site(s) for each group, each site...
     //_simulations[i][j][k] is the kth simulated site for site j in group i.
-    vector< vector< deque<const Vdouble *> > > simulations_;
+    vector< vector< deque<const VVdouble*> > > simulations_;
     //Contain the number of simulations for each group.
     vector<unsigned int> n1_, n2_;
     //The minimum number of simulation for each group:
@@ -216,7 +217,7 @@ class CandidateGroupSet
     void addCandidate(const CandidateGroup& group)
     {
       candidates_.push_back(group);
-      simulations_.push_back(vector< deque<const Vdouble*> >(group.size()));
+      simulations_.push_back(vector< deque<const VVdouble*> >(group.size()));
       n1_.push_back(0);
       n2_.push_back(0);
       if (group.isAnalysable()) nbAnalysable_++;
@@ -273,15 +274,15 @@ class CandidateGroupSet
      * @param v          A pointer toward the substitution vector to add.
      * @return 'true' if a group was completed.
      */
-    bool addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const Vdouble * v) throw (IndexOutOfBoundsException);
+    bool addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const VVdouble* v) throw (IndexOutOfBoundsException);
 
     /**
      * @brief Remove all pointers in simulations_, but do not modify n1_ and n2_.
      */
     void resetSimulations()
     {
-      for(unsigned int i = 0; i < simulations_.size(); i++)
-        for(unsigned int j = 0; j < simulations_[i].size(); j++)
+      for (size_t i = 0; i < simulations_.size(); ++i)
+        for (size_t j = 0; j < simulations_[i].size(); ++j)
           simulations_[i][j].clear();
     }
 

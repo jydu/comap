@@ -342,12 +342,12 @@ VVdouble AnalysisTools::computeCovarianceMatrix(
 
 /******************************************************************************/
 
-Vdouble AnalysisTools::computeNorms(const ProbabilisticSubstitutionMapping & mapping)
+Vdouble AnalysisTools::computeNorms(const ProbabilisticSubstitutionMapping& mapping)
 {
   unsigned int nbVectors = mapping.getNumberOfSites();
   Vdouble vect(nbVectors);
   for(unsigned int i = 0; i < nbVectors; i++)
-    vect[i] = VectorTools::norm<double, double>(mapping[i]);
+    vect[i] = SubstitutionMappingTools::computeNormForSite(mapping, i);
   return vect;
 }
 
@@ -756,26 +756,27 @@ void AnalysisTools::getNullDistributionInterDR(
 /******************************************************************************/
 
 void AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(
-  const DetailedSiteSimulator & seqSim,
-  const Statistic & statistic,
-  ostream & out,
+  const DetailedSiteSimulator& seqSim,
+  const Statistic& statistic,
+  ostream& out,
   unsigned int rep,
   bool verbose)
 {
   // Write header line:
   out << "Stat\tr1\tr2" << endl;
-  for(unsigned int i = 0; i < rep; i++)
+  TotalSubstitutionRegister reg(seqSim.getAlphabet());
+  for (unsigned int i = 0; i < rep; ++i)
   {
     ApplicationTools::displayGauge(i, rep - 1);
-    RASiteSimulationResult * hssr1 = 
-      dynamic_cast<RASiteSimulationResult *>(seqSim.dSimulate());
-    vector<double> vector1 = hssr1->getSubstitutionVector();
-    double         rate1   = hssr1->getRate();
+    RASiteSimulationResult* hssr1 = 
+      dynamic_cast<RASiteSimulationResult*>(seqSim.dSimulate());
+    VVdouble vector1 = hssr1->getSubstitutionVector(reg);
+    double     rate1 = hssr1->getRate();
     delete hssr1;
-    RASiteSimulationResult * hssr2 = 
-      dynamic_cast<RASiteSimulationResult *>(seqSim.dSimulate());
-    vector<double> vector2 = hssr2->getSubstitutionVector();
-    double         rate2   = hssr2->getRate(); 
+    RASiteSimulationResult* hssr2 = 
+      dynamic_cast<RASiteSimulationResult*>(seqSim.dSimulate());
+    VVdouble vector2 = hssr2->getSubstitutionVector(reg);
+    double     rate2 = hssr2->getRate(); 
     delete hssr2;
 
     double stat = statistic.getValueForPair(vector1, vector2);

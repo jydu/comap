@@ -49,6 +49,7 @@ knowledge of the CeCILL license and that you accept its terms.
 // From PhylLib:
 #include <Bpp/Phyl/Node.h>
 #include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
+#include <Bpp/Phyl/Mapping/SubstitutionMappingTools.h>
 
 using namespace bpp;
 
@@ -67,13 +68,13 @@ class Distance
 		virtual ~Distance() {}
 
 	public:
-		virtual double getDistanceForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException) = 0;
-		virtual double getDistanceForGroup(const vector<const Vdouble *> & v) const throw (DimensionException) = 0;
-    virtual void setWeights(const Vdouble & weights) = 0;
+		virtual double getDistanceForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException) = 0;
+		virtual double getDistanceForGroup(const vector<const VVdouble*>& v) const throw (DimensionException) = 0;
+    virtual void setWeights(const Vdouble& weights) = 0;
     virtual void deleteWeights() = 0;
-    virtual const Vdouble * getWeights() const = 0;
+    virtual const Vdouble* getWeights() const = 0;
     virtual bool hasWeights() const = 0;
-    virtual void setStatisticAsProperty(Node & node, const ProbabilisticSubstitutionMapping & mapping) const = 0;
+    virtual void setStatisticAsProperty(Node& node, const ProbabilisticSubstitutionMapping& mapping) const = 0;
 };
 
 class AbstractDistance : public Distance 
@@ -112,7 +113,7 @@ class AbstractDistance : public Distance
 
   protected:
     //Use statistic from the tree:
-    double setStatisticAsProperty_(Node & node, const ProbabilisticSubstitutionMapping & mapping) const
+    double setStatisticAsProperty_(Node& node, const ProbabilisticSubstitutionMapping& mapping) const
     {
       double height = 0;
       if(!node.isLeaf())
@@ -131,15 +132,15 @@ class AbstractDistance : public Distance
 class AbstractMaximumDistance: public AbstractDistance
 {
   public:
-		double getDistanceForGroup(const vector<const Vdouble *> & v) const throw (DimensionException)
+		double getDistanceForGroup(const vector<const VVdouble*>& v) const throw (DimensionException)
     {
       double maxi = log(0), val = 0;
-      for(unsigned int i = 1; i < v.size(); i++)
+      for (size_t i = 1; i < v.size(); i++)
       {
-        for(unsigned int j = 0; j < i; j++)
+        for (size_t j = 0; j < i; j++)
         {
           val = getDistanceForPair(*v[i], *v[j]);
-          if(val > maxi) maxi = val;
+          if (val > maxi) maxi = val;
         }
       }
       return maxi;
@@ -153,15 +154,19 @@ class EuclidianDistance: public AbstractMaximumDistance
 		virtual ~EuclidianDistance() {}
 
 	public:
-		double getDistanceForPair(const Vdouble & v1, const Vdouble & v2) const
+		double getDistanceForPair(const VVdouble& v1, const VVdouble& v2) const
 			throw (DimensionException)
 		{
-			if(v1.size() != v2.size()) throw DimensionException("EuclidianDistance::d(...).", v2.size(), v1.size());
-      if (weights_ && weights_->size() != v1.size()) throw DimensionException("EuclidianDistance::d(...).", v1.size(), weights_->size());
+			if (v1.size() != v2.size())
+        throw DimensionException("EuclidianDistance::d(...).", v2.size(), v1.size());
+      if (weights_ && weights_->size() != v1.size())
+        throw DimensionException("EuclidianDistance::d(...).", v1.size(), weights_->size());
 			double d = 0;
-			for(unsigned int i = 0; i < v1.size(); i++)
+			for (size_t i = 0; i < v1.size(); i++)
       {
-				d += (weights_ == 0) ? std::pow(v2[i] - v1[i], 2) : (*weights_)[i] * std::pow(v2[i] - v1[i], 2) ;
+        double sv1 = VectorTools::sum(v1[i]);
+        double sv2 = VectorTools::sum(v2[i]);
+				d += (weights_ == 0) ? std::pow(sv2 - sv1, 2) : (*weights_)[i] * std::pow(sv2 - sv1, 2) ;
 			}
 			return sqrt(d);
 		}
@@ -327,15 +332,15 @@ class StatisticBasedDistance: public Distance
     virtual ~StatisticBasedDistance() {}
 
   public:
-		double getDistanceForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException)
+		double getDistanceForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException)
     {
       return comp_ - stat_->getValueForPair(v1, v2);
     }
-		double getDistanceForGroup(const vector<const Vdouble *> & v) const throw (DimensionException)
+		double getDistanceForGroup(const vector<const VVdouble*> & v) const throw (DimensionException)
     {
       return comp_ - stat_->getValueForGroup(v);
     }
-    void setWeights(const vector<double> & weights) { stat_->setWeights(weights); }
+    void setWeights(const vector<double>& weights) { stat_->setWeights(weights); }
     void deleteWeights() { stat_->deleteWeights(); }
     const vector<double> * getWeights() const { return stat_->getWeights(); }
     bool hasWeights() const { return stat_->hasWeights(); }
@@ -375,11 +380,11 @@ class CompensationDistance: public Distance
     virtual ~CompensationDistance() {}
 
   public:
-		double getDistanceForPair(const Vdouble & v1, const Vdouble & v2) const throw (DimensionException)
+		double getDistanceForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException)
     {
       return 1. - stat_.getValueForPair(v1, v2);
     }
-		double getDistanceForGroup(const vector<const Vdouble *> & v) const throw (DimensionException)
+		double getDistanceForGroup(const vector<const VVdouble*>& v) const throw (DimensionException)
     {
       return 1. - stat_.getValueForGroup(v);
     }
@@ -390,22 +395,22 @@ class CompensationDistance: public Distance
       setStatisticAsProperty_(node, mapping, sigma, sumNorms);
     }
 
-    void setWeights(const vector<double> & weights) { stat_.setWeights(weights); }
+    void setWeights(const vector<double>& weights) { stat_.setWeights(weights); }
     void deleteWeights() { stat_.deleteWeights(); }
     const vector<double> * getWeights() const { return stat_.getWeights(); }
     virtual bool hasWeights() const { return stat_.hasWeights(); }
 
   protected:
-    void setStatisticAsProperty_(Node & node, const ProbabilisticSubstitutionMapping & mapping, Vdouble & sigma, double & sumNorms) const
+    void setStatisticAsProperty_(Node & node, const ProbabilisticSubstitutionMapping& mapping, Vdouble& sigma, double & sumNorms) const
     {
-      if(node.isLeaf())
+      if (node.isLeaf())
       {
-        sigma = mapping[TextTools::to<unsigned int>(node.getName())];
-        sumNorms = VectorTools::norm<double,double>(mapping[TextTools::to<unsigned int>(node.getName())]);
+        sigma = SubstitutionMappingTools::computeTotalSubstitutionVectorForSite(mapping, TextTools::to<unsigned int>(node.getName()));
+        sumNorms = SubstitutionMappingTools::computeNormForSite(mapping, TextTools::to<unsigned int>(node.getName()));
       }
       else
       {
-        for(unsigned int i = 0; i < node.getNumberOfSons(); i++)
+        for (unsigned int i = 0; i < node.getNumberOfSons(); i++)
         {
           Vdouble sigmaGroup(mapping.getNumberOfBranches(), 0.);
           double sumNormsGroup = 0;

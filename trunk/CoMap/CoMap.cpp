@@ -242,13 +242,13 @@ int main(int argc, char *argv[])
           Vdouble mv1(mapping1->getNumberOfBranches());
           //Compute mean vector:
           for (unsigned int i = 0; i < mapping1->getNumberOfSites(); ++i) {
-            mv1 += (*mapping1)[i];
+            mv1 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSite(*mapping1, i);
           }
           mv1 /= mapping1->getNumberOfSites();
           Vdouble mv2(mapping2->getNumberOfBranches());
           //Compute mean vector:
           for (unsigned int i = 0; i < mapping2->getNumberOfSites(); ++i) {
-            mv2 += (*mapping2)[i];
+            mv2 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSite(*mapping2, i);
           }
           mv2 /= mapping2->getNumberOfSites();
           cstat->setMeanVectors(mv1, mv2);
@@ -305,7 +305,7 @@ int main(int argc, char *argv[])
           Vdouble mv1(mapping1->getNumberOfBranches());
           //Compute mean vector:
           for (unsigned int i = 0; i < mapping1->getNumberOfSites(); ++i) {
-            mv1 += (*mapping1)[i];
+            mv1 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSite(*mapping1, i);
           }
           mv1 /= mapping1->getNumberOfSites();
           cstat->setMeanVector(mv1);
@@ -336,17 +336,18 @@ int main(int argc, char *argv[])
     // * Clustering analysis *
     // ***********************
   
-    else if(analysis == "clustering")
+    else if (analysis == "clustering")
     {
       CoETools::writeInfos(*sites1, *tl1, comap.getParams());
 
       ApplicationTools::displayMessage("\n\n-*- Perform clustering analysis -*-\n");
   
       string clusteringMethod = ApplicationTools::getStringParameter("clustering.method", comap.getParams(), "none", "", false, false);
-      if(clusteringMethod != "none")
+      if (clusteringMethod != "none")
       {
         unsigned int nbBranches = mapping1->getNumberOfBranches();
         unsigned int nbSites    = mapping1->getNumberOfSites();
+        unsigned int nbTypes    = mapping1->getNumberOfSubstitutionTypes();
         bool scale = ApplicationTools::getBooleanParameter("clustering.scale", comap.getParams(), false, "", true, true);
         vector<double> scales(nbBranches, 1.);
         vector<double> weights(nbBranches, 1.);
@@ -357,9 +358,8 @@ int main(int argc, char *argv[])
         {
           double sum = 0;
           for (unsigned int i = 0; i < nbSites; i++)
-          {
-            sum += (*mapping1)(j, i);
-          }
+            for (unsigned int t = 0; t < nbTypes; t++)
+              sum += (*mapping1)(j, i, t);
           meanVector[j] = sum / nbSites;
         }
   
@@ -378,9 +378,8 @@ int main(int argc, char *argv[])
               //else scaleVal = 0.;
             }// else: weight[j] == 0, so the position will not be used in distance calculation whatever...
             for (unsigned int i = 0; i < nbSites; i++)
-            {
-              (*mapping1)(j, i) *= scaleVal;
-            }
+              for (unsigned int t = 0; t < nbTypes; t++)
+                (*mapping1)(j, i, t) *= scaleVal;
             scales[j] = scaleVal;
           }
         }  
@@ -393,7 +392,7 @@ int main(int argc, char *argv[])
         {
           string siteName = TextTools::toString(sites1->getSite(i).getPosition());
           siteNames[i] = siteName; 
-          norms[i] = VectorTools::norm<double, double>((*mapping1)[i]);
+          norms[i] = SubstitutionMappingTools::computeNormForSite(*mapping1, i);
         }
   
         // Get the distance to use
