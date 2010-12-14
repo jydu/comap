@@ -460,15 +460,15 @@ int main(int argc, char *argv[])
         AgglomerativeDistanceMethod * clustering = 0;
         if (clusteringMethod == "complete")
         {
-          clustering = new SimpleClustering(SimpleClustering::COMPLETE, *mat, false);
+          clustering = new HierarchicalClustering(HierarchicalClustering::COMPLETE, *mat, false);
         }
         else if (clusteringMethod == "single")
         {
-          clustering = new SimpleClustering(SimpleClustering::SINGLE, *mat, false);
+          clustering = new HierarchicalClustering(HierarchicalClustering::SINGLE, *mat, false);
         }
         else if (clusteringMethod == "average")
         {
-          clustering = new SimpleClustering(SimpleClustering::AVERAGE, *mat, false);
+          clustering = new HierarchicalClustering(HierarchicalClustering::AVERAGE, *mat, false);
         }
         //else if(clusteringMethod == "sum")
         //{
