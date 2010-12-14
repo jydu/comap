@@ -44,47 +44,8 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From PhyLib:
 #include <Bpp/Phyl/Distance/AbstractAgglomerativeDistanceMethod.h>
+#include <Bpp/Phyl/Distance/HierarchicalClustering.h>
 #include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
-
-struct ClusterInfos
-{
-	unsigned int numberOfLeaves;
-	double length;
-};
-
-class SimpleClustering:
-  public AbstractAgglomerativeDistanceMethod
-{
-	public:
-		static const string COMPLETE; 
-		static const string SINGLE; 
-		static const string AVERAGE; 
-		static const string MEDIAN; 
-		static const string WARD; 
-		static const string CENTROID; 
-	
-	protected:
-		string method_;
-	
-	public:
-		SimpleClustering(const string & method, bool verbose = false): AbstractAgglomerativeDistanceMethod(verbose), method_(method) {}
-		SimpleClustering(const string & method, const DistanceMatrix & matrix, bool verbose = false) throw (Exception): AbstractAgglomerativeDistanceMethod(matrix, verbose), method_(method) 
-		{
-			computeTree(true);
-		}
-		~SimpleClustering() {}
-
-	public:
-		TreeTemplate<Node> * getTree() const;
-
-	protected:
-		vector<unsigned int> getBestPair() throw (Exception);
-		vector<double> computeBranchLengthsForPair(const vector<unsigned int> & pair);
-		double computeDistancesFromPair(const vector<unsigned int> & pair, const vector<double> & branchLengths, unsigned int pos);
-		void finalStep(int idRoot);	
-		virtual Node * getLeafNode(int id, const string & name);
-		virtual Node * getParentNode(int id, Node * son1, Node * son2);
-};
 
 /**
  * @brief Specific clustering.
