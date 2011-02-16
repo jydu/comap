@@ -64,7 +64,7 @@ vector<unsigned int> SumClustering::getBestPair() throw (Exception)
 	double distMin = -std::log(0.);
 	for(map<unsigned int, Node *>::iterator i = currentNodes_.begin(); i != currentNodes_.end(); i++)
   {
-		unsigned int id = i -> first;
+		unsigned int id = i->first;
 		map<unsigned int, Node *>::iterator j = i;
 		j++;
 		for(; j != currentNodes_.end(); j++)
@@ -118,7 +118,7 @@ void SumClustering::finalStep(int idRoot)
 	tree_ = new TreeTemplate< NodeTemplate<ClusterInfos> >(root);
 }
 
-Node * SumClustering::getLeafNode(int id, const string & name)
+Node* SumClustering::getLeafNode(int id, const string& name)
 {
 	ClusterInfos infos;
 	infos.numberOfLeaves = 1;
@@ -128,7 +128,7 @@ Node * SumClustering::getLeafNode(int id, const string & name)
 	return leaf;
 }
 
-Node * SumClustering::getParentNode(int id, Node * son1, Node * son2)
+Node* SumClustering::getParentNode(int id, Node* son1, Node* son2)
 {
 	ClusterInfos infos;
 	infos.numberOfLeaves = 
