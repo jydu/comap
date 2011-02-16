@@ -244,7 +244,7 @@ void ClusterTools::computeGlobalDistanceDistribution(
     {
       double scale = scales[j];
 		  for (unsigned int i = 0; i < sizeOfDataSet; ++i)
-		    for (unsigned int t = 0; i < nbTypes; ++t)
+		    for (unsigned int t = 0; t < nbTypes; ++t)
 			  (*mapping)(j, i, t) *= scale;
 		}
     
