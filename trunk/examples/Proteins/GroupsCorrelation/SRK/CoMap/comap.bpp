@@ -7,8 +7,8 @@
 alphabet = Protein
 
 # The sequence file to use (sequences must be aligned!)
-input.sequence.file   = ../Sequences/2MAT_BLAST100.mase
-input.sequence.format = Mase
+input.sequence.file   = ../Sequences/SRK.mase
+input.sequence.format = Mase(site_selection=SelectedSites)
 
 #Sites to use:
 # all => all sites, gaps will be considered as unknown chars.
@@ -16,16 +16,16 @@ input.sequence.format = Mase
 # complete => only fully resolved chars.
 input.sequence.sites_to_use = nogap
 
+# Ignore constant sites.
+input.remove_const = yes
+
 # Second file:
 input.sequence.file2 = none
 # All previous options can be set up for second file, just append '2' at option names.
 # The default is to use options of file1 for file2.
 
-# Ignore constant sites:
-input.remove_const = yes
-
 # The tree file to use. Branch lengths are optional.
-input.tree.file = ../Phylogeny/MAP.dnd
+input.tree.file = ../Phylogeny/SRK.dnd
 input.tree.format = Newick
 
 # ----------------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ model = JTT92
 
 # Rate Across Sites variation:
 # gamma or constant
-rate_distribution = Gamma(n=4, alpha=1.0200)
+rate_distribution = Gamma(n=4, alpha = 0.575996)
 
 simulations.continuous = no
 
@@ -50,15 +50,16 @@ simulations.continuous = no
 
 optimization = None
 
-output.tree.file =  none
+output.tree =  none
+
 # ----------------------------------------------------------------------------------------
 #                                     Additionnal stuff
 # ----------------------------------------------------------------------------------------
 
 # A file where site-specific information will be written (posterior rate, constant site, etc.):
-output.infos = MAP.infos
-output.tags.file = MAP.tags.dnd
-output.tags.translation = MAP.tags.tln
+output.infos = SRK.infos
+output.tags.file = SRK.tags.dnd
+output.tags.translation = SRK.tags.tln
 
 # ----------------------------------------------------------------------------------------
 #                                     Substitution vectors
@@ -84,7 +85,7 @@ nijt.joint = yes
 #                                     Clustering Analysis
 # ----------------------------------------------------------------------------------------
 
-analysis = clustering
+analysis=clustering
 
 clustering.distance=cor
 clustering.scale=no

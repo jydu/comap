@@ -7,7 +7,7 @@
 alphabet = Protein
 
 # The sequence file to use (sequences must be aligned!)
-input.sequence.file   = ../Sequences/2MAT_BLAST100.mase
+input.sequence.file   = ../Sequences/Myoglobin.aln.sel.mase
 input.sequence.format = Mase
 
 #Sites to use:
@@ -25,7 +25,8 @@ input.sequence.file2 = none
 input.remove_const = yes
 
 # The tree file to use. Branch lengths are optional.
-input.tree.file = ../Phylogeny/MAP.dnd
+# onyl newick format is supported.
+input.tree.file = ../Phylogeny/Myo.dnd
 input.tree.format = Newick
 
 # ----------------------------------------------------------------------------------------
@@ -40,7 +41,7 @@ model = JTT92
 
 # Rate Across Sites variation:
 # gamma or constant
-rate_distribution = Gamma(n=4, alpha=1.0200)
+rate_distribution = Gamma(n=4, alpha=0.985435)
 
 simulations.continuous = no
 
@@ -50,15 +51,16 @@ simulations.continuous = no
 
 optimization = None
 
-output.tree.file =  none
+output.tree =  none
+
 # ----------------------------------------------------------------------------------------
 #                                     Additionnal stuff
 # ----------------------------------------------------------------------------------------
 
 # A file where site-specific information will be written (posterior rate, constant site, etc.):
-output.infos = MAP.infos
-output.tags.file = MAP.tags.dnd
-output.tags.translation = MAP.tags.tln
+output.infos = Myo.infos
+output.tags.file = Myo.tags.dnd
+output.tags.translation = Myo.tags.tln
 
 # ----------------------------------------------------------------------------------------
 #                                     Substitution vectors
