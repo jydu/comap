@@ -2,6 +2,8 @@
 # 06/06/2006
 # 15/11/2007
 # 04/08/2007
+# 04/12/2009
+# 17/02/2011
 
 # ----------------------------------------------------------------------------------------------------------------
 # EDITABLE SECTION:
@@ -13,44 +15,51 @@
 # 1) Clustering output
 
 all.data.files<-list()
-all.data.files[["Simple"]]    <-"../Coe/Simple/SRK_groups.csv"
-all.data.files[["Grantham"]]  <-"../Coe/Grantham/SRK_groups.csv"
-all.data.files[["Volume"]]    <-"../Coe/Volume/SRK_groups.csv"
-all.data.files[["Polarity"]]  <-"../Coe/Polarity/SRK_groups.csv"
-all.data.files[["Charge"]]    <-"../Coe/Charge/SRK_groups.csv"
+all.data.files[["Simple"]]    <-"../CoMap/Simple/SRK_groups.csv"
+all.data.files[["Grantham"]]  <-"../CoMap/Grantham/SRK_groups.csv"
+all.data.files[["Volume"]]    <-"../CoMap/Volume/SRK_groups.csv"
+all.data.files[["Polarity"]]  <-"../CoMap/Polarity/SRK_groups.csv"
+all.data.files[["Charge"]]    <-"../CoMap/Charge/SRK_groups.csv"
 
 
 # 2) Simulations
 
 all.sim.files<-list()
-all.sim.files[["Simple"]]    <-"../Coe/Simple/SRK_simulations.csv"
-all.sim.files[["Grantham"]]  <-"../Coe/Grantham/SRK_simulations.csv"
-all.sim.files[["Volume"]]    <-"../Coe/Volume/SRK_simulations.csv"
-all.sim.files[["Polarity"]]  <-"../Coe/Polarity/SRK_simulations.csv"
-all.sim.files[["Charge"]]    <-"../Coe/Charge/SRK_simulations.csv"
+all.sim.files[["Simple"]]    <-"../CoMap/Simple/SRK_simulations.csv"
+all.sim.files[["Grantham"]]  <-"../CoMap/Grantham/SRK_simulations.csv"
+all.sim.files[["Volume"]]    <-"../CoMap/Volume/SRK_simulations.csv"
+all.sim.files[["Polarity"]]  <-"../CoMap/Polarity/SRK_simulations.csv"
+all.sim.files[["Charge"]]    <-"../CoMap/Charge/SRK_simulations.csv"
 
 # 3) Output files:
-output.file1<-"SRK_predictions_pvalues.csv"
+# Type I test:
+output.file<-"SRK_groups_predictions_pvalues.csv"
 
 #Sliding windows sizes:
 window.Nmin<-0.2
 
 # General options:
 
-#Maximum group size to test:
-maxgs<-10
-#Maximum p-value level or groups in the output files:
+#Maximum p-value level or groups in the output files.
+#Use NA if you don't want to filter the output.
 level<-0.05
 #Minimum number of simulated points required for computing p-value:
 min.nobs<-1000
-#Correction for nested groups:
-cng<-TRUE
 #Log file ("" = terminal)
 logFile<-"Cliques.txt"
-#FDR:
+#FDR (NA if you don't want to perform a FDR analysis):
 fdr<-0.05
 #Number of replicates to use for computing FDR:
-nfdr<-10
+nfdr<-100
+#Grid preprocessing (very recommended for pairwise analysis)
+gridpp<-TRUE
+
+# Clustering options (will have no effect for pairwise analyses):
+
+#Maximum group size to test:
+maxgs<-10
+#Correction for nested groups:
+cng<-TRUE
 
 # ----------------------------------------------------------------------------------------------------------------
 # END OF EDITABLE SECTION
@@ -81,7 +90,7 @@ all.pred<-list()
 for(m in methods)
 {
   cat("Testing method '", m, "'.\n", sep="")
-  all.pred[[m]]<-format.pred(all.data[[m]], all.sim[[m]], 2:maxgs, window.Nmin, min.nobs, m, level, cng, paste(m,logFile,sep="_"), fdr, nfdr)
+  all.pred[[m]]<-format.pred(all.data[[m]], all.sim[[m]], 2:maxgs, window.Nmin, min.nobs, gridpp, method=m, level=level, cng=cng, logFile=paste(m,logFile,sep="_"), fdr=fdr, nfdr=nfdr)
 }
 
 # Merging all results:

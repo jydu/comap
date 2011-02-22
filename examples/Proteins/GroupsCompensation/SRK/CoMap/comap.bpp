@@ -1,0 +1,100 @@
+# ----------------------------------------------------------------------------------------
+#                                     Data loading
+# ----------------------------------------------------------------------------------------
+
+# The laphabet to use:
+# DNA, RNA or Protein
+alphabet = Protein
+
+# The sequence file to use (sequences must be aligned!)
+input.sequence.file   = ../Sequences/SRK.mase
+input.sequence.format = Mase(site_selection=SelectedSites)
+
+#Sites to use:
+# all => all sites, gaps will be considered as unknown chars.
+# nogap => do not consider sites with gaps.
+# complete => only fully resolved chars.
+input.sequence.sites_to_use = nogap
+
+# Ignore constant sites
+input.remove_const = yes
+
+# Second file:
+input.sequence.file2 = none
+# All previous options can be set up for second file, just append '2' at option names.
+# The default is to use options of file1 for file2.
+
+# The tree file to use. Branch lengths are optional.
+# onyl newick format is supported.
+input.tree.file = ../Phylogeny/SRK.dnd
+input.tree.format = Newick
+
+# ----------------------------------------------------------------------------------------
+#                                     Model specification
+# ----------------------------------------------------------------------------------------
+
+# Available models.
+# For proteins, the DCmutt method is used for JTT92 and DSO78.
+# You can use the 'empirical' option to specify another model.
+# JCnuc, K80, T92, HKY85, TN93, JCprot, DSO78, JTT92 or empirical
+model = JTT92
+
+# Rate Across Sites variation:
+# gamma or constant
+rate_distribution = Gamma(n=4, alpha = 0.575996)
+
+simulations.continuous = no
+
+# ----------------------------------------------------------------------------------------
+#                                     Parameter estimation
+# ----------------------------------------------------------------------------------------
+
+optimization = None
+
+output.tree =  none
+# ----------------------------------------------------------------------------------------
+#                                     Additionnal stuff
+# ----------------------------------------------------------------------------------------
+
+# A file where site-specific information will be written (posterio rate, constant site, etc.):
+output.infos = SRK.infos
+output.tags.file = SRK.tags.dnd
+output.tags.translation = SRK.tags.tln
+
+# ----------------------------------------------------------------------------------------
+#                                     Substitution vectors
+# ----------------------------------------------------------------------------------------
+
+# We may restart an analysis by specifying the already computed vectors:
+input.vectors = none
+# Otherwise, tell where to write vectors:
+output.vectors.file = 
+
+# The method to use to compute vectors:
+# laplace, simple,...
+nijt= 
+# Where to trunc the series (see article):
+nijt.laplace.trunc = 10
+# Should we average over all ancestral state (yes) or use ancestral states reconstruction (no) ?
+nijt.average = yes
+# Should we use pair-joint calculation (yes) or marginal (no) one?
+nijt.joint = yes
+#!!! The 2 previous options are mainly for method comparisons, see article.
+
+# ----------------------------------------------------------------------------------------
+#                                     Clustering Analysis
+# ----------------------------------------------------------------------------------------
+
+analysis = clustering
+
+clustering.distance=comp
+clustering.scale=no
+clustering.method=complete
+
+clustering.output.groups.file=
+clustering.output.matrix.file=none
+clustering.output.tree.file=
+
+clustering.null=yes
+clustering.null.number=1000
+clustering.null.output.file=

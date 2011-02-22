@@ -2,7 +2,6 @@
 # 06/06/2006
 # 15/11/2007
 # 04/08/2007
-# 17/02/2011
 
 # ----------------------------------------------------------------------------------------------------------------
 # EDITABLE SECTION:
@@ -14,24 +13,25 @@
 # 1) Clustering output
 
 all.data.files<-list()
-all.data.files[["Simple"]]    <-"../CoMap/Simple/Myo_groups.csv"
-all.data.files[["Grantham"]]  <-"../CoMap/Grantham/Myo_groups.csv"
-all.data.files[["Volume"]]    <-"../CoMap/Volume/Myo_groups.csv"
-all.data.files[["Polarity"]]  <-"../CoMap/Polarity/Myo_groups.csv"
-all.data.files[["Charge"]]    <-"../CoMap/Charge/Myo_groups.csv"
+all.data.files[["Grantham"]]  <-"../Coe/Grantham/MAP_groups.csv"
+all.data.files[["Volume"]]    <-"../Coe/Volume/MAP_groups.csv"
+all.data.files[["Polarity"]]  <-"../Coe/Polarity/MAP_groups.csv"
+all.data.files[["Charge"]]    <-"../Coe/Charge/MAP_groups.csv"
 
 
 # 2) Simulations
 
 all.sim.files<-list()
-all.sim.files[["Simple"]]    <-"../CoMap/Simple/Myo_simulations.csv"
-all.sim.files[["Grantham"]]  <-"../CoMap/Grantham/Myo_simulations.csv"
-all.sim.files[["Volume"]]    <-"../CoMap/Volume/Myo_simulations.csv"
-all.sim.files[["Polarity"]]  <-"../CoMap/Polarity/Myo_simulations.csv"
-all.sim.files[["Charge"]]    <-"../CoMap/Charge/Myo_simulations.csv"
+all.sim.files[["Grantham"]]  <-"../Coe/Grantham/MAP_simulations.csv"
+all.sim.files[["Volume"]]    <-"../Coe/Volume/MAP_simulations.csv"
+all.sim.files[["Polarity"]]  <-"../Coe/Polarity/MAP_simulations.csv"
+all.sim.files[["Charge"]]    <-"../Coe/Charge/MAP_simulations.csv"
 
 # 3) Output files:
-output.file1<-"Myo_predictions_pvalues.csv"
+# Type I test:
+output.file1<-"MAP_predictions_pvalues.csv"
+# type II test:
+output.file2<-"MAP_predictions2_pvalues.csv"
 
 #Sliding windows sizes:
 window.Nmin<-0.2
@@ -51,9 +51,7 @@ logFile<-"Cliques.txt"
 #FDR:
 fdr<-0.05
 #Number of replicates to use for computing FDR:
-nfdr<-100
-#Grid preprocessing (very recommended for pairwise analysis)
-gridpp<-TRUE
+nfdr<-10
 
 # ----------------------------------------------------------------------------------------------------------------
 # END OF EDITABLE SECTION
@@ -84,7 +82,7 @@ all.pred<-list()
 for(m in methods)
 {
   cat("Testing method '", m, "'.\n", sep="")
-  all.pred[[m]]<-format.pred(all.data[[m]], all.sim[[m]], 2:maxgs, window.Nmin, min.nobs, gridpp, method=m, level=level, cng=cng, logFile=paste(m,logFile,sep="_"), fdr=fdr, nfdr=nfdr)
+  all.pred[[m]]<-format.pred(all.data[[m]], all.sim[[m]], 2:maxgs, window.Nmin, min.nobs, m, level, cng, paste(m,logFile,sep="_"), fdr, nfdr)
 }
 
 # Merging all results:
