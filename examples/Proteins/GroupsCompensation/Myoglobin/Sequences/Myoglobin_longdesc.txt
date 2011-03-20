@@ -1,0 +1,122 @@
+SWISS_PROT:GLB1_LIOJA	Q7M416	 	Globin 1 (Myoglobin I).	Liolophura japonica (Acanthopleura japonica).	145	
+SWISS_PROT:GLB2_ASCSU	P49672	 	Myoglobin (Globin, body wall isoform).	Ascaris suum (Pig roundworm) (Ascaris lumbricoides).	153	
+SWISS_PROT:GLB2_NIPBR	P51535	GLBB	Myoglobin (Globin, body wall isoform).	Nippostrongylus brasiliensis.	154	
+SWISS_PROT:GLB_APLJU	P14393	 	Globin (Myoglobin).	Aplysia juliana (Walking sea hare).	144	
+SWISS_PROT:GLB_APLKU	P02211|O01417	 	Globin (Myoglobin).	Aplysia kurodai (Kuroda's sea hare).	144	
+SWISS_PROT:GLB_APLLI	P02210|Q93114	 	Globin (Myoglobin).	Aplysia limacina (Slug sea hare).	146	
+SWISS_PROT:GLB_BIOGL	O77003	 	Globin (Myoglobin).	Biomphalaria glabrata (Bloodfluke planorb).	150	
+SWISS_PROT:GLB_BUCUU	Q7M424	 	Globin (Myoglobin).	Buccinum undatum (Common whelk).	146	
+SWISS_PROT:GLB_BURLE	P29287	 	Globin (Myoglobin).	Bursatella leachii (Ragged sea hare).	146	
+SWISS_PROT:GLB_BUSCA	P02214	 	Globin (Myoglobin).	Busycon canaliculatum (Channeled whelk).	147	
+SWISS_PROT:GLB_CERRH	P02215	 	Globin (Myoglobin).	Cerithidea rhizophorarum (Water snail) (Horn shell).	151	
+SWISS_PROT:GLB_DICDE	P56532	 	Globin (Myoglobin) (Fragments).	Dicrocoelium dendriticum (Small liver fluke).	108	
+SWISS_PROT:GLB_DOLAU	P09965	 	Globin (Myoglobin).	Dolabella auricularia (Sea hare).	146	
+SWISS_PROT:GLB_ISOHY	P80722	 	Globin (Myoglobin).	Isoparorchis hypselobagri.	148	
+SWISS_PROT:GLB_NASMU	P31331	 	Globin (Myoglobin).	Nassa mutabilis (Sea snail).	147	
+SWISS_PROT:GLB_PARCA	P15160	 	Myoglobin (Hemoglobin).	Paramecium caudatum.	116	
+SWISS_PROT:GLB_PAREP	P80721	 	Globin-3 (Myoglobin).	Paramphistomum epiclitum.	147	
+SWISS_PROT:GLB_TETPY	P17724	 	Myoglobin (Hemoglobin).	Tetrahymena pyriformis.	121	
+SWISS_PROT:GLB_TETTH	Q03459	 	Myoglobin (Hemoglobin).	Tetrahymena thermophila.	121	
+SWISS_PROT:MYG_AETPY	Q7LZM5	MB	Myoglobin.	Aethia pygmaea (Whiskered auklet).	153	
+SWISS_PROT:MYG_AILME	Q7M3C1	MB	Myoglobin (Fragment).	Ailuropoda melanoleuca (Giant panda).	96	
+SWISS_PROT:MYG_ALLMI	P02200	MB	Myoglobin.	Alligator mississippiensis (American alligator).	154	
+SWISS_PROT:MYG_ANAPO	Q7LZM2	MB	Myoglobin.	Anas poecilorhyncha (Spot-billed duck).	153	
+SWISS_PROT:MYG_AOTTR	P02151	MB	Myoglobin.	Aotus trivirgatus (Night monkey) (Douroucouli).	153	
+SWISS_PROT:MYG_APTFO	P02199	MB	Myoglobin.	Aptenodytes forsteri (Emperor penguin).	152	
+SWISS_PROT:MYG_AUXRO	Q6I7B0	MB	Myoglobin.	Auxis rochei (Bullet tuna).	146	
+SWISS_PROT:MYG_BALAC	P02179	MB	Myoglobin.	Balaenoptera acutorostrata (Minke whale) (Lesser rorqual).	153	
+SWISS_PROT:MYG_BALPH	P02180	MB	Myoglobin.	Balaenoptera physalus (Finback whale) (Common rorqual).	153	
+SWISS_PROT:MYG_BOVIN	P02192	MB	Myoglobin.	Bos taurus (Bovine).	153	
+SWISS_PROT:MYG_BRARE	Q6VN46|Q6P028	MB|ZGC:65819	Myoglobin.	Brachydanio rerio (Zebrafish) (Danio rerio).	146	
+SWISS_PROT:MYG_CALJA	P02152	MB	Myoglobin.	Callithrix jacchus (Common marmoset).	153	
+SWISS_PROT:MYG_CANFA	P63113|P02158	MB	Myoglobin.	Canis familiaris (Dog).	153	
+SWISS_PROT:MYG_CARCR	P56208	MB	Myoglobin.	Caretta caretta (Loggerhead).	153	
+SWISS_PROT:MYG_CASFI	P14396	MB	Myoglobin.	Castor fiber (Eurasian beaver).	153	
+SWISS_PROT:MYG_CEBAP	P02153	MB	Myoglobin.	Cebus apella (Brown-capped capuchin).	153	
+SWISS_PROT:MYG_CEREL	P02191	MB	Myoglobin.	Cervus elaphus (Red deer).	153	
+SWISS_PROT:MYG_CERMN	Q7LZM4	MB	Myoglobin.	Cerorhinca monocerata (Rhinoceros auklet).	153	
+SWISS_PROT:MYG_CHEMY	P02202	MB	Myoglobin.	Chelonia mydas (Green sea-turtle) (Chelonia agassizi).	153	
+SWISS_PROT:MYG_CHICK	P02197|P02198	MB	Myoglobin.	Gallus gallus (Chicken).	153	
+SWISS_PROT:MYG_CHIRA	P87497	MB	Myoglobin.	Chionodraco rastrospinosus (Ocellated icefish).	146	
+SWISS_PROT:MYG_CRYAN	Q9DEP0	MB	Myoglobin.	Cryodraco antarcticus (Crocodile icefish).	146	
+SWISS_PROT:MYG_CTEGU	P20856	MB	Myoglobin.	Ctenodactylus gundi (Northern gundi).	153	
+SWISS_PROT:MYG_CYPCA	P02204	MB	Myoglobin.	Cyprinus carpio (Common carp).	146	
+SWISS_PROT:MYG_DELDE	P68276|P02172|P02175	MB	Myoglobin.	Delphinus delphis (Saddleback dolphin) (Black sea dolphin).	153	
+SWISS_PROT:MYG_DELLE	P83682	MB	Myoglobin.	Delphinapterus leucas (Beluga whale).	153	
+SWISS_PROT:MYG_DIDMA	P02193	MB	Myoglobin.	Didelphis marsupialis virginiana (North American opossum).	153	
+SWISS_PROT:MYG_ELEMA	P02186	MB	Myoglobin.	Elephas maximus (Indian elephant).	153	
+SWISS_PROT:MYG_EQUBU	P68083|P02188	MB	Myoglobin.	Equus burchelli (Plains zebra) (Equus quagga).	153	
+SWISS_PROT:MYG_ERIEU	P02156	MB	Myoglobin.	Erinaceus europaeus (Western European hedgehog).	153	
+SWISS_PROT:MYG_ERYPA	P68086|P02149	MB	Myoglobin.	Erythrocebus patas (Red guenon) (Cercopithecus patas).	153	
+SWISS_PROT:MYG_ESCGI	P02177	MB	Myoglobin.	Eschrichtius gibbosus (California gray whale) (Eschrichtius robustus).	153	
+SWISS_PROT:MYG_GALCR	P02168	MB	Myoglobin.	Galago crassicaudatus (Thick-tailed galago) (Otolemur crassicaudatus).	153	
+SWISS_PROT:MYG_GALGA	P14397	MB	Myoglobin.	Galeorhinus galeus (Soupfin shark) (Galeorhinus australis).	148	
+SWISS_PROT:MYG_GALJA	P14398	MB	Myoglobin.	Galeorhinus japonicus (Shark) (Hemitriakis japonica).	148	
+SWISS_PROT:MYG_GLOME	P02174	MB	Myoglobin.	Globicephala melaena (Long-finned pilot whale) (Globicephala melas).	153	
+SWISS_PROT:MYG_GOBGI	Q9DEN9	MB	Myoglobin.	Gobionotothen gibberifrons (Humped rockcod).	146	
+SWISS_PROT:MYG_GORBE	P02147	MB	Myoglobin.	Gorilla gorilla beringei (Mountain gorilla) (Highland gorilla).	153	
+SWISS_PROT:MYG_GRAGE	P02201	MB	Myoglobin.	Graptemys geographica (Map turtle).	153	
+SWISS_PROT:MYG_HALGR	P68081|P02162	MB	Myoglobin.	Halichoerus grypus (Gray seal).	153	
+SWISS_PROT:MYG_HETPO	P02206	MB	Myoglobin.	Heterodontus portusjacksoni (Port Jackson shark).	148	
+SWISS_PROT:MYG_HORSE	P68082|P02188	MB	Myoglobin.	Equus caballus (Horse).	153	
+SWISS_PROT:MYG_HUMAN	P02144	MB	Myoglobin.	Homo sapiens (Human).	153	
+SWISS_PROT:MYG_HYLAG	P62734|P02146	MB	Myoglobin.	Hylobates agilis (Agile gibbon).	153	
+SWISS_PROT:MYG_HYLSY	P62735|P02146	MB	Myoglobin.	Hylobates syndactylus (Siamang) (Symphalangus syndactylus).	153	
+SWISS_PROT:MYG_INIGE	P02181	MB	Myoglobin.	Inia geoffrensis (Amazon dolphin).	153	
+SWISS_PROT:MYG_KOGSI	P02184	MB	Myoglobin.	Kogia simus (Dwarf sperm whale).	153	
+SWISS_PROT:MYG_LAGLA	P02154	MB	Myoglobin.	Lagothrix lagotricha (Common woolly monkey).	153	
+SWISS_PROT:MYG_LAGMA	P04250	MB	Myoglobin.	Lagostomus maximus (Plains viscacha).	153	
+SWISS_PROT:MYG_LEPMU	P02169	MB	Myoglobin.	Lepilemur mustelinus (Weasel lemur).	153	
+SWISS_PROT:MYG_LOXAF	P02187	MB	Myoglobin.	Loxodonta africana (African elephant).	153	
+SWISS_PROT:MYG_LUTLU	P11343	MB	Myoglobin.	Lutra lutra (European river otter).	153	
+SWISS_PROT:MYG_LYCPI	P02159	MB	Myoglobin.	Lycaon pictus (African wild dog) (Cape hunting dog).	153	
+SWISS_PROT:MYG_MACFA	P02150	MB	Myoglobin.	Macaca fascicularis (Crab eating macaque) (Cynomolgus monkey).	153	
+SWISS_PROT:MYG_MACRU	P02194	MB	Myoglobin.	Macropus rufus (Red kangaroo) (Megaleia rufa).	153	
+SWISS_PROT:MYG_MEGNO	P02178	MB	Myoglobin.	Megaptera novaeangliae (Humpback whale).	153	
+SWISS_PROT:MYG_MELME	P02157	MB	Myoglobin.	Meles meles (Eurasian badger).	153	
+SWISS_PROT:MYG_MESCA	P02183	MB	Myoglobin.	Mesoplodon carlhubbsi (Hubb's whale).	153	
+SWISS_PROT:MYG_MOUSE	P04247	MB	Myoglobin.	Mus musculus (Mouse).	153	
+SWISS_PROT:MYG_MUSAN	P14399	MB	Myoglobin.	Mustelus antarcticus (Gummy shark).	148	
+SWISS_PROT:MYG_NORMA	P51537	 	Myoglobin.	Nordotis madaka (Giant abalone).	377	
+SWISS_PROT:MYG_NOTCO	Q9DEN8	MB	Myoglobin.	Notothenia coriiceps neglecta (Black rockcod) (Yellowbelly rockcod).	146	
+SWISS_PROT:MYG_NYCCO	P02167	MB	Myoglobin.	Nycticebus coucang (Slow loris).	153	
+SWISS_PROT:MYG_OCHCU	Q6PL31	MB	Myoglobin.	Ochotona curzoniae (Black-lipped pika).	153	
+SWISS_PROT:MYG_OCHPR	P02171	MB	Myoglobin.	Ochotona princeps (Southern American pika).	153	
+SWISS_PROT:MYG_ONDZI	P32428	MB	Myoglobin.	Ondatra zibethicus (Muskrat).	153	
+SWISS_PROT:MYG_ORCOR	P02173	MB	Myoglobin.	Orcinus orca (Killer whale).	153	
+SWISS_PROT:MYG_ORNAN	P02196	MB	Myoglobin.	Ornithorhynchus anatinus (Duckbill platypus).	153	
+SWISS_PROT:MYG_ORYAF	P02164	MB	Myoglobin.	Orycteropus afer (Aardvark).	153	
+SWISS_PROT:MYG_OTOME	P63114|P02158	MB	Myoglobin.	Otocyon megalotis (Bat-eared fox).	153	
+SWISS_PROT:MYG_PANTR	P02145	MB	Myoglobin.	Pan troglodytes (Chimpanzee).	153	
+SWISS_PROT:MYG_PAPAN	P68084|P02149	MB	Myoglobin.	Papio anubis (Olive baboon).	153	
+SWISS_PROT:MYG_PERPO	P02166	MB	Myoglobin.	Perodicticus potto edwarsi (Potto).	153	
+SWISS_PROT:MYG_PHAFI	Q7LZM3	MB	Myoglobin.	Phalacrocorax filamentosus (Japanese cormorant).	153	
+SWISS_PROT:MYG_PHODA	P68277|P02176	MB	Myoglobin.	Phocoenoides dalli dalli (Dall's porpoise).	153	
+SWISS_PROT:MYG_PHOPH	P68278|P02176	MB	Myoglobin.	Phocoenoides phocoena (Harbor porpoise).	153	
+SWISS_PROT:MYG_PHOSI	P30562	MB	Myoglobin.	Phoca sibirica (Baikal seal).	153	
+SWISS_PROT:MYG_PHOVI	P68080|P02162	MB	Myoglobin.	Phoca vitulina (Harbor seal).	153	
+SWISS_PROT:MYG_PHYCA	P02185	MB	Myoglobin.	Physeter catodon (Sperm whale) (Physeter macrocephalus).	153	
+SWISS_PROT:MYG_PIG	P02189	MB	Myoglobin.	Sus scrofa (Pig).	153	
+SWISS_PROT:MYG_PONPY	P02148	MB	Myoglobin.	Pongo pygmaeus (Orangutan).	153	
+SWISS_PROT:MYG_PREEN	P68085|P02149	MB	Myoglobin.	Presbytis entellus (Hanuman langur).	153	
+SWISS_PROT:MYG_PROGU	P04249	MB	Myoglobin.	Proechimys guairae (Casiragua).	153	
+SWISS_PROT:MYG_PSEGE	Q9DEP1	MB	Myoglobin.	Pseudochaenichthys georgianus (South Georgia icefish).	146	
+SWISS_PROT:MYG_RABIT	P02170	MB	Myoglobin.	Oryctolagus cuniculus (Rabbit).	153	
+SWISS_PROT:MYG_ROUAE	P02163	MB	Myoglobin.	Rousettus aegyptiacus (Egyptian rousette) (Egyptian fruit bat).	153	
+SWISS_PROT:MYG_SAISC	P02155	MB	Myoglobin.	Saimiri sciureus (Common squirrel monkey).	153	
+SWISS_PROT:MYG_SHEEP	P02190	MB	Myoglobin.	Ovis aries (Sheep).	153	
+SWISS_PROT:MYG_SPAEH	P04248	MB	Myoglobin.	Spalax leucodon ehrenbergi (Ehrenberg's mole rat).	153	
+SWISS_PROT:MYG_SULDI	Q01966|Q26485	 	Myoglobin.	Sulculus diversicolor (Abalone).	377	
+SWISS_PROT:MYG_TACAC	P02195	MB	Myoglobin.	Tachyglossus aculeatus aculeatus (Australian echidna).	153	
+SWISS_PROT:MYG_TETNG	Q701N9	MB	Myoglobin.	Tetraodon nigroviridis (Green puffer).	145	
+SWISS_PROT:MYG_THUAL	P02205	MB	Myoglobin.	Thunnus albacares (Yellowfin tuna) (Neothunnus macropterus).	146	
+SWISS_PROT:MYG_THUOB	Q76G09	MB	Myoglobin.	Thunnus obesus (Bigeye tuna).	146	
+SWISS_PROT:MYG_THUTH	P68189|Q9DD47	MB	Myoglobin.	Thunnus thynnus (Bluefin tuna).	146	
+SWISS_PROT:MYG_THUTO	P68190|Q9DD47	MB	Myoglobin.	Thunnus thynnus orientalis (North Pacific bluefin tuna).	146	
+SWISS_PROT:MYG_TUPGL	P02165	MB	Myoglobin.	Tupaia glis (Tree shrew).	153	
+SWISS_PROT:MYG_TURTR	P68279|P02172|P02175	MB	Myoglobin.	Tursiops truncatus (Atlantic bottle-nosed dolphin).	153	
+SWISS_PROT:MYG_URILO	Q7LZM1	MB	Myoglobin.	Uria lomvia (Bruennich guillemot) (Thick-billed murre).	153	
+SWISS_PROT:MYG_VARVA	P02203	MB	Myoglobin.	Varanus varius (Lace monitor).	153	
+SWISS_PROT:MYG_VULCH	P02160	MB	Myoglobin.	Vulpes chama (Cape fox).	153	
+SWISS_PROT:MYG_ZALCA	P02161	MB	Myoglobin.	Zalophus californianus (California sealion).	153	
+SWISS_PROT:MYG_ZIPCA	P02182	MB	Myoglobin.	Ziphius cavirostris (Goose-beaked whale).	153	
