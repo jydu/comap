@@ -1,4 +1,4 @@
-input texinfo   @c -*-texinfo-*-
+\input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename comap.info
 @settitle CoMap Manual 1.4.0
@@ -137,12 +137,10 @@ Otherwise, compute vectors using the following options.
 
 @item nijt = @{laplace|simple|aadist@}
 The kind of mapping to perform.
-@option{laplace} option perform exact mapping, as in Dutheil et
-al. (2005).
-@option{simple} performs a naive mapping, as in Tufféry and Darlu
-(2000).
-@option{aadist} performs a weighted mapping, as in Dutheil and Galtier
-(2007). Currently available only for proteins.
+@option{laplace} option perform exact mapping, as in Dutheil et al. (2005).
+@option{simple} performs a naive mapping, as in Tufféry and Darlu (2000).
+@option{aadist} performs a weighted mapping, as in Dutheil and Galtier (2007).
+Currently available only for proteins.
 
 @item nijt_aadist.type = @{grantham|miyata|grantham.volume|grantham.polarity|charge|klein.charge|user1|user2@}
 Specify the type of weight to use.
