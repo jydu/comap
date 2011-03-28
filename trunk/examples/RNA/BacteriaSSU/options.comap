@@ -1,0 +1,115 @@
+
+# ----------------------------------------------------------------------------------------
+#                                     Data loading
+# ----------------------------------------------------------------------------------------
+
+# The alphabet to use:
+# DNA, RNA or Protein
+alphabet = RNA
+
+# The sequence file to use (sequences must be aligned!)
+input.sequence.file = Bacteria_SSU.40.phy
+# The alignment format:
+# Must be one of Mase, Fasta, Phylip, Clustal 
+input.sequence.format = Phylip(order=sequential, type=extended)
+
+#Sites to use:
+# all, nogap or complete (=only resolved chars)
+input.sequence.sites_to_use = complete
+# Specify a maximum amount of gaps: may be an absolute number or a percentage.
+input.sequence.max_gap_allowed = 100%
+
+input.remove_const=yes
+
+# Second file:
+input.sequence.file2 = none
+# All previous options can be set up for second file, just append '2' at option names.
+# The default is to use options of file1 for file2.
+
+# The tree file to use. Branch lengths are optional.
+# Only newick format is supported.
+input.tree.file = Bacteria_SSU.ML.dnd
+input.tree.format = Newick
+
+# ----------------------------------------------------------------------------------------
+#                                     Model specification
+# ----------------------------------------------------------------------------------------
+# Read the Bio++ Program Suite manual for a detail description of all available models.
+# Non-homogeneous models can be used here, and also covarions. The latter however will probably
+# do not do what you want, as it will map both states and rates... use with care then.
+
+# Substitution model parameters:
+model = GTR(a=1.595119085705, b=0.551507085060, c=0.350972557796, d=0.304670173544, e=0.282819006597, theta=0.523619444641, theta1=0.512962941602, theta2=0.585047306118)
+
+# Rate distribution parameters:
+rate_distribution = Invariant(dist=Gamma(n=4, alpha=0.737023854405), p=0.366611781033)
+
+# ----------------------------------------------------------------------------------------
+#                                     Parameter estimation
+# ----------------------------------------------------------------------------------------
+
+# Should we reestimate likelihood parameters? Tree topology will not be optimized.
+# (recommanded)
+optimization = None
+
+# ----------------------------------------------------------------------------------------
+#                                     Substitution vectors
+# ----------------------------------------------------------------------------------------
+
+# We may restart an analysis by specifying the already computed vectors:
+input.vectors.file = none
+# Otherwise, tell where to write vectors:
+output.vectors.file = none
+
+# The method to use to compute vectors:
+# One of
+# - laplace: real mapping
+# - simple: naive mapping (1 substitution if x<>y, 0 if x==y)
+# - aadist: weighted mapping (proteins)
+# - prob_one_jump: compute the probability of observing at least one jump.
+nijt = simple
+
+# ----------------------------------------------------------------------------------------
+#                                     Coevolution analysis
+# ----------------------------------------------------------------------------------------
+
+# 'pairwise', 'clustering' or 'candidates'
+# The pairwise method corresponds to the 2005 paper
+# The clustering method to the 2007 paper
+# The candidates method is not published yet and is still under development, use with care!
+analysis = pairwise
+
+# Coevolution statistic to use, for the pairwise and candidates methods:
+# - Correlation: Dutheil et al 2005/2007's method.
+# - Cosubstitution: Tuffery and Darlu 2000's method
+# - Compensation: Dutheil & Galtier 2007's method.
+# - MI(threshold=0.99) Mutual Information after discretization given a certain threshold (only with simple, laplace and prob_one_jump).
+statistic = Correlation
+
+# ----------------------------------------------------------------------------------------
+#                                     Pairwise analysis
+# ----------------------------------------------------------------------------------------
+
+# where to write the results:
+statistic.output.file = Bacteria_SSU.sta
+
+# Compute null distribution of statistics
+statistic.null = true
+
+# CPU*RAM pair of sites will be simulated.
+# increasing the RAM parameter speeds the program but need more memory
+# increasing the CPU parameter slower the program but need less memory
+statistic.null.nb_rep_CPU = 100
+statistic.null.nb_rep_RAM = 1000
+
+# Where to write the null distribution
+statistic.null.output.file = none
+
+# Shall we use the null distribution to compute p-values?
+statistic.null.compute_pvalue = yes
+
+# How many classes should be used when conditionning of pairs rate? 0 or 1 means no conditionning.
+statistic.null.nb_rate_classes = 10
+
+
+

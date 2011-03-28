@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 	cout << endl;
 	cout << endl;
 	cout << "***********************************************************" << endl;
-	cout << "* This is Mica         version 0.2.0       date: 28/02/09 *" << endl;
+	cout << "* This is Mica         version 1.0.0       date: 28/03/11 *" << endl;
 	cout << "*         Mutual Information Coevolution Analysis         *" << endl;
 	cout << "***********************************************************" << endl;
 	cout << endl;
@@ -307,17 +307,7 @@ int main(int argc, char *argv[])
   
   string path = ApplicationTools::getAFilePath("output.file", mica.getParams(), true, false);
   ApplicationTools::displayResult("Output file", path);
-  unsigned int maxNbPermutations = ApplicationTools::getParameter<unsigned int>("max_number_of_permutations", mica.getParams(), 1000);
-  if (maxNbPermutations == 0)
-  {
-    ApplicationTools::displayResult("Permutation test", string("no"));
-  }
-  else
-  {
-    ApplicationTools::displayResult("Permutation test", string("yes"));
-    ApplicationTools::displayResult("Maximum number of permutations", maxNbPermutations);
-  }
- 
+
   vector<double> averageMI;
   vector<double> entropy;
   ApplicationTools::displayTask("Computing average MIs", true);
@@ -335,11 +325,12 @@ int main(int argc, char *argv[])
     averageMI.push_back(sum / static_cast<double>(nbSites - 1));
   }
   ApplicationTools::displayTaskDone();
-  double fullAverageMI = VectorTools::mean<double,double>(averageMI);
+  double fullAverageMI = VectorTools::mean<double, double>(averageMI);
 
   //Some variables we'll need:
   const Site *site1, *site2;
   double stat, apc, rcw, nmin = 0, hj, hm, perm;
+  unsigned int maxNbPermutations = 0;
 
   //Get the null distribution of MI values:
   string nullMethod = ApplicationTools::getStringParameter("null.method", mica.getParams(), "none", "", true, false);
@@ -356,6 +347,8 @@ int main(int argc, char *argv[])
     //Shall we compute built-in p-values?
     if (nullMethod == "z-score")
       computePValues = true;
+    else if (nullMethod == "permutations")
+      computePValues = false;
     else
       computePValues = ApplicationTools::getBooleanParameter("null.compute_pvalues", mica.getParams(), true);
     if (computePValues)
@@ -547,7 +540,7 @@ int main(int argc, char *argv[])
       for (unsigned int i = 0; i < nbSites - 1; i++)
       {
         site1 = &sites->getSite(i);
-        for (unsigned int j = i + 1; j < nbSites - 1; j++)
+        for (unsigned int j = i + 1; j < nbSites; j++)
         {
           site2 = &sites->getSite(j);
           ApplicationTools::displayGauge(c++, nbSites * (nbSites - 1) / 2 - 1, '>');
@@ -588,7 +581,18 @@ int main(int argc, char *argv[])
       ApplicationTools::warning = os;
       ApplicationTools::displayTaskDone();  
     }
-
+    else if (nullMethod == "permutations")
+    {
+      maxNbPermutations = ApplicationTools::getParameter<unsigned int>("null.max_number_of_permutations", mica.getParams(), 1000);
+      if (maxNbPermutations == 0)
+      {
+        throw Exception("Permutation number should be greater than 0!");
+      }
+      else
+      {
+        ApplicationTools::displayResult("Maximum number of permutations", maxNbPermutations);
+      }
+    } 
     else
       throw Exception("Unvalid null distribution method specified: " + nullMethod);
   }
@@ -599,7 +603,6 @@ int main(int argc, char *argv[])
       sort((*simValues)[i].begin(), (*simValues)[i].end());
     }
   }
-
 
   //here comes the real stuff:
   ApplicationTools::displayTask("Computing all MI scores", true);

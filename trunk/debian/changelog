@@ -1,0 +1,7 @@
+bppsuite (1.4.0) unstable; urgency=low
+
+  * New MICA program.
+  * New built-in pvalue computation for pairwise analyses.
+
+ -- Julien Dutheil <julien.dutheil@univ-montp2.fr>  The, 24 Mar 2011 09:37:00 +0100
+
