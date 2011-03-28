@@ -184,6 +184,12 @@ statistic.null.upper =
 # Number of intervals
 statistic.null.nb_int =
 
+# Shall we use the null distribution to compute p-values?
+statistic.null.compute_pvalue = yes
+
+# How many classes should be used when conditionning of pairs rate? 0 or 1 means no conditionning.
+statistic.null.nb_rate_classes = 10
+
 # ----------------------------------------------------------------------------------------
 #                                     Clustering Analysis
 # ----------------------------------------------------------------------------------------

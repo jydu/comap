@@ -39,35 +39,48 @@ IF(NOT DEFINED INFO)
   SET(INFO UNIX)
 ENDIF(NOT DEFINED INFO)
 
+#build man pages?
+IF(NOT DEFINED MAN)
+  SET(MAN UNIX)
+ENDIF(NOT DEFINED MAN)
+
 #find executables for documentation
 FIND_PROGRAM(MAKEINFO_EXE NAMES makeinfo)
 FIND_PROGRAM(PDFTEX_EXE NAMES pdftex)
+FIND_PROGRAM(NROFF_EXE NAMES nroff)
 
 #here is a useful function:
 MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
   #start:
   FIND_PATH(${lib_name}_INCLUDE_DIR ${include_to_find})
-  UNSET(${lib_name}_LIBRARY CACHE) #Reset the cache.
+  INCLUDE_DIRECTORIES(${${lib_name}_INCLUDE_DIR})
 
   IF(BUILD_STATIC)
-    SET(${lib_name}_NAMES lib${lib_name}.a)
-    FIND_LIBRARY(${lib_name}_LIBRARY NAMES ${${lib_name}_NAMES})
-  ELSE(BUILD_STATIC)
-    SET(${lib_name}_NAMES ${lib_name} ${lib_name}lib ${lib_name}dll)
-    FIND_LIBRARY(${lib_name}_LIBRARY NAMES ${${lib_name}_NAMES})
-  ENDIF(BUILD_STATIC)
-
-  IF(${lib_name}_LIBRARY)
-    MESSAGE("-- Library ${lib_name} found here:")
-    MESSAGE("   includes : ${${lib_name}_INCLUDE_DIR}")
-    MESSAGE("   libraries: ${${lib_name}_LIBRARY}")
-  ELSE(${lib_name}_LIBRARY)
-    MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
-  ENDIF(${lib_name}_LIBRARY)
+    SET(${lib_name}_STATIC_NAMES lib${lib_name}.a)
+    FIND_LIBRARY(${lib_name}_STATIC_LIBRARY NAMES ${${lib_name}_STATIC_NAMES} PATH_SUFFIXES lib${LIB_SUFFIX})
+    IF(${lib_name}_STATIC_LIBRARY)
+      MESSAGE("-- Library ${lib_name} found here:")
+      MESSAGE("   includes: ${${lib_name}_INCLUDE_DIR}")
+      MESSAGE("   static libraries: ${${lib_name}_STATIC_LIBRARY}")
+    ELSE()
+      MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
+    ENDIF()
+    #add the dependency:
+    SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_STATIC_LIBRARY})
+  ELSE()
+    SET(${lib_name}_NAMES ${lib_name} ${lib_name}.lib ${lib_name}.dll)
+    FIND_LIBRARY(${lib_name}_LIBRARY NAMES ${${lib_name}_NAMES} PATH_SUFFIXES lib${LIB_SUFFIX})
+    IF(${lib_name}_LIBRARY)
+      MESSAGE("-- Library ${lib_name} found here:")
+      MESSAGE("   includes: ${${lib_name}_INCLUDE_DIR}")
+      MESSAGE("   dynamic libraries: ${${lib_name}_LIBRARY}")
+    ELSE()
+      MESSAGE(FATAL_ERROR "${lib_name} required but not found.")
+    ENDIF()
+    #add the dependency:
+    SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_LIBRARY})
+  ENDIF()
   
-  #add the dependency:
-  INCLUDE_DIRECTORIES(${${lib_name}_INCLUDE_DIR})
-  SET(${OUTPUT_LIBS} ${${OUTPUT_LIBS}} ${${lib_name}_LIBRARY})
 ENDMACRO(IMPROVED_FIND_LIBRARY)
 
 # Set the CMAKE_PREFIX_PATH for the find_library fonction when using non
@@ -113,9 +126,26 @@ IF(PDFTEX_EXE)
     )
 ENDIF(PDFTEX_EXE)
 
+IF(NROFF_EXE)
+  MESSAGE("-- Found nroff here: ${NROFF_EXE}")
+  MESSAGE("   Adding targets: man")
+
+  ADD_CUSTOM_TARGET(man
+    ALL
+    COMMAND cp comap.1.txt comap.1
+    COMMAND gzip -f comap.1
+    COMMAND cp mica.1.txt mica.1
+    COMMAND gzip -f mica.1
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/man
+    )
+
+ENDIF(NROFF_EXE)
+
+
 # Subdirectories
 ADD_SUBDIRECTORY(CoMap)
 ADD_SUBDIRECTORY(doc)
+ADD_SUBDIRECTORY(man)
 
 # Packager
 SET(CPACK_PACKAGE_NAME "CoMap")
@@ -125,8 +155,9 @@ SET(CPACK_PACKAGE_VERSION_MAJOR "1")
 SET(CPACK_PACKAGE_VERSION_MINOR "4")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CoMap: a program for mapping substitutions and detecting molecular co-evolution.")
-SET(CPACK_RESOURCE_FILE_LICENSE "COPYING")
-SET(CPACK_RESOURCE_FILE_AUTHORS "AUTHORS")
+SET(CPACK_RESOURCE_FILE_LICENSE "COPYING.txt")
+SET(CPACK_RESOURCE_FILE_AUTHORS "AUTHORS.txt")
+SET(CPACK_RESOURCE_FILE_INSTALL "INSTALL.txt")
 SET(CPACK_SOURCE_GENERATOR "TGZ")
 SET(CPACK_SOURCE_IGNORE_FILES
  "CMakeFiles"
@@ -138,15 +169,29 @@ SET(CPACK_SOURCE_IGNORE_FILES
  ".*\\\\.gz"
  ".*\\\\.deb"
  ".*\\\\.rpm"
- "\\\\..*\\\\.swp"
+ ".*\\\\.dmg"
+ ".*\\\\.sh"
+ ".*\\\\..*\\\\.swp"
+ ".*stamp"
+ "\\\\.sh"
  "CoMap/\\\\..*"
  "CoMap/comap"
+ "CoMap/mica"
  "doc/comap/"
  "doc/comap.info"
  "debian/tmp"
  "debian/comap"
+ "debian/comap\\\\.substvars"
+ "debian/comap\\\\.debhelper"
+ "debian/debhelper\\\\.log"
+ "install_manifest.txt"
+ "DartConfiguration.tcl"
  ${CPACK_SOURCE_IGNORE_FILES}
 )
+IF (MACOS)
+  SET(CPACK_GENERATOR "Bundle")
+ENDIF()
+
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 INCLUDE(CPack)
 
@@ -154,12 +199,13 @@ INCLUDE(CPack)
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 IF (UNIX)
 #This creates deb packages:
-ADD_CUSTOM_TARGET(deb fakeroot debian/rules binary)
-ADD_DEPENDENCIES(deb dist info)
+ADD_CUSTOM_TARGET(deb dpkg-buildpackages)
+ADD_DEPENDENCIES(deb info man)
 
 #This creates rpm packages:
 ADD_CUSTOM_TARGET(rpm rpmbuild -ta ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz)
-ADD_DEPENDENCIES(rpm dist info)
+ADD_DEPENDENCIES(rpm dist info man)
 
 #ADD_DEPENDENCIES(info install)
+
 ENDIF(UNIX)

@@ -1,4 +1,4 @@
-\input texinfo   @c -*-texinfo-*-
+input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename comap.info
 @settitle CoMap Manual 1.4.0
@@ -6,7 +6,7 @@
 @c %**end of header
 
 @copying
-This is the manual of CoMap, version 1.4.0-1.
+This is the manual of CoMap, version 1.4.0.
 
 Copyright @copyright{} 2006-2011 Julien Dutheil
 @end copying
@@ -131,11 +131,11 @@ Options in this chapter are for the computation of substitution vectors.
 
 @table @command
 
-@item input.vectors.file = [[path]|none]
+@item input.vectors.file = @{@{path@}|none@}
 Restart an analysis by specifying the already computed vectors.
 Otherwise, compute vectors using the following options.
 
-@item nijt = [laplace|simple|aadist]
+@item nijt = @{laplace|simple|aadist@}
 The kind of mapping to perform.
 @option{laplace} option perform exact mapping, as in Dutheil et
 al. (2005).
@@ -144,23 +144,23 @@ al. (2005).
 @option{aadist} performs a weighted mapping, as in Dutheil and Galtier
 (2007). Currently available only for proteins.
 
-@item nijt_aadist.type = [grantham|miyata|grantham.volume|grantham.polarity|charge|klein.charge|user1|user2]
+@item nijt_aadist.type = @{grantham|miyata|grantham.volume|grantham.polarity|charge|klein.charge|user1|user2@}
 Specify the type of weight to use.
 The @option{user1} option is for computing a simple distance from a AAIndex1 file, @option{user2} uses a AAIndex2 distance file.
 
-@item nijt_aadist.type_user1.file = [path]
+@item nijt_aadist.type_user1.file = @{path@}
 File path toward a AAIndex1 file.
 Used only if @option{nijt_aadist.type=user1}.
 
-@item nijt_aadist.type_user2.file = [path]
+@item nijt_aadist.type_user2.file = @{path@}
 File path toward a AAIndex2 file.
 Used only if @option{nijt_aadist.type=user2}.
 
-@item nijt_aadist.sym = [boolean]
+@item nijt_aadist.sym = @{boolean@}
 Tell if symmetric matrices must be used.
 This option should be set to "no" for testing compensation.
 
-@item output.vectors.file = [[path]|none]
+@item output.vectors.file = @{@{path@}|none@}
 Where to write the substitution mapping.
 
 @end table
@@ -168,18 +168,18 @@ Where to write the substitution mapping.
 @section Optional commands
 
 @table @command
-@item nijt_laplace.trunc = [int>0]
+@item nijt_laplace.trunc = @{int>0@}
 Where to trunk the series when estimating exact number of
 substitutions. A value of 10 should be fine.
 
-@item nijt.average = [boolean]
+@item nijt.average = @{boolean@}
 Tell if mapping should be averaged over all ancestral states
 (probabilistic mapping).
 Otherwise use ancestral states reconstruction (naive mapping).
 In most case, you should leave the default value (yes).
 NB: only marginal ancestral state reconstruction is implemented. 
 
-@item nijt.joint = [boolean]
+@item nijt.joint = @{bool@}
 Tell if joint probabilities are to be use, otherwise use marginal
 probabilities.
 This option is for method comparisons, a 'yes' value is suitable in
@@ -198,29 +198,37 @@ most cases.
 Use this option for performing a pairwise analysis.
 If another option or @option{none} is selected, no pairwise analysis is performed.
 
-@item statistic = [correlation|compensation|cosubstitutions]
+@item statistic = @{correlation|compensation|cosubstitutions@}
 The coevolution statistic to use.
 The @option{correlation} option is to be used in order to perform the MBE 2005 analysis.
 Uses option @option{compensation} to perform a pairwise analysis with the compensation statistics introduced in the BMC Evol Biol 2007 paper.
 You can also use the @option{cosubstitution} option to perform Tufféry & Darlu's MBE 2000 analysis.
 
-@item statistic.output.file = [path]
+@item statistic.output.file = @{path@}
 Where to write the statistic value for each pair of sites.
 
-@item statistic.null = [boolean]
+@item statistic.null = @{boolean@}
 Tell is the null distribution of the statistic must be computed, using
 parametric bootstrap.
 The number of simulations performed is the product of two numbers,
 adjusting the amount of CPU and RAM to use.
 
-@item statistic.null.nb_rep_CPU = [int>0]
+@item statistic.null.nb_rep_CPU = @{int>0@}
 Increase this parameter to take less memory (slow the program)
 
-@item statistic.null.nb_rep_RAM = [int>0]
+@item statistic.null.nb_rep_RAM = @{int>0@}
 Increase this parameter to speed the program (need more memory)
 
-@item statistic.null.output_file = [path]
+@item statistic.null.output_file = @{path@}
 Where to write the null distribution
+
+@item statistic.null.compute_pvalue = @{bool@} (statistic.null=yes)
+Shall we use the null distribution to compute p-values?
+From version 1.4.0, CoMap can now compute built-in p-values, without relying on an external R-script.
+
+@item statistic.null.nb_rate_classes = @{int@} (statistic.null.compute_pvalue = yes)
+Specifies how many classes should be used when conditioning of pairs rate.
+A value of 0 or 1 implies no conditionning.
 
 @end table
 
@@ -231,7 +239,7 @@ from a second data set (inter-gene analysis).
 
 @table @command
 
-@item sequence.file2 = [[path]|none]
+@item sequence.file2 = @{@{path@}|none@}
 The path toward the second file. 
 All previous options can be set up for second file, just append '2' at option names.
 The default is to use options of file1 for file2.
@@ -241,35 +249,35 @@ The default is to use options of file1 for file2.
 @section Optional commands
 
 @table @command
-@item statistic.min = [float]
+@item statistic.min = @{float@}
 Write only pairs with a statistic greater or equal to this value.
 
-@item statistic.min_rate = [float>0]
+@item statistic.min_rate = @{float>0@}
 Write only pairs with a posterior rate greater or equal to this value.
 
-@item statistic.min_rate_class = [int>0]
+@item statistic.min_rate_class = @{int>0@}
 Write only pairs with a minimum rate class greater or equal to this
 value (first class is 0).
 
-@item statistic.max_rate_diff = [float]
+@item statistic.max_rate_diff = @{float@}
 Write only pairs with rates that do not differ more than this value  (-1 ->
 write all pairs).
 
-@item statistic.max_rate_class_diff = [int]
+@item statistic.max_rate_class_diff = @{int@}
 Write only pairs with rate classes that do not differ more than this
 value (-1 -> write all pairs).
 
-@item statistic.null.cumul = [bool]
+@item statistic.null.cumul = @{boolean@}
 [deprecated] Tell if an histogram of the distribution should be returned instead of
 printing all simulated pairs.
 
-@item statistic.null.lower = [float]
+@item statistic.null.lower = @{float@}
 [deprecated] Lower bound of histogram.
 
-@item statistic.null.upper = [float]
+@item statistic.null.upper = @{float@}
 [deprecated] Upper bound of histogram.
 
-@item statistic.null.nb_int = [int<0]
+@item statistic.null.nb_int = @{int<0@}
 [deprecated] Number of intervals in histogram.
 
 @end table
@@ -285,32 +293,32 @@ printing all simulated pairs.
 Use this option for performing a clustering.
 If another option or @option{none} is selected, no pairwise analysis is performed.
 
-@item clustering.distance = [cor|euclidian|comp|none]
+@item clustering.distance = @{cor|euclidian|comp|none@}
 Distance to use: cor (correlation), euclidean, comp (compensation) or none (no clustering).
 
-@item clustering.scale = [boolean]
+@item clustering.scale = @{boolean@}
 Tell is mapping should be normalized (each row (=branch) will be
 divided by its sum.
 
-@item clustering.method = [complete]
+@item clustering.method = @{complete@}
 Clustering algorithm: complete linkage. Other linkage types are available, but the complete one gives the better results.
 
-@item clustering.output.matrix.file = [[path]|none]
+@item clustering.output.matrix.file = @{@{path@}|none@}
 Where to write the distance matrix (in phylip format).
 
-@item clustering.output.tree.file = [[path]|none]
+@item clustering.output.tree.file = @{@{path@}|none@}
 Where to write the clustering tree (newick format).
 
-@item clustering.output.groups.file = [[path]|none]
+@item clustering.output.groups.file = @{@{path@}|none@}
 Where to write the clusters (CSV format).
 
-@item clustering.null = [boolean]
+@item clustering.null = @{boolean@}
 Tell if the null distribution of clusters must be computed.
 
-@item clustering.null.number = [int>0]
+@item clustering.null.number = @{int>0@}
 Number of data sets to simulate.
 
-@item clustering.null.output.file = [path]
+@item clustering.null.output.file = @{path@}
 Where to write the simulated clusters (CSV format).
 
 @end table
@@ -355,8 +363,8 @@ The column separator for output file.
 @node Pvalue, Mica, Candidates, Top
 @chapter Output format and P-value computation
 
-Apart from the candidate analysis, CoMap do not compute p-values from the simulation.
-This goal is achieved by two R scripts, distributed along with the
+CoMap computes built-in p-values for the pairwise and candidate group analyses.
+For group detections, p-value computation is performed by two R scripts, distributed along with the
 program.
 The reason for this is that there are different ways to compute p-values, depending on the null-hypothesis to test.
 Getting the simulation result being the most expensive in terms of computer resources, I preferred to store them in files, and then play with R to get the p-values. It also allows to visualize the null-distribution and get more ``feeling'' about the data.
@@ -466,13 +474,17 @@ The minimum norm of substitution vector for the pair.
 
 @section Assessing significance of the coevolution statistics.
 
-Mica implements three possible ways to compute a significance value (p-value), which is specified by the command @command{null.method}.
-This command accepts 4 options:
+Mica implements four possible ways to compute a significance value (p-value), which is specified by the command @command{null.method}.
+This command accepts 5 options:
 
 @table @command
 
 @item none
 Will disable the computation of the null distribution.
+
+@item permutations
+Use simple permutations to compute p-values. This method does not account for shared ancestry and should only be used for didactic reasons.
+This option will add two colums, namely @command{Perm.p.value} and @command{Perm.nb}, with similar meaning as the bootstrap columns. 
 
 @item nonparametric-bootstrap
 Will sample sites from the original data set.
@@ -496,7 +508,7 @@ will perform CPU * RAM replicates in total. Increasing the RAM components will b
 The file where all samples from the null distribution should be written. Setting @command{none} will disable output.
 The output file can be used for making the p-value computation by hand, using the R software for instance. 
 
-@item null.compute_pvalues = @{boolean@}
+@item null.compute_pvalues = @{bool@}
 Tells if p-values should be computed from the null distribution.
 If set to yes, then two columns will be added to the output file: @command{Bs.p.value}, which stores the actual computed p-value, and @command{Bs.nb}, storing the number of replicates on which the computation is based.
 This number of replicates is the specified one when no rate comditioning is performed (see below). Otherwise it depends on the number of classes used.
@@ -513,7 +525,7 @@ The statistic for which p-values should be computed.
 
 @subsection Rate conditioning
 
-For all approaches, more specific null distributions can be obtained by conditioning over the evolutionary rate: 
+For all approaches but permutations, more specific null distributions can be obtained by conditioning over the evolutionary rate: 
 
 @table @command
 
@@ -524,17 +536,12 @@ By default, the minimum entropy is used as a rate measure. If a model is specifi
 
 @end table
 
-@subsection Permutation analysis.
-
-In addition to the bootsrap and Z-score analyses, a permutation test can be performed. The resulting p-value however does not account for the underlying shared ancestry and will be unreliable in most cases.
-Moreover, performing permutation is particularly slow. Use with extra care!
-
+Additional option for the permutation analysis:
 @table @command
 
 @item max_number_of_permutations = @{int >= 0 @} 
-If set to 0, disables permutations. Otherwise set the number of permutations that can be performed. The minimal p-value that will be obtained is obtained by @math{1/(n+1)}.
+Set the number of permutations that can be performed. The minimal p-value that will be obtained is obtained by @math{1/(n+1)}.
 For speeding up computations, the p-value of the pairs that are far from the tail of the distribution (and therefore most-likely non-significant) will be computed from less observations (the computation will stop when at least 5 points from the null distribution with a higher statistic than the observed one are found).
-This option will add two colums, namely @command{Perm.p.value} and @command{Perm.nb}, with similar meaning as the bootstrap columns. 
 @end table
 
 @c ------------------------------------------------------------------------------------------------------------------

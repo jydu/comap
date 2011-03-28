@@ -1,0 +1,53 @@
+# ----------------------------------------------------------------------------------------
+#                                     Data loading
+# ----------------------------------------------------------------------------------------
+
+# The laphabet to use:
+# DNA, RNA or Protein
+alphabet = RNA
+
+# The sequence file to use (sequences must be aligned!)
+input.sequence.file = Bacteria_SSU.40.phy 
+# The alignment format:
+# Must be one of Mase, Fasta, Phylip, Clustal 
+input.sequence.format = Phylip(type=extended, order=sequential)
+
+#Sites to use:
+# all => all sites, gaps will be considered as unknown chars.
+# nogap => do not consider sites with gaps.
+# complete => only fully resolved chars.
+input.sequence.sites_to_use = complete
+# Specify a maximum amount of gaps: may be an absolute number or a percentage.
+input.sequence.max_gap_allowed = 50%
+
+input.remove_const = yes
+
+# The tree file to use. Branch lengths are optional.
+# only newick format is supported.
+input.tree.file = Bacteria_SSU.ML.dnd
+input.tree.format = Newick
+
+# ----------------------------------------------------------------------------------------
+#                                     Model specification
+# ----------------------------------------------------------------------------------------
+
+use_model = yes
+
+# Substitution model parameters:
+model = GTR(a=1.595119085705, b=0.551507085060, c=0.350972557796, d=0.304670173544, e=0.282819006597, theta=0.523619444641, theta1=0.512962941602, theta2=0.585047306118)
+
+# Rate distribution parameters:
+rate_distribution = Invariant(dist=Gamma(n=4, alpha=0.737023854405), p=0.366611781033)
+
+# ----------------------------------------------------------------------------------------
+#                                     Mutual Information Analysis
+# ----------------------------------------------------------------------------------------
+
+output.file                = Bacteria_SSU.MI_PBS.csv
+null.method                = parametric-bootstrap
+null.compute_pvalues       = yes
+null.nb_rate_classes       = 10
+null.output.file           = none
+null.nb_rep_CPU            = 100   #Controles the number of simulations, here 100 simulations of 1000 pairs at a time.
+null.nb_rep_RAM            = 1000
+
