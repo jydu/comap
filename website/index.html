@@ -40,9 +40,15 @@ Menu:
 
 <div class="back">
 <div class="section">
-<h1>CoMap<br/>A C++ shell program to detect co-evolving groups of sites</h1>
+<h1>CoMap<br/>A package for the evolution-based detection of co-evolving positions in a molecule</h1>
 
 <h2 id="news">News</h2>
+
+<p class="news">29/03/11<br />
+New 1.4.0 version, using Bio++ 2.0.1.
+This version includes a brand new program (MICA - Mutual Information Coevolution Analysis), reimplementing several published MI-based methods.
+The CoMap software now offers a fast built-in p-value computation for pairwise and candidate groups analyses.
+</p>
 
 <p class="news">21/01/08<br />
 New 1.3.0 version, using Bio++ 1.5.
@@ -85,27 +91,16 @@ New CoMap website.
 <h2 id="download">Download</h2>
 
 <p>CoMap may be downloaded from <a href="http://download.gna.org/comap">http://download.gna.org/comap</a>.
-The source code is available as a <code>.tar.gz</code> archive, and requires the Bio++ libraries Utils, NumCalc, SeqLib and PhylLib to be installed (see <a href="http://kimura.univ-montp2.fr/BioPP">http://kimura.univ-montp2.fr/BioPP</a>).
-A static executable is also available for the Linux and Win32 platforms.</p>
+The source code is available as a <code>.tar.gz</code> archive, and requires the Bio++ libraries (bpp-core, bpp-seq and bpp-phyl) to be installed (see <a href="http://biopp.univ-montp2.fr">http://biopp.univ-montp2.fr</a>).
+Static executables are also available for the Linux and Win32 platforms.</p>
 
 <p class="news">
 Supplementary material:
 </p>
 <p>
-Example data sets (supplementary material of the 2007 paper) have been updated according to new options.
-Due to format changes, the original simulations have been removed from the archives.
+Example data sets (supplementary material of the 2007 paper) are frequently updated as the program options change.
+These files are distributed along with the source code, in the "example" subdirectory.
 </p>
-<ul>
-  <li>Correlation analysis:</li>
-  <ul>
-    <li><a href="http://download.gna.org/comap/SupplementaryMaterial/Correlation/">here</a></li>
-  </ul>
-  <li>Compensation analysis:</li>
-  <ul>
-    <li><a href="http://download.gna.org/comap/SupplementaryMaterial/Compensation/">here</a></li>
-  </ul>
-</ul>
-
 
 <h2 id="doc">Documentation</h2>
 
@@ -114,18 +109,25 @@ It is distributed along with the program source code.</p>
 
 <h2 id="cite">Citation</h2>
 
-<p>Cite the following article to cite the pairwise method:</p>
+<p>Cite the following article if you use the pairwise method:</p>
 <pre>
 Dutheil J, Pupko T, Jean-Marie A, Galtier N.
 A model-based approach for detecting coevolving positions in a molecule.
 Mol Biol Evol. 2005 Sep;22(9):1919-28.
 </pre>
 
-<p>Cite the following article to cite the clustering method:</p>
+<p>Cite the following article if you use the clustering method:</p>
 <pre>
 Dutheil J, Galtier N.
 Detecting groups of co-evolving positions in a molecule: a clustering approach.
 BMC Evol Biol. 2007 Nov 30;7(1):242
+</pre>
+
+<p>Cite the following article if you use the candidate approach method:</p>
+<pre>
+Dutheil JY, Jossinet F, Westhof E.
+Base pairing constraints drive structural epistasis in ribosomal RNA sequences.
+Mol Biol Evol. 2010 Aug;27(8):1868-76
 </pre>
 
 </div>

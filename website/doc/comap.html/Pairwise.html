@@ -1,17 +1,17 @@
 <html lang="en">
 <head>
-<title>Pairwise - CoMap Manual 1.3.0</title>
+<title>Pairwise - CoMap Manual 1.4.0</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="CoMap Manual 1.3.0">
-<meta name="generator" content="makeinfo 4.8">
+<meta name="description" content="CoMap Manual 1.4.0">
+<meta name="generator" content="makeinfo 4.13">
 <link title="Top" rel="start" href="index.html#Top">
 <link rel="prev" href="Mapping.html#Mapping" title="Mapping">
 <link rel="next" href="Clustering.html#Clustering" title="Clustering">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <!--
-This is the manual of CoMap, version 1.3.0, 23 January 2008.
+This is the manual of CoMap, version 1.4.0.
 
-Copyright (C) 2006, 2007, 2008 Julien Dutheil-->
+Copyright (C) 2006-2011 Julien Dutheil-->
 <meta http-equiv="Content-Style-Type" content="text/css">
 <style type="text/css"><!--
   pre.display { font-family:inherit }
@@ -24,11 +24,12 @@ Copyright (C) 2006, 2007, 2008 Julien Dutheil-->
   span.roman { font-family:serif; font-weight:normal; } 
   span.sansserif { font-family:sans-serif; font-weight:normal; } 
 --></style>
+<link rel="stylesheet" type="text/css" href="http://www.w3.org/StyleSheets/Core/Steely">
 </head>
 <body>
 <div class="node">
-<p>
 <a name="Pairwise"></a>
+<p>
 Next:&nbsp;<a rel="next" accesskey="n" href="Clustering.html#Clustering">Clustering</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="Mapping.html#Mapping">Mapping</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
@@ -41,23 +42,29 @@ Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
 <dt><samp><span class="command">analysis = pairwise</span></samp><dd>Use this option for performing a pairwise analysis. 
 If another option or <samp><span class="option">none</span></samp> is selected, no pairwise analysis is performed.
 
-     <br><dt><samp><span class="command">statistic = [correlation|compensation|cosubstitutions]</span></samp><dd>The coevolution statistic to use. 
+     <br><dt><samp><span class="command">statistic = {correlation|compensation|cosubstitutions}</span></samp><dd>The coevolution statistic to use. 
 The <samp><span class="option">correlation</span></samp> option is to be used in order to perform the MBE 2005 analysis. 
 Uses option <samp><span class="option">compensation</span></samp> to perform a pairwise analysis with the compensation statistics introduced in the BMC Evol Biol 2007 paper. 
-You can also use the <samp><span class="option">cosubstitution</span></samp> option to perform Tuffery &amp; Darlu's MBE 2000 analysis.
+You can also use the <samp><span class="option">cosubstitution</span></samp> option to perform Tufféry &amp; Darlu's MBE 2000 analysis.
 
-     <br><dt><samp><span class="command">statistic.output.file = [path]</span></samp><dd>Where to write the statistic value for each pair of sites.
+     <br><dt><samp><span class="command">statistic.output.file = {path}</span></samp><dd>Where to write the statistic value for each pair of sites.
 
-     <br><dt><samp><span class="command">statistic.null = [boolean]</span></samp><dd>Tell is the null distribution of the statistic must be computed, using
+     <br><dt><samp><span class="command">statistic.null = {boolean}</span></samp><dd>Tell is the null distribution of the statistic must be computed, using
 parametric bootstrap. 
 The number of simulations performed is the product of two numbers,
 adjusting the amount of CPU and RAM to use.
 
-     <br><dt><samp><span class="command">statistic.null.nb_rep_CPU = [int&gt;0]</span></samp><dd>Increase this parameter to take less memory (slow the program)
+     <br><dt><samp><span class="command">statistic.null.nb_rep_CPU = {int&gt;0}</span></samp><dd>Increase this parameter to take less memory (slow the program)
 
-     <br><dt><samp><span class="command">statistic.null.nb_rep_RAM = [int&gt;0]</span></samp><dd>Increase this parameter to speed the program (need more memory)
+     <br><dt><samp><span class="command">statistic.null.nb_rep_RAM = {int&gt;0}</span></samp><dd>Increase this parameter to speed the program (need more memory)
 
-     <br><dt><samp><span class="command">statistic.null.output_file = [path]</span></samp><dd>Where to write the null distribution
+     <br><dt><samp><span class="command">statistic.null.output_file = {path}</span></samp><dd>Where to write the null distribution
+
+     <br><dt><samp><span class="command">statistic.null.compute_pvalue = {bool} (statistic.null=yes)</span></samp><dd>Shall we use the null distribution to compute p-values? 
+From version 1.4.0, CoMap can now compute built-in p-values, without relying on an external R-script.
+
+     <br><dt><samp><span class="command">statistic.null.nb_rate_classes = {int} (statistic.null.compute_pvalue = yes)</span></samp><dd>Specifies how many classes should be used when conditioning of pairs rate. 
+A value of 0 or 1 implies no conditionning.
 
 </dl>
 
@@ -67,7 +74,7 @@ adjusting the amount of CPU and RAM to use.
 from a second data set (inter-gene analysis).
 
      <dl>
-<dt><samp><span class="command">sequence.file2 = [[path]|none]</span></samp><dd>The path toward the second file. 
+<dt><samp><span class="command">sequence.file2 = {{path}|none}</span></samp><dd>The path toward the second file. 
 All previous options can be set up for second file, just append '2' at option names. 
 The default is to use options of file1 for file2.
 
@@ -76,30 +83,30 @@ The default is to use options of file1 for file2.
 <h3 class="section">6.2 Optional commands</h3>
 
      <dl>
-<dt><samp><span class="command">statistic.min = [float]</span></samp><dd>Write only pairs with a statistic greater or equal to this value.
+<dt><samp><span class="command">statistic.min = {float}</span></samp><dd>Write only pairs with a statistic greater or equal to this value.
 
-     <br><dt><samp><span class="command">statistic.min_rate = [float&gt;0]</span></samp><dd>Write only pairs with a posterior rate greater or equal to this value.
+     <br><dt><samp><span class="command">statistic.min_rate = {float&gt;0}</span></samp><dd>Write only pairs with a posterior rate greater or equal to this value.
 
-     <br><dt><samp><span class="command">statistic.min_rate_class = [int&gt;0]</span></samp><dd>Write only pairs with a minimum rate class greater or equal to this
+     <br><dt><samp><span class="command">statistic.min_rate_class = {int&gt;0}</span></samp><dd>Write only pairs with a minimum rate class greater or equal to this
 value (first class is 0).
 
-     <br><dt><samp><span class="command">statistic.max_rate_diff = [float]</span></samp><dd>Write only pairs with rates that do not differ more than this value  (-1 -&gt;
+     <br><dt><samp><span class="command">statistic.max_rate_diff = {float}</span></samp><dd>Write only pairs with rates that do not differ more than this value  (-1 -&gt;
 write all pairs).
 
-     <br><dt><samp><span class="command">statistic.max_rate_class_diff = [int]</span></samp><dd>Write only pairs with rate classes that do not differ more than this
+     <br><dt><samp><span class="command">statistic.max_rate_class_diff = {int}</span></samp><dd>Write only pairs with rate classes that do not differ more than this
 value (-1 -&gt; write all pairs).
 
-     <br><dt><samp><span class="command">statistic.null.cumul = [bool]</span></samp><dd>[deprecated] Tell if an histogram of the distribution should be returned instead of
+     <br><dt><samp><span class="command">statistic.null.cumul = {boolean}</span></samp><dd>[deprecated] Tell if an histogram of the distribution should be returned instead of
 printing all simulated pairs.
 
-     <br><dt><samp><span class="command">statistic.null.lower = [float]</span></samp><dd>[deprecated] Lower bound of histogram.
+     <br><dt><samp><span class="command">statistic.null.lower = {float}</span></samp><dd>[deprecated] Lower bound of histogram.
 
-     <br><dt><samp><span class="command">statistic.null.upper = [float]</span></samp><dd>[deprecated] Upper bound of histogram.
+     <br><dt><samp><span class="command">statistic.null.upper = {float}</span></samp><dd>[deprecated] Upper bound of histogram.
 
-     <br><dt><samp><span class="command">statistic.null.nb_int = [int&lt;0]</span></samp><dd>[deprecated] Number of intervals in histogram.
+     <br><dt><samp><span class="command">statistic.null.nb_int = {int&lt;0}</span></samp><dd>[deprecated] Number of intervals in histogram.
 
 </dl>
 
 <!--  -->
-</body></html>
+   </body></html>
 

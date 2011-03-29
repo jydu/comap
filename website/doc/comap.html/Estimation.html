@@ -1,17 +1,17 @@
 <html lang="en">
 <head>
-<title>Estimation - CoMap Manual 1.3.0</title>
+<title>Estimation - CoMap Manual 1.4.0</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="CoMap Manual 1.3.0">
-<meta name="generator" content="makeinfo 4.8">
+<meta name="description" content="CoMap Manual 1.4.0">
+<meta name="generator" content="makeinfo 4.13">
 <link title="Top" rel="start" href="index.html#Top">
 <link rel="prev" href="Model.html#Model" title="Model">
 <link rel="next" href="Mapping.html#Mapping" title="Mapping">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <!--
-This is the manual of CoMap, version 1.3.0, 23 January 2008.
+This is the manual of CoMap, version 1.4.0.
 
-Copyright (C) 2006, 2007, 2008 Julien Dutheil-->
+Copyright (C) 2006-2011 Julien Dutheil-->
 <meta http-equiv="Content-Style-Type" content="text/css">
 <style type="text/css"><!--
   pre.display { font-family:inherit }
@@ -24,11 +24,12 @@ Copyright (C) 2006, 2007, 2008 Julien Dutheil-->
   span.roman { font-family:serif; font-weight:normal; } 
   span.sansserif { font-family:sans-serif; font-weight:normal; } 
 --></style>
+<link rel="stylesheet" type="text/css" href="http://www.w3.org/StyleSheets/Core/Steely">
 </head>
 <body>
 <div class="node">
-<p>
 <a name="Estimation"></a>
+<p>
 Next:&nbsp;<a rel="next" accesskey="n" href="Mapping.html#Mapping">Mapping</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="Model.html#Model">Model</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
@@ -49,48 +50,11 @@ values)
      <li>Parameters of the rate distribution (shape parameter of the gamma law, proportion of invariant sites).
 
    </ul>
-
-     <dl>
-<dt><samp><span class="command">optimization = [boolean]</span></samp><dd>Tells if numerical  parameters should be estimated. 
-Topology estimation is not supported.
-
-     <br><dt><samp><span class="command">optimization.method=[DB|fullD]</span></samp><dd>The optimization method to use. 
-DB (default) uses derivatives-based optimization for branch lengths + Brent for
-other parameters, and the fullD options uses derivatives for all parameters, with numerical derivatives for non-branch lengths parameters.
-
-     <br><dt><samp><span class="command">optimization_DB.nstep=[int&gt;=1]</span></samp><dd>Number of progressive steps to perform during optimization. 
-If nstep=3 and precision=E-6, a first optimization with precision =
-E-2, will be performed, then a round with precision set to E-4 and
-finally precision will be set to E-6. This approcah generally saves
-significant computation time.
-
-     <br><dt><samp><span class="command">optimization.method.derivatives = [newton|gradient]</span></samp><dd>Derivatives-based algorithm to use. 
-The Newton algorithm uses derivatives up to the second order, and is the recommanded choice. 
-The gradient algortihm uses only first order derivatives and can also be used.
-
-     <br><dt><samp><span class="command">optimization.final = [powell|simplex]</span></samp><dd>Optinal final optimization step, useful if numerical derivatives are to be used. 
-Leave the field empty in order to skip this step.
-
-     <br><dt><samp><span class="command">optimization.profiler = [[path]|std]|none</span></samp><dd>A file where to dump optimization steps (a file path or std for
-standard output or none for no output).
-
-     <br><dt><samp><span class="command">optimization.message_handler = [[path]|std|none]</span></samp><dd>A file where to dump warning messages.
-
-     <br><dt><samp><span class="command">optimization.max_number_f_eval = [int&lt;0]</span></samp><dd>The maximum number of likelihood evaluation to perform.
-
-     <br><dt><samp><span class="command">optimization.ignore_parameter = list[float[0,1]</span></samp><dd>A list of parameters to ignore during the estimation process.
-
-     <br><dt><samp><span class="command">optimization.tolerance = [float&gt;0]</span></samp><dd>The precision on the log-likelihood to reach.
-
-     <br><dt><samp><span class="command">output.tree.file = [[path]|none]</span></samp><dd>File path where to write the optimized tree.
-
-     <br><dt><samp><span class="command">output.infos = [[path]|none]</span></samp><dd>A text file containing several statistics for each site in the
-alignment. 
-These statistics include posterior rate, rate class with maximum
-posterior probability and whether the site is conserved or not.
-
-   </dl>
+   The corresponding options are described in the Bio++ Program Suite manual. 
+Note however that CoMap do not perform topology estimation. 
+The tree topology will is considered to be know prior to the analysis. 
+The tree can however contain multifurcations (WARNING: not fully tested, please report any bug you may found!).
 
 <!--  -->
-</body></html>
+   </body></html>
 

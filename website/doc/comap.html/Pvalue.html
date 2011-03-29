@@ -1,16 +1,17 @@
 <html lang="en">
 <head>
-<title>Pvalue - CoMap Manual 1.3.0</title>
+<title>Pvalue - CoMap Manual 1.4.0</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="CoMap Manual 1.3.0">
-<meta name="generator" content="makeinfo 4.8">
+<meta name="description" content="CoMap Manual 1.4.0">
+<meta name="generator" content="makeinfo 4.13">
 <link title="Top" rel="start" href="index.html#Top">
 <link rel="prev" href="Candidates.html#Candidates" title="Candidates">
+<link rel="next" href="Mica.html#Mica" title="Mica">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <!--
-This is the manual of CoMap, version 1.3.0, 23 January 2008.
+This is the manual of CoMap, version 1.4.0.
 
-Copyright (C) 2006, 2007, 2008 Julien Dutheil-->
+Copyright (C) 2006-2011 Julien Dutheil-->
 <meta http-equiv="Content-Style-Type" content="text/css">
 <style type="text/css"><!--
   pre.display { font-family:inherit }
@@ -23,22 +24,59 @@ Copyright (C) 2006, 2007, 2008 Julien Dutheil-->
   span.roman { font-family:serif; font-weight:normal; } 
   span.sansserif { font-family:sans-serif; font-weight:normal; } 
 --></style>
+<link rel="stylesheet" type="text/css" href="http://www.w3.org/StyleSheets/Core/Steely">
 </head>
 <body>
 <div class="node">
-<p>
 <a name="Pvalue"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Mica.html#Mica">Mica</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="Candidates.html#Candidates">Candidates</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
 <hr>
 </div>
 
-<h2 class="chapter">9 P-value computation</h2>
+<h2 class="chapter">9 Output format and P-value computation</h2>
 
-<p>CoMap do not compute p-values from the simulation. 
-This goal is achieved by two R scripts, distributed along with the
+<p>CoMap computes built-in p-values for the pairwise and candidate group analyses. 
+For group detections, p-value computation is performed by two R scripts, distributed along with the
 program. 
-The script <samp><span class="file">CoMapFunctions.R</span></samp> contains several functions
+The reason for this is that there are different ways to compute p-values, depending on the null-hypothesis to test. 
+Getting the simulation result being the most expensive in terms of computer resources, I preferred to store them in files, and then play with R to get the p-values. It also allows to visualize the null-distribution and get more &ldquo;feeling&rdquo; about the data.
+
+<h3 class="section">9.1 Output format</h3>
+
+<p>With the pairwise and clustering analysis, CoMap outputs two files, one for the real data, and one for simulations. 
+The two files are in the same format, a simple text file with columns separated by tabs. Each row stands for one group. The available columns are:
+
+     <dl>
+<dt><samp><span class="command">Stat</span></samp><dd>Contains the value of the statistic for the group.
+
+     <br><dt><samp><span class="command">Nmin</span></samp><dd>Contains the minimum norm of the group. 
+The norm of the substitution vector is a general evolutionary rate measure (See Dutheil 2008, JME for more information).
+
+   </dl>
+
+   <p>The output file for real data contains an additional column, <samp><span class="command">Group</span></samp>, which describes the corresponding sites in the alignment. 
+It is a text string, beginning with &ldquo;[&rdquo; and ending with &ldquo;]&rdquo;, with site positions separated by semi-colons. Site numbering begins with 1, and is according to the original alignment, accounting for any gap or ignored positions in the analysis.
+
+   <p>For the clustering analysis, the column <samp><span class="command">Size</span></samp> also contains the size of the group, that is the number of sites, and the column <samp><span class="command">Dmax</span></samp> contains the height of the supporting node in the clustering tree. 
+The simulation output for clustering also contains an additional column named <samp><span class="command">Rep</span></samp> that contains the index of the simulated data set.
+
+   <p>Additional columns, not used to compute p-values:
+
+     <dl>
+<dt><samp><span class="command">RCmin</span></samp><dd>Contains the minimum rate class for the group. the number of classes depends on the option specified as input.
+
+     <br><dt><samp><span class="command">PRmin</span></samp><dd>Similar to <samp><span class="command">RCmin</span></samp>, but with the posterior rate instead of the rate class.
+
+     <br><dt><samp><span class="command">Const</span></samp><dd>Tell if the group contains at least a totally conserved (=constant) site.
+
+   </dl>
+
+<h3 class="section">9.2 Available R scripts</h3>
+
+<p>The script <samp><span class="file">CoMapFunctions.R</span></samp> contains several functions
 performing the computation. 
 The script <samp><span class="file">computePValues.R</span></samp> is the one to launch. 
 It calls the previous one, so they must be in the same directory.
@@ -51,10 +89,5 @@ matches your files, and then run it with the command
    </td></tr></table>
 
 <!--  -->
-<!--  -->
-<!-- end of document -->
-<!-- @node Index,  , Pvalue, Top -->
-<!-- @unnumbered Index -->
-<!-- @printindex cp -->
-</body></html>
+   </body></html>
 

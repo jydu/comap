@@ -1,0 +1,63 @@
+<html lang="en">
+<head>
+<title>Candidates - CoMap Manual 1.4.0</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="CoMap Manual 1.4.0">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Clustering.html#Clustering" title="Clustering">
+<link rel="next" href="Pvalue.html#Pvalue" title="Pvalue">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This is the manual of CoMap, version 1.4.0.
+
+Copyright (C) 2006-2011 Julien Dutheil-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+<link rel="stylesheet" type="text/css" href="http://www.w3.org/StyleSheets/Core/Steely">
+</head>
+<body>
+<div class="node">
+<a name="Candidates"></a>
+<p>
+Next:&nbsp;<a rel="next" accesskey="n" href="Pvalue.html#Pvalue">Pvalue</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Clustering.html#Clustering">Clustering</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">8 Candidate groups analysis</h2>
+
+<p>This method is used to test candidate groups of sites. 
+It perform a more powerful test by taking into account the precise rate of each site,
+and no longer relies on the minimum rate of the group as in the pairwise or clustering method. 
+As a consequence, it is much slower, and should therefore only be used when some candidate groups are to be tested. 
+It can't be used in an exhaustive manner.
+
+   <p>Important note: This method does not require the R scripts to be used! It directly outputs p-values :)
+
+     <dl>
+<dt><samp><span class="command">candidates.input.file = {path}</span></samp><dd>The file to read. It must be in CSV-like format, with one group per line, and column names. 
+<br><dt><samp><span class="command">candidates.input.column_name = {string}</span></samp><dd>The name of the column that will contain groups. Groups should be described as [pos1;pos2;etc], refering to alignment positions, starting at 1. 
+<br><dt><samp><span class="command">candidates.input.column_sep = {char}</span></samp><dd>The character used to separate columns in the input file. 
+<br><dt><samp><span class="command">candidates.omega = {float}</span></samp><dd>The width of the window for telling whether two sites have similar rates or not. A value of 0.2 is usually good enough. The smaller the value, the more precise the computations, but the slower the execution time. 
+<br><dt><samp><span class="command">candidates.null.min = {int&gt;0}</span></samp><dd>Minimum number of simulations to perform for each group. 
+<br><dt><samp><span class="command">candidates.null.nb_rep_RAM = {int&lt;0}</span></samp><dd>Controles the number of sites to simulate at a time. The higher the value, the faster the execution, but at the expense of more memory usage. 
+<br><dt><samp><span class="command">candidates.null.verbose = {int&gt;=0}</span></samp><dd>Controles the amount of output to terminal. 
+<br><dt><samp><span class="command">candidates.output.file = {path}</span></samp><dd>The file to write, identical to the input one but with extra columns, in CSV format. 
+<br><dt><samp><span class="command">candidates.output.column_sep = {char}</span></samp><dd>The column separator for output file. 
+</dl>
+
+<!--  -->
+   </body></html>
+

@@ -1,17 +1,17 @@
 <html lang="en">
 <head>
-<title>Data - CoMap Manual 1.3.0</title>
+<title>Data - CoMap Manual 1.4.0</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="CoMap Manual 1.3.0">
-<meta name="generator" content="makeinfo 4.8">
+<meta name="description" content="CoMap Manual 1.4.0">
+<meta name="generator" content="makeinfo 4.13">
 <link title="Top" rel="start" href="index.html#Top">
 <link rel="prev" href="Introduction.html#Introduction" title="Introduction">
 <link rel="next" href="Model.html#Model" title="Model">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <!--
-This is the manual of CoMap, version 1.3.0, 23 January 2008.
+This is the manual of CoMap, version 1.4.0.
 
-Copyright (C) 2006, 2007, 2008 Julien Dutheil-->
+Copyright (C) 2006-2011 Julien Dutheil-->
 <meta http-equiv="Content-Style-Type" content="text/css">
 <style type="text/css"><!--
   pre.display { font-family:inherit }
@@ -24,11 +24,12 @@ Copyright (C) 2006, 2007, 2008 Julien Dutheil-->
   span.roman { font-family:serif; font-weight:normal; } 
   span.sansserif { font-family:sans-serif; font-weight:normal; } 
 --></style>
+<link rel="stylesheet" type="text/css" href="http://www.w3.org/StyleSheets/Core/Steely">
 </head>
 <body>
 <div class="node">
-<p>
 <a name="Data"></a>
+<p>
 Next:&nbsp;<a rel="next" accesskey="n" href="Model.html#Model">Model</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="Introduction.html#Introduction">Introduction</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
@@ -37,42 +38,10 @@ Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
 
 <h2 class="chapter">2 Data loading</h2>
 
-     <dl>
-<dt><samp><span class="command">alphabet = [DNA|RNA|Protein]</span></samp><dd>The alphabet to use when reading sequence.
+<p>CoMap inputs two kinds of data: a sequence alignment file and a phylogenetic tree. The corresponding options are fully described in the Bio++ Program Suite manual.
 
-     <br><dt><samp><span class="command">sequence.file=[path]</span></samp><dd>The sequence file to use (sequences must be aligned!)
-
-     <br><dt><samp><span class="command">sequence.format = [Mase|Fasta|Phylip|Clustal|DCSE]</span></samp><dd>The alignment file format.
-
-     <br><dt><samp><span class="command">sequence.format_mase.site_selection = [chars]</span></samp><dd>Meaningful only for mase format. 
-Specify a name for a site set to use.
-
-     <br><dt><samp><span class="command">sequence.format_phylip.order = [interleaved|sequential]</span></samp><dd>Meaningful only for phylip format. 
-Tells if sequences are interleave or sequential format.
-
-     <br><dt><samp><span class="command">sequence.format_phylip.ext = [classic|extended]</span></samp><dd>Meaningful only for phylip format. 
-The <samp><span class="option">classic</span></samp> option corresponds to old phylip format, with
-names up to ten characters. 
-The <samp><span class="option">extended</span></samp> option corresponds to the behaviour of PAML,
-which allows sequence name of any size, separated from the sequence
-with at least two spaces.
-
-     <br><dt><samp><span class="command">sequence.sites_to_use = [all|nogap|complete]</span></samp><dd>Tells wich sites to use. 
-The <samp><span class="option">nogap</span></samp> option removes all sites containing at least one
-gap, and the <samp><span class="option">complete</span></samp> option removes all sites containing at
-least one gap or one generic character, as 'X' for instance.
-
-     <br><dt><samp><span class="command">sequence.max_gap_allowed=101%</span></samp><dd>Only works when the <samp><span class="option">all</span></samp> option is selected. 
-specify the maximum amount of gap allowed by site, given as a number
-of sequence or a percentage. 
-Sites not succeeding the criterion will not be included in the analysis.
-
-     <br><dt><samp><span class="command">tree.file = [path]</span></samp><dd>The phylogenetic tree file to use. 
-Branch lengths are optional. 
-Only newick format is supported for now.
-
-</dl>
+   <p>CoMap adds an option to remove conserved sites from the analysis. The removal will occur after parameter optimization, if relevent.
 
 <!--  -->
-</body></html>
+   </body></html>
 

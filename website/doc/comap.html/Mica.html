@@ -1,0 +1,141 @@
+<html lang="en">
+<head>
+<title>Mica - CoMap Manual 1.4.0</title>
+<meta http-equiv="Content-Type" content="text/html">
+<meta name="description" content="CoMap Manual 1.4.0">
+<meta name="generator" content="makeinfo 4.13">
+<link title="Top" rel="start" href="index.html#Top">
+<link rel="prev" href="Pvalue.html#Pvalue" title="Pvalue">
+<link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
+<!--
+This is the manual of CoMap, version 1.4.0.
+
+Copyright (C) 2006-2011 Julien Dutheil-->
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css"><!--
+  pre.display { font-family:inherit }
+  pre.format  { font-family:inherit }
+  pre.smalldisplay { font-family:inherit; font-size:smaller }
+  pre.smallformat  { font-family:inherit; font-size:smaller }
+  pre.smallexample { font-size:smaller }
+  pre.smalllisp    { font-size:smaller }
+  span.sc    { font-variant:small-caps }
+  span.roman { font-family:serif; font-weight:normal; } 
+  span.sansserif { font-family:sans-serif; font-weight:normal; } 
+--></style>
+<link rel="stylesheet" type="text/css" href="http://www.w3.org/StyleSheets/Core/Steely">
+</head>
+<body>
+<div class="node">
+<a name="Mica"></a>
+<p>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="Pvalue.html#Pvalue">Pvalue</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
+<hr>
+</div>
+
+<h2 class="chapter">10 Mica: Mutual Information Coevolution Analysis</h2>
+
+<p>The Mica program performs several standard mutual information (MI) analyses. 
+Basically, it computes the MI value for all pairs of sites in an alignment, and optionally compute the MI value on randomized data. 
+The resulting values can be compared in R in order to get a simple p-value. 
+Mica also computes various rate measures, so that the CoMap R scripts and algorithms can be used with Mica's output. 
+Mica can generate replicates using either parametric bootstrap, like CoMap, or non-parametric bootstrap like in Caporaso et al (2008). 
+It can also compute corrected MI (MIp from Gloor et al), and the associated p-values using a Z-score approach.
+
+<h3 class="section">10.1 Input data.</h3>
+
+<p>Mica needs a sequence alignment, which can be read as in CoMap, with the same formats available. It works with all types of alphabets. 
+Optionally, Mica can also take a phylogenetic tree and a substitution model. Here again, all models supported in CoMap are supported by Mica. 
+If such model and tree are provided, Mica will perform substitution mapping and compute the norm of the substitution vector for each site, a better measure of evolutionary rate than the Shannon entropy. 
+Such a model is also required in order to perform parametric bootstrap.
+
+<h3 class="section">10.2 Output results.</h3>
+
+<p>Mica outputs a CSV file with all tested pairs, with various statistics, including:
+
+     <dl>
+<dt><samp><span class="command">MI</span></samp><dd>The mutal information for the site.
+
+     <br><dt><samp><span class="command">APC</span></samp><dd>The average product correction of Dunn et al (2008). MIp can be computed using the formula MI - APC.
+
+     <br><dt><samp><span class="command">RCW</span></samp><dd>The row-column weighting, of Gouveia-Oliveira (2007). The corrected MI is computed using the formula MI/RCW.
+
+     <br><dt><samp><span class="command">Hjoint</span></samp><dd>The joint entroy of the two sites.
+
+     <br><dt><samp><span class="command">Hmin</span></samp><dd>The minimum entropy of the two sites, Hmin = \min(H_i, H_j).
+
+   </dl>
+
+   <p>If a model and a phylogenetic tree were set up, the following extra information will also be available:
+
+     <dl>
+<dt><samp><span class="command">Nmin</span></samp><dd>The minimum norm of substitution vector for the pair.
+
+   </dl>
+
+<h3 class="section">10.3 Assessing significance of the coevolution statistics.</h3>
+
+<p>Mica implements four possible ways to compute a significance value (p-value), which is specified by the command <samp><span class="command">null.method</span></samp>. 
+This command accepts 5 options:
+
+     <dl>
+<dt><samp><span class="command">none</span></samp><dd>Will disable the computation of the null distribution.
+
+     <br><dt><samp><span class="command">permutations</span></samp><dd>Use simple permutations to compute p-values. This method does not account for shared ancestry and should only be used for didactic reasons. 
+This option will add two colums, namely <samp><span class="command">Perm.p.value</span></samp> and <samp><span class="command">Perm.nb</span></samp>, with similar meaning as the bootstrap columns.
+
+     <br><dt><samp><span class="command">nonparametric-bootstrap</span></samp><dd>Will sample sites from the original data set.
+
+     <br><dt><samp><span class="command">parametric-bootstrap</span></samp><dd>Performs simulations using the tree and model set as input.
+
+     <br><dt><samp><span class="command">z-score</span></samp><dd>Use the set of all pairs in the original data set as a null distribution.
+
+   </dl>
+
+   <p>When a bootstrap analysis is performed, the following options are available:
+
+     <dl>
+<dt><samp><span class="command">null.nb_rep_CPU = {int &gt; 0}, null.nb_rep_RAM = {int &gt; 0}</span></samp><dd>will perform CPU * RAM replicates in total. Increasing the RAM components will be faster but require more memory, while increasing CPU will demand more CPU time, but will use less memory.
+
+     <br><dt><samp><span class="command">null.output.file = {path}</span></samp><dd>The file where all samples from the null distribution should be written. Setting <samp><span class="command">none</span></samp> will disable output. 
+The output file can be used for making the p-value computation by hand, using the R software for instance.
+
+     <br><dt><samp><span class="command">null.compute_pvalues = {bool}</span></samp><dd>Tells if p-values should be computed from the null distribution. 
+If set to yes, then two columns will be added to the output file: <samp><span class="command">Bs.p.value</span></samp>, which stores the actual computed p-value, and <samp><span class="command">Bs.nb</span></samp>, storing the number of replicates on which the computation is based. 
+This number of replicates is the specified one when no rate comditioning is performed (see below). Otherwise it depends on the number of classes used. 
+P-values are always computed when Z-scores are used. 
+</dl>
+
+   <p>The bootstrap analyses will only be used for assessing the significance of MI. 
+A Z-score approach is to be used for computing the p-value associated to the corrected MIs. One therefore specifies what is the statistic for wich p-value should be computed:
+
+     <dl>
+<dt><samp><span class="command">null.method_zscore.stat = {MI|MIp|MIc}</span></samp><dd>The statistic for which p-values should be computed. 
+</dl>
+
+<h4 class="subsection">10.3.1 Rate conditioning</h4>
+
+<p>For all approaches but permutations, more specific null distributions can be obtained by conditioning over the evolutionary rate:
+
+     <dl>
+<dt><samp><span class="command">null.nb_rate_classes = {int &gt; 0}</span></samp><dd>If greater than 1, enables rate conditioning when computing the p-value. 
+The classes are computed by cutting the interval [0, max observation] into the specified number of categories. 
+By default, the minimum entropy is used as a rate measure. If a model is specified, the the minimum norm is used instead.
+
+   </dl>
+
+   <p>Additional option for the permutation analysis:
+     <dl>
+<dt><samp><span class="command">max_number_of_permutations = {int &gt;= 0 }</span></samp><dd>Set the number of permutations that can be performed. The minimal p-value that will be obtained is obtained by 1/(n+1). 
+For speeding up computations, the p-value of the pairs that are far from the tail of the distribution (and therefore most-likely non-significant) will be computed from less observations (the computation will stop when at least 5 points from the null distribution with a higher statistic than the observed one are found). 
+</dl>
+
+<!--  -->
+<!--  -->
+<!-- end of document -->
+<!-- @node Index,  , Pvalue, Top -->
+<!-- @unnumbered Index -->
+<!-- @printindex cp -->
+</body></html>
+

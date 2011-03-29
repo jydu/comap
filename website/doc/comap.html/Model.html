@@ -1,17 +1,17 @@
 <html lang="en">
 <head>
-<title>Model - CoMap Manual 1.3.0</title>
+<title>Model - CoMap Manual 1.4.0</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="CoMap Manual 1.3.0">
-<meta name="generator" content="makeinfo 4.8">
+<meta name="description" content="CoMap Manual 1.4.0">
+<meta name="generator" content="makeinfo 4.13">
 <link title="Top" rel="start" href="index.html#Top">
 <link rel="prev" href="Data.html#Data" title="Data">
 <link rel="next" href="Estimation.html#Estimation" title="Estimation">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <!--
-This is the manual of CoMap, version 1.3.0, 23 January 2008.
+This is the manual of CoMap, version 1.4.0.
 
-Copyright (C) 2006, 2007, 2008 Julien Dutheil-->
+Copyright (C) 2006-2011 Julien Dutheil-->
 <meta http-equiv="Content-Style-Type" content="text/css">
 <style type="text/css"><!--
   pre.display { font-family:inherit }
@@ -24,11 +24,12 @@ Copyright (C) 2006, 2007, 2008 Julien Dutheil-->
   span.roman { font-family:serif; font-weight:normal; } 
   span.sansserif { font-family:sans-serif; font-weight:normal; } 
 --></style>
+<link rel="stylesheet" type="text/css" href="http://www.w3.org/StyleSheets/Core/Steely">
 </head>
 <body>
 <div class="node">
-<p>
 <a name="Model"></a>
+<p>
 Next:&nbsp;<a rel="next" accesskey="n" href="Estimation.html#Estimation">Estimation</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="Data.html#Data">Data</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
@@ -37,122 +38,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="index.html#Top">Top</a>
 
 <h2 class="chapter">3 Model specification</h2>
 
-<h3 class="section">3.1 Substitution model</h3>
-
-     <dl>
-<dt><samp><span class="command">model.name = [JCnuc|K80|T92|HKY85|F84|TN93|GTR|JCprot|DSO78|JTT92|empirical]</span></samp><dd>Specify the substitution model to use. 
-For proteins, the DCmutt method is used for JTT92 and DSO78. 
-You can use the <samp><span class="option">empirical</span></samp> option to specify another model, as
-a text file in PAML format.
-
-     <br><dt><samp><span class="command">model.kappa=[real&gt;0]</span></samp><dd>Initial value or fixed value for parameter kappa
-(transition/transversion ratio) in models K80, T92, HKY85 and F84
-
-     <br><dt><samp><span class="command">model.kappa1=[real&gt;0]</span></samp><dd>Initial value or fixed value for parameter kappa1 in model TN93
-
-     <br><dt><samp><span class="command">model.kappa2=[real&gt;0]</span></samp><dd>Initial value or fixed value for parameter kappa2 in model TN93
-
-     <br><dt><samp><span class="command">model.theta=[real]0,1[]</span></samp><dd>Initial value or fixed value for parameter theta (GC content) in model
-T92, HKY85, F84, TN93 and GTR.
-
-     <br><dt><samp><span class="command">model.theta1 = [real]0,1[]</span></samp><dd>Proportion of G / (G + C) in models
-HKY85, F84, TN93 and GTR
-
-     <br><dt><samp><span class="command">model.theta2 = [real]0,1[]</span></samp><dd>Proportion of A / (A + T/U) in models
-HKY85, F84, TN93 and GTR
-
-     <br><dt><samp><span class="command">model.a,b,c,d,e = [real&gt;0]</span></samp><dd>Parameters of the GTR model
-
-     <br><dt><samp><span class="command">model.use_observed_freq = [boolean]</span></samp><dd>Tell if we have to use observed frequencies as parameter values (for <samp><span class="option">theta</span></samp>, <samp><span class="option">theta1</span></samp>, <samp><span class="option">theta2</span></samp>, etc). 
-For proteins, this is equivalent to the -F model family.
-
-     <br><dt><samp><span class="command">model_empirical.file = [path]</span></samp><dd>Meaningful only if the <samp><span class="option">empirical</span></samp> option is selected. 
-Specify the path where to find the model (in PAML format).
-
-</dl>
-
-<h3 class="section">3.2 Non-homogeneous models</h3>
-
-<p>You can specify a wide range of non-homogeneous models. 
-The novelty from the homogeenous case is that the likelihood depends on the position of the root. 
-Root frequencies are hence distinct parameters:
-
-     <dl>
-<dt><samp><span class="command">nonhomogeneous.root_freq=[balanced|observed|init|balancedGC|observedGC|initGC]</span></samp><dd>The <samp><span class="option">balanced</span></samp> option set all the frequencies to 1/size of the alphabet. 
-The <samp><span class="option">balancedGC</span></samp> option is for nucleotides only, and set the G content equal to the C content equal to 0.5. 
-The <samp><span class="option">observed</span></samp> option set frequencies equal to their values in the data set,, and <samp><span class="option">observedGC</span></samp> does the same for the GC content. 
-The <samp><span class="option">init</span></samp> and <samp><span class="option">initGC</span></samp> options allows you to set the values of the frequencies by hand.
-
-     <br><dt><samp><span class="command">model.ancA, ancC,..., ancA, ancR, ancN, ..., ancTheta</span></samp><dd>Initial values of ancestral frequencies if the <samp><span class="option">init</span></samp> or <samp><span class="option">initGC</span></samp> have been specified.
-
-   </dl>
-
-     <dl>
-<dt><samp><span class="command">nonhomogeneous = [no|one_per_branch|general]</span></samp><dd>Homogeneous model, Galtier &amp; Gouy 1997 model family or the general case.
-
-   </dl>
-
-<h4 class="subsection">3.2.1 One-per-branch non-homogeneous models</h4>
-
-<p>This option share the same parameters as the homogeneous case, since the same kind of model is used for each branch. The additional options are the following:
-     <dl>
-<dt><samp><span class="command">nonhomogeneous_one_per_branch.shared_parameters = [list]</span></samp><dd>List the names of the parameters that are shared by all branches. 
-In Galtier &amp; Gouy model, that would be model.kappa, since only the theta parameter is branch-specific.
-
-   </dl>
-
-<h4 class="subsection">3.2.2 General non-homogeneous models</h4>
-
-<p>Bio++ provides a general syntaxe to specify almost any non-homogeneous model.
-
-     <dl>
-<dt><samp><span class="command">nonhomogeneous.number_of_models</span></samp><dd>Set the number of distinct models to use.
-
-   </dl>
-
-   <p>You now have to configure each model individually, using the syntaxe introduced for the homogeneous case, excepted that model will be numbered, for instance:
-
-<pre class="example">     model1.name = T92
-     model1.theta = 0.39
-     model1.kappa = 2.79
-</pre>
-   <p>The additional option is available to attach the model to branches in the tree, specified by the id of the upper node in the tree:
-
-     <dl>
-<dt><samp><span class="command">model1.nodes_id = 1,5,10:15,19</span></samp><dd>Specify the ids of the nodes to which the node is attached. 
-Id ranges can be specified using the <samp><span class="option">begin:end</span></samp> syntaxe.
-
-   </dl>
-
-   <p>You can also make a given model share parameters with another one by writting for instance:
-<pre class="example">     model2.name = T92
-     model2.theta = 0.39
-     model2.kappa = model1.kappa
-</pre>
-   <p>Finally, you may find useful the following options:
-
-     <dl>
-<dt><samp><span class="command">output.tags.file = [[path]|none]</span></samp><dd>A tree file in newick format, with node ids instead of bootstrap
-values. 
-The node ids are the same as in the the vector file.
-
-     <br><dt><samp><span class="command">output.tags.translation = [[path]|none]</span></samp><dd>Write a file whith the correspondance between leaf names and ids.
-
-   </dl>
-
-<h3 class="section">3.3 Rate across site distribution</h3>
-
-     <dl>
-<dt><samp><span class="command">rate_distribution = [constant|gamma{+invariant}]</span></samp><dd>Specify the rate across sites distribution, as constant or gamma, optionally with an invariant class.
-
-     <br><dt><samp><span class="command">rate_distribution.alpha = [real&gt;0]</span></samp><dd>The gamma distribution's shape parameter
-
-     <br><dt><samp><span class="command">rate_distribution.classes_number = [int&gt;=2]</span></samp><dd>The number of classes to use in discretization (not including the invariant class if any)
-
-     <br><dt><samp><span class="command">rate_distribution.p = [real[0,1]]</span></samp><dd>Proportion of invariant sites
-
-</dl>
+<p>CoMap support all substitution models available in Bio++, including non-homogeneous models. Options for specifying a model are described in full in the Bio++ Program Suite manual.
 
 <!--  -->
-</body></html>
+   </body></html>
 
