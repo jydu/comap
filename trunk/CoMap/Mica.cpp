@@ -77,7 +77,7 @@ void help()
 {
   (*ApplicationTools::message << "__________________________________________________________________________").endLine(); 
   (*ApplicationTools::message << "mica param=optionfile").endLine();
-  (*ApplicationTools::message << "Check the Bio++ Program Suite manual for a full syntax specification.").endLine();
+  (*ApplicationTools::message << "Check the CoMap manual for a full syntax specification.").endLine();
   (*ApplicationTools::message << "__________________________________________________________________________").endLine();
 }
 

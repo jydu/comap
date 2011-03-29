@@ -179,6 +179,15 @@ SET(CPACK_SOURCE_IGNORE_FILES
  "CoMap/mica"
  "doc/comap/"
  "doc/comap.info"
+ "doc/comap.aux"
+ "doc/comap.toc"
+ "doc/comap.log"
+ "doc/comap.fn"
+ "doc/comap.cp"
+ "doc/comap.ky"
+ "doc/comap.pg"
+ "doc/comap.tp"
+ "doc/comap.vr"
  "debian/tmp"
  "debian/comap"
  "debian/comap\\\\.substvars"
@@ -197,6 +206,8 @@ INCLUDE(CPack)
 
 #This adds the 'dist' target
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+ADD_DEPENDENCIES(dist pdf)
+
 IF (UNIX)
 #This creates deb packages:
 ADD_CUSTOM_TARGET(deb dpkg-buildpackages)
