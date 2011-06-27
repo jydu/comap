@@ -23,6 +23,16 @@ IF(NO_VIRTUAL_COV)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_VIRTUAL_COV=1")
 ENDIF()
 
+IF(NOT NO_DEP_CHECK)
+  SET(NO_DEP_CHECK FALSE CACHE BOOL
+      "Disable dependencies check for building distribution only."
+      FORCE)
+ENDIF(NOT NO_DEP_CHECK)
+
+IF(NO_DEP_CHECK)
+  MESSAGE("-- Dependencies checking disabled. Only distribution can be built.")
+ELSE(NO_DEP_CHECK)
+
 #static linkage?
 IF(NOT BUILD_STATIC)
   SET(BUILD_STATIC FALSE CACHE BOOL
@@ -89,7 +99,7 @@ IF(CMAKE_INSTALL_PREFIX)
   SET(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
 ENDIF(CMAKE_INSTALL_PREFIX)
 
-#Find the libraries. The order is very important for staitc linkage, it won't
+#Find the libraries. The order is very important for static linkage, it won't
 #link if you change it!
 IMPROVED_FIND_LIBRARY(LIBS bpp-phyl Bpp/Phyl/Tree.h)
 IMPROVED_FIND_LIBRARY(LIBS bpp-seq Bpp/Seq/Alphabet/Alphabet.h)
@@ -138,7 +148,7 @@ IF(NROFF_EXE)
     COMMAND gzip -f mica.1
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/man
     )
-
+  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "man/comap.1.gz;man/mica.1.gz")
 ENDIF(NROFF_EXE)
 
 
@@ -155,9 +165,9 @@ SET(CPACK_PACKAGE_VERSION_MAJOR "1")
 SET(CPACK_PACKAGE_VERSION_MINOR "4")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CoMap: a program for mapping substitutions and detecting molecular co-evolution.")
-SET(CPACK_RESOURCE_FILE_LICENSE "COPYING.txt")
-SET(CPACK_RESOURCE_FILE_AUTHORS "AUTHORS.txt")
-SET(CPACK_RESOURCE_FILE_INSTALL "INSTALL.txt")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING.txt")
+SET(CPACK_RESOURCE_FILE_AUTHORS "${CMAKE_SOURCE_DIR}/AUTHORS.txt")
+SET(CPACK_RESOURCE_FILE_INSTALL "${CMAKE_SOURCE_DIR}/INSTALL.txt")
 SET(CPACK_SOURCE_GENERATOR "TGZ")
 SET(CPACK_SOURCE_IGNORE_FILES
  "CMakeFiles"
@@ -210,7 +220,10 @@ ADD_DEPENDENCIES(dist pdf)
 
 IF (UNIX)
 #This creates deb packages:
-ADD_CUSTOM_TARGET(deb dpkg-buildpackages)
+ADD_CUSTOM_TARGET(origdist COMMAND cp ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz ../${CPACK_DEBSOURCE_PACKAGE_FILE_NAME}.tar.gz)
+ADD_DEPENDENCIES(origdist dist)
+ADD_CUSTOM_TARGET(deb dpkg-buildpackage -uc -us -i${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz)
+ADD_DEPENDENCIES(deb origdist)
 ADD_DEPENDENCIES(deb info man)
 
 #This creates rpm packages:
@@ -220,3 +233,4 @@ ADD_DEPENDENCIES(rpm dist info man)
 #ADD_DEPENDENCIES(info install)
 
 ENDIF(UNIX)
+ENDIF(NOT NO_DEP_CHECK)
