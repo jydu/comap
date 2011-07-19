@@ -346,7 +346,7 @@ The character used to separate columns in the input file.
 The width of the window for telling whether two sites have similar rates or not. A value of 0.2 is usually good enough. The smaller the value, the more precise the computations, but the slower the execution time.
 @item candidates.null.min = @{int>0@}
 Minimum number of simulations to perform for each group.
-@item candidates.null.nb_rep_RAM = @{int<0@}
+@item candidates.null.nb_rep_RAM = @{int>0@}
 Controles the number of sites to simulate at a time. The higher the value, the faster the execution, but at the expense of more memory usage.
 @item candidates.null.verbose = @{int>=0@}
 Controles the amount of output to terminal.
