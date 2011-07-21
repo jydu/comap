@@ -645,7 +645,7 @@ int main(int argc, char *argv[])
         string group, tmp, strok = "0123456789;,";
         for (unsigned int i = 0; i < groups.size(); i++)
         {
-          if(groups.size() > 100) ApplicationTools::displayGauge(i, groups.size() - 1, '=');
+          if (groups.size() > 100) ApplicationTools::displayGauge(i, groups.size() - 1, '=');
           tmp = TextTools::removeWhiteSpaces(groups[i]);
           group = "";
           //Clean group description:
@@ -670,7 +670,10 @@ int main(int argc, char *argv[])
               ApplicationTools::displayWarning("Position " + TextTools::toString(pos) + " is not included in the selected sites. The group will be ignored (line " + TextTools::toString(i+1) + " in input file).");
               break;
             }
-            candidate.addSite(CandidateSite(posIndex[pos]));
+            else
+            {
+              candidate.addSite(CandidateSite(posIndex[pos]));
+            }
           }
           if (candidate.isAnalysable())
           {
@@ -680,6 +683,10 @@ int main(int argc, char *argv[])
           candidates.addCandidate(candidate);
         }
         ApplicationTools::displayTaskDone();
+        ApplicationTools::displayResult("Number of groups to test", candidates.size());
+
+        if (candidates.size() == 0)
+          throw Exception("ERROR!!! No group can be tested!");
 
         //Now compute p-values:
         unsigned int nbMaxTrials = ApplicationTools::getParameter<unsigned int>("candidates.nb_max_trials", comap.getParams(), 10, "", true, true);

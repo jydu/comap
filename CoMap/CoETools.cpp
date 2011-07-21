@@ -899,7 +899,7 @@ vector<unsigned int> CandidateGroupSet::nextCandidateSite() const throw (Excepti
     }
   }
   unsigned int startSearch = groupPos_;
-  if (n2_[groupPos_] >= minSim_)
+  if (n2_[groupPos_] >= minSim_ || !candidates_[groupPos_].isAnalysable())
   {
     while (n2_[groupPos_] >= minSim_ || !candidates_[groupPos_].isAnalysable())
     {
@@ -943,7 +943,7 @@ bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMappin
   {
     first = true;
     testNorm = false;
-    while(test && !testNorm)
+    while (test && !testNorm)
     {
       pos = nextCandidateSite();
       if (first)
@@ -1045,7 +1045,7 @@ void CoETools::computePValuesForCandidateGroups(
     SiteContainer * sites = seqSim.simulate(repRAM);
     drtl.setData(*sites);
     drtl.initialize();
-    ProbabilisticSubstitutionMapping * mapping;
+    ProbabilisticSubstitutionMapping* mapping;
 		if (average)
     {
 			if (joint)
