@@ -82,7 +82,7 @@ class CandidateSite
     }
     bool checkNorm(double norm) const
     {
-      return norm >= normMin_ && norm <= normMax_;
+      return (norm >= normMin_ && norm <= normMax_);
     }
     unsigned int getIndex() const { return index_; }
 };
