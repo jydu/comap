@@ -1026,11 +1026,11 @@ bool CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int s
 /******************************************************************************/
 
 void CoETools::computePValuesForCandidateGroups(
-    CandidateGroupSet & candidates,
-    DRTreeLikelihood & drtl,
+    CandidateGroupSet& candidates,
+    DRTreeLikelihood& drtl,
     const SequenceSimulator& seqSim,
-    SubstitutionCount & nijt,
-	  map<string, string> & params,
+    SubstitutionCount& nijt,
+	  map<string, string>& params,
     unsigned int maxTrials)
 {
   unsigned int repRAM = ApplicationTools::getParameter<unsigned int>("candidates.null.nb_rep_RAM", params, 1000, "", true, true);
@@ -1042,7 +1042,7 @@ void CoETools::computePValuesForCandidateGroups(
   {
     if (candidates.getVerbose() >= 2)
       ApplicationTools::displayResult("Simulate ", TextTools::toString(repRAM) + " sites.");
-    SiteContainer * sites = seqSim.simulate(repRAM);
+    SiteContainer* sites = seqSim.simulate(repRAM);
     drtl.setData(*sites);
     drtl.initialize();
     ProbabilisticSubstitutionMapping* mapping;
