@@ -200,8 +200,6 @@ int main(int argc, char *argv[])
     string nhOpt = ApplicationTools::getStringParameter("nonhomogeneous", mica.getParams(), "no", "", true, false);
     ApplicationTools::displayResult("Heterogeneous model", nhOpt);
 
-    unsigned int nbStates;
-
     if (nhOpt == "no")
     {  
       model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, sites, mica.getParams());
@@ -215,7 +213,6 @@ int main(int argc, char *argv[])
         rDist = PhylogeneticsApplicationTools::getRateDistribution(mica.getParams());
       }
       tl = new DRHomogeneousTreeLikelihood(*tree, *sites, model, rDist, true, false);
-      nbStates = model->getNumberOfStates();
     }
     else if(nhOpt == "one_per_branch")
     {
@@ -242,7 +239,6 @@ int main(int argc, char *argv[])
       modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, globalParameters); 
       model = modelSet->getModel(0)->clone();
       tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false);
-      nbStates = modelSet->getNumberOfStates();
     }
     else if (nhOpt == "general")
     {
@@ -258,7 +254,6 @@ int main(int argc, char *argv[])
       }
       model = modelSet->getModel(0)->clone();
       tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false);
-      nbStates = modelSet->getNumberOfStates();
     }
     else throw Exception("Unknown option for nonhomogeneous: " + nhOpt);
     tl->initialize();

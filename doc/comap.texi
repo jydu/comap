@@ -1,12 +1,12 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename comap.info
-@settitle CoMap Manual 1.4.0
+@settitle CoMap Manual 1.4.1
 @afourpaper
 @c %**end of header
 
 @copying
-This is the manual of CoMap, version 1.4.0.
+This is the manual of CoMap, version 1.4.1.
 
 Copyright @copyright{} 2006-2011 Julien Dutheil
 @end copying
@@ -40,7 +40,7 @@ Copyright @copyright{} 2006-2011 Julien Dutheil
 * Mapping::                     Compute the substitution mapping.                   
 * Pairwise::                    Performing the pairwise analysis of Dutheil et al. (2005).                 
 * Clustering::                  Performing the clustering analysis of Dutheil et al. (2007).              
-* Candidates::                  Candidate groups analysis (under development)
+* Candidates::                  Candidate groups analysis of Dutheil et al. (1010).
 * Pvalue::                      Using the R scripts to compute p-values.                            
 * Mica::                        Mutual Information Coevolution Analysis.                            
 
