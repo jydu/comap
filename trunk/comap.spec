@@ -1,5 +1,5 @@
 %define name CoMap
-%define version 1.4.0
+%define version 1.4.1
 %define release 1
 %define _prefix /usr
 
@@ -56,6 +56,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/share/man/man1/mica.1.gz
 
 %changelog
+* Tue Feb 28 2012 Julien Dutheil <julien.dutheil@univ-montp2.fr>
+- CoMap 1.4.1 release
 * Tue Mar 29 2011 Julien Dutheil <julien.dutheil@univ-montp2.fr>
 - CoMap 1.4.0 release
 
