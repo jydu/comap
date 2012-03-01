@@ -4,7 +4,7 @@
 
 # Global parameters
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6.4)
-PROJECT(CoMap CXX)
+PROJECT(comap CXX)
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
       "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
@@ -158,7 +158,7 @@ ADD_SUBDIRECTORY(doc)
 ADD_SUBDIRECTORY(man)
 
 # Packager
-SET(CPACK_PACKAGE_NAME "CoMap")
+SET(CPACK_PACKAGE_NAME "comap")
 SET(CPACK_PACKAGE_VENDOR "CNRS - University Montpellier 2")
 SET(CPACK_PACKAGE_VERSION "1.4.1")
 SET(CPACK_PACKAGE_VERSION_MAJOR "1")

@@ -1,4 +1,4 @@
-%define name CoMap
+%define name comap
 %define version 1.4.1
 %define release 1
 %define _prefix /usr
