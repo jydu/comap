@@ -219,6 +219,7 @@ INCLUDE(CPack)
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 ADD_DEPENDENCIES(dist pdf)
 
+IF(NOT NO_DEP_CHECK)
 IF (UNIX)
 #This creates deb packages:
 ADD_CUSTOM_TARGET(origdist COMMAND cp ${CPACK_SOURCE_PACKAGE_FILE_NAME}.tar.gz ../${CPACK_DEBSOURCE_PACKAGE_FILE_NAME}.tar.gz)
