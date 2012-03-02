@@ -84,7 +84,7 @@ install: install-indep install-arch
 install-indep:
 	dh_testdir
 	dh_testroot
-	dh_clean -k -i 
+	dh_prep -i 
 	dh_installdirs -i
 
 	# Add here commands to install the indep part of the package into
@@ -96,12 +96,12 @@ install-indep:
 install-arch:
 	dh_testdir
 	dh_testroot
-	dh_clean -k -s 
+	dh_prep -s 
 	dh_installdirs -s
 
 	# Add here commands to install the arch part of the package into 
 	# debian/tmp.
-	$(MAKE) DESTDIR=$(CURDIR)/debian/comap install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/comap man doc install
 
 	dh_install -s
 # Must not depend on anything. This is to be called by
