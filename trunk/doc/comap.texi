@@ -3,6 +3,14 @@
 @setfilename comap.info
 @settitle CoMap Manual 1.4.1
 @afourpaper
+
+@dircategory Science Biology Genetics
+@direntry
+* comap: (comap)                Coevolution Analysis by Cosubstitution Mapping.
+* mica: (mica)                  Coevolution Analysis by Mutual Information.
+@end direntry
+@c %**end of header
+
 @c %**end of header
 
 @copying
