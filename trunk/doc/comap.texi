@@ -9,7 +9,6 @@
 * comap: (comap)                Coevolution Analysis by Cosubstitution Mapping.
 * mica: (mica)                  Coevolution Analysis by Mutual Information.
 @end direntry
-@c %**end of header
 
 @c %**end of header
 
