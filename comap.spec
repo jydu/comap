@@ -4,6 +4,7 @@
 %define _prefix /usr
 
 URL: http://home.gna.org/comap/
+
 Name: %{_basename}
 Version: %{_version}
 Release: %{_release}
@@ -28,8 +29,6 @@ BuildRequires: libbpp-seq-devel = 2.0.3
 BuildRequires: libbpp-phyl9 = 2.0.3
 BuildRequires: libbpp-phyl-devel = 2.0.3
 
-
-Prefix: %{_prefix}
 AutoReq: yes
 AutoProv: yes
 %if 0%{?mdkversion}
