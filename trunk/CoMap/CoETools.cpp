@@ -476,6 +476,98 @@ Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* a
 
 /******************************************************************************/
 
+AlphabetIndex2<double>* CoETools::getWeight(const Alphabet* alphabet, map<string, string>& params) throw (Exception)
+{
+  string weightOption = ApplicationTools::getStringParameter("weight", params, "none", "", true, false);
+  if (weightOption != "None") {
+    string name;
+    map<string, string> args;
+    KeyvalTools::parseProcedure(weightOption, name, args);
+    ApplicationTools::displayResult("Mapping Weighting Scheme", name);
+    if (name == "AAdist")
+    {
+      if (!AlphabetTools::isProteicAlphabet(alphabet))
+      {
+        throw Exception("Chemical distance can only be used with protein data.");
+      }
+      string dist = ApplicationTools::getStringParameter("type", args, "grantham", "", true);
+      bool sym = ApplicationTools::getBooleanParameter("sym", args, true, "", true);
+      ApplicationTools::displayResult("Amino acid distance used", dist);
+      if (dist == "grantham")
+      {
+        GranthamAAChemicalDistance* M = new GranthamAAChemicalDistance();
+        M->setSymmetric(sym);
+        if (!sym) M->setPC1Sign(true);
+        return M;
+      }
+      else if (dist == "miyata")
+      {
+        MiyataAAChemicalDistance* M = new MiyataAAChemicalDistance();
+        M->setSymmetric(sym);
+        return M;
+      }
+      else if (dist == "grantham.polarity")
+      {
+        GranthamAAPolarityIndex I;
+        SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
+        M->setSymmetric(sym);
+        return M;
+      }
+      else if (dist == "grantham.volume")
+      {
+        GranthamAAVolumeIndex I;
+        SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
+        M->setSymmetric(sym);
+        return M;
+      }
+      else if (dist == "klein.charge")
+      {
+        KleinAANetChargeIndex I;
+        SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
+        M->setSymmetric(sym);
+        return M;
+      }
+      else if (dist == "charge")
+      {
+        AAChargeIndex I;
+        SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
+        M->setSymmetric(sym);
+        return M;
+      }
+      else if (dist == "user1")
+      {
+        string aax1FilePath = ApplicationTools::getAFilePath("file", args, true, true, "", false);
+        ifstream aax1File(aax1FilePath.c_str(), ios::in);
+        AAIndex1Entry I(aax1File);
+        SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
+        aax1File.close();
+        M->setSymmetric(sym);
+        return M;
+      }
+      else if (dist == "user2")
+      {
+        string aax2FilePath = ApplicationTools::getAFilePath("file", args, true, true, "", false);
+        ifstream aax2File(aax2FilePath.c_str(), ios::in);
+        AAIndex2Entry* M = new AAIndex2Entry(aax2File, sym);
+        aax2File.close();
+        return M;
+      }
+      else
+      {
+        throw Exception("Invalid distance '" + dist + ".");
+      }
+    }
+    else
+    {
+      throw Exception("Invalid weighting scheme, only 'aadist' available.");
+    }
+  }
+  else
+  {
+    return NULL;
+  }
+}
+
 SubstitutionCount* CoETools::getSubstitutionCount(
   const Alphabet* alphabet,
   const SubstitutionModel* model,
@@ -484,34 +576,41 @@ SubstitutionCount* CoETools::getSubstitutionCount(
   string suffix)
 {
   SubstitutionCount* substitutionCount = 0;
-  string nijtOption = ApplicationTools::getStringParameter("nijt", params, "uniformization", suffix, true);
+  string nijtOption;
+  map<string, string> nijtParams;
+  string nijtText = ApplicationTools::getStringParameter("nijt", params, "Uniformization", suffix, true);
+  KeyvalTools::parseProcedure(nijtText, nijtOption, nijtParams);
 
-  if (nijtOption == "laplace")
+  if (nijtOption == "Laplace")
   {
-    int trunc = ApplicationTools::getIntParameter("nijt_laplace.trunc", params, 10, suffix, true);
+    int trunc = ApplicationTools::getIntParameter("trunc", nijtParams, 10, suffix, true);
     substitutionCount = new LaplaceSubstitutionCount(model, trunc);
   }
-  else if (nijtOption == "uniformization")
+  else if (nijtOption == "Uniformization")
   {
-    substitutionCount = new UniformizationSubstitutionCount(model, new TotalSubstitutionRegister(alphabet));
+    AlphabetIndex2<double>* weights = getWeight(alphabet, nijtParams);
+    substitutionCount = new UniformizationSubstitutionCount(model, new TotalSubstitutionRegister(alphabet), weights);
   }
-  else if (nijtOption == "decomposition")
+  else if (nijtOption == "Decomposition")
   {
+    AlphabetIndex2<double>* weights = getWeight(alphabet, nijtParams);
     const ReversibleSubstitutionModel* revModel = dynamic_cast<const ReversibleSubstitutionModel*>(model);
     if (revModel)
-      substitutionCount = new DecompositionSubstitutionCount(revModel, new TotalSubstitutionRegister(alphabet));
+      substitutionCount = new DecompositionSubstitutionCount(revModel, new TotalSubstitutionRegister(alphabet), weights);
     else
       throw Exception("Decomposition method can only be used with reversible substitution models.");
   }
-  else if (nijtOption == "naive")
+  else if (nijtOption == "Naive")
   {
-    substitutionCount = reinterpret_cast<SubstitutionCount*>(new SimpleSubstitutionCount(new TotalSubstitutionRegister(alphabet)));
+    AlphabetIndex2<double>* weights = getWeight(alphabet, nijtParams);
+    substitutionCount = new NaiveSubstitutionCount(new TotalSubstitutionRegister(alphabet), false, weights);
+
   }
-  else if (nijtOption == "label")
+  else if (nijtOption == "Label")
   {
     substitutionCount = reinterpret_cast<SubstitutionCount*>(new LabelSubstitutionCount(alphabet));
   }
-  else if (nijtOption == "prob_one_jump")
+  else if (nijtOption == "ProbOneJump")
   {
     substitutionCount = reinterpret_cast<SubstitutionCount*>(new OneJumpSubstitutionCount(model));
   }
@@ -520,91 +619,8 @@ SubstitutionCount* CoETools::getSubstitutionCount(
     ApplicationTools::displayError("Invalid option '" + nijtOption + ", in 'nijt' parameter.");
     exit(-1);
   }
+  ApplicationTools::displayResult("Substitution count procedure", nijtOption);
 
-  string weightOption = ApplicationTools::getStringParameter("nijt.weight", params, "none", suffix, true, false);
-  if (weightOption != "none") {
-    if (nijtOption == "laplace" || nijtOption == "uniformization" || nijtOption == "decomposition" || nijtOption == "naive") {
-      string name;
-      map<string, string> args;
-      KeyvalTools::parseProcedure(weightOption, name, args);
-      ApplicationTools::displayResult("Mapping Weighting Scheme", name);
-      if (name == "aadist")
-      {
-        if (!AlphabetTools::isProteicAlphabet(alphabet))
-        {
-          throw Exception("Chemical distance can only be used with protein data.");
-        }
-        string dist = ApplicationTools::getStringParameter("type", args, "grantham", "", true);
-        bool sym = ApplicationTools::getBooleanParameter("sym", args, true, "", true);
-        ApplicationTools::displayResult("Amino acid distance used", dist);
-        if (dist == "grantham")
-        {
-          GranthamAAChemicalDistance* M = new GranthamAAChemicalDistance();
-          M->setSymmetric(sym);
-          if (!sym) M->setPC1Sign(true);
-          substitutionCount = new WeightedSubstitutionCount(substitutionCount, new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
-        }
-        else if (dist == "miyata")
-        {
-          MiyataAAChemicalDistance* M = new MiyataAAChemicalDistance();
-          M->setSymmetric(sym);
-          substitutionCount = new WeightedSubstitutionCount(substitutionCount, new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
-        }
-        else if (dist == "grantham.polarity")
-        {
-          GranthamAAPolarityIndex I;
-          SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
-          M->setSymmetric(sym);
-          substitutionCount = new WeightedSubstitutionCount(substitutionCount, new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
-        }
-        else if (dist == "grantham.volume")
-        {
-          GranthamAAVolumeIndex I;
-          SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
-          M->setSymmetric(sym);
-          substitutionCount = new WeightedSubstitutionCount(substitutionCount, new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
-        }
-        else if (dist == "klein.charge")
-        {
-          KleinAANetChargeIndex I;
-          SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
-          M->setSymmetric(sym);
-          substitutionCount = new WeightedSubstitutionCount(substitutionCount, new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
-        }
-        else if (dist == "charge")
-        {
-          AAChargeIndex I;
-          SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
-          M->setSymmetric(sym);
-          substitutionCount = new WeightedSubstitutionCount(substitutionCount, new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
-        }
-        else if (dist == "user1")
-        {
-          string aax1FilePath = ApplicationTools::getAFilePath("file", args, true, true, "", false);
-          ifstream aax1File(aax1FilePath.c_str(), ios::in);
-          AAIndex1Entry I(aax1File);
-          SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
-          aax1File.close();
-          M->setSymmetric(sym);
-          substitutionCount = new WeightedSubstitutionCount(substitutionCount, new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
-        }
-        else if (dist == "user2")
-        {
-          string aax2FilePath = ApplicationTools::getAFilePath("file", args, true, true, suffix, false);
-          ifstream aax2File(aax2FilePath.c_str(), ios::in);
-          AAIndex2Entry* M = new AAIndex2Entry(aax2File, sym);
-          aax2File.close();
-          substitutionCount = new WeightedSubstitutionCount(substitutionCount, new TotalSubstitutionRegister(alphabet), M, true); // M will be deleted when this substitutionsCount will be deleted.
-        }
-        else
-        {
-          throw Exception("Invalid distance '" + dist + ", in 'nijt_aadist' parameter.");
-        }
-      }
-    } else {
-      throw Exception("Weighted substitution mapping is not possible with nijt=" + nijtOption);
-    }
-  }
   // Send results:
   return substitutionCount;
 }

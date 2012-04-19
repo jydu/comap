@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename comap.info
-@settitle CoMap Manual 1.4.1
+@settitle CoMap Manual 1.5.0
 @afourpaper
 
 @dircategory Science Biology Genetics
@@ -13,9 +13,9 @@
 @c %**end of header
 
 @copying
-This is the manual of CoMap, version 1.4.1.
+This is the manual of CoMap, version 1.5.0.
 
-Copyright @copyright{} 2006-2011 Julien Dutheil
+Copyright @copyright{} 2006-2012 Julien Dutheil
 @end copying
 
 @titlepage
@@ -142,40 +142,48 @@ Options in this chapter are for the computation of substitution vectors.
 Restart an analysis by specifying the already computed vectors.
 Otherwise, compute vectors using the following options.
 
-@item nijt = @{laplace|simple|aadist@}
+@item output.vectors.file = @{@{path@}|none@}
+Where to write the substitution mapping.
+
+@item nijt = @{Naive|Laplace|Uniformization|Decomposition@}
 The kind of mapping to perform.
-@option{laplace} option perform exact mapping, as in Dutheil et al. (2005).
-@option{simple} performs a naive mapping, as in Tufféry and Darlu (2000).
-@option{aadist} performs a weighted mapping, as in Dutheil and Galtier (2007).
+@option{Laplace(trunc=@{int>1@})} option perform exact mapping, as in Dutheil et al. (2005). The @option{trunc} option set where to trunc the series (default to 10). Note that this substitution count is rather slow, the uniformization or decomposition methods are faster and more accurate. This option is only there for legacy purpose.
+@option{Naive(weight=...)} performs a naive mapping, as in Tufféry and Darlu (2000).
+@option{Uniformization(weight=...)} [default] performs exact mapping, with the uniformization method (See Tataru and Hobolth, 2011).
+@option{Decomposition(weight=...)} performs exact mapping, with the decomposition method (See Tataru and Hobolth, 2011).
 Currently available only for proteins.
 
-@item nijt_aadist.type = @{grantham|miyata|grantham.volume|grantham.polarity|charge|klein.charge|user1|user2@}
+@end table
+
+The Naive, Uniformization and Decomposition methods all allow to perform weighted substitution mapping, by taking a @option{weight} argument. Only two options are available for now:
+
+@table @command
+@item None
+The default, no weighting is used, all substitution weight the same.
+
+@item AAdist
+Amino-acid distance. This option takes further arguments:
+
+@table @command
+
+@item type = @{grantham|miyata|grantham.volume|grantham.polarity|charge|klein.charge|user1|user2@}
 Specify the type of weight to use.
 The @option{user1} option is for computing a simple distance from a AAIndex1 file, @option{user2} uses a AAIndex2 distance file.
 
-@item nijt_aadist.type_user1.file = @{path@}
-File path toward a AAIndex1 file.
-Used only if @option{nijt_aadist.type=user1}.
+@item file = @{path@}
+File path toward a AAIndex1 and AAIndex2 file, ignored otherwise.
 
-@item nijt_aadist.type_user2.file = @{path@}
-File path toward a AAIndex2 file.
-Used only if @option{nijt_aadist.type=user2}.
-
-@item nijt_aadist.sym = @{boolean@}
+@item sym = @{boolean@}
 Tell if symmetric matrices must be used.
 This option should be set to "no" for testing compensation.
 
-@item output.vectors.file = @{@{path@}|none@}
-Where to write the substitution mapping.
+@end table
 
 @end table
 
 @section Optional commands
 
 @table @command
-@item nijt_laplace.trunc = @{int>0@}
-Where to trunk the series when estimating exact number of
-substitutions. A value of 10 should be fine.
 
 @item nijt.average = @{boolean@}
 Tell if mapping should be averaged over all ancestral states
