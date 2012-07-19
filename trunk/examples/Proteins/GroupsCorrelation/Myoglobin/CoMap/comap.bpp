@@ -25,7 +25,6 @@ input.sequence.file2 = none
 input.remove_const = yes
 
 # The tree file to use. Branch lengths are optional.
-# onyl newick format is supported.
 input.tree.file = ../Phylogeny/Myo.dnd
 input.tree.format = Newick
 
@@ -51,7 +50,7 @@ simulations.continuous = no
 
 optimization = None
 
-output.tree =  none
+output.tree.file =  none
 
 # ----------------------------------------------------------------------------------------
 #                                     Additionnal stuff
