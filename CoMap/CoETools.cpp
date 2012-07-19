@@ -478,7 +478,7 @@ Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* a
 
 AlphabetIndex2<double>* CoETools::getWeight(const Alphabet* alphabet, map<string, string>& params) throw (Exception)
 {
-  string weightOption = ApplicationTools::getStringParameter("weight", params, "none", "", true, false);
+  string weightOption = ApplicationTools::getStringParameter("weight", params, "None", "", true, false);
   if (weightOption != "None") {
     string name;
     map<string, string> args;
@@ -523,13 +523,6 @@ AlphabetIndex2<double>* CoETools::getWeight(const Alphabet* alphabet, map<string
       else if (dist == "klein.charge")
       {
         KleinAANetChargeIndex I;
-        SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
-        M->setSymmetric(sym);
-        return M;
-      }
-      else if (dist == "charge")
-      {
-        AAChargeIndex I;
         SimpleIndexDistance<double>* M = new SimpleIndexDistance<double>(I);
         M->setSymmetric(sym);
         return M;
