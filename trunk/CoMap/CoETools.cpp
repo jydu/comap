@@ -39,12 +39,12 @@ knowledge of the CeCILL license and that you accept its terms.
 
 #include "CoETools.h"
 #include "AnalysisTools.h"
+#include "Domain.h"
+#include "IntervalData.h"
 
 #include <Bpp/Text.all>
 #include <Bpp/App/ApplicationTools.h>
 #include <Bpp/BppString.h>
-#include <Bpp/Numeric/Domain.h>
-#include <Bpp/Numeric/IntervalData.h>
 #include <Bpp/Numeric/ParameterExceptions.h>
 
 // From SeqLib:

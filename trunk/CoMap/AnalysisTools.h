@@ -41,10 +41,10 @@ knowledge of the CeCILL license and that you accept its terms.
 #define _ANALYSISTOOLS_H_
 
 #include "Statistics.h"
+#include "Domain.h"
+#include "IntervalData.h"
 
 #include <Bpp/Numeric/VectorTools.h>
-#include <Bpp/Numeric/Domain.h>
-#include <Bpp/Numeric/IntervalData.h>
 
 // From SeqLib:
 #include <Bpp/Seq/Container/SiteContainer.h>

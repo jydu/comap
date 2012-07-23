@@ -44,6 +44,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <stdexcept>
 
 using namespace std;
+#include "Domain.h"
 
 #include <Bpp/Utils/AttributesTools.h>
 #include <Bpp/Io/FileTools.h>
