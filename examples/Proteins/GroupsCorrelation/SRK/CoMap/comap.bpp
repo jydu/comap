@@ -50,7 +50,7 @@ simulations.continuous = no
 
 optimization = None
 
-output.tree =  none
+output.tree.file =  none
 
 # ----------------------------------------------------------------------------------------
 #                                     Additionnal stuff

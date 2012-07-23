@@ -8,10 +8,13 @@ SET(comap_CPP
  Cluster.cpp
  ClusterTools.cpp
  AnalysisTools.cpp
+ Domain.cpp
+ IntervalData.cpp
 )
 
 SET(mica_CPP
  Mica.cpp
+ Domain.cpp
 )
 
 ADD_EXECUTABLE(comap ${comap_CPP})

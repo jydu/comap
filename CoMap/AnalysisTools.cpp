@@ -38,6 +38,7 @@ knowledge of the CeCILL license and that you accept its terms.
 */
 
 #include "AnalysisTools.h"
+#include "IntervalData.h"
 
 #include <Bpp/App/ApplicationTools.h>
 #include <Bpp/Numeric/VectorTools.h>

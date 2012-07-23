@@ -41,8 +41,8 @@ knowledge of the CeCILL license and that you accept its terms.
 #ifndef _STATISTICS_H_
 #define _STATISTICS_H_
 
+#include "Domain.h"
 #include <Bpp/Numeric/VectorTools.h>
-#include <Bpp/Numeric/Domain.h>
 
 using namespace bpp;
 using namespace std;
