@@ -211,11 +211,11 @@ most cases.
 Use this option for performing a pairwise analysis.
 If another option or @option{none} is selected, no pairwise analysis is performed.
 
-@item statistic = @{correlation|compensation|cosubstitutions@}
+@item statistic = @{Correlation|Compensation|Cosubstitutions@}
 The coevolution statistic to use.
-The @option{correlation} option is to be used in order to perform the MBE 2005 analysis.
-Uses option @option{compensation} to perform a pairwise analysis with the compensation statistics introduced in the BMC Evol Biol 2007 paper.
-You can also use the @option{cosubstitution} option to perform Tufféry & Darlu's MBE 2000 analysis.
+The @option{Correlation} option is to be used in order to perform the MBE 2005 analysis.
+Uses option @option{Compensation} to perform a pairwise analysis with the compensation statistics introduced in the BMC Evol Biol 2007 paper.
+You can also use the @option{Cosubstitution} option to perform Tufféry & Darlu's MBE 2000 analysis.
 
 @item statistic.output.file = @{path@}
 Where to write the statistic value for each pair of sites.
