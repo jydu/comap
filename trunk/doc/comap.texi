@@ -452,6 +452,7 @@ Mica needs a sequence alignment, which can be read as in CoMap, with the same fo
 Optionally, Mica can also take a phylogenetic tree and a substitution model. Here again, all models supported in CoMap are supported by Mica.
 If such model and tree are provided, Mica will perform substitution mapping and compute the norm of the substitution vector for each site, a better measure of evolutionary rate than the Shannon entropy.
 Such a model is also required in order to perform parametric bootstrap.
+The argument @command{use_model = yes} (no by default) enables the use of a substitution model (Jukes-Cantor by default).
 
 @section Output results.
 
