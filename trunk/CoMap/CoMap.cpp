@@ -57,7 +57,7 @@ using namespace std;
 #include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
 #include <Bpp/Phyl/Simulation.all>
 #include <Bpp/Phyl/Likelihood/RASTools.h>
-#include <Bpp/Phyl/Distance/AgglomerativeDistanceMethod.h>
+#include <Bpp/Phyl/Distance/DistanceMethod.h>
 #include <Bpp/Phyl/Io/PhylipDistanceMatrixFormat.h>
 #include <Bpp/Phyl/Io/Newick.h>
 
@@ -241,16 +241,16 @@ int main(int argc, char *argv[])
         if (cstat) {
           Vdouble mv1(mapping1->getNumberOfBranches());
           //Compute mean vector:
-          for (unsigned int i = 0; i < mapping1->getNumberOfSites(); ++i) {
+          for (size_t i = 0; i < mapping1->getNumberOfSites(); ++i) {
             mv1 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSite(*mapping1, i);
           }
-          mv1 /= mapping1->getNumberOfSites();
+          mv1 /= static_cast<double>(mapping1->getNumberOfSites());
           Vdouble mv2(mapping2->getNumberOfBranches());
           //Compute mean vector:
-          for (unsigned int i = 0; i < mapping2->getNumberOfSites(); ++i) {
+          for (size_t i = 0; i < mapping2->getNumberOfSites(); ++i) {
             mv2 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSite(*mapping2, i);
           }
-          mv2 /= mapping2->getNumberOfSites();
+          mv2 /= static_cast<double>(mapping2->getNumberOfSites());
           cstat->setMeanVectors(mv1, mv2);
         }
    
@@ -304,10 +304,10 @@ int main(int argc, char *argv[])
         if (cstat) {
           Vdouble mv1(mapping1->getNumberOfBranches());
           //Compute mean vector:
-          for (unsigned int i = 0; i < mapping1->getNumberOfSites(); ++i) {
+          for (size_t i = 0; i < mapping1->getNumberOfSites(); ++i) {
             mv1 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSite(*mapping1, i);
           }
-          mv1 /= mapping1->getNumberOfSites();
+          mv1 /= static_cast<double>(mapping1->getNumberOfSites());
           cstat->setMeanVector(mv1);
         }
 
@@ -345,26 +345,26 @@ int main(int argc, char *argv[])
       string clusteringMethod = ApplicationTools::getStringParameter("clustering.method", comap.getParams(), "none", "", false, false);
       if (clusteringMethod != "none")
       {
-        unsigned int nbBranches = mapping1->getNumberOfBranches();
-        unsigned int nbSites    = mapping1->getNumberOfSites();
-        unsigned int nbTypes    = mapping1->getNumberOfSubstitutionTypes();
+        size_t nbBranches = mapping1->getNumberOfBranches();
+        size_t nbSites    = mapping1->getNumberOfSites();
+        size_t nbTypes    = mapping1->getNumberOfSubstitutionTypes();
         bool scale = ApplicationTools::getBooleanParameter("clustering.scale", comap.getParams(), false, "", true, true);
         vector<double> scales(nbBranches, 1.);
         vector<double> weights(nbBranches, 1.);
         vector<double> brLens = mapping1->getBranchLengths();
         double minLen = ApplicationTools::getDoubleParameter("clustering.min_length", comap.getParams(), false, "", 0.000001, false);
         vector<double> meanVector(nbBranches);
-        for (unsigned int j = 0; j < nbBranches; j++)
+        for (size_t j = 0; j < nbBranches; j++)
         {
           double sum = 0;
-          for (unsigned int i = 0; i < nbSites; i++)
-            for (unsigned int t = 0; t < nbTypes; t++)
+          for (size_t i = 0; i < nbSites; i++)
+            for (size_t t = 0; t < nbTypes; t++)
               sum += (*mapping1)(j, i, t);
-          meanVector[j] = sum / nbSites;
+          meanVector[j] = sum / static_cast<double>(nbSites);
         }
   
         // Scale if required (i.e., devide each vector by the mean vector):
-        for (unsigned int j = 0; j < nbBranches; j++)
+        for (size_t j = 0; j < nbBranches; j++)
         {
           double len = brLens[j];
           if (len <= minLen) weights[j] = 0.; // Branch ignored, considered as a multifurcation.
@@ -388,7 +388,7 @@ int main(int argc, char *argv[])
         // Compute norms:
         vector<double> norms(nbSites);
         vector<string> siteNames(nbSites);
-        for (unsigned int i = 0; i < nbSites; i++)
+        for (size_t i = 0; i < nbSites; i++)
         {
           string siteName = TextTools::toString(sites1->getSite(i).getPosition());
           siteNames[i] = siteName; 

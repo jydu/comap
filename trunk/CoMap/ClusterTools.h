@@ -48,7 +48,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/Phyl/TreeTemplate.h>
 #include <Bpp/Phyl/Likelihood/DRTreeLikelihood.h>
 #include <Bpp/Phyl/Simulation/SequenceSimulator.h>
-#include <Bpp/Phyl/Distance/AgglomerativeDistanceMethod.h>
+#include <Bpp/Phyl/Distance/DistanceMethod.h>
 #include <Bpp/Phyl/Mapping/SubstitutionCount.h>
 #include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
 
@@ -59,7 +59,7 @@ class Group
   protected:
     vector<string> names_;
     double height_;
-    vector< vector<unsigned int> > subgroups_;
+    vector< vector<size_t> > subgroups_;
     vector<double> subgroupsHeights_;
     map<string, const Clonable*> properties_;
 
@@ -70,34 +70,34 @@ class Group
   public:
     void setHeight(double height) { height_ = height; }
     const double getHeight() const { return  height_; }
-    void addSubgroup(const vector<unsigned int>& subgroup, double height)
+    void addSubgroup(const vector<size_t>& subgroup, double height)
     {
       subgroups_.push_back(subgroup);
       subgroupsHeights_.push_back(height);
     }
-    const vector< vector<unsigned int> > & getSubgroups() const
+    const vector< vector<size_t> > & getSubgroups() const
     {
       return subgroups_;
     }
-    const vector<unsigned int> & getSubgroup(unsigned int i) const
+    const vector<size_t> & getSubgroup(size_t i) const
     {
       return subgroups_[i];
     }
-    const vector<string> getSubgroupNames(unsigned int i) const
+    const vector<string> getSubgroupNames(size_t i) const
     {
       vector<string> names;
-      for(unsigned int j = 0; j < subgroups_[i].size(); j++)
+      for(size_t j = 0; j < subgroups_[i].size(); j++)
       {
         names.push_back(names_[subgroups_[i][j]]);
       }
       return names;
     }
-    double getSubgroupHeight(unsigned int i) const { return subgroupsHeights_[i]; }
+    double getSubgroupHeight(size_t i) const { return subgroupsHeights_[i]; }
     string toString() const
     {
       if (names_.size() == 0) return "[]";
       string text = "[" + names_[0];
-      for (unsigned int i = 1; i < names_.size(); i++)
+      for (size_t i = 1; i < names_.size(); i++)
       {
         text += ";" + names_[i];
       }
@@ -108,19 +108,19 @@ class Group
     string toString(const vector<string>& tln) const
     {
       if (names_.size() == 0) return "[]";
-      string text = "[" + tln[TextTools::to<unsigned int>(names_[0])];
-      for(unsigned int i = 1; i < names_.size(); i++)
+      string text = "[" + tln[TextTools::to<size_t>(names_[0])];
+      for(size_t i = 1; i < names_.size(); i++)
       {
-        text += ";" + tln[TextTools::to<unsigned int>(names_[i])];
+        text += ";" + tln[TextTools::to<size_t>(names_[i])];
       }
       text += "]";
       return text;
     }
-    string toString(unsigned int i) const
+    string toString(size_t i) const
     {
       if (subgroups_[i].size() == 0) return "[]";
       string text = "[" + names_[subgroups_[i][0]];
-      for(unsigned int j = 1; j < subgroups_[i].size(); j++)
+      for(size_t j = 1; j < subgroups_[i].size(); j++)
       {
         text += ";" + names_[subgroups_[i][j]];
       }
@@ -128,10 +128,10 @@ class Group
       return text;
     }
 
-    unsigned int size() const { return names_.size(); }
+    size_t size() const { return names_.size(); }
 
-    const string& operator[](unsigned int i) const { return names_[i]; }
-    string& operator[](unsigned int i) { return names_[i]; }
+    const string& operator[](size_t i) const { return names_[i]; }
+    string& operator[](size_t i) { return names_[i]; }
 
     void add(const string& name) { names_.push_back(name); }
 
@@ -152,9 +152,9 @@ class ClusterTools
 
     static vector<Group> getGroups(const TreeTemplate<Node> * tree);
 
-    static vector<const Node *> getSubtreesWithSize(const TreeTemplate<Node> & tree, unsigned int size);
+    static vector<const Node *> getSubtreesWithSize(const TreeTemplate<Node> & tree, size_t size);
 
-    static vector<Group> getGroupsWithSize(const TreeTemplate<Node> & tree, unsigned int size);
+    static vector<Group> getGroupsWithSize(const TreeTemplate<Node> & tree, size_t size);
     
     static void computeGlobalDistanceDistribution(
         DRTreeLikelihood & drtl,
@@ -163,9 +163,9 @@ class ClusterTools
         const Distance & distance,
         AgglomerativeDistanceMethod & clustering,
         const vector<double> & scales,
-        unsigned int sizeOfDataSet,
-        unsigned int nrep,
-        unsigned int maxGroupSize,
+        size_t sizeOfDataSet,
+        size_t nrep,
+        size_t maxGroupSize,
         ofstream * out = NULL);
 
     static void translate(TreeTemplate<Node> & tree, const vector<string> & tln)
@@ -179,11 +179,11 @@ class ClusterTools
   private:
     static Group getGroups(const Node & subtree, vector<Group> & groups);
     static Group getGroup(const Node & subtree);
-    static unsigned int getSubtreesWithSize(const Node * subtree, unsigned int size, vector<const Node *> & subtrees);
+    static size_t getSubtreesWithSize(const Node * subtree, size_t size, vector<const Node *> & subtrees);
     static void translate(Node * node, const vector<string> & tln)
     {
-      if(node->isLeaf()) node->setName(tln[TextTools::to<unsigned int>(node->getName())]);
-      for(unsigned int i = 0; i < node->getNumberOfSons(); i++) translate(node->getSon(i), tln);
+      if(node->isLeaf()) node->setName(tln[TextTools::to<size_t>(node->getName())]);
+      for(size_t i = 0; i < node->getNumberOfSons(); i++) translate(node->getSon(i), tln);
     }
     static void computeNormProperties_(Node * node, const ProbabilisticSubstitutionMapping & mapping, double & minNorm);
 

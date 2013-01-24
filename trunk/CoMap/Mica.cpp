@@ -84,7 +84,7 @@ void help()
 
 /******************************************************************************/
 
-void miTest(const Site& site1, const Site& site2, unsigned int maxNbPermutations, double& mi, double& pvalue, unsigned int& nbPermutations)
+void miTest(const Site& site1, const Site& site2, size_t maxNbPermutations, double& mi, double& pvalue, size_t& nbPermutations)
 {
   mi = SiteTools::mutualInformation(site1, site2, true);
   Site copyOfSite1 = site1;
@@ -98,7 +98,7 @@ void miTest(const Site& site1, const Site& site2, unsigned int maxNbPermutations
   }
   else
   {
-    unsigned int i;
+    size_t i;
     for (i = 0; count < 5 && i < maxNbPermutations; i++)
     {
       copyOfSite1.shuffle();
@@ -116,9 +116,9 @@ void miTest(const Site& site1, const Site& site2, unsigned int maxNbPermutations
 
 vector<double> computeNorms(const ProbabilisticSubstitutionMapping& mapping)
 {
-  unsigned int nbVectors = mapping.getNumberOfSites();
+  size_t nbVectors = mapping.getNumberOfSites();
   vector<double> vect(nbVectors);
-  for (unsigned int i = 0; i < nbVectors; i++)
+  for (size_t i = 0; i < nbVectors; i++)
     vect[i] = SubstitutionMappingTools::computeNormForSite(mapping, i);
   return vect;
 }
@@ -164,16 +164,16 @@ int main(int argc, char *argv[])
 
   bool removeConst = ApplicationTools::getBooleanParameter("input.remove_const", mica.getParams(), true);
   if (removeConst) {
-    unsigned int n = sites->getNumberOfSites();
-    for (unsigned int i = n; i > 0; --i) {
+    size_t n = sites->getNumberOfSites();
+    for (size_t i = n; i > 0; --i) {
       if (SiteTools::isConstant(sites->getSite(i - 1), true))
         sites->deleteSite(i - 1);
     }
     ApplicationTools::displayResult("Number of conserved sites ignored", n - sites->getNumberOfSites());
   }
 
-  unsigned int nbSites = sites->getNumberOfSites();
-  unsigned int nbSeqs  = sites->getNumberOfSequences();
+  size_t nbSites = sites->getNumberOfSites();
+  size_t nbSeqs  = sites->getNumberOfSequences();
  
   ApplicationTools::displayResult("Number of sequences", nbSeqs);
   ApplicationTools::displayResult("Number of sites", nbSites);
@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
       if (model->getNumberOfStates() != alphabet->getSize())
       {
         //Markov-Modulated Markov Model...
-        unsigned int n =(unsigned int)(model->getNumberOfStates() / alphabet->getSize());
+        size_t n =(size_t)(model->getNumberOfStates() / alphabet->getSize());
         rateFreqs = vector<double>(n, 1./(double)n); // Equal rates assumed for now, may be changed later (actually, in the most general case,
                                                      // we should assume a rate distribution for the root also!!!  
       }
@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
       ApplicationTools::displayWarning("!!! This may be due to branch length == 0.");
       ApplicationTools::displayWarning("!!! All null branch lengths will be set to 0.000001.");
       ParameterList pl = tl->getBranchLengthsParameters();
-      for (unsigned int i = 0; i < pl.size(); i++)
+      for (size_t i = 0; i < pl.size(); i++)
       {
         if (pl[i].getValue() < 0.000001) pl[i].setValue(0.000001);
       }
@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
     {
       ApplicationTools::displayError("!!! Unexpected likelihood == 0.");
       ApplicationTools::displayError("!!! Looking at each site:");
-      for (unsigned int i = 0; i < sites->getNumberOfSites(); i++)
+      for (size_t i = 0; i < sites->getNumberOfSites(); i++)
       {
         (*ApplicationTools::error << "Site " << sites->getSite(i).getPosition() << "\tlog likelihood = " << tl->getLogLikelihoodForASite(i)).endLine();
       }
@@ -307,11 +307,11 @@ int main(int argc, char *argv[])
   vector<double> averageMI;
   vector<double> entropy;
   ApplicationTools::displayTask("Computing average MIs", true);
-  for (unsigned int i = 0; i < nbSites; ++i) {
+  for (size_t i = 0; i < nbSites; ++i) {
     const Site* site1 =  &sites->getSite(i);
     ApplicationTools::displayGauge(i, nbSites - 1);
     double sum = 0;
-    for (unsigned int j = 0; j < nbSites; ++j) {
+    for (size_t j = 0; j < nbSites; ++j) {
       if (j != i) {
         const Site* site2 =  &sites->getSite(j);
         sum += SiteTools::mutualInformation(*site1, *site2, true); 
@@ -326,7 +326,7 @@ int main(int argc, char *argv[])
   //Some variables we'll need:
   const Site *site1, *site2;
   double stat, apc, rcw, nmin = 0, hj, hm, perm;
-  unsigned int maxNbPermutations = 0;
+  size_t maxNbPermutations = 0;
 
   //Get the null distribution of MI values:
   string nullMethod = ApplicationTools::getStringParameter("null.method", mica.getParams(), "none", "", true, false);
@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
 
   bool computePValues = false;
   //These variables will only be used if p-values are computed:
-  unsigned int nbRateClasses = 0;
+  size_t nbRateClasses = 0;
   Domain* rateDomain = 0;
   vector< vector<double> >* simValues = 0;
 
@@ -349,7 +349,7 @@ int main(int argc, char *argv[])
       computePValues = ApplicationTools::getBooleanParameter("null.compute_pvalues", mica.getParams(), true);
     if (computePValues)
     {
-      nbRateClasses = ApplicationTools::getParameter<unsigned int>("null.nb_rate_classes", mica.getParams(), 10);
+      nbRateClasses = ApplicationTools::getParameter<size_t>("null.nb_rate_classes", mica.getParams(), 10);
       ApplicationTools::displayResult("Number of sub-distributions", nbRateClasses);
       if (withModel)
         rateDomain = new Domain(0, VectorTools::max(*norms), nbRateClasses);
@@ -374,21 +374,21 @@ int main(int argc, char *argv[])
         *simout << endl;
       }
     
-      unsigned int nbRepCPU = ApplicationTools::getParameter<unsigned int>("null.nb_rep_CPU", mica.getParams(), 10);
-      unsigned int nbRepRAM = ApplicationTools::getParameter<unsigned int>("null.nb_rep_RAM", mica.getParams(), 100);
+      size_t nbRepCPU = ApplicationTools::getParameter<size_t>("null.nb_rep_CPU", mica.getParams(), 10);
+      size_t nbRepRAM = ApplicationTools::getParameter<size_t>("null.nb_rep_RAM", mica.getParams(), 100);
   
       OutputStream* os = ApplicationTools::warning;
       ApplicationTools::warning = 0;
-      for (unsigned int i = 0; i < nbRepCPU; i++)
+      for (size_t i = 0; i < nbRepCPU; i++)
       {
         //Generate data set:
-        vector<unsigned int> index1;
+        vector<size_t> index1;
         SiteContainer* sites1 = SiteContainerTools::sampleSites(*sites, nbRepRAM, &index1);
   
-        vector<unsigned int> index2;
+        vector<size_t> index2;
         SiteContainer* sites2 = SiteContainerTools::sampleSites(*sites, nbRepRAM, &index2);
   
-        for (unsigned int j = 0; j < nbRepRAM; j++)
+        for (size_t j = 0; j < nbRepRAM; j++)
         {
           ApplicationTools::displayGauge(i * nbRepRAM + j, nbRepCPU * nbRepRAM - 1, '>');
           site1 = &sites1->getSite(j);
@@ -405,14 +405,14 @@ int main(int argc, char *argv[])
               *simout << "\t" << nmin;
             if (computePValues) {
               try {
-                unsigned int cat = rateDomain->getIndex(nmin);
+                size_t cat = rateDomain->getIndex(nmin);
                 (*simValues)[cat].push_back(stat);
               } catch (OutOfRangeException& oore) {}
             }
           } else {
             if (computePValues) {
               try {
-                unsigned int cat = rateDomain->getIndex(hm);
+                size_t cat = rateDomain->getIndex(hm);
                 (*simValues)[cat].push_back(stat);
               } catch (OutOfRangeException& oore) {}
             }
@@ -461,12 +461,12 @@ int main(int argc, char *argv[])
         *simout << "MI\tHjoint\tHmin\tNmin" << endl;
       }
 
-      unsigned int nbRepCPU = ApplicationTools::getParameter<unsigned int>("null.nb_rep_CPU", mica.getParams(), 10);
-      unsigned int nbRepRAM = ApplicationTools::getParameter<unsigned int>("null.nb_rep_RAM", mica.getParams(), 100);
+      size_t nbRepCPU = ApplicationTools::getParameter<size_t>("null.nb_rep_CPU", mica.getParams(), 10);
+      size_t nbRepRAM = ApplicationTools::getParameter<size_t>("null.nb_rep_RAM", mica.getParams(), 100);
   
       OutputStream* os = ApplicationTools::warning;
       ApplicationTools::warning = 0;
-      for (unsigned int i = 0; i < nbRepCPU; i++)
+      for (size_t i = 0; i < nbRepCPU; i++)
       {
         //Generate data set:
         SiteContainer* sites1 = simulator->simulate(nbRepRAM);
@@ -487,7 +487,7 @@ int main(int argc, char *argv[])
         norms2 = computeNorms(*mapping2);
         delete mapping2;
   
-        for (unsigned int j = 0; j < nbRepRAM; j++)
+        for (size_t j = 0; j < nbRepRAM; j++)
         {
           ApplicationTools::displayGauge(i * nbRepRAM + j, nbRepCPU * nbRepRAM - 1, '>');
           site1 = &sites1->getSite(j);
@@ -499,7 +499,7 @@ int main(int argc, char *argv[])
   
           if (computePValues) {
             try {
-              unsigned int cat = rateDomain->getIndex(nmin);
+              size_t cat = rateDomain->getIndex(nmin);
               (*simValues)[cat].push_back(stat);
             } catch(OutOfRangeException& oore) {}
           }
@@ -532,11 +532,11 @@ int main(int argc, char *argv[])
       ApplicationTools::displayTask("Computing total distribution", true);
       OutputStream* os = ApplicationTools::warning;
       ApplicationTools::warning = 0;
-      unsigned int c = 0;
-      for (unsigned int i = 0; i < nbSites - 1; i++)
+      size_t c = 0;
+      for (size_t i = 0; i < nbSites - 1; i++)
       {
         site1 = &sites->getSite(i);
-        for (unsigned int j = i + 1; j < nbSites; j++)
+        for (size_t j = i + 1; j < nbSites; j++)
         {
           site2 = &sites->getSite(j);
           ApplicationTools::displayGauge(c++, nbSites * (nbSites - 1) / 2 - 1, '>');
@@ -547,7 +547,7 @@ int main(int argc, char *argv[])
           if (withModel) {
             nmin  = min((*norms)[i], (*norms)[j]);
             try {
-              unsigned int cat = rateDomain->getIndex(nmin);
+              size_t cat = rateDomain->getIndex(nmin);
               if (correctStat == 1) {
                 apc = averageMI[i] * averageMI[j] / fullAverageMI;
                 (*simValues)[cat].push_back(stat - apc);
@@ -560,7 +560,7 @@ int main(int argc, char *argv[])
             } catch (OutOfRangeException& oore) {}
           } else {
             try {
-              unsigned int cat = rateDomain->getIndex(hm);
+              size_t cat = rateDomain->getIndex(hm);
               if (correctStat == 1) {
                 apc = averageMI[i] * averageMI[j] / fullAverageMI;
                 (*simValues)[cat].push_back(stat - apc);
@@ -579,7 +579,7 @@ int main(int argc, char *argv[])
     }
     else if (nullMethod == "permutations")
     {
-      maxNbPermutations = ApplicationTools::getParameter<unsigned int>("null.max_number_of_permutations", mica.getParams(), 1000);
+      maxNbPermutations = ApplicationTools::getParameter<size_t>("null.max_number_of_permutations", mica.getParams(), 1000);
       if (maxNbPermutations == 0)
       {
         throw Exception("Permutation number should be greater than 0!");
@@ -595,7 +595,7 @@ int main(int argc, char *argv[])
 
   //We need to sort observations for a better efficiency:
   if (computePValues) {
-    for (unsigned int i = 0; i < nbRateClasses; ++i) {
+    for (size_t i = 0; i < nbRateClasses; ++i) {
       sort((*simValues)[i].begin(), (*simValues)[i].end());
     }
   }
@@ -613,12 +613,12 @@ int main(int argc, char *argv[])
     out << "\tBs.p.value\tBs.nb";
   out << endl;
 
-  unsigned int nbPerm;
-  unsigned int c = 0;
-  for (unsigned int i = 0; i < nbSites - 1; ++i)
+  size_t nbPerm;
+  size_t c = 0;
+  for (size_t i = 0; i < nbSites - 1; ++i)
   {
     site1 = &sites->getSite(i);
-    for (unsigned int j = i + 1; j < nbSites; ++j)
+    for (size_t j = i + 1; j < nbSites; ++j)
     {
       ApplicationTools::displayGauge(c++, (nbSites - 1) * (nbSites) / 2 - 1);
       site2 = &sites->getSite(j);
@@ -643,9 +643,9 @@ int main(int argc, char *argv[])
       if (computePValues) {
         //Bootstrap:
         try {
-          unsigned int cat = withModel ? rateDomain->getIndex(nmin) : rateDomain->getIndex(hm);
-          unsigned int nsim = (*simValues)[cat].size();
-          unsigned int count;
+          size_t cat = withModel ? rateDomain->getIndex(nmin) : rateDomain->getIndex(hm);
+          size_t nsim = (*simValues)[cat].size();
+          size_t count;
           for (count = 0; count < nsim && (*simValues)[cat][count] < stat; ++count) {}
           double pvalue = static_cast<double>(nsim - count + 1) / static_cast<double>(nsim + 1);
           out << "\t" << pvalue << "\t" << nsim;

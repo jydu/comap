@@ -222,8 +222,8 @@ class AnalysisTools
 			const Statistic& statistic,
 			const Domain& statDomain,
 			const Domain& rateDomain,
-			unsigned int repCPU,
-      unsigned int repRAM,
+			size_t repCPU,
+      size_t repRAM,
 			bool average,
 			bool joint,
 			bool verbose = true);
@@ -238,8 +238,8 @@ class AnalysisTools
 			const Statistic & statistic,
 			const Domain & statDomain,
 			const Domain & rateDomain,
-			unsigned int repCPU,
-      unsigned int repRAM,
+			size_t repCPU,
+      size_t repRAM,
 			bool average,
 			bool joint,
 			bool verbose = true);
@@ -258,8 +258,8 @@ class AnalysisTools
 			ostream* out,
       vector< vector<double> >* simstats,
       const Domain* rateDomain,
-			unsigned int repCPU,
-      unsigned int repRAM,
+			size_t repCPU,
+      size_t repRAM,
 			bool average,
 			bool joint,
 			bool verbose = true);
@@ -273,8 +273,8 @@ class AnalysisTools
 			SubstitutionCount & nijt2,
 			const Statistic & statistic,
 			ostream & out,
-			unsigned int repCPU,
-      unsigned int repRAM,
+			size_t repCPU,
+      size_t repRAM,
 			bool average,
 			bool joint,
 			bool verbose = true);
@@ -283,7 +283,7 @@ class AnalysisTools
 			const DetailedSiteSimulator & seqSim,
 			const Statistic & statistic,
 			ostream & out,
-			unsigned int rep,
+			size_t rep,
 			bool verbose = true);
 };
 

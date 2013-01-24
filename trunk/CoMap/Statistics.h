@@ -234,9 +234,9 @@ class CosubstitutionNumberStatistic: public AbstractMinimumStatistic
     {
 			if (v1.size() != v2.size())
         throw new Exception("CosubstitutionNumberStatistic::getValueForPair: vectors must have the same size.");
-			unsigned int n = v1.size();
+			size_t n = v1.size();
 			double c = 0;
-			for (unsigned int i = 0; i < n; i++)
+			for (size_t i = 0; i < n; i++)
       {
 				if (VectorTools::sum(v1[i]) >= 1. && VectorTools::sum(v2[i]) >= 1.) c++;
 			}
@@ -316,14 +316,14 @@ class DiscreteMutualInformationStatistic: public AbstractMinimumStatistic
 	public:
 		double getValueForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException)
     {
-      vector<unsigned int> c1(v1.size());
-      vector<unsigned int> c2(v2.size());
-      for (unsigned int i = 0; i < c1.size(); i++)
+      vector<size_t> c1(v1.size());
+      vector<size_t> c2(v2.size());
+      for (size_t i = 0; i < c1.size(); i++)
       {
         c1[i] = domain_.getIndex(VectorTools::sum(v1[i]));
         c2[i] = domain_.getIndex(VectorTools::sum(v2[i]));
       }
-      return VectorTools::miDiscrete<unsigned int, double>(c1, c2); //Weights ignored for now.
+      return VectorTools::miDiscrete<size_t, double>(c1, c2); //Weights ignored for now.
 		}
     //NB: also define a group statistic if it works...
 };
