@@ -43,25 +43,25 @@ knowledge of the CeCILL license and that you accept its terms.
 using namespace bpp;
 using namespace std;
 
-Domain::Domain(double a, double b, unsigned int n) throw (Exception) :
+Domain::Domain(double a, double b, size_t n) throw (Exception) :
   bounds_(n + 1), midPoints_(n)
 {
   if (n == 0) throw Exception("Domain::constructor1. Number of classes should be > 0.");
   double mini = min(a, b);
   double maxi = max(a, b);
-  double w = (maxi - mini) / n;
+  double w = (maxi - mini) / static_cast<double>(n);
   bounds_[0] = mini;
-  for (unsigned int i = 1; i < n + 1; i++)
+  for (size_t i = 1; i < n + 1; i++)
   {
-    bounds_[i] = mini + i * w;
-    midPoints_[i - 1] = mini + (i - .5) * w;
+    bounds_[i] = mini + static_cast<double>(i) * w;
+    midPoints_[i - 1] = mini + (static_cast<double>(i) - .5) * w;
   }
 }
 
 Domain::Domain(const Vdouble& bounds) throw (Exception): bounds_(bounds), midPoints_(bounds.size() - 1)
 {
-  unsigned int n = bounds_.size();
-  for (unsigned int i = 0; i < n - 1; i++)
+  size_t n = bounds_.size();
+  for (size_t i = 0; i < n - 1; i++)
   {
     if (bounds[i+1] < bounds[i]) throw Exception(
                    "Bound " + TextTools::toString(i+1) + " (" + TextTools::toString(bounds[i+1]) +
@@ -74,15 +74,15 @@ Domain::Domain(const Vdouble& bounds, const Vdouble& midPoints) throw (Exception
 {
   if (bounds.size() != midPoints.size() + 1) throw Exception("Domain::Domain(). Number of midpoints must equal number of bounds - 1.");
   
-  unsigned int n = bounds_.size();
-  for (unsigned int i = 0; i < n-1; i++)
+  size_t n = bounds_.size();
+  for (size_t i = 0; i < n-1; i++)
   {
     if (bounds[i+1] < bounds[i]) throw Exception(
                    "Bound " + TextTools::toString(i+1) + " (" + TextTools::toString(bounds[i+1]) +
          ") is < to bound " + TextTools::toString(i)   + " (" + TextTools::toString(bounds[i]) + ").");
   }
   // Check if midPoint are really midPoints ;-)
-  for (unsigned int i = 0; i < midPoints_.size(); i++)
+  for (size_t i = 0; i < midPoints_.size(); i++)
   {
     if (! ((bounds_[i] == bounds_[i+1] && midPoints_[i] == bounds_[i])
        || (midPoints_[i] >= bounds_[i] && midPoints_[i] < bounds_[i+1])))
@@ -103,18 +103,18 @@ double Domain::getNearestValue(double x) const throw (OutOfRangeException)
 {
   if(x < getLowerBound() || x >= getUpperBound())
     throw OutOfRangeException("Domain::getNearestValue", x, getLowerBound(), getUpperBound());
-  for(unsigned int i = 1; i < bounds_.size(); i++)
+  for(size_t i = 1; i < bounds_.size(); i++)
     if(x < bounds_[i])
       return midPoints_[i - 1];
   // This line can't be reached:
   return 0;
 }
 
-unsigned int Domain::getIndex(double x) const throw (OutOfRangeException)
+size_t Domain::getIndex(double x) const throw (OutOfRangeException)
 {
   if(x < getLowerBound() || x >= getUpperBound())
     throw OutOfRangeException("Domain::getIndex", x, getLowerBound(), getUpperBound());
-  for(unsigned int i = 1; i < bounds_.size(); i++)
+  for(size_t i = 1; i < bounds_.size(); i++)
     if(x < bounds_[i])
       return i - 1;
   // This line can't be reached:

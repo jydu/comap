@@ -72,16 +72,16 @@ Group ClusterTools::getGroups(const Node & subtree, vector<Group> & groups)
   }
   else
   {
-    unsigned int subcount = 0;
-    vector<unsigned int> thisgroup;
-    for (unsigned int i = 0; i < subtree.getNumberOfSons(); i++)
+    size_t subcount = 0;
+    vector<size_t> thisgroup;
+    for (size_t i = 0; i < subtree.getNumberOfSons(); i++)
     {
       const Node * son = subtree.getSon(i);
       // Get group for each son node:
       Group sonGroup = getGroups(*son, groups); 
-      vector<unsigned int> subgroup(sonGroup.size());
-      unsigned int index = subcount;
-      for (unsigned int j = 0; j < sonGroup.size(); j++)
+      vector<size_t> subgroup(sonGroup.size());
+      size_t index = subcount;
+      for (size_t j = 0; j < sonGroup.size(); j++)
       {
         group.add(sonGroup[j]);
         subgroup[j] = subcount;
@@ -92,7 +92,7 @@ Group ClusterTools::getGroups(const Node & subtree, vector<Group> & groups)
       {
         //group.addSubgroup(subgroup, sonGroup.getHeight());
         // Recursively add subgroups:
-        for(unsigned int j = 0; j < sonGroup.getSubgroups().size(); j++)
+        for(size_t j = 0; j < sonGroup.getSubgroups().size(); j++)
         {
           group.addSubgroup(sonGroup.getSubgroup(j) + index, sonGroup.getSubgroupHeight(j));
         }
@@ -100,7 +100,7 @@ Group ClusterTools::getGroups(const Node & subtree, vector<Group> & groups)
       group.setHeight(sonGroup.getHeight() + son->getDistanceToFather());
     }
     vector<string> propNames = subtree.getNodePropertyNames();
-    for(unsigned int i = 0; i < propNames.size(); i++)
+    for(size_t i = 0; i < propNames.size(); i++)
     {
       group.setProperty(propNames[i], subtree.getNodeProperty(propNames[i]));
     }
@@ -122,16 +122,16 @@ Group ClusterTools::getGroup(const Node & subtree)
   }
   else
   {
-    unsigned int subcount = 0;
-    vector<unsigned int> thisgroup;
-    for (unsigned int i = 0; i < subtree.getNumberOfSons(); i++)
+    size_t subcount = 0;
+    vector<size_t> thisgroup;
+    for (size_t i = 0; i < subtree.getNumberOfSons(); i++)
     {
       const Node * son = subtree.getSon(i);
       // Get group for each son node:
       Group sonGroup = getGroup(*son); 
-      vector<unsigned int> subgroup(sonGroup.size());
-      unsigned int index = subcount;
-      for (unsigned int j = 0; j < sonGroup.size(); j++)
+      vector<size_t> subgroup(sonGroup.size());
+      size_t index = subcount;
+      for (size_t j = 0; j < sonGroup.size(); j++)
       {
         group.add(sonGroup[j]);
         subgroup[j] = subcount;
@@ -142,7 +142,7 @@ Group ClusterTools::getGroup(const Node & subtree)
       {
         //group.addSubgroup(subgroup, sonGroup.getHeight());
         // Recursively add subgroups:
-        for(unsigned int j = 0; j < sonGroup.getSubgroups().size(); j++)
+        for(size_t j = 0; j < sonGroup.getSubgroups().size(); j++)
         {
           group.addSubgroup(sonGroup.getSubgroup(j) + index, sonGroup.getSubgroupHeight(j));
         }
@@ -152,26 +152,26 @@ Group ClusterTools::getGroup(const Node & subtree)
     group.addSubgroup(thisgroup, group.getHeight());
   }
   vector<string> propNames = subtree.getNodePropertyNames();
-  for(unsigned int i = 0; i < propNames.size(); i++)
+  for(size_t i = 0; i < propNames.size(); i++)
   {
     group.setProperty(propNames[i], subtree.getNodeProperty(propNames[i]));
   }
   return group;
 }
 
-unsigned int ClusterTools::getSubtreesWithSize(const Node * subtree, unsigned int size, vector<const Node *> & subtrees)
+size_t ClusterTools::getSubtreesWithSize(const Node * subtree, size_t size, vector<const Node *> & subtrees)
 {
   if(subtree->isLeaf()) return 1;
-  unsigned int sizeOfThisNode = 0;
-  vector<unsigned int> sonSizes(subtree->getNumberOfSons());
-  for(unsigned int i = 0; i < subtree->getNumberOfSons(); i++)
+  size_t sizeOfThisNode = 0;
+  vector<size_t> sonSizes(subtree->getNumberOfSons());
+  for(size_t i = 0; i < subtree->getNumberOfSons(); i++)
   {
     sonSizes[i] = getSubtreesWithSize(subtree->getSon(i), size, subtrees);
     sizeOfThisNode += sonSizes[i];
   }
   if(sizeOfThisNode == size) subtrees.push_back(subtree);
   if(sizeOfThisNode > size) {
-    for(unsigned int i = 0; i < sonSizes.size(); i++)
+    for(size_t i = 0; i < sonSizes.size(); i++)
     {
       if(sonSizes[i] < size && sonSizes[i] > 1) subtrees.push_back(subtree->getSon(i));
     }
@@ -179,18 +179,18 @@ unsigned int ClusterTools::getSubtreesWithSize(const Node * subtree, unsigned in
   return sizeOfThisNode;
 }
 
-vector<const Node *> ClusterTools::getSubtreesWithSize(const TreeTemplate<Node> & tree, unsigned int size)
+vector<const Node *> ClusterTools::getSubtreesWithSize(const TreeTemplate<Node> & tree, size_t size)
 {
   vector<const Node *> subtrees;
   getSubtreesWithSize(tree.getRootNode(), size, subtrees);
   return subtrees;
 }
 
-vector<Group> ClusterTools::getGroupsWithSize(const TreeTemplate<Node> & tree, unsigned int size)
+vector<Group> ClusterTools::getGroupsWithSize(const TreeTemplate<Node> & tree, size_t size)
 {
   vector<const Node *> nodes = getSubtreesWithSize(tree, size);
   vector<Group> groups(nodes.size());
-  for(unsigned int i = 0; i < nodes.size(); i++)
+  for(size_t i = 0; i < nodes.size(); i++)
   {
     groups[i] = getGroup(* nodes[i]);
   }
@@ -204,14 +204,14 @@ void ClusterTools::computeGlobalDistanceDistribution(
   const Distance& distance,
   AgglomerativeDistanceMethod& clustering,
   const vector<double>& scales,
-  unsigned int sizeOfDataSet,
-  unsigned int nrep,
-  unsigned int maxGroupSize,
+  size_t sizeOfDataSet,
+  size_t nrep,
+  size_t maxGroupSize,
   ofstream* out)
 {
-  unsigned int nbTypes = nijt.getNumberOfSubstitutionTypes();
+  size_t nbTypes = nijt.getNumberOfSubstitutionTypes();
   vector<string> siteNames(sizeOfDataSet);
-  for (unsigned int i = 0; i < sizeOfDataSet; i++)
+  for (size_t i = 0; i < sizeOfDataSet; i++)
   {
     siteNames[i] = TextTools::toString(i);
   }
@@ -219,42 +219,42 @@ void ClusterTools::computeGlobalDistanceDistribution(
   if (out)
     *out << "Rep\tGroup\tSize\tDmax\tStat\tNmin" << endl;
 
-  for (unsigned int k = 0; k < nrep; k++)
+  for (size_t k = 0; k < nrep; k++)
   {
     ApplicationTools::displayGauge(k, nrep-1, '>');
     SiteContainer* sites = simulator.simulate(sizeOfDataSet);
     drtl.setData(*sites);
     drtl.initialize();
     ProbabilisticSubstitutionMapping * mapping = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
-    unsigned int nbBranches = mapping->getNumberOfBranches();
+    size_t nbBranches = mapping->getNumberOfBranches();
     
     //Mean vector:
     vector<double> meanVector(nbBranches);
-    for (unsigned int j = 0; j < nbBranches; j++)
+    for (size_t j = 0; j < nbBranches; j++)
     {
 		  double sum = 0;
-      for (unsigned int i = 0; i < sizeOfDataSet; i++)
-        for (unsigned int t = 0; t < nbTypes; t++)
+      for (size_t i = 0; i < sizeOfDataSet; i++)
+        for (size_t t = 0; t < nbTypes; t++)
           sum += (*mapping)(j, i, t);
-      meanVector[j] = sum / sizeOfDataSet;
+      meanVector[j] = sum / static_cast<double>(sizeOfDataSet);
     }
 
     //Scale vectors:
-		for (unsigned int j = 0; j < nbBranches; ++j)
+		for (size_t j = 0; j < nbBranches; ++j)
     {
       double scale = scales[j];
-		  for (unsigned int i = 0; i < sizeOfDataSet; ++i)
-		    for (unsigned int t = 0; t < nbTypes; ++t)
+		  for (size_t i = 0; i < sizeOfDataSet; ++i)
+		    for (size_t t = 0; t < nbTypes; ++t)
 			  (*mapping)(j, i, t) *= scale;
 		}
     
     //Compute distance matrix:
 	  DistanceMatrix* mat = new DistanceMatrix(siteNames);
-	  for (unsigned int i = 0; i < sizeOfDataSet; ++i)
+	  for (size_t i = 0; i < sizeOfDataSet; ++i)
     {
 		  (*mat)(i, i) = 0.;
       VVdouble* vec = &((*mapping)[i]);
-		  for (unsigned int j = 0; j < i; ++j)
+		  for (size_t j = 0; j < i; ++j)
       {
 			  (*mat)(i,j) = (*mat)(j,i) = distance.getDistanceForPair(*vec, (*mapping)[j]);
 		  }
@@ -268,7 +268,7 @@ void ClusterTools::computeGlobalDistanceDistribution(
     catch(exception& e) {}
     
     clustering.setDistanceMatrix(*mat);
-    clustering.computeTree(true);
+    clustering.computeTree();
     TreeTemplate<Node> clusteringTree(*clustering.getTree());
 
     //Add information to tree:
@@ -277,16 +277,16 @@ void ClusterTools::computeGlobalDistanceDistribution(
     
     //Now parse each group:
     vector<Group> groups = getGroups(&clusteringTree);
-    for(unsigned int i = 0; i < groups.size(); i++)
+    for(size_t i = 0; i < groups.size(); i++)
     {
       Group * group = &groups[i];
       if(group->size() > maxGroupSize) continue;
       
       //// Compute distance from mean vector:
       //vector<double> groupMeanVector(mapping->getNumberOfBranches(), 0.);
-      //for(unsigned int j = 0; j < group->size(); j++)
+      //for(size_t j = 0; j < group->size(); j++)
       //{
-      //  groupMeanVector += (*mapping)[TextTools::to<unsigned int>((*group)[j])]; 
+      //  groupMeanVector += (*mapping)[TextTools::to<size_t>((*group)[j])]; 
       //}
       //double distFromMeanVector = distance.getDistanceForPair(groupMeanVector/group->size(), meanVector);
       
@@ -319,11 +319,11 @@ void ClusterTools::computeNormProperties_(Node* node, const ProbabilisticSubstit
   minNorm = -log(0.);
   if (node->isLeaf())
   {
-    minNorm = SubstitutionMappingTools::computeNormForSite(mapping, TextTools::to<unsigned int>(node->getName()));
+    minNorm = SubstitutionMappingTools::computeNormForSite(mapping, TextTools::to<size_t>(node->getName()));
   }
   else
   {
-    for (unsigned int i = 0; i < node->getNumberOfSons(); ++i)
+    for (size_t i = 0; i < node->getNumberOfSons(); ++i)
     {
       double minNormSon;
       computeNormProperties_(node->getSon(i), mapping, minNormSon);

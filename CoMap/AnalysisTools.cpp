@@ -71,8 +71,8 @@ VVdouble AnalysisTools::getFromStream(istream & in)
     analysis.push_back(Vdouble());
   }
     
-  int size = analysis.size();
-  if(size == 0) {
+  size_t size = analysis.size();
+  if (size == 0) {
     cerr << "Error while reading result file. Bad header line or no data." << endl;
     exit(-1);
   }
@@ -85,7 +85,7 @@ VVdouble AnalysisTools::getFromStream(istream & in)
       exit(-1);
     }
     //begin to parse a new line:
-    for(int i = 0; i < size + 1; i++) {
+    for(size_t i = 0; i < size + 1; i++) {
       if(!in) {
         cerr << "Error while reading result file. Incomplete branch data line." << endl;
         exit(-1);
@@ -101,18 +101,18 @@ VVdouble AnalysisTools::getFromStream(istream & in)
 
 VVdouble AnalysisTools::computeScalarProductMatrix(const VVdouble & vectors)
 {
-  unsigned int nbVectors = vectors.size();
+  size_t nbVectors = vectors.size();
   VVdouble matrix = VVdouble(nbVectors);
-  for(unsigned int i = 0; i < nbVectors; i++)
+  for(size_t i = 0; i < nbVectors; i++)
   {
     //Must initialize all vector first, since we access
     //both matrix[i, j] and matrix[j, i] in the same time.
     matrix[i] = Vdouble(nbVectors, 0);
   }
-  for(unsigned int i = 0; i < nbVectors; i++)
+  for(size_t i = 0; i < nbVectors; i++)
   {
     matrix[i][i] = VectorTools::scalar<double, double>(vectors[i], vectors[i]);
-    for(unsigned int j = i + 1; j < nbVectors; j++)
+    for(size_t j = i + 1; j < nbVectors; j++)
     {
       matrix[i][j] = matrix[j][i] = VectorTools::scalar<double, double>(vectors[i], vectors[j]);
     }
@@ -128,8 +128,8 @@ VVdouble AnalysisTools::computeScalarProductMatrix (
   bool independantComparisons
 ) throw (DimensionException)
 {
-  unsigned int nbVectors1 = vectors1.size();
-  unsigned int nbVectors2 = vectors2.size();
+  size_t nbVectors1 = vectors1.size();
+  size_t nbVectors2 = vectors2.size();
   if(independantComparisons && nbVectors1 != nbVectors2)
   {
     throw DimensionException(
@@ -141,16 +141,16 @@ VVdouble AnalysisTools::computeScalarProductMatrix (
     );
   }
   VVdouble matrix = VVdouble(nbVectors1);
-  for(unsigned int i = 0; i < nbVectors1; i++)
+  for(size_t i = 0; i < nbVectors1; i++)
   {
     //Must initialize all vector first, since we access
     matrix[i] = Vdouble(nbVectors2, 0);
   }
-  for(unsigned int i = 0; i < nbVectors1; i++)
+  for(size_t i = 0; i < nbVectors1; i++)
   {
-    unsigned int begin = independantComparisons ? i : 0;
-    unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
-    for(unsigned int j = begin; j < end; j++)
+    size_t begin = independantComparisons ? i : 0;
+    size_t end   = independantComparisons ? i + 1 : nbVectors2;
+    for(size_t j = begin; j < end; j++)
     {
       matrix[i][j] = VectorTools::scalar<double, double>(vectors1[i], vectors2[j]);
     }
@@ -162,18 +162,18 @@ VVdouble AnalysisTools::computeScalarProductMatrix (
 
 VVdouble AnalysisTools::computeCosinusMatrix(const VVdouble & vectors)
 {
-  unsigned int nbVectors = vectors.size();
+  size_t nbVectors = vectors.size();
   VVdouble matrix = VVdouble(nbVectors);
-  for(unsigned int i = 0; i < nbVectors; i++)
+  for(size_t i = 0; i < nbVectors; i++)
   {
     //Must initialize all vector first, since we access
     //both matrix[i, j] and matrix[j, i] in the same time.
     matrix[i] = Vdouble(nbVectors, 0);
   }
-  for(unsigned int i = 0; i < nbVectors; i++)
+  for(size_t i = 0; i < nbVectors; i++)
   {
     matrix[i][i] = 1;
-    for(unsigned int j = i + 1; j < nbVectors; j++)
+    for(size_t j = i + 1; j < nbVectors; j++)
     {
       matrix[i][j] = matrix[j][i] = VectorTools::cos<double, double>(vectors[i], vectors[j]);
     }
@@ -189,8 +189,8 @@ VVdouble AnalysisTools::computeCosinusMatrix(
   bool independantComparisons
 ) throw (DimensionException)
 {
-  unsigned int nbVectors1 = vectors1.size();
-  unsigned int nbVectors2 = vectors2.size();
+  size_t nbVectors1 = vectors1.size();
+  size_t nbVectors2 = vectors2.size();
   if(independantComparisons && nbVectors1 != nbVectors2)
   {
     throw DimensionException(
@@ -202,16 +202,16 @@ VVdouble AnalysisTools::computeCosinusMatrix(
     );
   }
   VVdouble matrix = VVdouble(nbVectors1);
-  for(unsigned int i = 0; i < nbVectors1; i++)
+  for(size_t i = 0; i < nbVectors1; i++)
   {
     //Must initialize all vector first, since we access
     matrix[i] = Vdouble(nbVectors2, 0);
   }
-  for(unsigned int i = 0; i < nbVectors1; i++)
+  for(size_t i = 0; i < nbVectors1; i++)
   {
-    unsigned int begin = independantComparisons ? i : 0;
-    unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
-    for(unsigned int j = begin; j < end; j++)
+    size_t begin = independantComparisons ? i : 0;
+    size_t end   = independantComparisons ? i + 1 : nbVectors2;
+    for(size_t j = begin; j < end; j++)
     {
       matrix[i][j] = VectorTools::cos<double, double>(vectors1[i], vectors2[j]);
     }
@@ -223,18 +223,18 @@ VVdouble AnalysisTools::computeCosinusMatrix(
 
 VVdouble AnalysisTools::computeCorrelationMatrix(const VVdouble & vectors)
 {
-  unsigned int nbVectors = vectors.size();
+  size_t nbVectors = vectors.size();
   VVdouble matrix = VVdouble(nbVectors);
-  for(unsigned int i = 0; i < nbVectors; i++)
+  for(size_t i = 0; i < nbVectors; i++)
   {
     //Must initialize all vector first, since we access
     //both matrix[i, j] and matrix[j, i] in the same time.
     matrix[i] = Vdouble(nbVectors, 0);
   }
-  for(unsigned int i = 0; i < nbVectors; i++)
+  for(size_t i = 0; i < nbVectors; i++)
   {
     matrix[i][i] = 1;
-    for(unsigned int j = i + 1; j < nbVectors; j++)
+    for(size_t j = i + 1; j < nbVectors; j++)
     {
       matrix[i][j] = matrix[j][i] = VectorTools::cor<double, double>(vectors[i], vectors[j]);
     }
@@ -250,8 +250,8 @@ VVdouble AnalysisTools::computeCorrelationMatrix(
   bool independantComparisons
 ) throw (DimensionException)
 {
-  unsigned int nbVectors1 = vectors1.size();
-  unsigned int nbVectors2 = vectors2.size();
+  size_t nbVectors1 = vectors1.size();
+  size_t nbVectors2 = vectors2.size();
   if(independantComparisons && nbVectors1 != nbVectors2)
   {
     throw DimensionException(
@@ -263,16 +263,16 @@ VVdouble AnalysisTools::computeCorrelationMatrix(
     );
   }
   VVdouble matrix = VVdouble(nbVectors1);
-  for(unsigned int i = 0; i < nbVectors1; i++)
+  for(size_t i = 0; i < nbVectors1; i++)
   {
     //Must initialize all vector first, since we access
     matrix[i] = Vdouble(nbVectors2, 0);
   }
-  for(unsigned int i = 0; i < nbVectors1; i++)
+  for(size_t i = 0; i < nbVectors1; i++)
   {
-    unsigned int begin = independantComparisons ? i : 0;
-    unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
-    for(unsigned int j = begin; j < end; j++) 
+    size_t begin = independantComparisons ? i : 0;
+    size_t end   = independantComparisons ? i + 1 : nbVectors2;
+    for(size_t j = begin; j < end; j++) 
     {
       matrix[i][j] = VectorTools::cor<double, double>(vectors1[i], vectors2[j]);
     }
@@ -284,18 +284,18 @@ VVdouble AnalysisTools::computeCorrelationMatrix(
 
 VVdouble AnalysisTools::computeCovarianceMatrix(const VVdouble & vectors)
 {
-  unsigned int nbVectors = vectors.size();
+  size_t nbVectors = vectors.size();
   VVdouble matrix = VVdouble(nbVectors);
-  for(unsigned int i = 0; i < nbVectors; i++)
+  for(size_t i = 0; i < nbVectors; i++)
   {
     //Must initialize all vector first, since we access
     //both matrix[i, j] and matrix[j, i] in the same time.
     matrix[i] = Vdouble(nbVectors, 0);
   }
-  for(unsigned int i = 0; i < nbVectors; i++)
+  for(size_t i = 0; i < nbVectors; i++)
   {
     matrix[i][i] = VectorTools::var<double, double>(vectors[i]);
-    for(unsigned int j = i + 1; j < nbVectors; j++)
+    for(size_t j = i + 1; j < nbVectors; j++)
     {
       matrix[i][j] = matrix[j][i] = VectorTools::cov<double, double>(vectors[i], vectors[j]);
     }
@@ -311,8 +311,8 @@ VVdouble AnalysisTools::computeCovarianceMatrix(
   bool independantComparisons
 ) throw (DimensionException)
 {
-  unsigned int nbVectors1 = vectors1.size();
-  unsigned int nbVectors2 = vectors2.size();
+  size_t nbVectors1 = vectors1.size();
+  size_t nbVectors2 = vectors2.size();
   if(independantComparisons && nbVectors1 != nbVectors2)
   {
     throw DimensionException(
@@ -324,16 +324,16 @@ VVdouble AnalysisTools::computeCovarianceMatrix(
     );
   }
   VVdouble matrix = VVdouble(nbVectors1);
-  for(unsigned int i = 0; i < nbVectors1; i++)
+  for(size_t i = 0; i < nbVectors1; i++)
   {
     //Must initialize all vector first, since we access
     matrix[i] = Vdouble(nbVectors2, 0);
   }
-  for(unsigned int i = 0; i < nbVectors1; i++)
+  for(size_t i = 0; i < nbVectors1; i++)
   {
-    unsigned int begin = independantComparisons ? i : 0;
-    unsigned int end   = independantComparisons ? i + 1 : nbVectors2;
-    for(unsigned int j = begin; j < end; j++)
+    size_t begin = independantComparisons ? i : 0;
+    size_t end   = independantComparisons ? i + 1 : nbVectors2;
+    for(size_t j = begin; j < end; j++)
     {
       matrix[i][j] = VectorTools::cov<double, double>(vectors1[i], vectors2[j]);
     }
@@ -345,9 +345,9 @@ VVdouble AnalysisTools::computeCovarianceMatrix(
 
 Vdouble AnalysisTools::computeNorms(const ProbabilisticSubstitutionMapping& mapping)
 {
-  unsigned int nbVectors = mapping.getNumberOfSites();
+  size_t nbVectors = mapping.getNumberOfSites();
   Vdouble vect(nbVectors);
-  for(unsigned int i = 0; i < nbVectors; i++)
+  for(size_t i = 0; i < nbVectors; i++)
     vect[i] = SubstitutionMappingTools::computeNormForSite(mapping, i);
   return vect;
 }
@@ -360,16 +360,16 @@ void AnalysisTools::writeMatrix(
   ostream& out)
 {
   out << "\tMean";
-  for(unsigned int i = 0; i < matrix.size() - 1; i++)
+  for(size_t i = 0; i < matrix.size() - 1; i++)
   {
     out << "\tSite" << sites.getSite(i).getPosition();
   }
   out << endl;
-  for(unsigned int j = 0; j < matrix[0].size(); j++)
+  for(size_t j = 0; j < matrix[0].size(); j++)
   {
     if(j == 0) out << "Mean";
     else out << "Site" << sites.getSite(j - 1).getPosition();
-    for(unsigned int i = 0; i < matrix.size(); i++)
+    for(size_t i = 0; i < matrix.size(); i++)
     {
       out << "\t" << matrix[i][j];
     }
@@ -386,16 +386,16 @@ void AnalysisTools::writeMatrix(
   ostream & out)
 {
   out << "\tMean";
-  for(unsigned int i = 0; i < matrix.size() - 1; i++)
+  for(size_t i = 0; i < matrix.size() - 1; i++)
   {
     out << "\tSite" << sites1.getSite(i).getPosition();
   }
   out << endl;
-  for(unsigned int j = 0; j < matrix[0].size(); j++)
+  for(size_t j = 0; j < matrix[0].size(); j++)
   {
     if(j == 0) out << "Mean";
     else out << "Site" << sites2.getSite(j - 1).getPosition();
-    for(unsigned int i = 0; i < matrix.size(); i++)
+    for(size_t i = 0; i < matrix.size(); i++)
     {
       out << "\t" << matrix[i][j];
     }
@@ -412,19 +412,19 @@ vector<IntervalData*> AnalysisTools::getNullDistributionIntraDR(
   const Statistic& statistic,
   const Domain& statDomain,
   const Domain& rateDomain,
-  unsigned int repCPU,
-  unsigned int repRAM,
+  size_t repCPU,
+  size_t repRAM,
   bool average,
   bool joint,
   bool verbose)
 {
-  unsigned int nbClasses = rateDomain.getSize();
+  size_t nbClasses = rateDomain.getSize();
   vector<IntervalData *> id(nbClasses);
-  for(unsigned int i = 0; i < nbClasses; i++)
+  for(size_t i = 0; i < nbClasses; i++)
   {
     id[i] = new IntervalData(statDomain, "Null distribution (classe > " + TextTools::toString(rateDomain.getValue(i)) + ")");
   }
-  for(unsigned int i = 0; i < repCPU; i++)
+  for(size_t i = 0; i < repCPU; i++)
   {
     if(verbose) ApplicationTools::displayGauge(i, repCPU - 1);
 
@@ -469,7 +469,7 @@ vector<IntervalData*> AnalysisTools::getNullDistributionIntraDR(
     }
     delete sites2;
 
-    for(unsigned int j = 0; j < repRAM; j++)
+    for(size_t j = 0; j < repRAM; j++)
     {
       double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
       double minR = min(pr1[j], pr2[j]);
@@ -498,19 +498,19 @@ vector<IntervalData*> AnalysisTools::getNullDistributionInterDR(
   const Statistic& statistic,
   const Domain& statDomain,
   const Domain& rateDomain,
-  unsigned int repCPU,
-  unsigned int repRAM,
+  size_t repCPU,
+  size_t repRAM,
   bool average,
   bool joint,
   bool verbose)
 {
-  unsigned int nbClasses = rateDomain.getSize();
+  size_t nbClasses = rateDomain.getSize();
   vector<IntervalData*> id(nbClasses);
-  for (unsigned int i = 0; i < nbClasses; i++)
+  for (size_t i = 0; i < nbClasses; i++)
   {
     id[i] = new IntervalData(statDomain, "Null distribution (classe > " + TextTools::toString(rateDomain.getValue(i)) + ")");
   }
-  for (unsigned int i = 0; i < repCPU; i++)
+  for (size_t i = 0; i < repCPU; i++)
   {
     if(verbose) ApplicationTools::displayGauge(i, repCPU - 1);
 
@@ -556,7 +556,7 @@ vector<IntervalData*> AnalysisTools::getNullDistributionInterDR(
     }
     delete sites2;
     
-    for(unsigned int j = 0; j < repRAM; j++)
+    for(size_t j = 0; j < repRAM; j++)
     {
       double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
       double minR = min(pr1[j], pr2[j]);
@@ -580,8 +580,8 @@ void AnalysisTools::getNullDistributionIntraDR(
   ostream* out,
   vector< vector<double> >* simstats,
   const Domain* rateDomain,
-  unsigned int repCPU,
-  unsigned int repRAM,
+  size_t repCPU,
+  size_t repRAM,
   bool average,
   bool joint,
   bool verbose)
@@ -595,14 +595,14 @@ void AnalysisTools::getNullDistributionIntraDR(
   if (simstats && !rateDomain)
     if (simstats->size() != 1)
       throw Exception("AnalysisTools::getNullDistributionIntraDR. Input vector should be of same size 1 as no rate domain was specified.");
-  for (unsigned int i = 0; i < repCPU; i++)
+  for (size_t i = 0; i < repCPU; i++)
   {
     if (verbose) ApplicationTools::displayGauge(i, repCPU - 1);
     
     SiteContainer* sites1 = seqSim.simulate(repRAM);
     drtl.setData(*sites1);
     drtl.initialize();
-    vector<unsigned int> rc1 = drtl.getRateClassWithMaxPostProbOfEachSite();
+    vector<size_t> rc1 = drtl.getRateClassWithMaxPostProbOfEachSite();
     Vdouble pr1 = drtl.getPosteriorRateOfEachSite();
     
     ProbabilisticSubstitutionMapping* mapping1;
@@ -626,7 +626,7 @@ void AnalysisTools::getNullDistributionIntraDR(
     SiteContainer* sites2 = seqSim.simulate(repRAM);
     drtl.setData(*sites2);
     drtl.initialize();
-    vector<unsigned int> rc2 = drtl.getRateClassWithMaxPostProbOfEachSite();
+    vector<size_t> rc2 = drtl.getRateClassWithMaxPostProbOfEachSite();
     Vdouble pr2 = drtl.getPosteriorRateOfEachSite();
     
     ProbabilisticSubstitutionMapping* mapping2;
@@ -647,7 +647,7 @@ void AnalysisTools::getNullDistributionIntraDR(
     delete sites2;
     Vdouble norm2 = computeNorms(*mapping2);
       
-    for (unsigned int j = 0; j < repRAM; j++)
+    for (size_t j = 0; j < repRAM; j++)
     {
       double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
       double nmin = std::min(norm1[j], norm2[j]);
@@ -656,7 +656,7 @@ void AnalysisTools::getNullDistributionIntraDR(
       if (simstats) {
         if (rateDomain) {
           try {
-            unsigned int cat = rateDomain->getIndex(nmin);
+            size_t cat = rateDomain->getIndex(nmin);
             (*simstats)[cat].push_back(stat);
           } catch (OutOfRangeException& oore) {}
         } else {
@@ -683,22 +683,22 @@ void AnalysisTools::getNullDistributionInterDR(
   SubstitutionCount & nijt2,
   const Statistic & statistic,
   ostream & out,
-  unsigned int repCPU,
-  unsigned int repRAM,
+  size_t repCPU,
+  size_t repRAM,
   bool average,
   bool joint,
   bool verbose)
 {
   // Write header line:
   out << "Stat\tRCmin\tPRmin\tNmin" << endl;
-  for(unsigned int i = 0; i < repCPU; i++)
+  for(size_t i = 0; i < repCPU; i++)
   {
     if(verbose) ApplicationTools::displayGauge(i, repCPU - 1);
 
     SiteContainer * sites1 = seqSim1.simulate(repRAM);
     drtl1.setData(*sites1);
     drtl1.initialize();
-    vector<unsigned int> rc1 = drtl1.getRateClassWithMaxPostProbOfEachSite();
+    vector<size_t> rc1 = drtl1.getRateClassWithMaxPostProbOfEachSite();
     Vdouble pr1 = drtl1.getPosteriorRateOfEachSite();
  
     ProbabilisticSubstitutionMapping * mapping1;
@@ -722,7 +722,7 @@ void AnalysisTools::getNullDistributionInterDR(
     SiteContainer * sites2 = seqSim2.simulate(repRAM);
     drtl2.setData(*sites2);
     drtl2.initialize();
-    vector<unsigned int> rc2 = drtl2.getRateClassWithMaxPostProbOfEachSite();
+    vector<size_t> rc2 = drtl2.getRateClassWithMaxPostProbOfEachSite();
     Vdouble pr2 = drtl2.getPosteriorRateOfEachSite();
     ProbabilisticSubstitutionMapping * mapping2;
     if(average)
@@ -742,7 +742,7 @@ void AnalysisTools::getNullDistributionInterDR(
     delete sites2;
     Vdouble norm2 = computeNorms(*mapping2);
 
-    for(unsigned int j = 0; j < repRAM; j++)
+    for(size_t j = 0; j < repRAM; j++)
     {
       double stat = statistic.getValueForPair((*mapping1)[j], (*mapping2)[j]);
       out << stat << "\t" << std::min(rc1[j], rc2[j]) << "\t" << std::min(pr1[j], pr2[j]) << "\t" << std::min(norm1[j], norm2[j]) << endl;
@@ -760,13 +760,13 @@ void AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(
   const DetailedSiteSimulator& seqSim,
   const Statistic& statistic,
   ostream& out,
-  unsigned int rep,
+  size_t rep,
   bool verbose)
 {
   // Write header line:
   out << "Stat\tr1\tr2" << endl;
   TotalSubstitutionRegister reg(seqSim.getAlphabet());
-  for (unsigned int i = 0; i < rep; ++i)
+  for (size_t i = 0; i < rep; ++i)
   {
     ApplicationTools::displayGauge(i, rep - 1);
     RASiteSimulationResult* hssr1 = 

@@ -61,9 +61,9 @@ class SumClustering : public AbstractAgglomerativeDistanceMethod
 	
 	public:
 		SumClustering(const ProbabilisticSubstitutionMapping& mapping, const Distance* distance, const DistanceMatrix& matrix) throw (Exception) :
-      AbstractAgglomerativeDistanceMethod(matrix), mapping_(mapping), distance_(distance)
+      AbstractAgglomerativeDistanceMethod(matrix, true, true), mapping_(mapping), distance_(distance)
 		{
-			computeTree(true);
+			computeTree();
 		}
     SumClustering(const SumClustering& sc) :
       AbstractAgglomerativeDistanceMethod(sc), mapping_(sc.mapping_), distance_(sc.distance_) 
@@ -91,9 +91,9 @@ class SumClustering : public AbstractAgglomerativeDistanceMethod
 		 * The vector at position bestPair[0] is now the sum of vectors bestPair[0] and bestPair[1].
 		 * It is then used for computation of distances.
 		 */
-		vector<unsigned int> getBestPair() throw (Exception);
-		vector<double> computeBranchLengthsForPair(const vector<unsigned int> & pair);
-		double computeDistancesFromPair(const vector<unsigned int> & pair, const vector<double> & branchLengths, unsigned int pos);
+		vector<size_t> getBestPair() throw (Exception);
+		vector<double> computeBranchLengthsForPair(const vector<size_t> & pair);
+		double computeDistancesFromPair(const vector<size_t> & pair, const vector<double> & branchLengths, size_t pos);
 		void finalStep(int idRoot);	
 		virtual Node * getLeafNode(int id, const string & name);
 		virtual Node * getParentNode(int id, Node * son1, Node * son2);

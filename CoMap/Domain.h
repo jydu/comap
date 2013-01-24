@@ -71,7 +71,7 @@ class Domain
      * @param n The number of classes.
      * @throw Exception If the number of classes is 0.
      */
-    Domain(double a = 0, double b = 0, unsigned int n = 1) throw (Exception);
+    Domain(double a = 0, double b = 0, size_t n = 1) throw (Exception);
     
     /**
      * @brief Build a new Domain object given the classes bounds.
@@ -120,7 +120,7 @@ class Domain
     /**
      * @return The number of classes = number of intervals = number of midpoints.
      */
-    virtual unsigned int getSize() const { return midPoints_.size(); }
+    virtual size_t getSize() const { return midPoints_.size(); }
 
     /**
      * @return All bounds.
@@ -131,13 +131,13 @@ class Domain
      * @return One bound.
      * @param i The index of the bound \f$\in [0,n]\f$ where \f$n\f$ is the number of classes.
      */
-    virtual double getBound(unsigned int i) const { return bounds_[i]; }
+    virtual double getBound(size_t i) const { return bounds_[i]; }
     
     /**
      * @return One midpoint.
      * @param i The index of the midpoint \f$\in [0,n[\f$ where \f$n\f$ is the number of classes.
      */
-    virtual double getValue(unsigned int i) const { return midPoints_[i]; }
+    virtual double getValue(size_t i) const { return midPoints_[i]; }
 
     /**
      * @return The nearest midpoint of a given value.
@@ -151,7 +151,7 @@ class Domain
      * @param x The value to check.
      * @throw OutOfRangeException if the value is not in the domain interval.
      */
-    virtual unsigned int getIndex(double x) const throw (OutOfRangeException);
+    virtual size_t getIndex(double x) const throw (OutOfRangeException);
     
 };
 

@@ -125,7 +125,7 @@ class CandidateGroup
     }
     void setAnalysable(bool yn) { analysable_ = yn; }
     bool isAnalysable() const { return analysable_; }
-    unsigned int size() const { return sites_.size(); }
+    size_t size() const { return sites_.size(); }
 
     const CandidateSite& operator[](unsigned int i) const { return sites_[i]; }
     CandidateSite& operator[](unsigned int i) { return sites_[i]; }
@@ -231,7 +231,7 @@ class CandidateGroupSet
     double getN1ForGroup(unsigned int groupIndex) const { return n1_[groupIndex]; }
     double getN2ForGroup(unsigned int groupIndex) const { return n2_[groupIndex]; }
 
-    unsigned int size() const { return candidates_.size(); }
+    size_t size() const { return candidates_.size(); }
 
     const CandidateGroup& operator[](unsigned int index) const { return candidates_[index]; }
 

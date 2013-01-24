@@ -224,8 +224,8 @@ void CoETools::readData(
   bool removeConst = ApplicationTools::getBooleanParameter("input.remove_const", params, true);
   if (removeConst) {
     ApplicationTools::displayTask("Remove conserved positions", true);
-    unsigned int n = sites->getNumberOfSites();
-    for (unsigned int i = n; i > 0; --i) {
+    size_t n = sites->getNumberOfSites();
+    for (size_t i = n; i > 0; --i) {
       ApplicationTools::displayGauge(n - i, n - 1, '=');
       if (SiteTools::isConstant(sites->getSite(i - 1), true))
         sites->deleteSite(i - 1);
@@ -253,7 +253,7 @@ ProbabilisticSubstitutionMapping* CoETools::getVectors(
   if (inputVectorsFilePath != "none")
   {
     //We try to load the substitution vector directly from file:
-    int nbSites = drtl.getNumberOfSites();
+    size_t nbSites = drtl.getNumberOfSites();
     ApplicationTools::displayResult("Substitution mapping in file:", inputVectorsFilePath);
     ifstream sc(inputVectorsFilePath.c_str(), ios::in);
     substitutions = new ProbabilisticSubstitutionMapping(drtl.getTree(), &substitutionCount, nbSites);
@@ -379,7 +379,7 @@ void CoETools::writeInfos(
   if (outFile == "none") return;
 
   // Get the rate class with maximum posterior probability:
-  vector<unsigned int> classes = ras.getRateClassWithMaxPostProbOfEachSite();
+  vector<size_t> classes = ras.getRateClassWithMaxPostProbOfEachSite();
   // Get the posterior rate, i.e. rate averaged over all posterior probabilities:
   Vdouble rates = ras.getPosteriorRateOfEachSite();
   Vdouble logLn = ras.getLogLikelihoodForEachSite();
@@ -644,13 +644,13 @@ void CoETools::computeIntraStats(
   double maxRateDiff   = getMaxRateDiff(params);
   double minStatistic  = getStatisticMin(params);
 
-  unsigned int nbSites = mapping.getNumberOfSites();
+  size_t nbSites = mapping.getNumberOfSites();
   vector<double> norms = AnalysisTools::computeNorms(mapping);
 
   //Compute null distribution?
   //tl would be modified after the simulations, so we copy it before.
   vector< vector<double> >* simValues = 0; 
-  unsigned int nbRateClasses = 1;
+  size_t nbRateClasses = 1;
   auto_ptr<Domain> rateDomain;
   if (computeNull)
   { 
@@ -666,7 +666,7 @@ void CoETools::computeIntraStats(
         statistic,
         params);
     //We need to sort observations for a better efficiency:
-    for (unsigned int i = 0; i < simValues->size(); ++i) {
+    for (size_t i = 0; i < simValues->size(); ++i) {
       sort((*simValues)[i].begin(), (*simValues)[i].end());
     }
   }
@@ -685,20 +685,20 @@ void CoETools::computeIntraStats(
 
   ApplicationTools::displayTask("Analyse each site pair", true);
   
-  vector<unsigned int> classes = tl.getRateClassWithMaxPostProbOfEachSite();
+  vector<size_t> classes = tl.getRateClassWithMaxPostProbOfEachSite();
   Vdouble rates = tl.getPosteriorRateOfEachSite();
 
-  for (unsigned int i = 0; i < nbSites; i++)
+  for (size_t i = 0; i < nbSites; i++)
   {
-    int    iClass = classes[i];
+    int    iClass = static_cast<int>(classes[i]);
     double iRate  = rates[i];
     if (iClass < minRateClass) continue;
     if (iRate  < minRate     ) continue;
     double iNorm  = norms[i];
     ApplicationTools::displayGauge(i, nbSites - 1);
-    for (unsigned int j = i + 1; j < nbSites; j++)
+    for (size_t j = i + 1; j < nbSites; j++)
     {
-      int    jClass = classes[j];
+      int    jClass = static_cast<int>(classes[j]);
       double jRate  = rates[j];
       if (jClass < minRateClass) continue;
       if (jRate  < minRate     ) continue;
@@ -728,8 +728,8 @@ void CoETools::computeIntraStats(
       statOut << minNorm;
       if (computeNull) {
         try {
-          unsigned int cat = rateDomain->getIndex(minNorm);
-          unsigned int nsim = (*simValues)[cat].size();
+          size_t cat = rateDomain->getIndex(minNorm);
+          size_t nsim = (*simValues)[cat].size();
           unsigned int count;
           for (count = 0; count < nsim && (*simValues)[cat][count] < stat; ++count) {}
           double pvalue = static_cast<double>(nsim - count + 1) / static_cast<double>(nsim + 1);
@@ -779,8 +779,8 @@ void CoETools::computeInterStats(
   double maxRateDiff   = getMaxRateDiff(params);
   double minStatistic  = getStatisticMin(params);
 
-  unsigned int nbSites1 = mapping1.getNumberOfSites();
-  unsigned int nbSites2 = mapping2.getNumberOfSites();
+  size_t nbSites1 = mapping1.getNumberOfSites();
+  size_t nbSites2 = mapping2.getNumberOfSites();
   vector<double> norms1 = AnalysisTools::computeNorms(mapping1);
   vector<double> norms2 = AnalysisTools::computeNorms(mapping2);
 
@@ -797,25 +797,25 @@ void CoETools::computeInterStats(
 
   ApplicationTools::displayTask("Analyse each site pair", true);
     
-  vector<unsigned int> classes1 = tl1.getRateClassWithMaxPostProbOfEachSite();
-  vector<unsigned int> classes2 = tl2.getRateClassWithMaxPostProbOfEachSite();
+  vector<size_t> classes1 = tl1.getRateClassWithMaxPostProbOfEachSite();
+  vector<size_t> classes2 = tl2.getRateClassWithMaxPostProbOfEachSite();
   Vdouble rates1   = tl1.getPosteriorRateOfEachSite();
   Vdouble rates2   = tl2.getPosteriorRateOfEachSite();
 
-  for (unsigned int i = 0; i < nbSites1; i++)
+  for (size_t i = 0; i < nbSites1; i++)
   {
-    int    iClass = classes1[i];
+    int    iClass = static_cast<int>(classes1[i]);
     double iRate  = rates1[i];
     if (iClass < minRateClass1) continue;
     if (iRate  < minRate1     ) continue;
     double iNorm  = norms1[i];
     ApplicationTools::displayGauge(i, nbSites1 - 1);
       
-    unsigned int begin = indepComp ? i : 0;
-    unsigned int end   = indepComp ? i + 1 : nbSites2;
-    for (unsigned int j = begin; j < end; j++)
+    size_t begin = indepComp ? i : 0;
+    size_t end   = indepComp ? i + 1 : nbSites2;
+    for (size_t j = begin; j < end; j++)
     {
-      int    jClass = classes2[j];
+      int    jClass = static_cast<int>(classes2[j]);
       double jRate  = rates2[j];
       if (jClass < minRateClass2) continue;
       if (jRate  < minRate2     ) continue;
