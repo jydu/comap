@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
   ApplicationTools::displayMessage("\n\n-*- Get substitution vectors -*-\n");
 
   // Getting the substitutions count function:
-  SubstitutionCount* substitutionCount1 = CoETools::getSubstitutionCount(alphabet1, model1, rDist1, comap.getParams());
+  SubstitutionCount* substitutionCount1 = PhylogeneticsApplicationTools::getSubstitutionCount(alphabet1, model1, comap.getParams());
     
   // Getting the substitution vectors:
   ProbabilisticSubstitutionMapping* mapping1 = CoETools::getVectors(*tl1, *substitutionCount1, *sites1, comap.getParams());
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
         }
 
         // Getting the substitutions count function:
-        SubstitutionCount* substitutionCount2 = CoETools::getSubstitutionCount(alphabet2, model2, rDist2, comap.getParams());
+        SubstitutionCount* substitutionCount2 = PhylogeneticsApplicationTools::getSubstitutionCount(alphabet2, model2, comap.getParams());
     
         // Getting the substitution vectors:
         ProbabilisticSubstitutionMapping* mapping2 = CoETools::getVectors(*tl2, *substitutionCount2, *sites2, comap.getParams(), "2");
