@@ -98,13 +98,13 @@ class IntervalData
 		 * @return The number of elements in interval @c i.
 		 * @param i The index of the interval.
 		 */
-		virtual unsigned int getFreq(unsigned int i) const { return _freqs[i]; }
+		virtual unsigned int getFreq(size_t i) const { return _freqs[i]; }
 		
 		/**
 		 * @return The proportion of elements in interval @c i.
 		 * @param i the index of the interval.
 		 */
-		virtual double getDensity(unsigned int i) const{ return (double)_freqs[i] / (double)_n; }
+		virtual double getDensity(size_t i) const{ return static_cast<double>(_freqs[i]) /static_cast<double>(_n); }
 		
 		/**
 		 * @return A vector with all element counts.

@@ -349,15 +349,6 @@ class CoETools
 		
 		static Statistic* getStatistic(map<string, string>& params, const Alphabet* alphabet) throw (Exception);
 		
-    static AlphabetIndex2<double>* getWeight(const Alphabet* alphabet, map<string, string>& params) throw (Exception);
-
-		static SubstitutionCount* getSubstitutionCount(
-			const Alphabet* alphabet,
-			const SubstitutionModel* model,
-			const DiscreteDistribution* rDist,
-			map<string, string> & params,
-			string suffix = "");
-
     /**
      * This subroutine will call computeIntraNullDistribution on request.
      */

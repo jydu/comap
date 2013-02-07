@@ -52,7 +52,7 @@ IntervalData::IntervalData(const Domain& domain, const std::string& name):
 Vdouble IntervalData::getDensities() const
 {
 	Vdouble densities(_freqs.size());
-	for(unsigned int i = 0; i < _freqs.size(); i++) densities[i] = getDensity(i);
+	for (size_t i = 0; i < _freqs.size(); i++) densities[i] = getDensity(i);
 	return densities;
 }
 
@@ -62,9 +62,9 @@ void IntervalData::addValue(double value) throw (OutOfRangeException)
 	_n++;
 	_sum += value;
 	_sumsquare += value * value;
-	if(value < _min) _min = value;
-	if(value > _max) _max = value;
-	int index = _domain.getIndex(value);
+	if (value < _min) _min = value;
+	if (value > _max) _max = value;
+	size_t index = _domain.getIndex(value);
 	_freqs[index]++;
 }
 

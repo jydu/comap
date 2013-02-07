@@ -56,6 +56,7 @@ using namespace std;
 
 // From bpp-seq:
 #include <Bpp/Seq/SiteTools.h>
+#include <Bpp/Seq/Container/SiteContainerTools.h>
 #include <Bpp/Seq/App/SequenceApplicationTools.h>
 
 // From bpp-phyl:

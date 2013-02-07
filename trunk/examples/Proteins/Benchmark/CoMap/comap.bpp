@@ -74,8 +74,6 @@ output.vectors.file =
 # The method to use to compute vectors:
 # laplace, simple,...
 nijt= 
-# Where to trunc the series (see article):
-nijt_laplace.trunc = 10
 # Should we average over all ancestral state (yes) or use ancestral states reconstruction (no) ?
 nijt.average = yes
 # Should we use pair-joint calculation (yes) or marginal (no) one?
