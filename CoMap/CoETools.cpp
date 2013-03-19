@@ -50,7 +50,7 @@ knowledge of the CeCILL license and that you accept its terms.
 // From SeqLib:
 #include <Bpp/Seq/SiteTools.h>
 #include <Bpp/Seq/App/SequenceApplicationTools.h>
-#include <Bpp/Seq/StateProperties.all>
+#include <Bpp/Seq/AlphabetIndex.all>
 
 // From PhylLib:
 #include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
@@ -126,8 +126,8 @@ void CoETools::readData(
     if (model->getNumberOfStates() != alphabet->getSize())
     {
       //Markov-Modulated Markov Model...
-      unsigned int n =(unsigned int)(model->getNumberOfStates() / alphabet->getSize());
-      rateFreqs = vector<double>(n, 1./(double)n); // Equal rates assumed for now, may be changed later (actually, in the most general case,
+      size_t n =static_cast<size_t>(model->getNumberOfStates() / alphabet->getSize());
+      rateFreqs = vector<double>(n, 1./static_cast<double>(n)); // Equal rates assumed for now, may be changed later (actually, in the most general case,
                                                     // we should assume a rate distribution for the root also!!!  
     }
     FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, sites, params, rateFreqs);
@@ -164,9 +164,9 @@ void CoETools::readData(
     ApplicationTools::displayError("!!! You should consider reestimating all branch lengths parameters.");
     ApplicationTools::displayError("!!! Site-specific likelihood have been written in file DEBUG_likelihoods.txt .");
     ofstream debug ("DEBUG_likelihoods.txt", ios::out);
-    for (unsigned int i = 0; i < allSites->getNumberOfSites(); i++)
+    for (size_t i = 0; i < sites->getNumberOfSites(); i++)
     {
-      debug << "Position " << i+1 << " = " << tl->getLogLikelihoodForASite(i) << endl; 
+      debug << "Position " << sites->getSite(i).getPosition() << " = " << tl->getLogLikelihoodForASite(i) << endl; 
     }
     debug.close();
     exit(-1);

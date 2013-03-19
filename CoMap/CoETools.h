@@ -68,11 +68,11 @@ using namespace std;
 class CandidateSite
 {
   protected:
-    unsigned int index_;
+    size_t index_;
     double normMin_, normMax_;
 
   public:
-    CandidateSite(unsigned int index): index_(index), normMin_(0), normMax_(0) {}
+    CandidateSite(size_t index): index_(index), normMin_(0), normMax_(0) {}
 
   public:
     void setNormRange(double min, double max)
@@ -84,7 +84,7 @@ class CandidateSite
     {
       return (norm >= normMin_ && norm <= normMax_);
     }
-    unsigned int getIndex() const { return index_; }
+    size_t getIndex() const { return index_; }
 };
 
 class CandidateGroup
@@ -105,9 +105,9 @@ class CandidateGroup
       if (!analysable_) throw Exception("CandidateGroup::computeStatisticValue. Group is not analysable.");
       if (sites_.size() == 0) throw Exception("CandidateGroup::computeStatisticValue. Group is empty!");
       vector<const VVdouble*> group;
-      for (unsigned int i = 0; i < sites_.size(); i++)
+      for (size_t i = 0; i < sites_.size(); i++)
       {
-        unsigned int index = sites_[i].getIndex();
+        size_t index = sites_[i].getIndex();
         group.push_back(&mapping[index]);
       }
       statistic_ = stat.getValueForGroup(group);
