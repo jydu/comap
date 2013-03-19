@@ -619,9 +619,9 @@ int main(int argc, char *argv[])
         CandidateGroupSet candidates(statistic, minSim, verbose);
     
         //Create positions index first:
-        map<int, unsigned int> posIndex;
+        map<int, size_t> posIndex;
         vector<int> positions = sites1->getSitePositions();
-        for (unsigned int i = 0; i < positions.size(); i++)
+        for (size_t i = 0; i < positions.size(); i++)
           posIndex[positions[i]] = i;
 
         //Parse file:
@@ -643,7 +643,7 @@ int main(int argc, char *argv[])
         //Now parse each group, compute index and corresponding norm ranges and statistic value:
         ApplicationTools::displayTask("Compute statistic for each group", true);
         string group, tmp, strok = "0123456789;,";
-        for (unsigned int i = 0; i < groups.size(); i++)
+        for (size_t i = 0; i < groups.size(); i++)
         {
           if (groups.size() > 100) ApplicationTools::displayGauge(i, groups.size() - 1, '=');
           tmp = TextTools::removeWhiteSpaces(groups[i]);
