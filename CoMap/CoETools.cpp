@@ -96,7 +96,7 @@ void CoETools::readData(
 
   if (nhOpt == "no")
   {  
-    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, sites, params);
+    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, 0, sites, params);
     if (model->getNumberOfStates() > model->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
@@ -111,7 +111,7 @@ void CoETools::readData(
   }
   else if (nhOpt == "one_per_branch")
   {
-    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, sites, params);
+    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, 0, sites, params);
     if (model->getNumberOfStates() > model->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
@@ -130,7 +130,7 @@ void CoETools::readData(
       rateFreqs = vector<double>(n, 1./static_cast<double>(n)); // Equal rates assumed for now, may be changed later (actually, in the most general case,
                                                     // we should assume a rate distribution for the root also!!!  
     }
-    FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, sites, params, rateFreqs);
+    FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, 0, sites, params, rateFreqs);
     vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", params, ',', "");
     modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, globalParameters); 
     model = modelSet->getModel(0)->clone();
@@ -138,7 +138,7 @@ void CoETools::readData(
   }
   else if (nhOpt == "general")
   {
-    modelSet = PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet,0, params);
+    modelSet = PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet, 0, 0, params);
     if (modelSet->getNumberOfStates() > modelSet->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
