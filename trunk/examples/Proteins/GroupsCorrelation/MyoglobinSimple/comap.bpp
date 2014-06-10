@@ -1,0 +1,85 @@
+# ----------------------------------------------------------------------------------------
+#                                     Data loading
+# ----------------------------------------------------------------------------------------
+
+# The laphabet to use:
+# DNA, RNA or Protein
+alphabet = Protein
+
+# The sequence file to use (sequences must be aligned!)
+input.sequence.file   = Myoglobin.aln.sel.mase
+input.sequence.format = Mase
+
+#Sites to use:
+# all => all sites, gaps will be considered as unknown chars.
+# nogap => do not consider sites with gaps.
+# complete => only fully resolved chars.
+input.sequence.sites_to_use = nogap
+
+# Ignore constant sites:
+input.remove_const = yes
+
+# The tree file to use. Branch lengths are optional.
+input.tree.file = Myo.dnd
+input.tree.format = Newick
+
+# ----------------------------------------------------------------------------------------
+#                                     Model specification
+# ----------------------------------------------------------------------------------------
+
+# Available models.
+# For proteins, the DCmutt method is used for JTT92 and DSO78.
+# You can use the 'empirical' option to specify another model.
+# JCnuc, K80, T92, HKY85, TN93, JCprot, DSO78, JTT92 or empirical
+model = LG08
+
+# Rate Across Sites variation:
+# gamma or constant
+rate_distribution = Gamma(n=4, alpha=0.985435)
+
+simulations.continuous = no
+
+# ----------------------------------------------------------------------------------------
+#                                     Parameter estimation
+# ----------------------------------------------------------------------------------------
+
+optimization = FullD
+
+output.tree.file = Myo.LG.dnd
+
+# ----------------------------------------------------------------------------------------
+#                                     Additionnal stuff
+# ----------------------------------------------------------------------------------------
+
+# A file where site-specific information will be written (posterior rate, constant site, etc.):
+output.infos = Myo.infos
+output.tags.file = Myo.tags.dnd
+output.tags.translation = Myo.tags.tln
+
+# ----------------------------------------------------------------------------------------
+#                                     Substitution vectors
+# ----------------------------------------------------------------------------------------
+
+output.vectors.file = None
+
+# The method to use to compute vectors:
+# laplace, simple,...
+#nijt = Uniformization
+
+# ----------------------------------------------------------------------------------------
+#                                     Clustering Analysis
+# ----------------------------------------------------------------------------------------
+
+analysis = clustering
+
+clustering.distance=cor
+clustering.scale=no
+clustering.method=complete
+
+clustering.output.groups.file=
+clustering.output.matrix.file=none
+clustering.output.tree.file=
+
+clustering.null=yes
+clustering.null.number=1000
+clustering.null.output.file=

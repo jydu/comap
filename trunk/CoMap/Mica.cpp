@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
 
     if (nhOpt == "no")
     {  
-      model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, sites, mica.getParams());
+      model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, 0, sites, mica.getParams());
       if(model->getNumberOfStates() > model->getAlphabet()->getSize())
       {
         //Markov-modulated Markov model!
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
     }
     else if(nhOpt == "one_per_branch")
     {
-      model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, sites, mica.getParams());
+      model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, 0, sites, mica.getParams());
       if (model->getNumberOfStates() > model->getAlphabet()->getSize())
       {
         //Markov-modulated Markov model!
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
         rateFreqs = vector<double>(n, 1./(double)n); // Equal rates assumed for now, may be changed later (actually, in the most general case,
                                                      // we should assume a rate distribution for the root also!!!  
       }
-      FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, sites, mica.getParams(), rateFreqs);
+      FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, 0, sites, mica.getParams(), rateFreqs);
       vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", mica.getParams(), ',', "");
       modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, globalParameters); 
       model = modelSet->getModel(0)->clone();
@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
     }
     else if (nhOpt == "general")
     {
-      modelSet = PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet, sites, mica.getParams());
+      modelSet = PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet, 0, sites, mica.getParams());
       if (modelSet->getNumberOfStates() > modelSet->getAlphabet()->getSize())
       {
         //Markov-modulated Markov model!
