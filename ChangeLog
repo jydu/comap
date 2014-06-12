@@ -1,3 +1,6 @@
+12/06/14 Julien Dutheil
+* Several bug fixed. Simplified interface with more default values.
+
 19/04/11 Julien Dutheil
 * New mapping options. super fast multiple (weighted) substitution mapping!
 
