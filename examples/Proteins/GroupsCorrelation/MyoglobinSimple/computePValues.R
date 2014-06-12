@@ -23,7 +23,7 @@ all.sim.files<-list()
 all.sim.files[["Simple"]]    <-"Myo_null.csv"
 
 # 3) Output files:
-output.file1<-"Myo_stats_pvalues.csv"
+output.file<-"Myo_stats_pvalues.csv"
 
 #Sliding windows sizes:
 window.Nmin<-0.2
