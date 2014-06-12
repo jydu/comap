@@ -281,7 +281,7 @@ ProbabilisticSubstitutionMapping* CoETools::getVectors(
         substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, substitutionCount, 0);
       }
     }
-    if (outputVectorsFilePath != "none" & outputVectorsFilePath != "None") {
+    if (outputVectorsFilePath != "none" && outputVectorsFilePath != "None") {
       ofstream outputVectors(outputVectorsFilePath.c_str(), ios::out);
       SubstitutionMappingTools::writeToStream(*substitutions, completeSites, 0, outputVectors);
       outputVectors.close();
