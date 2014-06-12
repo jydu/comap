@@ -137,23 +137,23 @@ int main(int argc, char *argv[])
   ApplicationTools::displayResult("Number of sites to analyse", sites1->getNumberOfSites());
   ApplicationTools::displayResult("Number of site patterns", tl1->getLikelihoodData()->getNumberOfDistinctSites());
   
-  bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", comap.getParams(), false, "", true, false);
+  bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", comap.getParams(), false, "", true, 1);
   ApplicationTools::displayResult("Rate distribution for simulations", (continuousSim ? "continuous" : "discrete"));
 
   ApplicationTools::displayMessage("\n\n-*- Get substitution vectors -*-\n");
 
   // Getting the substitutions count function:
-  SubstitutionCount* substitutionCount1 = PhylogeneticsApplicationTools::getSubstitutionCount(alphabet1, model1, comap.getParams());
+  SubstitutionCount* substitutionCount1 = PhylogeneticsApplicationTools::getSubstitutionCount(alphabet1, model1, comap.getParams(), "", true, 1);
     
   // Getting the substitution vectors:
   ProbabilisticSubstitutionMapping* mapping1 = CoETools::getVectors(*tl1, *substitutionCount1, *sites1, comap.getParams());
 
-  string analysis = ApplicationTools::getStringParameter("analysis", comap.getParams(), "pairwise");
+  string analysis = ApplicationTools::getStringParameter("analysis", comap.getParams(), "pairwise", "", false, 0);
   ApplicationTools::displayResult("Analysis type", analysis);
 
   if (analysis == "none")
   {
-    //No coevolution analysis, just do mapping!
+    //No coevolution analysis, only perform mapping!
   }
   else
   {
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
       Statistic* statistic = CoETools::getStatistic(comap.getParams(), alphabet1);
 
       bool computeNullHyp = false;
-      computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", comap.getParams(), false);
+      computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", comap.getParams(), false, "", false, 0);
   
   
       // *******************************************
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
       if (comap.getParams().find("input.sequence.file2") != comap.getParams().end() && comap.getParams()["input.sequence.file2"] != "none")
       {
         TreeTemplate<Node>* tree2;
-        if(comap.getParams().find("input.tree.file2") != comap.getParams().end() && comap.getParams()["input.tree.file2"] != "none")
+        if (comap.getParams().find("input.tree.file2") != comap.getParams().end() && comap.getParams()["input.tree.file2"] != "none")
         {
           ApplicationTools::displayMessage("WARNING!!! Second tree file specified.\n Tree 1 and Tree 2 must differ only by their branch lengths, otherwise results may be uninterpretable.\n");      
           Tree* tmpTree2 = PhylogeneticsApplicationTools::getTree(comap.getParams(), "input.", "2", true);
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
           computeNullHyp,
           comap.getParams());
         CoETools::writeInfos(*sites1, *tl1, comap.getParams());
-     }
+      }
 
       delete statistic;
     }
@@ -342,29 +342,29 @@ int main(int argc, char *argv[])
 
       ApplicationTools::displayMessage("\n\n-*- Perform clustering analysis -*-\n");
   
-      string clusteringMethod = ApplicationTools::getStringParameter("clustering.method", comap.getParams(), "none", "", false, false);
+      string clusteringMethod = ApplicationTools::getStringParameter("clustering.method", comap.getParams(), "complete", "", false, 0);
       if (clusteringMethod != "none")
       {
         size_t nbBranches = mapping1->getNumberOfBranches();
         size_t nbSites    = mapping1->getNumberOfSites();
         size_t nbTypes    = mapping1->getNumberOfSubstitutionTypes();
-        bool scale = ApplicationTools::getBooleanParameter("clustering.scale", comap.getParams(), false, "", true, true);
+        bool scale = ApplicationTools::getBooleanParameter("clustering.scale", comap.getParams(), false, "", true, 4); //This option is for testing purpose only.
         vector<double> scales(nbBranches, 1.);
         vector<double> weights(nbBranches, 1.);
         vector<double> brLens = mapping1->getBranchLengths();
-        double minLen = ApplicationTools::getDoubleParameter("clustering.min_length", comap.getParams(), false, "", 0.000001, false);
+        double minLen = ApplicationTools::getDoubleParameter("clustering.min_length", comap.getParams(), false, "", 0.000001, 4);
         vector<double> meanVector(nbBranches);
-        for (size_t j = 0; j < nbBranches; j++)
+        for (size_t j = 0; j < nbBranches; ++j)
         {
           double sum = 0;
-          for (size_t i = 0; i < nbSites; i++)
-            for (size_t t = 0; t < nbTypes; t++)
+          for (size_t i = 0; i < nbSites; ++i)
+            for (size_t t = 0; t < nbTypes; ++t)
               sum += (*mapping1)(j, i, t);
           meanVector[j] = sum / static_cast<double>(nbSites);
         }
   
         // Scale if required (i.e., devide each vector by the mean vector):
-        for (size_t j = 0; j < nbBranches; j++)
+        for (size_t j = 0; j < nbBranches; ++j)
         {
           double len = brLens[j];
           if (len <= minLen) weights[j] = 0.; // Branch ignored, considered as a multifurcation.
@@ -377,8 +377,8 @@ int main(int argc, char *argv[])
               if (m > 0) scaleVal = 1./m; // if mean==0, hence the susbstitution number is 0 too, the scale does not matter... 0/0=>0.
               //else scaleVal = 0.;
             }// else: weight[j] == 0, so the position will not be used in distance calculation whatever...
-            for (unsigned int i = 0; i < nbSites; i++)
-              for (unsigned int t = 0; t < nbTypes; t++)
+            for (unsigned int i = 0; i < nbSites; ++i)
+              for (unsigned int t = 0; t < nbTypes; ++t)
                 (*mapping1)(j, i, t) *= scaleVal;
             scales[j] = scaleVal;
           }
@@ -397,29 +397,25 @@ int main(int argc, char *argv[])
   
         // Get the distance to use
     
-        string distanceMethod = ApplicationTools::getStringParameter("clustering.distance", comap.getParams(), "cor", "", true, true);
-        Distance* dist = 0;
+        string distanceMethod = ApplicationTools::getStringParameter("clustering.distance", comap.getParams(), "cor", "", true, 1);
+        auto_ptr<Distance> dist;
         if (distanceMethod == "euclidian")
         {
-          dist = new EuclidianDistance();
+          dist.reset(new EuclidianDistance());
         }
         else if (distanceMethod == "cor")
         {
           Statistic* cor = new CorrelationStatistic();
-          dist = new StatisticBasedDistance(cor, 1.);
+          dist.reset(new StatisticBasedDistance(cor, 1.));
         }
-        else if(distanceMethod == "comp")
+        else if (distanceMethod == "comp")
         {
-          string nijtOption = ApplicationTools::getStringParameter("nijt", comap.getParams(), "simule", "", true);
-          bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", comap.getParams(), true, "", true); 
-          if (nijtOption != "aadist" || sym)
-          {
-            throw Exception("Compensation distance must be used with 'nijt=aadist' and 'nijt_aadist.sym=no' options.");
-          }
-          else
-          {
-            dist = new CompensationDistance();
-          }
+          WeightedSubstitutionCount* wsc = dynamic_cast<WeightedSubstitutionCount*>(substitutionCount1);
+          if (!wsc) 
+            throw Exception("Compensation distance must be used in combination with a substitution count allowing biochemical weights (e.g. 'nijt=Uniformization').");
+          if (wsc->getWeights()->isSymmetric())
+            throw Exception("Compensation distance must be used in combination with asymmetric substitution weights.");
+          dist.reset(new CompensationDistance());
         }
         else
         {
@@ -430,17 +426,17 @@ int main(int argc, char *argv[])
         ApplicationTools::displayResult("Distance to use", distanceMethod);
 
         // Compute the distance matrix.
-        DistanceMatrix* mat = new DistanceMatrix(siteNames);
-        for (unsigned int i = 0; i < nbSites; i++)
+        auto_ptr<DistanceMatrix> mat(new DistanceMatrix(siteNames));
+        for (size_t i = 0; i < nbSites; ++i)
         {
           (*mat)(i,i) = 0.;
-          for (unsigned int j = 0; j < i; j++)
+          for (size_t j = 0; j < i; ++j)
           {
             (*mat)(i,j) = (*mat)(j,i) = dist->getDistanceForPair((*mapping1)[i], (*mapping1)[j]);
           }
         }
 
-        string matrixFile = ApplicationTools::getAFilePath("clustering.output.matrix.file", comap.getParams(), false, false, "", false);
+        string matrixFile = ApplicationTools::getAFilePath("clustering.output.matrix.file", comap.getParams(), false, false, "", false, 1);
         if (matrixFile != "none")
         {
           //Write out matrix to a file, in Phylip format:
@@ -454,21 +450,21 @@ int main(int argc, char *argv[])
         // The leaves in the clustering tree are the position in the mapping.
         // We will translate them before writing it to file.
         vector<string> matNames(nbSites);
-        for (unsigned int i = 0; i < nbSites; i++) matNames[i] = TextTools::toString(i);
+        for (size_t i = 0; i < nbSites; ++i) matNames[i] = TextTools::toString(i);
         mat->setNames(matNames);
    
-        AgglomerativeDistanceMethod * clustering = 0;
+        auto_ptr<AgglomerativeDistanceMethod> clustering;
         if (clusteringMethod == "complete")
         {
-          clustering = new HierarchicalClustering(HierarchicalClustering::COMPLETE, *mat, false);
+          clustering.reset(new HierarchicalClustering(HierarchicalClustering::COMPLETE, *mat, false));
         }
         else if (clusteringMethod == "single")
         {
-          clustering = new HierarchicalClustering(HierarchicalClustering::SINGLE, *mat, false);
+          clustering.reset(new HierarchicalClustering(HierarchicalClustering::SINGLE, *mat, false));
         }
         else if (clusteringMethod == "average")
         {
-          clustering = new HierarchicalClustering(HierarchicalClustering::AVERAGE, *mat, false);
+          clustering.reset(new HierarchicalClustering(HierarchicalClustering::AVERAGE, *mat, false));
         }
         //else if(clusteringMethod == "sum")
         //{
@@ -489,7 +485,7 @@ int main(int argc, char *argv[])
         dist->setStatisticAsProperty(*clusteringTree.getRootNode(), *mapping1);
   
         // Dumping groups to file, with more or less information, depending on the method used.
-        string groupsPath = ApplicationTools::getAFilePath("clustering.output.groups.file", comap.getParams(), true, false, "", false);
+        string groupsPath = ApplicationTools::getAFilePath("clustering.output.groups.file", comap.getParams(), true, false, "", false, 0);
         ApplicationTools::displayResult("Site clusters output file", groupsPath);
         vector<string> colNames(6);
         colNames[0] = "Group";
@@ -504,19 +500,21 @@ int main(int argc, char *argv[])
         // A few infos we will need:
         vector<double> rates = tl1->getPosteriorRateOfEachSite();
         vector<bool> isConst(nbSites);
-        for (unsigned int i = 0; i < nbSites; i++)
+        for (size_t i = 0; i < nbSites; ++i)
           isConst[i] = SiteTools::isConstant(sites1->getSite(i), true);
   
         vector<Group> groups = ClusterTools::getGroups(&clusteringTree);
         //vector<double> minNorms(groups.size());
   
-        for (unsigned int i = 0; i < groups.size(); i++)
+        unsigned int maxGroupSize = ApplicationTools::getParameter<unsigned int>("clustering.maximum_group_size", comap.getParams(), 10, "", true, 2);
+        for (size_t i = 0; i < groups.size(); ++i)
         {
           Group* group = &groups[i];
-      
+          if (group->size() > maxGroupSize) continue; 
+
           // Does the group contain a constant site?
           bool test = false;
-          for (unsigned int j = 0; j < group->size() && !test; j++)
+          for (size_t j = 0; j < group->size() && !test; ++j)
           {
             if (isConst[TextTools::to<unsigned int>((*group)[j])]) test = true;
           }
@@ -548,7 +546,7 @@ int main(int argc, char *argv[])
         groupsFile.close();
 
         //Write clustering tree to file:
-        string treeFile = ApplicationTools::getAFilePath("clustering.output.tree.file", comap.getParams(), false, false, "", false);
+        string treeFile = ApplicationTools::getAFilePath("clustering.output.tree.file", comap.getParams(), false, false, "", false, 1);
         if (treeFile != "none")
         {
           // First we retranslate leaves names:
@@ -561,13 +559,12 @@ int main(int argc, char *argv[])
         // Now test each group:
         ApplicationTools::displayMessage("\n\n-*- Compute null distribution of clusters -*-\n");
   
-        bool testGroupsGlobal = ApplicationTools::getBooleanParameter("clustering.null", comap.getParams(), false, "", true, false);
-        unsigned int maxGroupSize = ApplicationTools::getParameter<unsigned int>("clustering.maximum_group_size", comap.getParams(), 10, "", true, false);
+        bool testGroupsGlobal = ApplicationTools::getBooleanParameter("clustering.null", comap.getParams(), false, "", true, 0);
         ApplicationTools::displayResult("Maximum group size to test", TextTools::toString(maxGroupSize));
         if (testGroupsGlobal)
         {       
-          string simPath = ApplicationTools::getAFilePath("clustering.null.output.file", comap.getParams(), true, false, "", false);
-          unsigned int nrep = ApplicationTools::getParameter<unsigned int>("clustering.null.number", comap.getParams(), 1, "", true);
+          string simPath = ApplicationTools::getAFilePath("clustering.null.output.file", comap.getParams(), true, false, "", false, 0);
+          unsigned int nrep = ApplicationTools::getParameter<unsigned int>("clustering.null.number", comap.getParams(), 1, "", true, 1);
           ApplicationTools::displayResult("Number of simulations", TextTools::toString(nrep));
           ApplicationTools::displayResult("Simulations output file", simPath);
           ofstream* out = 0;
@@ -575,13 +572,8 @@ int main(int argc, char *argv[])
           ApplicationTools::displayTask("Simulating groups", true);
           ClusterTools::computeGlobalDistanceDistribution(*tl1, *seqSim1, *substitutionCount1, *dist, *clustering, scales, nbSites, nrep, maxGroupSize, out);
           ApplicationTools::displayTaskDone();
-          if (out != 0) out->close();
+          if (out) out->close();
         }
-
-        // Clustering memory freeing:
-        delete dist;
-        delete mat;
-        delete clustering;
       }
     }
 

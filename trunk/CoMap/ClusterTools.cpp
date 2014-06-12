@@ -56,14 +56,14 @@ knowledge of the CeCILL license and that you accept its terms.
 using namespace std;
 
 
-vector<Group> ClusterTools::getGroups(const TreeTemplate<Node> * tree)
+vector<Group> ClusterTools::getGroups(const TreeTemplate<Node>* tree)
 {
   vector<Group> groups;
   getGroups(*tree->getRootNode(), groups);
   return groups;
 }
   
-Group ClusterTools::getGroups(const Node & subtree, vector<Group> & groups)
+Group ClusterTools::getGroups(const Node& subtree, vector<Group>& groups)
 {
   Group group;
   if (subtree.isLeaf())
@@ -113,7 +113,7 @@ Group ClusterTools::getGroups(const Node & subtree, vector<Group> & groups)
 }
 
 //Useful?
-Group ClusterTools::getGroup(const Node & subtree)
+Group ClusterTools::getGroup(const Node& subtree)
 {
   Group group;
   if (subtree.isLeaf())
@@ -159,7 +159,7 @@ Group ClusterTools::getGroup(const Node & subtree)
   return group;
 }
 
-size_t ClusterTools::getSubtreesWithSize(const Node * subtree, size_t size, vector<const Node *> & subtrees)
+size_t ClusterTools::getSubtreesWithSize(const Node* subtree, size_t size, vector<const Node*>& subtrees)
 {
   if(subtree->isLeaf()) return 1;
   size_t sizeOfThisNode = 0;
@@ -179,14 +179,14 @@ size_t ClusterTools::getSubtreesWithSize(const Node * subtree, size_t size, vect
   return sizeOfThisNode;
 }
 
-vector<const Node *> ClusterTools::getSubtreesWithSize(const TreeTemplate<Node> & tree, size_t size)
+vector<const Node *> ClusterTools::getSubtreesWithSize(const TreeTemplate<Node>& tree, size_t size)
 {
   vector<const Node *> subtrees;
   getSubtreesWithSize(tree.getRootNode(), size, subtrees);
   return subtrees;
 }
 
-vector<Group> ClusterTools::getGroupsWithSize(const TreeTemplate<Node> & tree, size_t size)
+vector<Group> ClusterTools::getGroupsWithSize(const TreeTemplate<Node>& tree, size_t size)
 {
   vector<const Node *> nodes = getSubtreesWithSize(tree, size);
   vector<Group> groups(nodes.size());
@@ -222,10 +222,10 @@ void ClusterTools::computeGlobalDistanceDistribution(
   for (size_t k = 0; k < nrep; k++)
   {
     ApplicationTools::displayGauge(k, nrep-1, '>');
-    SiteContainer* sites = simulator.simulate(sizeOfDataSet);
+    auto_ptr<SiteContainer> sites(simulator.simulate(sizeOfDataSet));
     drtl.setData(*sites);
     drtl.initialize();
-    ProbabilisticSubstitutionMapping * mapping = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
+    auto_ptr<ProbabilisticSubstitutionMapping> mapping(SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false));
     size_t nbBranches = mapping->getNumberOfBranches();
     
     //Mean vector:
@@ -249,7 +249,7 @@ void ClusterTools::computeGlobalDistanceDistribution(
 		}
     
     //Compute distance matrix:
-	  DistanceMatrix* mat = new DistanceMatrix(siteNames);
+	  auto_ptr<DistanceMatrix> mat(new DistanceMatrix(siteNames));
 	  for (size_t i = 0; i < sizeOfDataSet; ++i)
     {
 		  (*mat)(i, i) = 0.;
@@ -277,10 +277,10 @@ void ClusterTools::computeGlobalDistanceDistribution(
     
     //Now parse each group:
     vector<Group> groups = getGroups(&clusteringTree);
-    for(size_t i = 0; i < groups.size(); i++)
+    for (size_t i = 0; i < groups.size(); i++)
     {
-      Group * group = &groups[i];
-      if(group->size() > maxGroupSize) continue;
+      Group* group = &groups[i];
+      if (group->size() > maxGroupSize) continue;
       
       //// Compute distance from mean vector:
       //vector<double> groupMeanVector(mapping->getNumberOfBranches(), 0.);
@@ -290,7 +290,7 @@ void ClusterTools::computeGlobalDistanceDistribution(
       //}
       //double distFromMeanVector = distance.getDistanceForPair(groupMeanVector/group->size(), meanVector);
       
-      if(out != NULL) *out << k
+      if (out) *out << k
         << "\t" << group->toString()
         << "\t" << group->size()
         << "\t" << (group->getHeight() * 2.)
@@ -299,22 +299,17 @@ void ClusterTools::computeGlobalDistanceDistribution(
         //<< "\t" << distFromMeanVector
         << endl;
     }
-
-    //Housekeeping:
-    delete sites;
-    delete mapping;
-    delete mat;
   }
   ApplicationTools::message->endLine();
 }
 
-void ClusterTools::computeNormProperties(TreeTemplate<Node> & tree, const ProbabilisticSubstitutionMapping & mapping)
+void ClusterTools::computeNormProperties(TreeTemplate<Node>& tree, const ProbabilisticSubstitutionMapping & mapping)
 {
   double min;
   computeNormProperties_(tree.getRootNode(), mapping, min);
 }
     
-void ClusterTools::computeNormProperties_(Node* node, const ProbabilisticSubstitutionMapping & mapping, double & minNorm)
+void ClusterTools::computeNormProperties_(Node* node, const ProbabilisticSubstitutionMapping& mapping, double & minNorm)
 {
   minNorm = -log(0.);
   if (node->isLeaf())

@@ -37,8 +37,6 @@ model = LG08
 # gamma or constant
 rate_distribution = Gamma(n=4, alpha=0.985435)
 
-simulations.continuous = no
-
 # ----------------------------------------------------------------------------------------
 #                                     Parameter estimation
 # ----------------------------------------------------------------------------------------
@@ -48,38 +46,15 @@ optimization = FullD
 output.tree.file = Myo.LG.dnd
 
 # ----------------------------------------------------------------------------------------
-#                                     Additionnal stuff
-# ----------------------------------------------------------------------------------------
-
-# A file where site-specific information will be written (posterior rate, constant site, etc.):
-output.infos = Myo.infos
-output.tags.file = Myo.tags.dnd
-output.tags.translation = Myo.tags.tln
-
-# ----------------------------------------------------------------------------------------
-#                                     Substitution vectors
-# ----------------------------------------------------------------------------------------
-
-output.vectors.file = None
-
-# The method to use to compute vectors:
-# laplace, simple,...
-#nijt = Uniformization
-
-# ----------------------------------------------------------------------------------------
 #                                     Clustering Analysis
 # ----------------------------------------------------------------------------------------
 
 analysis = clustering
 
-clustering.distance=cor
-clustering.scale=no
-clustering.method=complete
+clustering.distance = cor
+clustering.method = complete
+clustering.output.groups.file = Myo_stats.csv
 
-clustering.output.groups.file=
-clustering.output.matrix.file=none
-clustering.output.tree.file=
-
-clustering.null=yes
-clustering.null.number=1000
-clustering.null.output.file=
+clustering.null = yes
+clustering.null.number = 1000
+clustering.null.output.file = Myo_null.csv

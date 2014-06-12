@@ -88,7 +88,7 @@ void CoETools::readData(
   allSites = SequenceApplicationTools::getSiteContainer(alphabet, params, suffix, false);
   sites    = SequenceApplicationTools::getSitesToAnalyse(*allSites, params, suffix, true, true, true);
 
-  string nhOpt = ApplicationTools::getStringParameter("nonhomogeneous", params, "no", "", true, false);
+  string nhOpt = ApplicationTools::getStringParameter("nonhomogeneous", params, "no", "", true, 1);
   ApplicationTools::displayResult("Heterogeneous model", nhOpt);
 
   model = 0;
@@ -131,7 +131,7 @@ void CoETools::readData(
                                                     // we should assume a rate distribution for the root also!!!  
     }
     FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, 0, sites, params, rateFreqs);
-    vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", params, ',', "");
+    vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", params, ',', "", "", true, 1);
     modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, globalParameters); 
     model = modelSet->getModel(0)->clone();
     tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false);
@@ -190,7 +190,7 @@ void CoETools::readData(
     // Print parameters:
     ApplicationTools::displayResult("Final likelihood, -lnL =", TextTools::toString(tl -> getLogLikelihood(), 20));
   }
-  string tags = ApplicationTools::getAFilePath("output.tags.file", params, false, false, suffix, false);
+  string tags = ApplicationTools::getAFilePath("output.tags.file", params, false, false, suffix, false, 2);
   if (tags != "none")
   {
     TreeTemplate<Node> treeCopy(*tree);
@@ -221,7 +221,7 @@ void CoETools::readData(
     newick.write(treeCopy, tags, true);
   }
 
-  bool removeConst = ApplicationTools::getBooleanParameter("input.remove_const", params, true);
+  bool removeConst = ApplicationTools::getBooleanParameter("input.remove_const", params, true, "", false, 1);
   if (removeConst) {
     ApplicationTools::displayTask("Remove conserved positions", true);
     size_t n = sites->getNumberOfSites();
@@ -248,7 +248,7 @@ ProbabilisticSubstitutionMapping* CoETools::getVectors(
   const string          & suffix)
 {
   ProbabilisticSubstitutionMapping* substitutions = 0;
-  string inputVectorsFilePath = ApplicationTools::getAFilePath("input.vectors.file", params, false, true, suffix, false);
+  string inputVectorsFilePath = ApplicationTools::getAFilePath("input.vectors.file", params, false, true, suffix, false, 1);
 
   if (inputVectorsFilePath != "none")
   {
@@ -263,11 +263,11 @@ ProbabilisticSubstitutionMapping* CoETools::getVectors(
   {
     //We compute the substitutions vector:
 
-    string outputVectorsFilePath = ApplicationTools::getAFilePath("output.vectors.file", params, false, false, suffix, false);
+    string outputVectorsFilePath = ApplicationTools::getAFilePath("output.vectors.file", params, false, false, suffix, false, 1);
     ApplicationTools::displayResult("Output mapping to file" + suffix, outputVectorsFilePath);
 
-    bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true, "", true, false);
-    bool joint   = ApplicationTools::getBooleanParameter("nijt.joint"  , params, true, "", true, false);
+    bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true, "", true, 4); //These two options are realy for benchmarking only!
+    bool joint   = ApplicationTools::getBooleanParameter("nijt.joint"  , params, true, "", true, 4);
     if (average) {
       if (joint) {
         substitutions = SubstitutionMappingTools::computeSubstitutionVectors(drtl, substitutionCount, 0);
@@ -281,7 +281,7 @@ ProbabilisticSubstitutionMapping* CoETools::getVectors(
         substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, substitutionCount, 0);
       }
     }
-    if (outputVectorsFilePath != "none") {
+    if (outputVectorsFilePath != "none" & outputVectorsFilePath != "None") {
       ofstream outputVectors(outputVectorsFilePath.c_str(), ios::out);
       SubstitutionMappingTools::writeToStream(*substitutions, completeSites, 0, outputVectors);
       outputVectors.close();
@@ -375,7 +375,7 @@ void CoETools::writeInfos(
   map<string, string> & params,
   const string & suffix)
 {
-  string outFile = ApplicationTools::getAFilePath("output.infos", params, false, false, suffix, true);
+  string outFile = ApplicationTools::getAFilePath("output.infos", params, false, false, suffix, true, 1);
   if (outFile == "none") return;
 
   // Get the rate class with maximum posterior probability:
