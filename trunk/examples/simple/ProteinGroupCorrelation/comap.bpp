@@ -1,3 +1,6 @@
+# Run this example with:
+# comap param=comap.bpp
+
 # ----------------------------------------------------------------------------------------
 #                                     Data loading
 # ----------------------------------------------------------------------------------------
@@ -28,21 +31,17 @@ input.tree.format = Newick
 # ----------------------------------------------------------------------------------------
 
 # Available models.
-# For proteins, the DCmutt method is used for JTT92 and DSO78.
-# You can use the 'empirical' option to specify another model.
-# JCnuc, K80, T92, HKY85, TN93, JCprot, DSO78, JTT92 or empirical
 model = LG08
 
 # Rate Across Sites variation:
 # gamma or constant
-rate_distribution = Gamma(n=4, alpha=0.985435)
+rate_distribution = Gamma(n=4, alpha=0.5)
 
 # ----------------------------------------------------------------------------------------
 #                                     Parameter estimation
 # ----------------------------------------------------------------------------------------
 
 optimization = FullD
-
 output.tree.file = Myo.LG.dnd
 
 # ----------------------------------------------------------------------------------------
