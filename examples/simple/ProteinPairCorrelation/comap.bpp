@@ -1,0 +1,54 @@
+# Run this example with:
+# comap param=comap.bpp
+
+# ----------------------------------------------------------------------------------------
+#                                     Data loading
+# ----------------------------------------------------------------------------------------
+
+# The laphabet to use:
+# DNA, RNA or Protein
+alphabet = Protein
+
+# The sequence file to use (sequences must be aligned!)
+input.sequence.file   = Myoglobin.aln.sel.mase
+input.sequence.format = Mase
+
+#Sites to use:
+# all => all sites, gaps will be considered as unknown chars.
+# nogap => do not consider sites with gaps.
+# complete => only fully resolved chars.
+input.sequence.sites_to_use = nogap
+
+# Ignore constant sites:
+input.remove_const = yes
+
+# The tree file to use. Branch lengths are optional.
+input.tree.file = Myo.dnd
+input.tree.format = Newick
+
+# ----------------------------------------------------------------------------------------
+#                                     Model specification
+# ----------------------------------------------------------------------------------------
+
+# Available models.
+model = LG08
+
+# Rate Across Sites variation:
+# gamma or constant
+rate_distribution = Gamma(n=4, alpha=0.5)
+
+# ----------------------------------------------------------------------------------------
+#                                     Parameter estimation
+# ----------------------------------------------------------------------------------------
+
+optimization = None //FullD
+output.tree.file = Myo.LG.dnd
+
+# ----------------------------------------------------------------------------------------
+#                                     Clustering Analysis
+# ----------------------------------------------------------------------------------------
+
+analysis = pairwise
+
+statistic = Correlation
+

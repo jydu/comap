@@ -408,7 +408,7 @@ void CoETools::writeInfos(
 
 Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* alphabet) throw (Exception)
 {
-  string statistic = ApplicationTools::getStringParameter("statistic", params, "none");
+  string statistic = ApplicationTools::getStringParameter("statistic", params, "Correlation");
   string name;
   map<string,string> args;
   KeyvalTools::parseProcedure(statistic, name, args);
@@ -489,7 +489,7 @@ void CoETools::computeIntraStats(
   //Vdouble branchLengths = vectors[0];
   //vectors.erase(vectors.begin());//remove branch lengths.
   
-  string statFilePath = ApplicationTools::getAFilePath("statistic.output.file", params, true, false);
+  string statFilePath = ApplicationTools::getAFilePath("statistic.output.file", params, true, false, "", false, "statistics.txt", 1);
   ofstream statOut(statFilePath.c_str(), ios::out);
 
   //Getting parameters:
@@ -623,7 +623,7 @@ void CoETools::computeInterStats(
     exit(-1);
   }
 
-  string statFilePath = ApplicationTools::getAFilePath("statistic.output.file", params, true, false);
+  string statFilePath = ApplicationTools::getAFilePath("statistic.output.file", params, true, false, "", false, "statistics.txt", 1);
   ofstream statOut(statFilePath.c_str(), ios::out);
 
   //Getting parameters:
@@ -716,7 +716,7 @@ vector< vector<double> >* CoETools::computeIntraNullDistribution(
     const Statistic& statistic,
     map<string, string>& params)
 {
-  string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, false, false);
+  string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, false, false, "", false, "statistics.null.txt", 1);
   auto_ptr<ofstream> outFile;
   if (path != "none")
     outFile.reset(new ofstream(path.c_str(), ios::out));
@@ -747,16 +747,16 @@ vector< vector<double> >* CoETools::computeIntraNullDistribution(
 /******************************************************************************/
 
 void CoETools::computeInterNullDistribution(
-    DRTreeLikelihood & drtl1,
-    DRTreeLikelihood & drtl2,
+    DRTreeLikelihood& drtl1,
+    DRTreeLikelihood& drtl2,
     const SequenceSimulator& seqSim1,
     const SequenceSimulator& seqSim2,
-    SubstitutionCount & nijt1,
-    SubstitutionCount & nijt2,
-    const Statistic & statistic,
-    map<string, string> & params)
+    SubstitutionCount& nijt1,
+    SubstitutionCount& nijt2,
+    const Statistic& statistic,
+    map<string, string>& params)
 {
-  string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, true, false);
+  string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, true, false, "", false, "statistics.null.txt", 1);
   ofstream outFile(path.c_str(), ios::out);
   
   int nbRepCPU = ApplicationTools::getIntParameter("statistic.null.nb_rep_CPU", params, 10);
