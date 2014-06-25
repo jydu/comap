@@ -190,7 +190,7 @@ void CoETools::readData(
     // Print parameters:
     ApplicationTools::displayResult("Final likelihood, -lnL =", TextTools::toString(tl -> getLogLikelihood(), 20));
   }
-  string tags = ApplicationTools::getAFilePath("output.tags.file", params, false, false, suffix, false, 2);
+  string tags = ApplicationTools::getAFilePath("output.tags.file", params, false, false, suffix, false, "none", 2);
   if (tags != "none")
   {
     TreeTemplate<Node> treeCopy(*tree);
@@ -248,7 +248,7 @@ ProbabilisticSubstitutionMapping* CoETools::getVectors(
   const string          & suffix)
 {
   ProbabilisticSubstitutionMapping* substitutions = 0;
-  string inputVectorsFilePath = ApplicationTools::getAFilePath("input.vectors.file", params, false, true, suffix, false, 1);
+  string inputVectorsFilePath = ApplicationTools::getAFilePath("input.vectors.file", params, false, true, suffix, false, "none", 1);
 
   if (inputVectorsFilePath != "none")
   {
@@ -263,7 +263,7 @@ ProbabilisticSubstitutionMapping* CoETools::getVectors(
   {
     //We compute the substitutions vector:
 
-    string outputVectorsFilePath = ApplicationTools::getAFilePath("output.vectors.file", params, false, false, suffix, false, 1);
+    string outputVectorsFilePath = ApplicationTools::getAFilePath("output.vectors.file", params, false, false, suffix, false, "none", 1);
     ApplicationTools::displayResult("Output mapping to file" + suffix, outputVectorsFilePath);
 
     bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true, "", true, 4); //These two options are realy for benchmarking only!
@@ -295,7 +295,7 @@ ProbabilisticSubstitutionMapping* CoETools::getVectors(
 
 int CoETools::getMinRateClass(map<string, string>& params, string suffix)
 {
-  int minRateClass = ApplicationTools::getIntParameter("statistic.min_rate_class", params, 0, suffix, true, false);
+  int minRateClass = ApplicationTools::getIntParameter("statistic.min_rate_class", params, 0, suffix, true, 2);
   if (minRateClass > 0)
     ApplicationTools::displayMessage(
         "Only sites with posterior rate class >= " +
@@ -308,7 +308,7 @@ int CoETools::getMinRateClass(map<string, string>& params, string suffix)
 
 double CoETools::getMinRate(map<string, string>& params, string suffix)
 {
-  double minRate = ApplicationTools::getDoubleParameter("statistic.min_rate", params, 0., suffix, true, false);
+  double minRate = ApplicationTools::getDoubleParameter("statistic.min_rate", params, 0., suffix, true, 2);
   if (minRate > 0.)
     ApplicationTools::displayMessage(
         "Only sites with posterior rate > = " +
@@ -321,7 +321,7 @@ double CoETools::getMinRate(map<string, string>& params, string suffix)
 
 int CoETools::getMaxRateClassDiff(map<string, string>& params)
 {
-  int maxRateClassDiff = ApplicationTools::getIntParameter("statistic.max_rate_class_diff", params, -1, "", false, false);
+  int maxRateClassDiff = ApplicationTools::getIntParameter("statistic.max_rate_class_diff", params, -1, "", false, 2);
   if (maxRateClassDiff >= 0) 
     ApplicationTools::displayMessage(
       "Only pairs of sites with difference in posterior rate class <= " +
@@ -334,7 +334,7 @@ int CoETools::getMaxRateClassDiff(map<string, string>& params)
 
 double CoETools::getMaxRateDiff(map<string, string>& params)
 {
-  double maxRateDiff = ApplicationTools::getDoubleParameter("statistic.max_rate_diff", params, -1., "", false, false);
+  double maxRateDiff = ApplicationTools::getDoubleParameter("statistic.max_rate_diff", params, -1., "", false, 2);
   if (maxRateDiff >= 0.)
     ApplicationTools::displayMessage(
         "Only pairs of sites with difference in posterior rate <= " +
@@ -347,7 +347,7 @@ double CoETools::getMaxRateDiff(map<string, string>& params)
 
 double CoETools::getStatisticMin(map<string, string>& params)
 {
-  double minStatistic = ApplicationTools::getDoubleParameter("statistic.min", params, 0, "", false, false);
+  double minStatistic = ApplicationTools::getDoubleParameter("statistic.min", params, 0, "", false, 2);
   if (minStatistic > 0)
     ApplicationTools::displayMessage(
       "Only pairs of sites with abs(statistic) >= " +
@@ -375,7 +375,7 @@ void CoETools::writeInfos(
   map<string, string> & params,
   const string & suffix)
 {
-  string outFile = ApplicationTools::getAFilePath("output.infos", params, false, false, suffix, true, 1);
+  string outFile = ApplicationTools::getAFilePath("output.infos", params, false, false, suffix, true, "none", 1);
   if (outFile == "none") return;
 
   // Get the rate class with maximum posterior probability:
@@ -449,7 +449,7 @@ Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* a
   {
     string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simple", "", true, false);
     if (nijtOption == "label") { //Warning, does not work with a second data set with a different alphabet :s
-      bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true, "", true, false);
+      bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true, "", true, 4); //For benchmarking only!
       if (average) {
         throw Exception("MI distance with 'nijt=label' can't be used with 'nijt.average=yes'.");
       }
@@ -510,7 +510,7 @@ void CoETools::computeIntraStats(
   auto_ptr<Domain> rateDomain;
   if (computeNull)
   { 
-    nbRateClasses = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rate_classes", params, 10);
+    nbRateClasses = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rate_classes", params, 10, "", false, 1);
     ApplicationTools::displayResult("Number of sub-distributions", nbRateClasses);
     rateDomain.reset(new Domain(0, VectorTools::max(norms), nbRateClasses));
     auto_ptr<DRTreeLikelihood> tlCopy(tl.clone());
@@ -716,28 +716,30 @@ vector< vector<double> >* CoETools::computeIntraNullDistribution(
     const Statistic& statistic,
     map<string, string>& params)
 {
-  string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, false, false, "", false, "statistics.null.txt", 1);
+  string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, false, false, "", false, "none", 1);
   auto_ptr<ofstream> outFile;
-  if (path != "none")
+  if (path != "none") {
     outFile.reset(new ofstream(path.c_str(), ios::out));
+    ApplicationTools::displayResult("Write simulation results to", path);
+  }
  
   vector< vector<double> >* simValues = 0;
-  
-  ApplicationTools::displayMessage("Compute statistic under null hypothesis...");
-  
-  unsigned int nbRepCPU = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rep_CPU", params, 10);
-  unsigned int nbRepRAM = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rep_RAM", params, 100);
-  bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true, "", true, false);
-  bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true, "", true, false);
+   
+  unsigned int nbRepCPU = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rep_CPU", params, 100, "", false, 1);
+  unsigned int nbRepRAM = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rep_RAM", params, 1000, "", false, 1);
+  bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true, "", true, 3); //This is for testing purpose only
+  bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true, "", true, 3);
 
-  bool computePValues = ApplicationTools::getBooleanParameter("statistic.null.compute_pvalue", params, true);
+  bool computePValues = ApplicationTools::getBooleanParameter("statistic.null.compute_pvalue", params, true, "", false, 2);
  
   if (computePValues)
   {
     simValues = new vector< vector<double> >(rateDomain->getSize());
   }
 
+  ApplicationTools::displayResult("Nb of simulations to perform", nbRepCPU * nbRepRAM);
   AnalysisTools::getNullDistributionIntraDR(drtl, seqSim, nijt, statistic, outFile.get(), simValues, rateDomain, nbRepCPU, nbRepRAM, average, joint, true);
+  ApplicationTools::message->endLine();
 
   if (outFile.get())
     outFile->close();
@@ -759,10 +761,10 @@ void CoETools::computeInterNullDistribution(
   string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, true, false, "", false, "statistics.null.txt", 1);
   ofstream outFile(path.c_str(), ios::out);
   
-  int nbRepCPU = ApplicationTools::getIntParameter("statistic.null.nb_rep_CPU", params, 10);
-  int nbRepRAM = ApplicationTools::getIntParameter("statistic.null.nb_rep_RAM", params, 100);
-  bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true, "", true, false);
-  bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true, "", true, false);
+  int nbRepCPU = ApplicationTools::getIntParameter("statistic.null.nb_rep_CPU", params, 10, "", false, 1);
+  int nbRepRAM = ApplicationTools::getIntParameter("statistic.null.nb_rep_RAM", params, 1000, "", false, 1);
+  bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true, "", true, 3); //For testing purpose only
+  bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true, "", true, 3);
 
   ApplicationTools::displayMessage("Compute statistic under null hypothesis...");
   AnalysisTools::getNullDistributionInterDR(drtl1, drtl2, seqSim1, seqSim2, nijt1, nijt2, statistic, outFile, nbRepCPU, nbRepRAM, average, joint, true);
@@ -920,9 +922,9 @@ void CoETools::computePValuesForCandidateGroups(
 	  map<string, string>& params,
     unsigned int maxTrials)
 {
-  unsigned int repRAM = ApplicationTools::getParameter<unsigned int>("candidates.null.nb_rep_RAM", params, 1000, "", true, true);
-  bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true, "", true, false);
-  bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true, "", true, false);
+  unsigned int repRAM = ApplicationTools::getParameter<unsigned int>("candidates.null.nb_rep_RAM", params, 1000, "", true, 1);
+  bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true, "", true, 3); //For testing purpose only
+  bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true, "", true, 3);
 
   bool test = true;
   while(test)

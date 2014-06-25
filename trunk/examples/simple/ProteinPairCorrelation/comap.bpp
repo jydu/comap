@@ -51,4 +51,8 @@ output.tree.file = Myo.LG.dnd
 analysis = pairwise
 
 statistic = Correlation
+statistic.output.file = Myo.results.txt
 
+#The product of these two numbers determines the number of simulations.
+statistic.null.nb_rep_CPU = 100 #Increases execution time
+statistic.null.nb_rep_RAM = 1000 #Increases memory usage

@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
 
 
     // *********************
-    // * Pariwise analysis *
+    // * Pairwise analysis *
     // *********************
 
     if (analysis == "pairwise")
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
       Statistic* statistic = CoETools::getStatistic(comap.getParams(), alphabet1);
 
       bool computeNullHyp = false;
-      computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", comap.getParams(), false, "", false, 0);
+      computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", comap.getParams(), true, "", false, 1);
   
   
       // *******************************************
@@ -311,7 +311,8 @@ int main(int argc, char *argv[])
           cstat->setMeanVector(mv1);
         }
 
-        ApplicationTools::displayMessage("Analyse dataset.");
+        ApplicationTools::displayMessage("\n\n-*- Perform pairwise analysis -*-\n");
+        
         CoETools::computeIntraStats(
           *tl1,
           *seqSim1,
@@ -436,7 +437,7 @@ int main(int argc, char *argv[])
           }
         }
 
-        string matrixFile = ApplicationTools::getAFilePath("clustering.output.matrix.file", comap.getParams(), false, false, "", false, 1);
+        string matrixFile = ApplicationTools::getAFilePath("clustering.output.matrix.file", comap.getParams(), false, false, "", false, "none", 1);
         if (matrixFile != "none")
         {
           //Write out matrix to a file, in Phylip format:
@@ -546,7 +547,7 @@ int main(int argc, char *argv[])
         groupsFile.close();
 
         //Write clustering tree to file:
-        string treeFile = ApplicationTools::getAFilePath("clustering.output.tree.file", comap.getParams(), false, false, "", false, 1);
+        string treeFile = ApplicationTools::getAFilePath("clustering.output.tree.file", comap.getParams(), false, false, "", false, "none", 1);
         if (treeFile != "none")
         {
           // First we retranslate leaves names:
