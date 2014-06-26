@@ -310,7 +310,7 @@ class CoETools
 			map<string, string>   &params,
 			const string          &suffix = "");
 
-		static ProbabilisticSubstitutionMapping * getVectors(
+		static ProbabilisticSubstitutionMapping* getVectors(
 			const DRTreeLikelihood & drtl, 
       SubstitutionCount      & substitutionCount,
       const SiteContainer    & completeSites,
@@ -347,7 +347,7 @@ class CoETools
 		
 		static bool haveToPerformIndependantComparisons(map<string, string>& params);
 		
-		static Statistic* getStatistic(map<string, string>& params, const Alphabet* alphabet) throw (Exception);
+		static Statistic* getStatistic(map<string, string>& params, const Alphabet* alphabet, const SubstitutionCount* nijt) throw (Exception);
 		
     /**
      * This subroutine will call computeIntraNullDistribution on request.

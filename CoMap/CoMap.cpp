@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
 
     if (analysis == "pairwise")
     {
-      Statistic* statistic = CoETools::getStatistic(comap.getParams(), alphabet1);
+      Statistic* statistic = CoETools::getStatistic(comap.getParams(), alphabet1, substitutionCount1);
 
       bool computeNullHyp = false;
       computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", comap.getParams(), true, "", false, 1);
@@ -595,7 +595,7 @@ int main(int argc, char *argv[])
     
       CoETools::writeInfos(*sites1, *tl1, comap.getParams());
     
-      const Statistic* statistic = CoETools::getStatistic(comap.getParams(), alphabet1);
+      const Statistic* statistic = CoETools::getStatistic(comap.getParams(), alphabet1, substitutionCount1);
   
       string groupsPath = ApplicationTools::getAFilePath("candidates.input.file", comap.getParams(), false, true);
       if (groupsPath != "none")
