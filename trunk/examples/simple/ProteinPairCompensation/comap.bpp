@@ -44,13 +44,16 @@ rate_distribution = Gamma(n=4, alpha=0.5)
 optimization = FullD
 output.tree.file = Myo.LG.dnd
 
+# Mapping procedure:
+nijt = Uniformization(weight=Diff(index1=Volume, symmetrical=no))
+
 # ----------------------------------------------------------------------------------------
 #                                     Pairwise analysis
 # ----------------------------------------------------------------------------------------
 
 analysis = pairwise
 
-statistic = Correlation
+statistic = Compensation
 statistic.output.file = Myo.results.txt
 # This file contains all pairs and their p-values, as well as the actual number
 # of simulations on which they are computed (depends on the number of classes used

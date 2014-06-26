@@ -406,7 +406,7 @@ void CoETools::writeInfos(
 
 /******************************************************************************/
 
-Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* alphabet) throw (Exception)
+Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* alphabet, const SubstitutionCount* nijt) throw (Exception)
 {
   string statistic = ApplicationTools::getStringParameter("statistic", params, "Correlation");
   string name;
@@ -434,16 +434,14 @@ Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* a
   }
   else if (name == "Compensation")
   {
-    string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simule", "", true);
-    bool sym = ApplicationTools::getBooleanParameter("nijt_aadist.sym", params, true, "", true); 
-    if (nijtOption != "aadist" || sym)
-    {
-      throw Exception("Compensation distance must be used with 'nijt=aadist' and 'nijt_aadist.sym=no' options.");
-    }
-    else
-    {
-		  return new CompensationStatistic();
-    }
+    const WeightedSubstitutionCount* wsc = dynamic_cast<const WeightedSubstitutionCount*>(nijt);
+    if (!wsc)
+      throw Exception("Compensation distance must be used with a mapping procedure allowing weights, e.g. 'nijt=Uniformization(weight=Diff(index1=Volume, symmetrical=no))'.");
+    if (!wsc->hasWeights())
+      throw Exception("Compensation distance must be used with a mapping procedure with weights, e.g. 'nijt=Uniformization(weight=Diff(index1=Volume, symmetrical=no))'.");
+    if (wsc->getWeights()->isSymmetric())
+      throw Exception("Compensation distance must be used with a mapping procedure allowing non-symmetric weights, e.g. 'nijt=Uniformization(weight=Diff(index1=Volume, symmetrical=no))'.");
+		return new CompensationStatistic();
   }
   else if (name == "MI")
   {
