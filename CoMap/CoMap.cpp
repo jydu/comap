@@ -400,22 +400,24 @@ int main(int argc, char *argv[])
     
         string distanceMethod = ApplicationTools::getStringParameter("clustering.distance", comap.getParams(), "cor", "", true, 1);
         auto_ptr<Distance> dist;
-        if (distanceMethod == "euclidian")
+        if (distanceMethod == "Euclidian" || distanceMethod == "euclidian")
         {
           dist.reset(new EuclidianDistance());
         }
-        else if (distanceMethod == "cor")
+        else if (distanceMethod == "Correlation" || distanceMethod == "cor")
         {
           Statistic* cor = new CorrelationStatistic();
           dist.reset(new StatisticBasedDistance(cor, 1.));
         }
-        else if (distanceMethod == "comp")
+        else if (distanceMethod == "Compensation" || distanceMethod == "comp")
         {
           WeightedSubstitutionCount* wsc = dynamic_cast<WeightedSubstitutionCount*>(substitutionCount1);
-          if (!wsc) 
-            throw Exception("Compensation distance must be used in combination with a substitution count allowing biochemical weights (e.g. 'nijt=Uniformization').");
+          if (!wsc)
+            throw Exception("Compensation distance must be used with a mapping procedure allowing weights, e.g. 'nijt=Uniformization(weight=Diff(index1=Volume, symmetrical=no))'.");
+          if (!wsc->hasWeights())
+            throw Exception("Compensation distance must be used with a mapping procedure with weights, e.g. 'nijt=Uniformization(weight=Diff(index1=Volume, symmetrical=no))'.");
           if (wsc->getWeights()->isSymmetric())
-            throw Exception("Compensation distance must be used in combination with asymmetric substitution weights.");
+            throw Exception("Compensation distance must be used with a mapping procedure allowing non-symmetric weights, e.g. 'nijt=Uniformization(weight=Diff(index1=Volume, symmetrical=no))'.");
           dist.reset(new CompensationDistance());
         }
         else
