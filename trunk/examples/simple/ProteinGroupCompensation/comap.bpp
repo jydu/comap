@@ -37,6 +37,9 @@ model = LG08
 # gamma or constant
 rate_distribution = Gamma(n=4, alpha=0.5)
 
+# Weighted mapping:
+nijt = Uniformization(weight=Diff(index1=Volume, symmetrical=no))
+
 # ----------------------------------------------------------------------------------------
 #                                     Parameter estimation
 # ----------------------------------------------------------------------------------------
@@ -50,7 +53,7 @@ output.tree.file = Myo.LG.dnd
 
 analysis = clustering
 
-clustering.distance = Correlation
+clustering.distance = Compensation
 clustering.method = complete
 clustering.output.groups.file = Myo_stats.csv
 
