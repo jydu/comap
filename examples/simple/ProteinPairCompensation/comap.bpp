@@ -44,7 +44,7 @@ rate_distribution = Gamma(n=4, alpha=0.5)
 optimization = FullD
 output.tree.file = Myo.LG.dnd
 
-# Mapping procedure:
+# Weighted mapping:
 nijt = Uniformization(weight=Diff(index1=Volume, symmetrical=no))
 
 # ----------------------------------------------------------------------------------------

@@ -191,21 +191,23 @@ void CoETools::readData(
     ApplicationTools::displayResult("Final likelihood, -lnL =", TextTools::toString(tl -> getLogLikelihood(), 20));
   }
   string tags = ApplicationTools::getAFilePath("output.tags.file", params, false, false, suffix, false, "none", 2);
+  ApplicationTools::displayResult("Tagged tree file", tags);
   if (tags != "none")
   {
     TreeTemplate<Node> treeCopy(*tree);
     vector<Node *> nodes = treeCopy.getInnerNodes();
-    for (unsigned int i = 0; i < nodes.size(); i++) {
-      nodes[i]->setNodeProperty("name", BppString(TextTools::toString(nodes[i]->getId())));
+    for (size_t i = 0; i < nodes.size(); ++i) {
+      nodes[i]->setBranchProperty("name", BppString(TextTools::toString(nodes[i]->getId())));
     }
     nodes = treeCopy.getLeaves();
 
     // Writing leaf names translation:
-    string tlnPath = ApplicationTools::getAFilePath("output.tags.translation", params, false, false, suffix, false);
+    string tlnPath = ApplicationTools::getAFilePath("output.tags.translation", params, false, false, suffix, false, "tags_translation.txt", 1);
+    ApplicationTools::displayResult("Tagged tree names translation", tlnPath);
     if (tlnPath != "none") {
       ofstream tln(tlnPath.c_str(), ios::out);
       tln << "Name\tId" << endl;
-      for (unsigned int i = 0; i < nodes.size(); i++)
+      for (size_t i = 0; i < nodes.size(); ++i)
       {
         tln << nodes[i]->getName() << "\t" << nodes[i]->getId() << endl;
       }
@@ -213,7 +215,7 @@ void CoETools::readData(
     }
 
     // Translate names:
-    for (unsigned int i = 0; i < nodes.size(); ++i) {
+    for (size_t i = 0; i < nodes.size(); ++i) {
       nodes[i]->setName(TextTools::toString(nodes[i]->getId()));
     }
     Newick newick;
