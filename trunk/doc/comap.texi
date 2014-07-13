@@ -200,6 +200,26 @@ most cases.
 
 @end table
 
+@section Ancestral sequences reconstruction
+
+CoMap can also perform ancestral sequence reconstruction.
+Ancestral sequences are not used in the analysis, but can be usefull for interpreting results.
+Marginal reconstruction is performed, for more advanced technics and options, consider the bppAncestor
+program from the Bio++ Program Suite.
+
+@table @command
+
+@item asr.method = @{none|marginal@}
+Method to use, only marginal reconstruction is available for now.
+
+@item output.sequence.file = @{path@}
+Where to write reconstructed sequences, together with extant sequences.
+
+@item output.sequence.format = @{string@}
+All Bio++ format are supported.
+
+@end table
+
 @c ------------------------------------------------------------------------------------------------------------------
 
 @node Pairwise, Clustering, Mapping, Top
