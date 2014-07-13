@@ -45,15 +45,18 @@ knowledge of the CeCILL license and that you accept its terms.
 
 using namespace std;
 
+// From bpp-core:
 #include <Bpp/App.all>
 #include <Bpp/Io/FileTools.h>
 #include <Bpp/Text/TextTools.h>
 #include <Bpp/Numeric/DataTable.h>
 
-// From SeqLib:
+// From bpp-seq:
 #include <Bpp/Seq/SiteTools.h>
+#include <Bpp/Seq/App/SequenceApplicationTools.h>
+#include <Bpp/Seq/Container/SequenceContainerTools.h>
 
-// From PhylLib:
+// From bpp-phyl:
 #include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
 #include <Bpp/Phyl/Simulation.all>
 #include <Bpp/Phyl/Likelihood/RASTools.h>
@@ -113,7 +116,7 @@ int main(int argc, char *argv[])
   }
 
   BppApplication comap(argc, argv, "CoMap");
-  comap.startTimer();
+ comap.startTimer();
 
   ApplicationTools::displayMessage("\n\n-*- Retrieve data and model -*-\n");
 
@@ -151,6 +154,33 @@ int main(int argc, char *argv[])
   string analysis = ApplicationTools::getStringParameter("analysis", comap.getParams(), "pairwise", "", false, 0);
   ApplicationTools::displayResult("Analysis type", analysis);
 
+  // Reconstruct ancestral sequences (not used in the analysis):
+  string reconstruction = ApplicationTools::getStringParameter("asr.method", comap.getParams(), "marginal", "", true, 1);
+  ApplicationTools::displayResult("Ancestral state reconstruction method", reconstruction);
+
+  auto_ptr<AncestralStateReconstruction> asr;
+  if (reconstruction == "none") {
+    //do nothing
+  } else if (reconstruction == "marginal") {
+    asr.reset(new MarginalAncestralStateReconstruction(tl1));
+  } else
+    throw Exception("Unknown ancestral state reconstruction method: " + reconstruction);
+
+  if (asr.get()) {
+    auto_ptr<SiteContainer> asSites1(asr->getAncestralSequences());
+  
+    //Add existing sequence to output:
+    SequenceContainerTools::append(*asSites1.get(), *sites1);
+
+    //Write output:
+    if (ApplicationTools::getStringParameter("output.sequence.file", comap.getParams(), "none", "", true, 1) != "none") {
+      SequenceApplicationTools::writeAlignmentFile(*asSites1, comap.getParams());
+    }
+  }
+
+
+
+  // Coevolutiona analysis:
   if (analysis == "none")
   {
     //No coevolution analysis, only perform mapping!
