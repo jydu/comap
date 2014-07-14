@@ -41,19 +41,13 @@ optimization = FullD
 output.tree.file = Myo.LG.dnd
 
 # ----------------------------------------------------------------------------------------
-#                                     Pairwise analysis
+#                                     Substitution mapping only
 # ----------------------------------------------------------------------------------------
 
-analysis = pairwise
-
-statistic = Correlation
-statistic.output.file = Myo.results.txt
-# This file contains all pairs and their p-values, as well as the actual number
-# of simulations on which they are computed (depends on the number of classes used
-# for discretizing the distribution of vector norms, 10 by default).
-# You should consider using a correction for multiple testing,
-# for instance using p.adjust in R.
-
-# The product of these two numbers determines the total number of simulations:
-statistic.null.nb_rep_CPU = 100 #Increases execution time
-statistic.null.nb_rep_RAM = 1000 #Increases memory usage
+analysis = none
+output.vectors.file = Myo_counts.txt
+output.tags.file = Myo_tags.dnd
+output.tags.translation = Myo_tags_tln.txt
+asr.method = marginal
+output.sequence.file = Myo_ancestors.fasta
+output.sequence.format = Fasta
