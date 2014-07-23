@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
   ApplicationTools::displayResult("Analysis type", analysis);
 
   // Reconstruct ancestral sequences (not used in the analysis):
-  string reconstruction = ApplicationTools::getStringParameter("asr.method", comap.getParams(), "marginal", "", true, 1);
+  string reconstruction = ApplicationTools::getStringParameter("asr.method", comap.getParams(), "none", "", true, 1);
   ApplicationTools::displayResult("Ancestral state reconstruction method", reconstruction);
 
   auto_ptr<AncestralStateReconstruction> asr;
