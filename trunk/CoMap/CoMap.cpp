@@ -518,7 +518,7 @@ int main(int argc, char *argv[])
         dist->setStatisticAsProperty(*clusteringTree.getRootNode(), *mapping1);
   
         // Dumping groups to file, with more or less information, depending on the method used.
-        string groupsPath = ApplicationTools::getAFilePath("clustering.output.groups.file", comap.getParams(), true, false, "", false, 0);
+        string groupsPath = ApplicationTools::getAFilePath("clustering.output.groups.file", comap.getParams(), true, false, "", false, "groups_output_stats.txt", 0);
         ApplicationTools::displayResult("Site clusters output file", groupsPath);
         vector<string> colNames(6);
         colNames[0] = "Group";
@@ -596,7 +596,7 @@ int main(int argc, char *argv[])
         ApplicationTools::displayResult("Maximum group size to test", TextTools::toString(maxGroupSize));
         if (testGroupsGlobal)
         {       
-          string simPath = ApplicationTools::getAFilePath("clustering.null.output.file", comap.getParams(), true, false, "", false, 0);
+          string simPath = ApplicationTools::getAFilePath("clustering.null.output.file", comap.getParams(), true, false, "", false, "groups_output_null.txt", 0);
           unsigned int nrep = ApplicationTools::getParameter<unsigned int>("clustering.null.number", comap.getParams(), 1, "", true, 1);
           ApplicationTools::displayResult("Number of simulations", TextTools::toString(nrep));
           ApplicationTools::displayResult("Simulations output file", simPath);
