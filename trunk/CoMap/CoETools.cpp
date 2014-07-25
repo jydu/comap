@@ -47,12 +47,12 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/BppString.h>
 #include <Bpp/Numeric/ParameterExceptions.h>
 
-// From SeqLib:
+// From bpp-seq:
 #include <Bpp/Seq/SiteTools.h>
 #include <Bpp/Seq/App/SequenceApplicationTools.h>
 #include <Bpp/Seq/AlphabetIndex.all>
 
-// From PhylLib:
+// From bpp-phyl:
 #include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
 #include <Bpp/Phyl/PatternTools.h>
 #include <Bpp/Phyl/OptimizationTools.h>
