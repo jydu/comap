@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
 
     //Get the substitution mapping in order to compute the rates:
 
-    TotalSubstitutionRegister* reg = new TotalSubstitutionRegister(model->getAlphabet());
+    TotalSubstitutionRegister* reg = new TotalSubstitutionRegister(model);
     simple = new UniformizationSubstitutionCount(model, reg); 
     ProbabilisticSubstitutionMapping* mapping = 
       SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, true);
