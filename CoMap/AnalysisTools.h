@@ -280,9 +280,9 @@ class AnalysisTools
 			bool verbose = true);
 
 		static void getNullDistributionIntraWithoutReestimatingCounts(
-			const DetailedSiteSimulator & seqSim,
-			const Statistic & statistic,
-			ostream & out,
+			const NonHomogeneousSequenceSimulator& seqSim,
+			const Statistic& statistic,
+			ostream& out,
 			size_t rep,
 			bool verbose = true);
 };

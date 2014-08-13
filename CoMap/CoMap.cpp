@@ -383,7 +383,7 @@ int main(int argc, char *argv[])
         vector<double> scales(nbBranches, 1.);
         vector<double> weights(nbBranches, 1.);
         vector<double> brLens = mapping1->getBranchLengths();
-        double minLen = ApplicationTools::getDoubleParameter("clustering.min_length", comap.getParams(), false, "", 0.000001, 4);
+        double minLen = ApplicationTools::getDoubleParameter("clustering.min_length", comap.getParams(), 0.000001, "", false, 4);
         vector<double> meanVector(nbBranches);
         for (size_t j = 0; j < nbBranches; ++j)
         {

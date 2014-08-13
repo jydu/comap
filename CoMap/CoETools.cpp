@@ -761,8 +761,8 @@ void CoETools::computeInterNullDistribution(
   string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, true, false, "", false, "statistics.null.txt", 1);
   ofstream outFile(path.c_str(), ios::out);
   
-  int nbRepCPU = ApplicationTools::getIntParameter("statistic.null.nb_rep_CPU", params, 10, "", false, 1);
-  int nbRepRAM = ApplicationTools::getIntParameter("statistic.null.nb_rep_RAM", params, 1000, "", false, 1);
+  unsigned int nbRepCPU = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rep_CPU", params, 10, "", false, 1);
+  unsigned int nbRepRAM = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rep_RAM", params, 1000, "", false, 1);
   bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true, "", true, 3); //For testing purpose only
   bool joint   = ApplicationTools::getBooleanParameter("nijt.joint", params, true, "", true, 3);
 

@@ -757,7 +757,7 @@ void AnalysisTools::getNullDistributionInterDR(
 /******************************************************************************/
 
 void AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(
-  const DetailedSiteSimulator& seqSim,
+  const NonHomogeneousSequenceSimulator& seqSim,
   const Statistic& statistic,
   ostream& out,
   size_t rep,
@@ -765,17 +765,17 @@ void AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(
 {
   // Write header line:
   out << "Stat\tr1\tr2" << endl;
-  TotalSubstitutionRegister reg(seqSim.getAlphabet());
+  TotalSubstitutionRegister reg(seqSim.getSubstitutionModelSet()->getModel(0));
   for (size_t i = 0; i < rep; ++i)
   {
     ApplicationTools::displayGauge(i, rep - 1);
     RASiteSimulationResult* hssr1 = 
-      dynamic_cast<RASiteSimulationResult*>(seqSim.dSimulate());
+      dynamic_cast<RASiteSimulationResult*>(seqSim.dSimulateSite());
     VVdouble vector1 = hssr1->getSubstitutionVector(reg);
     double     rate1 = hssr1->getRate();
     delete hssr1;
     RASiteSimulationResult* hssr2 = 
-      dynamic_cast<RASiteSimulationResult*>(seqSim.dSimulate());
+      dynamic_cast<RASiteSimulationResult*>(seqSim.dSimulateSite());
     VVdouble vector2 = hssr2->getSubstitutionVector(reg);
     double     rate2 = hssr2->getRate(); 
     delete hssr2;
