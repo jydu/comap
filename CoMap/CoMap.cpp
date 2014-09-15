@@ -129,12 +129,13 @@ int main(int argc, char *argv[])
   // Get data 1:
   //Tree * tree1 = new Tree(* tree); // Copy tree.
   Alphabet *alphabet1;
+  GeneticCode *geneticCode1;
   VectorSiteContainer *allSites1, *sites1;
   SubstitutionModel *model1;
   SubstitutionModelSet *modelSet1;
   DiscreteDistribution *rDist1;
   DRTreeLikelihood *tl1;
-  CoETools::readData(tree1, alphabet1, allSites1, sites1, model1, modelSet1, rDist1, tl1, comap.getParams(), "");
+  CoETools::readData(tree1, alphabet1, geneticCode1, allSites1, sites1, model1, modelSet1, rDist1, tl1, comap.getParams(), "");
  
   ApplicationTools::displayResult("Number of sites in file", allSites1->getNumberOfSites());
   ApplicationTools::displayResult("Number of sites to analyse", sites1->getNumberOfSites());
@@ -235,13 +236,14 @@ int main(int argc, char *argv[])
         }
 
         Alphabet *alphabet2;
+        GeneticCode *geneticCode2;
         VectorSiteContainer *allSites2, *sites2;
         SubstitutionModel *model2;
         SubstitutionModelSet *modelSet2;
         DiscreteDistribution *rDist2;
         DRTreeLikelihood *tl2;
         ApplicationTools::displayMessage("\nLoading second dataset...\n");
-        CoETools::readData(tree2, alphabet2, allSites2, sites2, model2, modelSet2, rDist2, tl2, comap.getParams(), "2");
+        CoETools::readData(tree2, alphabet2, geneticCode2, allSites2, sites2, model2, modelSet2, rDist2, tl2, comap.getParams(), "2");
         ApplicationTools::displayResult("Number of sites in file", allSites2->getNumberOfSites());
         ApplicationTools::displayResult("Number of sites to analyse", sites2->getNumberOfSites());
         ApplicationTools::displayResult("Number of site patterns", tl2->getLikelihoodData()->getNumberOfDistinctSites());

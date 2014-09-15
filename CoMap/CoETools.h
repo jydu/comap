@@ -301,6 +301,7 @@ class CoETools
 		static void readData(
 			TreeTemplate<Node>*   &tree,
 			Alphabet*             &alphabet,
+			GeneticCode*          &geneticCode,
 			VectorSiteContainer*  &allSites,
 			VectorSiteContainer*  &sites,
 			SubstitutionModel*    &model,
