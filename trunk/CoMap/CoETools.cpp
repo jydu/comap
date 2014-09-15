@@ -75,6 +75,7 @@ using namespace std;
 void CoETools::readData(
   TreeTemplate<Node>*          &tree,
   Alphabet*                    &alphabet,
+  GeneticCode*                 &geneticCode,
   VectorSiteContainer*         &allSites,
   VectorSiteContainer*         &sites,
   SubstitutionModel*           &model,
@@ -88,6 +89,15 @@ void CoETools::readData(
   allSites = SequenceApplicationTools::getSiteContainer(alphabet, params, suffix, false);
   sites    = SequenceApplicationTools::getSitesToAnalyse(*allSites, params, suffix, true, true, true);
 
+  CodonAlphabet* codonAlphabet = dynamic_cast<CodonAlphabet*>(alphabet);
+  if (codonAlphabet) {
+    string codeDesc = ApplicationTools::getStringParameter("genetic_code", params, "Standard", "", true, true);
+    ApplicationTools::displayResult("Genetic Code", codeDesc);
+      
+    geneticCode = SequenceApplicationTools::getGeneticCode(codonAlphabet->getNucleicAlphabet(), codeDesc);
+  }
+
+
   string nhOpt = ApplicationTools::getStringParameter("nonhomogeneous", params, "no", "", true, 1);
   ApplicationTools::displayResult("Heterogeneous model", nhOpt);
 
@@ -96,7 +106,7 @@ void CoETools::readData(
 
   if (nhOpt == "no")
   {  
-    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, 0, sites, params);
+    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, geneticCode, sites, params);
     if (model->getNumberOfStates() > model->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
@@ -111,7 +121,7 @@ void CoETools::readData(
   }
   else if (nhOpt == "one_per_branch")
   {
-    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, 0, sites, params);
+    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, geneticCode, sites, params);
     if (model->getNumberOfStates() > model->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
@@ -130,7 +140,7 @@ void CoETools::readData(
       rateFreqs = vector<double>(n, 1./static_cast<double>(n)); // Equal rates assumed for now, may be changed later (actually, in the most general case,
                                                     // we should assume a rate distribution for the root also!!!  
     }
-    FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, 0, sites, params, rateFreqs);
+    FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, geneticCode, sites, params, rateFreqs);
     vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", params, ',', "", "", true, 1);
     modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, globalParameters); 
     model = modelSet->getModel(0)->clone();
@@ -138,7 +148,7 @@ void CoETools::readData(
   }
   else if (nhOpt == "general")
   {
-    modelSet = PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet, 0, 0, params);
+    modelSet = PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet, geneticCode, 0, params);
     if (modelSet->getNumberOfStates() > modelSet->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
@@ -157,22 +167,61 @@ void CoETools::readData(
   tl->initialize();
 
   ApplicationTools::displayTask("Tree likelihood");
+
+  //Check for saturation:
   double ll = tl->getValue();
   if (isinf(ll))
   {
     ApplicationTools::displayError("!!! Unexpected initial likelihood == 0.");
-    ApplicationTools::displayError("!!! You should consider reestimating all branch lengths parameters.");
-    ApplicationTools::displayError("!!! Site-specific likelihood have been written in file DEBUG_likelihoods.txt .");
-    ofstream debug ("DEBUG_likelihoods.txt", ios::out);
-    for (size_t i = 0; i < sites->getNumberOfSites(); i++)
+    if (codonAlphabet)
     {
-      debug << "Position " << sites->getSite(i).getPosition() << " = " << tl->getLogLikelihoodForASite(i) << endl; 
+      bool f = false;
+      size_t s;
+      for (size_t i = 0; i < sites->getNumberOfSites(); i++) {
+        if (isinf(tl->getLogLikelihoodForASite(i))) {
+          const Site& site = sites->getSite(i);
+          s = site.size();
+          for (size_t j = 0; j < s; j++) {
+            if (geneticCode->isStop(site.getValue(j))) {
+              (*ApplicationTools::error << "Stop Codon at site " << site.getPosition() << " in sequence " << sites->getSequence(j).getName()).endLine();
+              f = true;
+            }
+          }
+        }
+      }
+      if (f)
+        exit(-1);
     }
-    debug.close();
-    exit(-1);
-  }
-  (ApplicationTools::message->setPrecision(20) << ll).endLine();
-  
+    bool removeSaturated = ApplicationTools::getBooleanParameter("input.sequence.remove_saturated_sites", params, false, "", true, 1);
+    if (!removeSaturated) {
+      ofstream debug ("DEBUG_likelihoods.txt", ios::out);
+      for (size_t i = 0; i < sites->getNumberOfSites(); i++)
+      {
+        debug << "Position " << sites->getSite(i).getPosition() << " = " << tl->getLogLikelihoodForASite(i) << endl; 
+      }
+      debug.close();
+      ApplicationTools::displayError("!!! Site-specific likelihood have been written in file DEBUG_likelihoods.txt .");
+      ApplicationTools::displayError("!!! 0 values (inf in log) may be due to computer overflow, particularily if datasets are big (>~500 sequences).");
+      ApplicationTools::displayError("!!! You may want to try input.sequence.remove_saturated_sites = yes to ignore positions with likelihood 0.");
+      exit(1);
+    } else {
+      for (size_t i = sites->getNumberOfSites(); i > 0; --i) {
+        if (isinf(tl->getLogLikelihoodForASite(i - 1))) {
+          ApplicationTools::displayResult("Ignore saturated site", sites->getSite(i - 1).getPosition());
+          sites->deleteSite(i - 1);
+        }
+      }
+      ApplicationTools::displayResult("Number of sites retained", sites->getNumberOfSites());
+      tl->setData(*sites);
+      tl->initialize();
+      ll = tl->getValue();
+      if (isinf(ll)) {
+        throw Exception("Likelihood is still 0 after saturated sites are removed! Looks like a bug...");
+      }
+      ApplicationTools::displayResult("Initial log likelihood", TextTools::toString(-ll, 15));
+    }
+  }    
+
   string optimization = ApplicationTools::getStringParameter("optimization", params, "None", suffix, true, false);
   if (optimization != "None")
   {
