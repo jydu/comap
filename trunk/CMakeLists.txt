@@ -29,6 +29,19 @@ IF(NOT NO_DEP_CHECK)
       FORCE)
 ENDIF(NOT NO_DEP_CHECK)
 
+IF(NOT DOC_COMPRESS)
+  SET(DOC_COMPRESS gzip CACHE STRING
+      "Set program for compressing documentation."
+      FORCE)
+ENDIF(NOT DOC_COMPRESS)
+
+IF(NOT DOC_COMPRESS_EXT)
+  SET(DOC_COMPRESS_EXT gz CACHE STRING
+      "Set extension of compressed documentation."
+      FORCE)
+ENDIF(NOT DOC_COMPRESS_EXT)
+
+
 IF(NO_DEP_CHECK)
   MESSAGE("-- Dependencies checking disabled. Only distribution can be built.")
 ELSE(NO_DEP_CHECK)
@@ -55,9 +68,62 @@ IF(NOT DEFINED MAN)
 ENDIF(NOT DEFINED MAN)
 
 #find executables for documentation
-FIND_PROGRAM(MAKEINFO_EXE NAMES makeinfo)
+IF(MAN)
+  FIND_PROGRAM(NROFF_EXE NAMES nroff)
+  IF(NROFF_EXE)
+    MESSAGE("-- Found nroff here: ${NROFF_EXE}")
+    MESSAGE("   Adding targets: man")
+
+    ADD_CUSTOM_TARGET(man
+      ALL
+      COMMAND cp comap.1.txt comap.1
+      COMMAND ${DOC_COMPRESS} -f comap.1
+      COMMAND cp mica.1.txt mica.1
+      COMMAND ${DOC_COMPRESS} -f mica.1
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/man
+      )
+    SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "man/comap.1.${DOC_COMPRESS_EXT};man/mica.1.${DOC_COMPRESS_EXT}")
+
+  ELSE()
+    MESSAGE(FATAL_ERROR "Program nroff required but not found.")
+  ENDIF()
+ENDIF(MAN)
+
+IF(INFO)
+  FIND_PROGRAM(MAKEINFO_EXE NAMES makeinfo)
+  IF(MAKEINFO_EXE)
+    MESSAGE("-- Found makeinfo here: ${MAKEINFO_EXE}")
+    MESSAGE("   Adding targets: info, html")
+ 
+    SET(ADD_INFO_TO "ALL")
+    MESSAGE("   Adding target info to target all")
+    
+    ADD_CUSTOM_TARGET(info
+      ${ADD_INFO_TO}
+      COMMAND ${MAKEINFO_EXE} comap.texi
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
+      )
+
+    ADD_CUSTOM_TARGET(html
+      COMMAND ${MAKEINFO_EXE} --html --css-ref=http://www.w3.org/StyleSheets/Core/Steely comap.texi
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
+      )
+  ELSE(MAKEINFO_EXE)
+    MESSAGE(FATAL_ERROR p"Program makeinfo required but not found.")
+  ENDIF(MAKEINFO_EXE)
+ENDIF(INFO)
+
 FIND_PROGRAM(PDFTEX_EXE NAMES pdftex)
-FIND_PROGRAM(NROFF_EXE NAMES nroff)
+IF(PDFTEX_EXE)
+  MESSAGE("-- Found pdftex here: ${PDFTEX_EXE}")
+  MESSAGE("   Adding target: pdf")
+
+  ADD_CUSTOM_TARGET(pdf
+    COMMAND ${PDFTEX_EXE} comap.texi
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
+    )
+  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "doc/comap.pdf;doc/comap.aux;doc/comap.cp;doc/comap.fn;doc/comap.info;doc/comap.ky;doc/comap.log;doc/comap.pg;doc/comap.toc;doc/comap.tp;doc/comap.vr")
+ENDIF(PDFTEX_EXE)
 
 #here is a useful function:
 MACRO(IMPROVED_FIND_LIBRARY OUTPUT_LIBS lib_name include_to_find)
@@ -105,53 +171,6 @@ IMPROVED_FIND_LIBRARY(LIBS bpp-phyl Bpp/Phyl/Tree.h)
 IMPROVED_FIND_LIBRARY(LIBS bpp-seq Bpp/Seq/Alphabet/Alphabet.h)
 IMPROVED_FIND_LIBRARY(LIBS bpp-core Bpp/Clonable.h)
 
-IF(MAKEINFO_EXE)
-  MESSAGE("-- Found makeinfo here: ${MAKEINFO_EXE}")
-  MESSAGE("   Adding targets: info, html")
-
-  IF(INFO)
-    SET(ADD_INFO_TO "ALL")
-    MESSAGE("   Adding target info to target all")
-  ENDIF(INFO)
-
-  ADD_CUSTOM_TARGET(info
-    ${ADD_INFO_TO}
-    COMMAND ${MAKEINFO_EXE} comap.texi
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
-    )
-
-  ADD_CUSTOM_TARGET(html
-    COMMAND ${MAKEINFO_EXE} --html --css-ref=http://www.w3.org/StyleSheets/Core/Steely comap.texi
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
-    )
-ENDIF(MAKEINFO_EXE)
-
-IF(PDFTEX_EXE)
-  MESSAGE("-- Found pdftex here: ${PDFTEX_EXE}")
-  MESSAGE("   Adding target: pdf")
-
-  ADD_CUSTOM_TARGET(pdf
-    COMMAND ${PDFTEX_EXE} comap.texi
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc
-    )
-ENDIF(PDFTEX_EXE)
-
-IF(NROFF_EXE)
-  MESSAGE("-- Found nroff here: ${NROFF_EXE}")
-  MESSAGE("   Adding targets: man")
-
-  ADD_CUSTOM_TARGET(man
-    ALL
-    COMMAND cp comap.1.txt comap.1
-    COMMAND gzip -f comap.1
-    COMMAND cp mica.1.txt mica.1
-    COMMAND gzip -f mica.1
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/man
-    )
-  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "man/comap.1.gz;man/mica.1.gz")
-ENDIF(NROFF_EXE)
-
-
 # Subdirectories
 ADD_SUBDIRECTORY(CoMap)
 ADD_SUBDIRECTORY(doc)
@@ -162,10 +181,10 @@ ENDIF(NO_DEP_CHECK)
 # Packager
 SET(CPACK_PACKAGE_NAME "comap")
 SET(CPACK_PACKAGE_VENDOR "CNRS - University Montpellier 2")
-SET(CPACK_PACKAGE_VERSION "1.5.0")
+SET(CPACK_PACKAGE_VERSION "1.5.1")
 SET(CPACK_PACKAGE_VERSION_MAJOR "1")
 SET(CPACK_PACKAGE_VERSION_MINOR "5")
-SET(CPACK_PACKAGE_VERSION_PATCH "0")
+SET(CPACK_PACKAGE_VERSION_PATCH "1")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CoMap: a program for mapping substitutions and detecting molecular co-evolution.")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING.txt")
 SET(CPACK_RESOURCE_FILE_AUTHORS "${CMAKE_SOURCE_DIR}/AUTHORS.txt")
@@ -218,8 +237,21 @@ SET(CPACK_DEBSOURCE_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}_${CPACK_PACKAGE_VER
 INCLUDE(CPack)
 
 #This adds the 'dist' target
-add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
-ADD_DEPENDENCIES(dist pdf)
+ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+# 'clean' is not (yet) a first class target. However, we need to clean the directories before building the sources:
+IF("${CMAKE_GENERATOR}" MATCHES "Make")
+  ADD_CUSTOM_TARGET(make_clean
+    COMMAND ${CMAKE_MAKE_PROGRAM} clean
+    WORKING_DIRECTORY ${CMAKE_CURRENT_DIR}
+  )
+  ADD_DEPENDENCIES(dist make_clean)
+
+  ADD_CUSTOM_TARGET(make_clean_man
+    COMMAND rm -f *.${DOC_COMPRESS_EXT}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/man
+  )
+  ADD_DEPENDENCIES(dist make_clean_man)
+ENDIF()
 
 IF(NOT NO_DEP_CHECK)
 IF (UNIX)

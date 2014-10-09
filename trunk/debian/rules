@@ -65,18 +65,22 @@ clean:
 	[ ! -f Makefile ] || $(MAKE) clean;
 	[ ! -f Makefile ] || rm Makefile;
 	[ ! -f Makefile ] || rm CoMap/Makefile;
+	[ ! -f doc/Makefile ] || rm doc/Makefile;
+	[ ! -f man/Makefile ] || rm man/Makefile;
+	rm -f man/*.gz;
 	rm -f config.sub config.guess
 	rm -f build-stamp
 	rm -f CMakeCache.txt
 	rm -f *.cmake
 	rm -f CoMap/*.cmake
-	#rm -f test/*.cmake
+	rm -f man/*.cmake
+	rm -f doc/*.cmake
 	rm -rf CMakeFiles
 	rm -rf CoMap/CMakeFiles
-	#rm -rf test/CMakeFiles
+	rm -rf man/CMakeFiles
+	rm -rf doc/CMakeFiles
+	rm -rf doc/comap.info
 	rm -rf _CPack_Packages
-	#rm -rf Testing
-	#rm -f DartConfiguration.tcl
 
 	dh_clean 
 

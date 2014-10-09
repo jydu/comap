@@ -14,13 +14,13 @@
 # 1) Clustering output
 
 all.data.files<-list()
-all.data.files[["Simple"]]    <-"Myo_stats.csv"
+all.data.files[["Volume"]]    <-"Myo_stats.csv"
 
 
 # 2) Simulations
 
 all.sim.files<-list()
-all.sim.files[["Simple"]]    <-"Myo_null.csv"
+all.sim.files[["Volume"]]    <-"Myo_null.csv"
 
 # 3) Output files:
 output.file<-"Myo_stats_pvalues.csv"
