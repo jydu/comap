@@ -1,3 +1,11 @@
+comap (1.5.1-1) unstable; urgency=low
+
+  * New mapping procedure
+  * Simplified interface
+  * Bug fixes...
+
+ -- Julien Dutheil <julien.dutheil@univ-montp2.fr>  Thu, 09 Oct 2014 22:46:00 +0100
+
 comap (1.4.1-1) unstable; urgency=low
 
   * Mostly compatibility update + bug fixed.
