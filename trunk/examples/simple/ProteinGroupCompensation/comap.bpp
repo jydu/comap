@@ -39,6 +39,7 @@ rate_distribution = Gamma(n=4, alpha=0.5)
 
 # Weighted mapping:
 nijt = Uniformization(weight=Diff(index1=Volume, symmetrical=no))
+output.vectors.file = Myo_volume.txt
 
 # ----------------------------------------------------------------------------------------
 #                                     Parameter estimation

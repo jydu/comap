@@ -45,11 +45,11 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/Numeric/Prob/DiscreteDistribution.h>
 #include <Bpp/Numeric/VectorTools.h>
 
-// From SeqLib:
+// From bpp-seq:
 #include <Bpp/Seq/Alphabet/Alphabet.h>
 #include <Bpp/Seq/Container/VectorSiteContainer.h>
 
-// From PhylLib:
+// From bpp-phyl:
 #include <Bpp/Phyl/Tree.h>
 #include <Bpp/Phyl/Model/SubstitutionModel.h>
 #include <Bpp/Phyl/Likelihood.all>
@@ -331,10 +331,11 @@ class CoETools
      * - constant [boolean (0 = false)]
      */
 		static void writeInfos(
-			const SiteContainer & completeSites,
-			const DiscreteRatesAcrossSitesTreeLikelihood & ras,
-			map<string, string> & params,
-			const string & suffix = "");
+			const SiteContainer& completeSites,
+			const DiscreteRatesAcrossSitesTreeLikelihood& ras,
+      const std::vector<double>& norms,
+			map<string, string>& params,
+			const string& suffix = "");
 
 		static int getMinRateClass(map<string, string>& params, string suffix = "");
 		

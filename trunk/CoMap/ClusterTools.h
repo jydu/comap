@@ -162,11 +162,10 @@ class ClusterTools
 	      SubstitutionCount & nijt,
         const Distance & distance,
         AgglomerativeDistanceMethod & clustering,
-        const vector<double> & scales,
         size_t sizeOfDataSet,
         size_t nrep,
         size_t maxGroupSize,
-        ofstream * out = NULL);
+        ofstream* out = 0);
 
     static void translate(TreeTemplate<Node> & tree, const vector<string> & tln)
     {

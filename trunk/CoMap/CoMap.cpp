@@ -90,13 +90,12 @@ void help()
 /**
  * @brief The main function.
  */
-
 int main(int argc, char *argv[])
 {
   cout << endl;
   cout << endl;
   cout << "***********************************************************" << endl;
-  cout << "* This is CoMap        version 1.5.1       date: 12/06/14 *" << endl;
+  cout << "* This is CoMap        version 1.5.1       date: 26/09/14 *" << endl;
   cout << "*     A C++ shell program to detect co-evolving sites.    *" << endl;
   cout << "***********************************************************" << endl;
   cout << endl;
@@ -116,7 +115,7 @@ int main(int argc, char *argv[])
   }
 
   BppApplication comap(argc, argv, "CoMap");
- comap.startTimer();
+  comap.startTimer();
 
   ApplicationTools::displayMessage("\n\n-*- Retrieve data and model -*-\n");
 
@@ -152,6 +151,15 @@ int main(int argc, char *argv[])
   // Getting the substitution vectors:
   ProbabilisticSubstitutionMapping* mapping1 = CoETools::getVectors(*tl1, *substitutionCount1, *sites1, comap.getParams());
 
+  // Compute norms:
+  size_t nbSites1 = mapping1->getNumberOfSites();
+  vector<double> norms1(nbSites1);
+  for (size_t i = 0; i < nbSites1; i++)
+  {
+    norms1[i] = SubstitutionMappingTools::computeNormForSite(*mapping1, i);
+  }
+  CoETools::writeInfos(*sites1, *tl1, norms1, comap.getParams());
+
   string analysis = ApplicationTools::getStringParameter("analysis", comap.getParams(), "pairwise", "", false, 0);
   ApplicationTools::displayResult("Analysis type", analysis);
 
@@ -181,7 +189,7 @@ int main(int argc, char *argv[])
 
 
 
-  // Coevolutiona analysis:
+  // Coevolution analysis:
   if (analysis == "none")
   {
     //No coevolution analysis, only perform mapping!
@@ -200,8 +208,6 @@ int main(int argc, char *argv[])
       seqSim1 = new HomogeneousSequenceSimulator(model1, rDist1, tree1);
       dynamic_cast<HomogeneousSequenceSimulator *>(seqSim1)->enableContinuousRates(continuousSim);
     }
-
-
 
     // *********************
     // * Pairwise analysis *
@@ -223,16 +229,17 @@ int main(int argc, char *argv[])
         TreeTemplate<Node>* tree2;
         if (comap.getParams().find("input.tree.file2") != comap.getParams().end() && comap.getParams()["input.tree.file2"] != "none")
         {
-          ApplicationTools::displayMessage("WARNING!!! Second tree file specified.\n Tree 1 and Tree 2 must differ only by their branch lengths, otherwise results may be uninterpretable.\n");      
-          Tree* tmpTree2 = PhylogeneticsApplicationTools::getTree(comap.getParams(), "input.", "2", true);
+          auto_ptr<Tree> tmpTree2(PhylogeneticsApplicationTools::getTree(comap.getParams(), "input.", "2", true));
           tree2 = new TreeTemplate<Node>(*tmpTree2);
-          delete tmpTree2;
+          if (!TreeTools::haveSameTopology(*tree1, *tree2))
+            throw Exception("The second tree must have the same topology as the first tree.");
           ApplicationTools::displayResult("# number of leaves", TextTools::toString(tree2->getNumberOfLeaves()));
           ApplicationTools::displayResult("# number of sons at root", TextTools::toString(tree2->getRootNode()->getNumberOfSons()));
+          //We haverage weights:
         }
         else
         {
-          tree2 = new TreeTemplate<Node>(* tree1); // Copy tree.
+          tree2 = new TreeTemplate<Node>(*tree1); // Copy tree.
         }
 
         Alphabet *alphabet2;
@@ -269,6 +276,14 @@ int main(int argc, char *argv[])
         // Getting the substitution vectors:
         ProbabilisticSubstitutionMapping* mapping2 = CoETools::getVectors(*tl2, *substitutionCount2, *sites2, comap.getParams(), "2");
  
+        // Compute norms:
+        size_t nbSites2 = mapping1->getNumberOfSites();
+        vector<double> norms2(nbSites2);
+        for (size_t i = 0; i < nbSites2; i++)
+        {
+          norms2[i] = SubstitutionMappingTools::computeNormForSite(*mapping2, i);
+        }
+
         CorrectedCorrelationStatistic* cstat = dynamic_cast<CorrectedCorrelationStatistic*>(statistic);
         if (cstat) {
           Vdouble mv1(mapping1->getNumberOfBranches());
@@ -303,7 +318,7 @@ int main(int argc, char *argv[])
           *statistic,
           comap.getParams());
       
-        CoETools::writeInfos(*sites2, *tl2, comap.getParams(), "2");
+        CoETools::writeInfos(*sites2, *tl2, norms2, comap.getParams(), "2");
       
         //tl2 will be modified after the simulations!
         if (computeNullHyp)
@@ -354,7 +369,6 @@ int main(int argc, char *argv[])
           *statistic,
           computeNullHyp,
           comap.getParams());
-        CoETools::writeInfos(*sites1, *tl1, comap.getParams());
       }
 
       delete statistic;
@@ -371,61 +385,17 @@ int main(int argc, char *argv[])
   
     else if (analysis == "clustering")
     {
-      CoETools::writeInfos(*sites1, *tl1, comap.getParams());
-
       ApplicationTools::displayMessage("\n\n-*- Perform clustering analysis -*-\n");
   
       string clusteringMethod = ApplicationTools::getStringParameter("clustering.method", comap.getParams(), "complete", "", false, 0);
       if (clusteringMethod != "none")
-      {
-        size_t nbBranches = mapping1->getNumberOfBranches();
-        size_t nbSites    = mapping1->getNumberOfSites();
-        size_t nbTypes    = mapping1->getNumberOfSubstitutionTypes();
-        bool scale = ApplicationTools::getBooleanParameter("clustering.scale", comap.getParams(), false, "", true, 4); //This option is for testing purpose only.
-        vector<double> scales(nbBranches, 1.);
-        vector<double> weights(nbBranches, 1.);
-        vector<double> brLens = mapping1->getBranchLengths();
-        double minLen = ApplicationTools::getDoubleParameter("clustering.min_length", comap.getParams(), 0.000001, "", false, 4);
-        vector<double> meanVector(nbBranches);
-        for (size_t j = 0; j < nbBranches; ++j)
-        {
-          double sum = 0;
-          for (size_t i = 0; i < nbSites; ++i)
-            for (size_t t = 0; t < nbTypes; ++t)
-              sum += (*mapping1)(j, i, t);
-          meanVector[j] = sum / static_cast<double>(nbSites);
-        }
-  
-        // Scale if required (i.e., devide each vector by the mean vector):
-        for (size_t j = 0; j < nbBranches; ++j)
-        {
-          double len = brLens[j];
-          if (len <= minLen) weights[j] = 0.; // Branch ignored, considered as a multifurcation.
-          if (scale)
-          {
-            double scaleVal = 0;
-            if (len > minLen)
-            {
-              double m = meanVector[j];
-              if (m > 0) scaleVal = 1./m; // if mean==0, hence the susbstitution number is 0 too, the scale does not matter... 0/0=>0.
-              //else scaleVal = 0.;
-            }// else: weight[j] == 0, so the position will not be used in distance calculation whatever...
-            for (unsigned int i = 0; i < nbSites; ++i)
-              for (unsigned int t = 0; t < nbTypes; ++t)
-                (*mapping1)(j, i, t) *= scaleVal;
-            scales[j] = scaleVal;
-          }
-        }  
-        ApplicationTools::displayResult("Scale by row", scale ? "yes" : "no");
-  
-        // Compute norms:
-        vector<double> norms(nbSites);
-        vector<string> siteNames(nbSites);
-        for (size_t i = 0; i < nbSites; i++)
+      { 
+        // Get site positions:
+        vector<string> siteNames(nbSites1);
+        for (size_t i = 0; i < nbSites1; i++)
         {
           string siteName = TextTools::toString(sites1->getSite(i).getPosition());
           siteNames[i] = siteName; 
-          norms[i] = SubstitutionMappingTools::computeNormForSite(*mapping1, i);
         }
   
         // Get the distance to use
@@ -457,12 +427,12 @@ int main(int argc, char *argv[])
           ApplicationTools::displayError("Unknown distance method.");
           exit(-1);
         }
-        dist->setWeights(weights);
+        //dist->setWeights(weights);
         ApplicationTools::displayResult("Distance to use", distanceMethod);
 
         // Compute the distance matrix.
         auto_ptr<DistanceMatrix> mat(new DistanceMatrix(siteNames));
-        for (size_t i = 0; i < nbSites; ++i)
+        for (size_t i = 0; i < nbSites1; ++i)
         {
           (*mat)(i,i) = 0.;
           for (size_t j = 0; j < i; ++j)
@@ -484,8 +454,9 @@ int main(int argc, char *argv[])
   
         // The leaves in the clustering tree are the position in the mapping.
         // We will translate them before writing it to file.
-        vector<string> matNames(nbSites);
-        for (size_t i = 0; i < nbSites; ++i) matNames[i] = TextTools::toString(i);
+        vector<string> matNames(nbSites1);
+        for (size_t i = 0; i < nbSites1; ++i)
+          matNames[i] = TextTools::toString(i);
         mat->setNames(matNames);
    
         auto_ptr<AgglomerativeDistanceMethod> clustering;
@@ -534,8 +505,8 @@ int main(int argc, char *argv[])
 
         // A few infos we will need:
         vector<double> rates = tl1->getPosteriorRateOfEachSite();
-        vector<bool> isConst(nbSites);
-        for (size_t i = 0; i < nbSites; ++i)
+        vector<bool> isConst(nbSites1);
+        for (size_t i = 0; i < nbSites1; ++i)
           isConst[i] = SiteTools::isConstant(sites1->getSite(i), true);
   
         vector<Group> groups = ClusterTools::getGroups(&clusteringTree);
@@ -605,7 +576,7 @@ int main(int argc, char *argv[])
           ofstream* out = 0;
           if (simPath != "none") out = new ofstream(simPath.c_str(), ios::out);
           ApplicationTools::displayTask("Simulating groups", true);
-          ClusterTools::computeGlobalDistanceDistribution(*tl1, *seqSim1, *substitutionCount1, *dist, *clustering, scales, nbSites, nrep, maxGroupSize, out);
+          ClusterTools::computeGlobalDistanceDistribution(*tl1, *seqSim1, *substitutionCount1, *dist, *clustering, nbSites1, nrep, maxGroupSize, out);
           ApplicationTools::displayTaskDone();
           if (out) out->close();
         }
@@ -626,8 +597,6 @@ int main(int argc, char *argv[])
       // * Candidate groups analysis *
       // *****************************
       // We only deal with the one data set case for now.
-    
-      CoETools::writeInfos(*sites1, *tl1, comap.getParams());
     
       const Statistic* statistic = CoETools::getStatistic(comap.getParams(), alphabet1, substitutionCount1);
   
