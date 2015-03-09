@@ -140,9 +140,10 @@ void CoETools::readData(
       rateFreqs = vector<double>(n, 1./static_cast<double>(n)); // Equal rates assumed for now, may be changed later (actually, in the most general case,
                                                     // we should assume a rate distribution for the root also!!!  
     }
-    FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, geneticCode, sites, params, rateFreqs);
+    map<string, string> sharedParams;
+    FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, geneticCode, sites, params, sharedParams, rateFreqs);
     vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", params, ',', "", "", true, 1);
-    modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, globalParameters); 
+    modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, sharedParams, globalParameters); 
     model = modelSet->getModel(0)->clone();
     tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false);
   }
@@ -165,8 +166,6 @@ void CoETools::readData(
   else throw Exception("Unknown option for nonhomogeneous: " + nhOpt);
   
   tl->initialize();
-
-  ApplicationTools::displayTask("Tree likelihood");
 
   //Check for saturation:
   double ll = tl->getValue();
@@ -223,9 +222,9 @@ void CoETools::readData(
   }    
 
   string optimization = ApplicationTools::getStringParameter("optimization", params, "None", suffix, true, false);
+  ApplicationTools::displayBooleanResult("Optimization", optimization != "None");
   if (optimization != "None")
   {
-    ApplicationTools::displayResult("Optimization", string("yes"));
     PhylogeneticsApplicationTools::optimizeParameters(tl, tl->getParameters(), params, suffix, true, true);
     TreeTemplate<Node> *treeOpt = new TreeTemplate<Node>(tl->getTree());
     PhylogeneticsApplicationTools::writeTree(*treeOpt, params, "output.", suffix);
@@ -421,9 +420,10 @@ bool CoETools::haveToPerformIndependantComparisons(map<string, string>& params)
 /******************************************************************************/
 
 void CoETools::writeInfos(
-  const SiteContainer & completeSites,
-  const DiscreteRatesAcrossSitesTreeLikelihood & ras,
-  map<string, string> & params,
+  const SiteContainer& completeSites,
+  const DiscreteRatesAcrossSitesTreeLikelihood& ras,
+  const vector<double>& norms,
+  map<string, string>& params,
   const string & suffix)
 {
   string outFile = ApplicationTools::getAFilePath("output.infos", params, false, false, suffix, true, "none", 1);
@@ -438,11 +438,11 @@ void CoETools::writeInfos(
   ApplicationTools::displayResult("Alignment information logfile", outFile);
 
   ofstream out(outFile.c_str(), ios::out);
-  out << "Group\tIsComplete\tIsConstant\tRC\tPR\tlogLn" << endl;
+  out << "Group\tIsComplete\tIsConstant\tRC\tPR\tN\tlogLn" << endl;
 
-  for (unsigned int i = 0; i < completeSites.getNumberOfSites(); i++)
+  for (size_t i = 0; i < completeSites.getNumberOfSites(); i++)
   {
-    const Site * currentSite = &completeSites.getSite(i);
+    const Site* currentSite = &completeSites.getSite(i);
     int currentSitePosition = currentSite->getPosition();
     int isCompl = (SiteTools::isComplete(* currentSite) ? 1 : 0);
     int isConst = (SiteTools::isConstant(* currentSite, true) ? 1 : 0);
@@ -451,6 +451,7 @@ void CoETools::writeInfos(
     out << isConst << "\t";
     out << classes[i] << "\t";
     out << rates[i] << "\t";
+    out << norms[i] << "\t";
     out << logLn[i] << endl;
   }
 }
@@ -496,11 +497,11 @@ Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* a
   }
   else if (name == "MI")
   {
-    string nijtOption = ApplicationTools::getStringParameter("nijt", params, "simple", "", true, false);
-    if (nijtOption == "label") { //Warning, does not work with a second data set with a different alphabet :s
+    string nijtOption = ApplicationTools::getStringParameter("nijt", params, "Label", "", true, false);
+    if (nijtOption == "Label") { //Warning, does not work with a second data set with a different alphabet :s
       bool average = ApplicationTools::getBooleanParameter("nijt.average", params, true, "", true, 4); //For benchmarking only!
       if (average) {
-        throw Exception("MI distance with 'nijt=label' can't be used with 'nijt.average=yes'.");
+        throw Exception("MI distance with 'nijt=Label' can't be used with 'nijt.average=yes'.");
       }
       unsigned int n = alphabet->getSize() * (alphabet->getSize() - 1);
       vector<double> b(n + 2);
@@ -508,14 +509,12 @@ Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* a
       for (unsigned int i = 0; i < n + 1; ++i)
         b[i + 1] = b [i] + 1;
       return new DiscreteMutualInformationStatistic(b);  
-    } else if (nijtOption == "simple" || nijtOption == "laplace" || nijtOption == "prob_one_jump") {
+    } else {
       double threshold = ApplicationTools::getDoubleParameter("threshold", args, 0.99, "", true);
       vector<double> b(3);
       b[0] = 0.; b[1] = threshold; b[2] = 10000.;
 		  return new DiscreteMutualInformationStatistic(b);
-    } else {
-      throw Exception("MI distance can only be used with 'nijt=label', 'nijt=simple', 'nijt=laplace', 'nijt=prob_one_jump' options for now.");
-    }
+    } 
   }
   else
   {

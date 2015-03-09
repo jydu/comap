@@ -13,9 +13,9 @@
 @c %**end of header
 
 @copying
-This is the manual of CoMap, version 1.5.0.
+This is the manual of CoMap, version 1.5.1.
 
-Copyright @copyright{} 2006-2012 Julien Dutheil
+Copyright @copyright{} 2006-2014 Julien Dutheil
 @end copying
 
 @titlepage
@@ -328,10 +328,6 @@ If another option or @option{none} is selected, no pairwise analysis is performe
 
 @item clustering.distance = @{cor|euclidian|comp|none@}
 Distance to use: cor (correlation), euclidean, comp (compensation) or none (no clustering).
-
-@item clustering.scale = @{boolean@}
-Tell is mapping should be normalized (each row (=branch) will be
-divided by its sum.
 
 @item clustering.method = @{complete@}
 Clustering algorithm: complete linkage. Other linkage types are available, but the complete one gives the better results.

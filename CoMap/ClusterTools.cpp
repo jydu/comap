@@ -203,7 +203,6 @@ void ClusterTools::computeGlobalDistanceDistribution(
 	SubstitutionCount& nijt,
   const Distance& distance,
   AgglomerativeDistanceMethod& clustering,
-  const vector<double>& scales,
   size_t sizeOfDataSet,
   size_t nrep,
   size_t maxGroupSize,
@@ -239,15 +238,6 @@ void ClusterTools::computeGlobalDistanceDistribution(
       meanVector[j] = sum / static_cast<double>(sizeOfDataSet);
     }
 
-    //Scale vectors:
-		for (size_t j = 0; j < nbBranches; ++j)
-    {
-      double scale = scales[j];
-		  for (size_t i = 0; i < sizeOfDataSet; ++i)
-		    for (size_t t = 0; t < nbTypes; ++t)
-			  (*mapping)(j, i, t) *= scale;
-		}
-    
     //Compute distance matrix:
 	  auto_ptr<DistanceMatrix> mat(new DistanceMatrix(siteNames));
 	  for (size_t i = 0; i < sizeOfDataSet; ++i)
