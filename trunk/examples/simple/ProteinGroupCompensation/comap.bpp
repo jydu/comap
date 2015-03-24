@@ -47,6 +47,7 @@ output.vectors.file = Myo_volume.txt
 
 optimization = FullD
 output.tree.file = Myo.LG.dnd
+output.infos = Myo_sites.csv
 
 # ----------------------------------------------------------------------------------------
 #                                     Clustering Analysis

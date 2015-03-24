@@ -238,6 +238,39 @@ void CoETools::readData(
     // Print parameters:
     ApplicationTools::displayResult("Final likelihood, -lnL =", TextTools::toString(tl -> getLogLikelihood(), 20));
   }
+  
+  // Write parameters to file:
+  string parametersFile = ApplicationTools::getAFilePath("output.estimates", params, false, false, "none", 1);
+  ApplicationTools::displayResult("Output estimates to file", parametersFile);
+  if (parametersFile != "none")
+  {
+    StlOutputStream out(new ofstream(parametersFile.c_str(), ios::out));
+    out << "# Log likelihood = ";
+    out.setPrecision(20) << (-tl->getValue());
+    out.endLine();
+    out << "# Number of sites = ";
+    out.setPrecision(20) << sites->getNumberOfSites();
+    out.endLine();
+    out.endLine();
+    out << "# Substitution model parameters:";
+    out.endLine();
+    if (modelSet)
+    {
+      modelSet->matchParametersValues(tl->getParameters());
+      PhylogeneticsApplicationTools::printParameters(modelSet, out);
+    }
+    else
+    {
+      model->matchParametersValues(tl->getParameters());
+      PhylogeneticsApplicationTools::printParameters(model, out);
+    }
+    out.endLine();
+    (out << "# Rate distribution parameters:").endLine();
+    rDist->matchParametersValues(tl->getParameters());
+    PhylogeneticsApplicationTools::printParameters(rDist, out);
+  }
+
+
   string tags = ApplicationTools::getAFilePath("output.tags.file", params, false, false, suffix, false, "none", 2);
   ApplicationTools::displayResult("Tagged tree file", tags);
   if (tags != "none")
