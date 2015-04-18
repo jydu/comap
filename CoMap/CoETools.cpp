@@ -140,10 +140,9 @@ void CoETools::readData(
       rateFreqs = vector<double>(n, 1./static_cast<double>(n)); // Equal rates assumed for now, may be changed later (actually, in the most general case,
                                                     // we should assume a rate distribution for the root also!!!  
     }
-    map<string, string> sharedParams;
-    FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, geneticCode, sites, params, sharedParams, rateFreqs);
+    FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, geneticCode, sites, params, rateFreqs);
     vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", params, ',', "", "", true, 1);
-    modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, sharedParams, globalParameters); 
+    modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, globalParameters); 
     model = modelSet->getModel(0)->clone();
     tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false);
   }
