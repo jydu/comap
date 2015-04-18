@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename comap.info
-@settitle CoMap Manual 1.5.0
+@settitle CoMap Manual 1.5.2
 @afourpaper
 
 @dircategory Science Biology Genetics
@@ -13,9 +13,9 @@
 @c %**end of header
 
 @copying
-This is the manual of CoMap, version 1.5.1.
+This is the manual of CoMap, version 1.5.2.
 
-Copyright @copyright{} 2006-2014 Julien Dutheil
+Copyright @copyright{} 2006-2015 Julien Dutheil
 @end copying
 
 @titlepage
@@ -155,29 +155,15 @@ Currently available only for proteins.
 
 @end table
 
-The Naive, Uniformization and Decomposition methods all allow to perform weighted substitution mapping, by taking a @option{weight} argument. Only two options are available for now:
+The Naive, Uniformization and Decomposition methods all allow to perform weighted substitution mapping, by taking a @option{weight} argument:
 
 @table @command
 @item None
 The default, no weighting is used, all substitution weight the same.
 
-@item AAdist
-Amino-acid distance. This option takes further arguments:
-
-@table @command
-
-@item type = @{grantham|miyata|grantham.volume|grantham.polarity|charge|klein.charge|user1|user2@}
-Specify the type of weight to use.
-The @option{user1} option is for computing a simple distance from a AAIndex1 file, @option{user2} uses a AAIndex2 distance file.
-
-@item file = @{path@}
-File path toward a AAIndex1 and AAIndex2 file, ignored otherwise.
-
-@item sym = @{boolean@}
-Tell if symmetric matrices must be used.
-This option should be set to "no" for testing compensation.
-
-@end table
+@item [Index2]
+An Index2 description (see the bppsuite manual for a detailed description, as well as the example data sets).
+Note that from compensation methods, the @command{symmetrical} argument must be set to 'no'.
 
 @end table
 

@@ -1,5 +1,5 @@
 %define _basename comap
-%define _version 1.5.1
+%define _version 1.5.2
 %define _release 1
 %define _prefix /usr
 
@@ -98,6 +98,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/share/man/man1/mica.1.%{zipext}
 
 %changelog
+* Sat Apr 18 2015 Julien Dutheil <julien.dutheil@univ-montp2.fr> 1.5.2-1
+- Extended output files
 * Thu Oct 09 2014 Julien Dutheil <julien.dutheil@univ-montp2.fr> 1.5.1-1
 - New mapping procedure
 - Simplified interface

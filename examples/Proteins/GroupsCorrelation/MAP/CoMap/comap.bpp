@@ -51,14 +51,16 @@ simulations.continuous = no
 optimization = None
 
 output.tree.file =  none
+output.estimates = none
+
 # ----------------------------------------------------------------------------------------
 #                                     Additionnal stuff
 # ----------------------------------------------------------------------------------------
 
 # A file where site-specific information will be written (posterior rate, constant site, etc.):
-output.infos = MAP.infos
-output.tags.file = MAP.tags.dnd
-output.tags.translation = MAP.tags.tln
+output.infos = $(OUTPUT)/$(DATA).infos
+output.tags.file = $(OUTPUT)/$(DATA).tags.dnd
+output.tags.translation = $(OUTPUT)/$(DATA).tags.tln
 
 # ----------------------------------------------------------------------------------------
 #                                     Substitution vectors
@@ -67,13 +69,11 @@ output.tags.translation = MAP.tags.tln
 # We may restart an analysis by specifying the already computed vectors:
 input.vectors.file = none
 # Otherwise, tell where to write vectors:
-output.vectors.file = 
+output.vectors.file = $(OUTPUT)/$(DATA).vec
 
 # The method to use to compute vectors:
 # laplace, simple,...
 nijt= 
-# Where to trunc the series (see article):
-nijt_laplace.trunc = 10
 # Should we average over all ancestral state (yes) or use ancestral states reconstruction (no) ?
 nijt.average = yes
 # Should we use pair-joint calculation (yes) or marginal (no) one?
@@ -86,14 +86,15 @@ nijt.joint = yes
 
 analysis = clustering
 
-clustering.distance=cor
-clustering.scale=no
-clustering.method=complete
+clustering.distance = cor
+clustering.scale = no
+clustering.method = complete
 
-clustering.output.groups.file=
-clustering.output.matrix.file=none
-clustering.output.tree.file=
+clustering.output.groups.file = $(OUTPUT)/$(DATA)_groups.csv
+clustering.output.matrix.file = none
+clustering.output.tree.file = $(OUTPUT)/$(DATA)_clust.dnd
 
-clustering.null=yes
-clustering.null.number=1000
-clustering.null.output.file=
+clustering.null = yes
+clustering.null.number = 1000
+clustering.null.output.file = $(OUTPUT)/$(DATA)_null.csv
+
