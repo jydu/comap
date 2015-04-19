@@ -1,6 +1,6 @@
 #! /bin/sh
 arch=`uname -m`
-version=1.5.1-1
+version=1.5.2-1
 
 strip CoMap/comap
 strip CoMap/mica
