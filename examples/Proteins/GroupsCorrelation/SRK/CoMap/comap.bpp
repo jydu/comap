@@ -16,13 +16,13 @@ input.sequence.format = Mase(site_selection=SelectedSites)
 # complete => only fully resolved chars.
 input.sequence.sites_to_use = nogap
 
-# Ignore constant sites.
-input.remove_const = yes
-
 # Second file:
 input.sequence.file2 = none
 # All previous options can be set up for second file, just append '2' at option names.
 # The default is to use options of file1 for file2.
+
+# Ignore constant sites:
+input.remove_const = yes
 
 # The tree file to use. Branch lengths are optional.
 input.tree.file = ../Phylogeny/SRK.dnd
@@ -51,15 +51,16 @@ simulations.continuous = no
 optimization = None
 
 output.tree.file =  none
+output.estimates = none
 
 # ----------------------------------------------------------------------------------------
 #                                     Additionnal stuff
 # ----------------------------------------------------------------------------------------
 
 # A file where site-specific information will be written (posterior rate, constant site, etc.):
-output.infos = SRK.infos
-output.tags.file = SRK.tags.dnd
-output.tags.translation = SRK.tags.tln
+output.infos = $(OUTPUT)/$(DATA).infos
+output.tags.file = $(OUTPUT)/$(DATA).tags.dnd
+output.tags.translation = $(OUTPUT)/$(DATA).tags.tln
 
 # ----------------------------------------------------------------------------------------
 #                                     Substitution vectors
@@ -68,13 +69,11 @@ output.tags.translation = SRK.tags.tln
 # We may restart an analysis by specifying the already computed vectors:
 input.vectors.file = none
 # Otherwise, tell where to write vectors:
-output.vectors.file = 
+output.vectors.file = $(OUTPUT)/$(DATA).vec
 
 # The method to use to compute vectors:
 # laplace, simple,...
 nijt= 
-# Where to trunc the series (see article):
-nijt_laplace.trunc = 10
 # Should we average over all ancestral state (yes) or use ancestral states reconstruction (no) ?
 nijt.average = yes
 # Should we use pair-joint calculation (yes) or marginal (no) one?
@@ -85,16 +84,17 @@ nijt.joint = yes
 #                                     Clustering Analysis
 # ----------------------------------------------------------------------------------------
 
-analysis=clustering
+analysis = clustering
 
-clustering.distance=cor
-clustering.scale=no
-clustering.method=complete
+clustering.distance = cor
+clustering.scale = no
+clustering.method = complete
 
-clustering.output.groups.file=
-clustering.output.matrix.file=none
-clustering.output.tree.file=
+clustering.output.groups.file = $(OUTPUT)/$(DATA)_groups.csv
+clustering.output.matrix.file = none
+clustering.output.tree.file = $(OUTPUT)/$(DATA)_clust.dnd
 
-clustering.null=yes
-clustering.null.number=1000
-clustering.null.output.file=
+clustering.null = yes
+clustering.null.number = 1000
+clustering.null.output.file = $(OUTPUT)/$(DATA)_null.csv
+

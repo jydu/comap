@@ -24,10 +24,10 @@ all.data.files[["Charge"]]    <-"../CoMap/Charge/MAP_groups.csv"
 # 2) Simulations
 
 all.sim.files<-list()
-all.sim.files[["Grantham"]]  <-"../CoMap/Grantham/MAP_simulations.csv"
-all.sim.files[["Volume"]]    <-"../CoMap/Volume/MAP_simulations.csv"
-all.sim.files[["Polarity"]]  <-"../CoMap/Polarity/MAP_simulations.csv"
-all.sim.files[["Charge"]]    <-"../CoMap/Charge/MAP_simulations.csv"
+all.sim.files[["Grantham"]]  <-"../CoMap/Grantham/MAP_null.csv"
+all.sim.files[["Volume"]]    <-"../CoMap/Volume/MAP_null.csv"
+all.sim.files[["Polarity"]]  <-"../CoMap/Polarity/MAP_null.csv"
+all.sim.files[["Charge"]]    <-"../CoMap/Charge/MAP_null.csv"
 
 # 3) Output files:
 # Type I test:

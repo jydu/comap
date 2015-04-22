@@ -51,6 +51,7 @@ rate_distribution = Invariant(dist=Gamma(n=4, alpha=0.737023854405), p=0.3666117
 # Should we reestimate likelihood parameters? Tree topology will not be optimized.
 # (recommanded)
 optimization = None
+output.estimates = no
 
 # ----------------------------------------------------------------------------------------
 #                                     Substitution vectors
@@ -62,12 +63,7 @@ input.vectors.file = none
 output.vectors.file = none
 
 # The method to use to compute vectors:
-# One of
-# - laplace: real mapping
-# - simple: naive mapping (1 substitution if x<>y, 0 if x==y)
-# - aadist: weighted mapping (proteins)
-# - prob_one_jump: compute the probability of observing at least one jump.
-nijt = simple
+nijt = Uniformization
 
 # ----------------------------------------------------------------------------------------
 #                                     Coevolution analysis
