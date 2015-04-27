@@ -3,6 +3,7 @@
 # 15/11/2007
 # 04/08/2007
 # 17/02/2011
+# 18/04/2015
 
 # ----------------------------------------------------------------------------------------------------------------
 # EDITABLE SECTION:
@@ -14,7 +15,7 @@
 # 1) Clustering output
 
 all.data.files<-list()
-all.data.files[["Simple"]]    <-"../CoMap/Simple/Myo_groups.csv"
+all.data.files[["Raw"]]       <-"../CoMap/Raw/Myo_groups.csv"
 all.data.files[["Grantham"]]  <-"../CoMap/Grantham/Myo_groups.csv"
 all.data.files[["Volume"]]    <-"../CoMap/Volume/Myo_groups.csv"
 all.data.files[["Polarity"]]  <-"../CoMap/Polarity/Myo_groups.csv"
@@ -24,14 +25,14 @@ all.data.files[["Charge"]]    <-"../CoMap/Charge/Myo_groups.csv"
 # 2) Simulations
 
 all.sim.files<-list()
-all.sim.files[["Simple"]]    <-"../CoMap/Simple/Myo_simulations.csv"
-all.sim.files[["Grantham"]]  <-"../CoMap/Grantham/Myo_simulations.csv"
-all.sim.files[["Volume"]]    <-"../CoMap/Volume/Myo_simulations.csv"
-all.sim.files[["Polarity"]]  <-"../CoMap/Polarity/Myo_simulations.csv"
-all.sim.files[["Charge"]]    <-"../CoMap/Charge/Myo_simulations.csv"
+all.sim.files[["Raw"]]       <-"../CoMap/Raw/Myo_null.csv"
+all.sim.files[["Grantham"]]  <-"../CoMap/Grantham/Myo_null.csv"
+all.sim.files[["Volume"]]    <-"../CoMap/Volume/Myo_null.csv"
+all.sim.files[["Polarity"]]  <-"../CoMap/Polarity/Myo_null.csv"
+all.sim.files[["Charge"]]    <-"../CoMap/Charge/Myo_null.csv"
 
 # 3) Output files:
-output.file1<-"Myo_predictions_pvalues.csv"
+output.file<-"Myo_predictions_pvalues.csv"
 
 #Sliding windows sizes:
 window.Nmin<-0.2

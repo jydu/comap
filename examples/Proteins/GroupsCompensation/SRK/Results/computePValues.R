@@ -4,6 +4,7 @@
 # 04/08/2007
 # 04/12/2009
 # 17/02/2011
+# 18/04/2015
 
 # ----------------------------------------------------------------------------------------------------------------
 # EDITABLE SECTION:
@@ -24,10 +25,10 @@ all.data.files[["Charge"]]    <-"../CoMap/Charge/SRK_groups.csv"
 # 2) Simulations
 
 all.sim.files<-list()
-all.sim.files[["Grantham"]]  <-"../CoMap/Grantham/SRK_simulations.csv"
-all.sim.files[["Volume"]]    <-"../CoMap/Volume/SRK_simulations.csv"
-all.sim.files[["Polarity"]]  <-"../CoMap/Polarity/SRK_simulations.csv"
-all.sim.files[["Charge"]]    <-"../CoMap/Charge/SRK_simulations.csv"
+all.sim.files[["Grantham"]]  <-"../CoMap/Grantham/SRK_null.csv"
+all.sim.files[["Volume"]]    <-"../CoMap/Volume/SRK_null.csv"
+all.sim.files[["Polarity"]]  <-"../CoMap/Polarity/SRK_null.csv"
+all.sim.files[["Charge"]]    <-"../CoMap/Charge/SRK_null.csv"
 
 # 3) Output files:
 # Type I test:

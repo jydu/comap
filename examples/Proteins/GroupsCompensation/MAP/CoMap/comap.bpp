@@ -16,16 +16,15 @@ input.sequence.format = Mase
 # complete => only fully resolved chars.
 input.sequence.sites_to_use = nogap
 
-# Ignore constant sites
-input.remove_const = yes
-
 # Second file:
 input.sequence.file2 = none
 # All previous options can be set up for second file, just append '2' at option names.
 # The default is to use options of file1 for file2.
 
+# Ignore constant sites:
+input.remove_const = yes
+
 # The tree file to use. Branch lengths are optional.
-# onyl newick format is supported.
 input.tree.file = ../Phylogeny/MAP.dnd
 input.tree.format = Newick
 
@@ -41,7 +40,7 @@ model = JTT92
 
 # Rate Across Sites variation:
 # gamma or constant
-rate_distribution = Gamma(n=4, alpha =1.0200)
+rate_distribution = Gamma(n=4, alpha=1.0200)
 
 simulations.continuous = no
 
@@ -51,15 +50,17 @@ simulations.continuous = no
 
 optimization = None
 
-output.tree =  none
+output.tree.file = none
+output.estimates = none
+
 # ----------------------------------------------------------------------------------------
 #                                     Additionnal stuff
 # ----------------------------------------------------------------------------------------
 
 # A file where site-specific information will be written (posterior rate, constant site, etc.):
-output.infos = MAP.infos
-output.tags.file = MAP.tags.dnd
-output.tags.translation = MAP.tags.tln
+output.infos = $(OUTPUT)/$(DATA).infos
+output.tags.file = $(OUTPUT)/$(DATA).tags.dnd
+output.tags.translation = $(OUTPUT)/$(DATA).tags.tln
 
 # ----------------------------------------------------------------------------------------
 #                                     Substitution vectors
@@ -68,13 +69,11 @@ output.tags.translation = MAP.tags.tln
 # We may restart an analysis by specifying the already computed vectors:
 input.vectors.file = none
 # Otherwise, tell where to write vectors:
-output.vectors.file = 
+output.vectors.file = $(OUTPUT)/$(DATA).vec
 
 # The method to use to compute vectors:
 # laplace, simple,...
-nijt= 
-# Where to trunc the series (see article):
-nijt_laplace.trunc = 10
+nijt = 
 # Should we average over all ancestral state (yes) or use ancestral states reconstruction (no) ?
 nijt.average = yes
 # Should we use pair-joint calculation (yes) or marginal (no) one?
@@ -87,14 +86,15 @@ nijt.joint = yes
 
 analysis = clustering
 
-clustering.distance=comp
-clustering.scale=no
-clustering.method=complete
+clustering.distance = comp
+clustering.scale = no
+clustering.method = complete
 
-clustering.output.groups.file=
-clustering.output.matrix.file=none
-clustering.output.tree.file=
+clustering.output.groups.file = $(OUTPUT)/$(DATA)_groups.csv
+clustering.output.matrix.file = none
+clustering.output.tree.file = $(OUTPUT)/$(DATA)_clust.dnd
 
-clustering.null=yes
-clustering.null.number=1000
-clustering.null.output.file=
+clustering.null = yes
+clustering.null.number = 1000
+clustering.null.output.file = $(OUTPUT)/$(DATA)_null.csv
+
