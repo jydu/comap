@@ -405,7 +405,7 @@ class CompensationDistance: public Distance
     {
       if (node.isLeaf())
       {
-        sigma = SubstitutionMappingTools::computeTotalSubstitutionVectorForSite(mapping, TextTools::to<unsigned int>(node.getName()));
+        sigma = SubstitutionMappingTools::computeTotalSubstitutionVectorForSitePerBranch(mapping, TextTools::to<unsigned int>(node.getName()));
         sumNorms = SubstitutionMappingTools::computeNormForSite(mapping, TextTools::to<unsigned int>(node.getName()));
       }
       else

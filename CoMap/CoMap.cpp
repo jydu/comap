@@ -289,13 +289,13 @@ int main(int argc, char *argv[])
           Vdouble mv1(mapping1->getNumberOfBranches());
           //Compute mean vector:
           for (size_t i = 0; i < mapping1->getNumberOfSites(); ++i) {
-            mv1 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSite(*mapping1, i);
+            mv1 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSitePerBranch(*mapping1, i);
           }
           mv1 /= static_cast<double>(mapping1->getNumberOfSites());
           Vdouble mv2(mapping2->getNumberOfBranches());
           //Compute mean vector:
           for (size_t i = 0; i < mapping2->getNumberOfSites(); ++i) {
-            mv2 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSite(*mapping2, i);
+            mv2 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSitePerBranch(*mapping2, i);
           }
           mv2 /= static_cast<double>(mapping2->getNumberOfSites());
           cstat->setMeanVectors(mv1, mv2);
@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
           Vdouble mv1(mapping1->getNumberOfBranches());
           //Compute mean vector:
           for (size_t i = 0; i < mapping1->getNumberOfSites(); ++i) {
-            mv1 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSite(*mapping1, i);
+            mv1 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSitePerBranch(*mapping1, i);
           }
           mv1 /= static_cast<double>(mapping1->getNumberOfSites());
           cstat->setMeanVector(mv1);
