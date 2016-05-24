@@ -457,7 +457,7 @@ void CoETools::writeInfos(
   const DiscreteRatesAcrossSitesTreeLikelihood& ras,
   const vector<double>& norms,
   map<string, string>& params,
-  const string & suffix)
+  const string& suffix)
 {
   string outFile = ApplicationTools::getAFilePath("output.infos", params, false, false, suffix, true, "none", 1);
   if (outFile == "none") return;
@@ -588,13 +588,13 @@ void CoETools::computeIntraStats(
   //tl would be modified after the simulations, so we copy it before.
   vector< vector<double> >* simValues = 0; 
   size_t nbRateClasses = 1;
-  auto_ptr<Domain> rateDomain;
+  unique_ptr<Domain> rateDomain;
   if (computeNull)
   { 
     nbRateClasses = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rate_classes", params, 10, "", false, 1);
     ApplicationTools::displayResult("Number of sub-distributions", nbRateClasses);
     rateDomain.reset(new Domain(0, VectorTools::max(norms), nbRateClasses));
-    auto_ptr<DRTreeLikelihood> tlCopy(tl.clone());
+    unique_ptr<DRTreeLikelihood> tlCopy(tl.clone());
     simValues = computeIntraNullDistribution(
         *tlCopy,
         rateDomain.get(),
@@ -798,7 +798,7 @@ vector< vector<double> >* CoETools::computeIntraNullDistribution(
     map<string, string>& params)
 {
   string path = ApplicationTools::getAFilePath("statistic.null.output.file", params, false, false, "", false, "none", 1);
-  auto_ptr<ofstream> outFile;
+  unique_ptr<ofstream> outFile;
   if (path != "none") {
     outFile.reset(new ofstream(path.c_str(), ios::out));
     ApplicationTools::displayResult("Write simulation results to", path);

@@ -366,7 +366,7 @@ int main(int argc, char *argv[])
       bool outputToFile = (simpath != "none") && (!TextTools::isEmpty(simpath));
       ApplicationTools::displayTask("Computing null distribution", true);
    
-      auto_ptr<ofstream> simout;
+      unique_ptr<ofstream> simout;
       if (outputToFile) {
         ApplicationTools::displayResult("Null output file", simpath);
         simout.reset(new ofstream(simpath.c_str(), ios::out));
@@ -455,7 +455,7 @@ int main(int argc, char *argv[])
       bool outputToFile = (simpath != "none") && (!TextTools::isEmpty(simpath));
       ApplicationTools::displayTask("Computing null distribution", true);
  
-      auto_ptr<ofstream> simout;
+      unique_ptr<ofstream> simout;
       if (outputToFile) {
         ApplicationTools::displayResult("Null output file", simpath);
         simout.reset(new ofstream(simpath.c_str(), ios::out));
