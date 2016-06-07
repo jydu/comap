@@ -89,7 +89,7 @@ for (grp in 1:nrow(groups)) {
 x.ave <- x.ave / x.siz
 results <- data.frame(Replicate = x.rep, Group = x.grp, Size = x.siz, RandMean = x.ave, OrigMean = x.oav)
 
-write.table(results, file = outputPath, sep = "\t")
+write.table(results, file = outputPath, sep = "\t", row.names = FALSE)
 
 
 #### DONE
