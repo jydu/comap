@@ -30,53 +30,60 @@ row.names(sites) <- sites$Group
 groups <- read.table(groupsPath, header = TRUE, stringsAsFactors = FALSE)
 groupsLst <- strsplit(substr(groups$Group, 2, nchar(groups$Group) - 1), ";")
 
+# Set of sites available for each replicate:
+sitesSet <- list()
+for (i in 1:nrep) sitesSet[[i]] <- sites
+
 # Now replicate each group:
 x.rep <- numeric(nrow(groups) * nrep)
 x.grp <- character(nrow(groups) * nrep)
 x.ave <- numeric(nrow(groups) * nrep) #Average of the sampled group
 x.siz <- numeric(nrow(groups) * nrep)
 x.oav <- numeric(nrow(groups) * nrep) #Average the original group
-k <- 1
-for (i in 1:nrow(groups)) {
-  size <- groups[i, "Size"]
-  nmin <- groups[i, "Nmin"]
+i <- 1
+for (grp in 1:nrow(groups)) {
+  size <- groups[grp, "Size"]
+  nmin <- groups[grp, "Nmin"]
   
-  # Get all sites with adequate norm for each position:
-  gp <- groupsLst[[i]]
+  # Get all sites with adequate value for each position:
+  gp <- groupsLst[[grp]]
   if (length(gp) != size) stop("!!! Error in input file, group size does not match number or sites!")
   gp.vals <- numeric(size)
   for (j in 1:size) {
     gp.vals[j] <- sites[gp[j], cond.var]
   }
 
-  x.rep[k:(k + nrep - 1)] <- 1:nrep
-  x.siz[k:(k + nrep - 1)] <- size
-  x.grp[k:(k + nrep - 1)] <- "["
-  x.ave[k:(k + nrep - 1)] <- 0
-  x.oav[k:(k + nrep - 1)] <- mean(gp.vals)
+  x.rep[i:(i + nrep - 1)] <- 1:nrep
+  x.siz[i:(i + nrep - 1)] <- size
+  x.grp[i:(i + nrep - 1)] <- "["
+  x.ave[i:(i + nrep - 1)] <- 0
+  x.oav[i:(i + nrep - 1)] <- mean(gp.vals)
   
   # Loop over each site in the group:
-  for (j in 1:size) {
-    x <- sites[,cond.var]
-    t <- abs(x - gp.vals[j]) / gp.vals[j]
+  for (sit in 1:size) {
+    # Loop over each simulation replicate:
+    for (sim in 1:nrep) {
+      x <- sitesSet[[sim]][,cond.var]
+      t <- abs(x - gp.vals[sit]) / gp.vals[sit]
     
-    # Get all sites with sufficient variability:
-    tmp <- subset(sites, t <= sim.t)
-    if (nrow(tmp) == 0)
-      stop("Error, input files are inconsistant :(\n")
-    if (nrow(tmp) < min.obs)
-      warning(paste("Minimum site frequency not matched for site", j, "in group", i))
+      # Get all sites with sufficient variability:
+      tmp <- subset(sitesSet[[sim]], t <= sim.t)
+      if (nrow(tmp) == 0)
+        warning(paste("No more site available for site", sit, "in group", grp, "replicate", sim))
+      if (nrow(tmp) < min.obs)
+        warning(paste("Minimum site frequency not matched for site", sit, "in group", grp, "replicate", sim))
 
-
-    # Now sample sites:
-    for (l in k:(k + nrep - 1)) {
+      # Now sample sites:
       x <- sample(1:nrow(tmp), 1)
-      x.grp[l] <- paste(x.grp[l], paste(tmp[x, "Group"], collapse = ";"), sep = ifelse(x.grp[l] == "[", "", ";"))
-      x.ave[l] <- x.ave[l] + sum(tmp[x, cond.var])
+      x.grp[i + sim - 1] <- paste(x.grp[i + sim - 1], paste(tmp[x, "Group"], sep = ";"), sep = ifelse(x.grp[i + sim - 1] == "[", "", ";"))
+      x.ave[i + sim - 1] <- x.ave[i + sim - 1] + sum(tmp[x, cond.var])
+
+      # As we sample without replacement:
+      sitesSet[[sim]] <- subset(sitesSet[[sim]], Group != tmp[x, "Group"])
     }
   }
-  x.grp[k:(k + nrep - 1)] <- paste(x.grp[k:(k + nrep - 1)], "]", sep = "")
-  k <- k + nrep
+  x.grp[i:(i + nrep - 1)] <- paste(x.grp[i:(i + nrep - 1)], "]", sep = "")
+  i <- i + nrep
 }
 
 x.ave <- x.ave / x.siz
