@@ -57,7 +57,7 @@ for (i in 1:nrow(groups)) {
   x.grp[k:(k + nrep - 1)] <- "["
   x.min[k:(k + nrep - 1)] <- Inf
   x.omi[k:(k + nrep - 1)] <- nmin
-  print(x.grp)
+  #print(x.grp)
   
   tbl <- table(gpRc)
   for (j in 1:length(tbl)) {
