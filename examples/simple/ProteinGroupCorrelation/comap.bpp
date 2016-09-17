@@ -43,6 +43,7 @@ rate_distribution = Gamma(n=4, alpha=0.5)
 
 optimization = FullD
 output.tree.file = Myo.LG.dnd
+output.infos = Myo_sites.csv
 
 # ----------------------------------------------------------------------------------------
 #                                     Clustering Analysis

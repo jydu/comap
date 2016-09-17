@@ -200,6 +200,22 @@ most cases.
 
 @end table
 
+@section Site specific statistics
+
+Some of the calculations made by CoMap on each site can be output to a file.
+This file can be used for a posteriori analysis or check of results.
+
+@table @command
+
+@item output.infos = @{path@}
+Path of the output file.
+
+@end table
+
+The output file is tab-separated spreadsheet, with one line per site.
+Site names are identical to the ones output in the coevolution analysis.
+Columns are: IsComplete (yes if the site has no missing data), IsConstant (yes if the site is monomorphic), RC (the rate class, defined as the category with maximal posterior probability), PR (the posterior estimate of the site-specific rate, averaged over all rate classes), N (the norm of the (weighted) substitution vector, logLn (the log-likelihood for the site).
+
 @section Ancestral sequences reconstruction
 
 CoMap can also perform ancestral sequence reconstruction.

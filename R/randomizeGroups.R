@@ -38,8 +38,10 @@ for (i in 1:nrow(sites)) {
 x.rep <- numeric(nrow(groups) * nrep)
 x.grp <- character(nrow(groups) * nrep)
 x.min <- numeric(nrow(groups) * nrep)
+x.ave <- numeric(nrow(groups) * nrep)
 x.siz <- numeric(nrow(groups) * nrep)
 x.omi <- numeric(nrow(groups) * nrep)
+x.oav <- numeric(nrow(groups) * nrep)
 k <- 1
 for (i in 1:nrow(groups)) {
   size <- groups[i, "Size"]
@@ -48,15 +50,19 @@ for (i in 1:nrow(groups)) {
   # Get all sites with adequate norm for each position:
   gp <- groupsLst[[i]]
   gpRc <- numeric(length(gp))
+  gpRv <- numeric(length(gp))
   for (j in 1:length(gp)) {
     gpRc[j] <- sites[gp[j], "NRC"]
+    gpRv[j] <- sites[gp[j], "N"]
   }
 
   x.rep[k:(k + nrep - 1)] <- 1:nrep
   x.siz[k:(k + nrep - 1)] <- size
   x.grp[k:(k + nrep - 1)] <- "["
   x.min[k:(k + nrep - 1)] <- Inf
+  x.ave[k:(k + nrep - 1)] <- 0
   x.omi[k:(k + nrep - 1)] <- nmin
+  x.oav[k:(k + nrep - 1)] <- mean(gpRv)
   #print(x.grp)
   
   tbl <- table(gpRc)
@@ -72,19 +78,17 @@ for (i in 1:nrow(groups)) {
       x <- sample(1:nrow(tmp), rf)
       x.grp[l] <- paste(x.grp[l], paste(tmp[x, "Group"], collapse = ";"), sep = ifelse(x.grp[l] == "[", "", ";"))
       x.min[l] <- min(x.min[l], tmp[x, "N"])
+      x.ave[l] <- x.ave[l] + sum(tmp[x, "N"])
     }
   }
   x.grp[k:(k + nrep - 1)] <- paste(x.grp[k:(k + nrep - 1)], "]", sep = "")
   k <- k + nrep
 }
 
-results <- data.frame(Replicate = x.rep, Group = x.grp, Size = x.siz, Nmin = x.min)
+x.ave <- x.ave / x.siz
+results <- data.frame(Replicate = x.rep, Group = x.grp, Size = x.siz, Nmin = x.min, Nmean = x.ave, OrigNmin = x.omi, OrigNmean = x.oav)
 
 write.table(results, file = outputPath, sep = "\t")
 
-#rates <- data.frame(NminOrig = x.omi, Size = x.siz, NminRand = x.min)
-
-#plot(NminRand~NminOrig, rates)
-#abline(0, 1)
 
 #### DONE

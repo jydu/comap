@@ -221,10 +221,10 @@ void ClusterTools::computeGlobalDistanceDistribution(
   for (size_t k = 0; k < nrep; k++)
   {
     ApplicationTools::displayGauge(k, nrep-1, '>');
-    auto_ptr<SiteContainer> sites(simulator.simulate(sizeOfDataSet));
+    unique_ptr<SiteContainer> sites(simulator.simulate(sizeOfDataSet));
     drtl.setData(*sites);
     drtl.initialize();
-    auto_ptr<ProbabilisticSubstitutionMapping> mapping(SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false));
+    unique_ptr<ProbabilisticSubstitutionMapping> mapping(SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false));
     size_t nbBranches = mapping->getNumberOfBranches();
     
     //Mean vector:
@@ -239,7 +239,7 @@ void ClusterTools::computeGlobalDistanceDistribution(
     }
 
     //Compute distance matrix:
-	  auto_ptr<DistanceMatrix> mat(new DistanceMatrix(siteNames));
+	  unique_ptr<DistanceMatrix> mat(new DistanceMatrix(siteNames));
 	  for (size_t i = 0; i < sizeOfDataSet; ++i)
     {
 		  (*mat)(i, i) = 0.;

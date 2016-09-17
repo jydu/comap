@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
   string reconstruction = ApplicationTools::getStringParameter("asr.method", comap.getParams(), "none", "", true, 1);
   ApplicationTools::displayResult("Ancestral state reconstruction method", reconstruction);
 
-  auto_ptr<AncestralStateReconstruction> asr;
+  unique_ptr<AncestralStateReconstruction> asr;
   if (reconstruction == "none") {
     //do nothing
   } else if (reconstruction == "marginal") {
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
     throw Exception("Unknown ancestral state reconstruction method: " + reconstruction);
 
   if (asr.get()) {
-    auto_ptr<SiteContainer> asSites1(asr->getAncestralSequences());
+    unique_ptr<SiteContainer> asSites1(asr->getAncestralSequences());
   
     //Add existing sequence to output:
     SequenceContainerTools::append(*asSites1.get(), *sites1);
@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
         TreeTemplate<Node>* tree2;
         if (comap.getParams().find("input.tree.file2") != comap.getParams().end() && comap.getParams()["input.tree.file2"] != "none")
         {
-          auto_ptr<Tree> tmpTree2(PhylogeneticsApplicationTools::getTree(comap.getParams(), "input.", "2", true));
+          unique_ptr<Tree> tmpTree2(PhylogeneticsApplicationTools::getTree(comap.getParams(), "input.", "2", true));
           tree2 = new TreeTemplate<Node>(*tmpTree2);
           if (!TreeTools::haveSameTopology(*tree1, *tree2))
             throw Exception("The second tree must have the same topology as the first tree.");
@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
         // Get the distance to use
     
         string distanceMethod = ApplicationTools::getStringParameter("clustering.distance", comap.getParams(), "cor", "", true, 1);
-        auto_ptr<Distance> dist;
+        unique_ptr<Distance> dist;
         if (distanceMethod == "Euclidian" || distanceMethod == "euclidian")
         {
           dist.reset(new EuclidianDistance());
@@ -431,7 +431,7 @@ int main(int argc, char *argv[])
         ApplicationTools::displayResult("Distance to use", distanceMethod);
 
         // Compute the distance matrix.
-        auto_ptr<DistanceMatrix> mat(new DistanceMatrix(siteNames));
+        unique_ptr<DistanceMatrix> mat(new DistanceMatrix(siteNames));
         for (size_t i = 0; i < nbSites1; ++i)
         {
           (*mat)(i,i) = 0.;
@@ -459,7 +459,7 @@ int main(int argc, char *argv[])
           matNames[i] = TextTools::toString(i);
         mat->setNames(matNames);
    
-        auto_ptr<AgglomerativeDistanceMethod> clustering;
+        unique_ptr<AgglomerativeDistanceMethod> clustering;
         if (clusteringMethod == "complete")
         {
           clustering.reset(new HierarchicalClustering(HierarchicalClustering::COMPLETE, *mat, false));
