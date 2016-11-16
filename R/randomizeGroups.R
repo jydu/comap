@@ -63,7 +63,7 @@ for (i in 1:nrow(groups)) {
   x.ave[k:(k + nrep - 1)] <- 0
   x.omi[k:(k + nrep - 1)] <- nmin
   x.oav[k:(k + nrep - 1)] <- mean(gpRv)
-  print(x.grp)
+  #print(x.grp)
   
   tbl <- table(gpRc)
   for (j in 1:length(tbl)) {
