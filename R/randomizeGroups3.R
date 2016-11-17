@@ -31,12 +31,9 @@ row.names(sites) <- sites$Group
 groups <- read.table(groupsPath, header = TRUE, stringsAsFactors = FALSE)
 groupsLst <- strsplit(substr(groups$Group, 2, nchar(groups$Group) - 1), ";")
 
-# Set of sites available for each replicate:
-sitesSet <- list()
-for (i in 1:nrep) sitesSet[[i]] <- sites
-
 # Now replicate each group:
 x.rep <- numeric(nrow(groups) * nrep)
+l.grp <- list()
 x.grp <- character(nrow(groups) * nrep)
 x.ave <- numeric(nrow(groups) * nrep) #Average of the sampled group
 x.siz <- numeric(nrow(groups) * nrep)
@@ -62,31 +59,44 @@ for (grp in 1:nrow(groups)) {
   
   # Loop over each site in the group:
   for (sit in 1:size) {
+    # Get all sites with similar rate (or any other conditional variable):
+    x <- sites[,cond.var]
+    t <- abs(x - gp.vals[sit]) / gp.vals[sit]
+    condSites <- subset(sites, t <= sim.t)
     # Loop over each simulation replicate:
-    for (sim in 1:nrep) {
-      x <- sitesSet[[sim]][,cond.var]
-      t <- abs(x - gp.vals[sit]) / gp.vals[sit]
-    
-      # Get all sites with sufficient variability:
-      tmp <- subset(sitesSet[[sim]], t <= sim.t)
+    for (sim in 1:nrep) {    
+      # Remove sites already present in the group
+      if (i + sim - 1 <= length(l.grp)) { # test if element already exists in list
+        tmp <- subset(condSites, ! (Group %in% l.grp[[i + sim - 1]]))
+      } else {
+        tmp <- condSites
+      }
+
       # Sampling correction:
       tmpl <- tmp[tmp[,cond.var] < gp.vals[sit],]
       tmpg <- tmp[tmp[,cond.var] > gp.vals[sit],]
       tmpe <- tmp[tmp[,cond.var] == gp.vals[sit],]
       n <- min(nrow(tmpl), nrow(tmpg))
-      tmp2 <- rbind(tmpl[sample(1:nrow(tmpl),n),], tmpe, tmpg[sample(1:nrow(tmpg),n),])
-      if (nrow(tmp2) == 0)
-        warning(paste("No more site available for site", sit, "in group", grp, "replicate", sim))
-      if (nrow(tmp2) < min.obs)
-        warning(paste("Minimum site frequency not matched for site", sit, "in group", grp, "replicate", sim))
+      n <- max(n, min.obs) # we add min.obs there to avoid getting no replicate site when we have extreme values for the candidate site.
+      tmp2 <- rbind(tmpl[sample(1:nrow(tmpl), min(n, nrow(tmpl))),], tmpe, tmpg[sample(1:nrow(tmpg), min(n, nrow(tmpg))),])
+      if (nrow(tmp2) == 0) {
+        warning(paste("No more similar site available for candidate site", sit, "in group", grp, "replicate", sim))
+        x.grp[i + sim - 1] <- paste(x.grp[i + sim - 1], "NA", sep = ifelse(x.grp[i + sim - 1] == "[", "", ";"))
+        x.ave[i + sim - 1] <- NA
+      } else {
+        if (nrow(tmp2) < min.obs)
+          warning(paste("Minimum site frequency not matched for candidate site", sit, "in group", grp, "replicate", sim))
 
-      # Now sample sites:
-      x <- sample(1:nrow(tmp2), 1)
-      x.grp[i + sim - 1] <- paste(x.grp[i + sim - 1], paste(tmp2[x, "Group"], sep = ";"), sep = ifelse(x.grp[i + sim - 1] == "[", "", ";"))
-      x.ave[i + sim - 1] <- x.ave[i + sim - 1] + sum(tmp2[x, cond.var])
-
-      # In order to sample without replacement:
-      #sitesSet[[sim]] <- subset(sitesSet[[sim]], Group != tmp[x, "Group"])
+        # Now sample sites:
+        x <- sample(1:nrow(tmp2), 1)
+        if (i + sim - 1 <= length(l.grp)) {
+          l.grp[[i + sim - 1]] <- append(l.grp[[i + sim - 1]], tmp2[x, "Group"])
+        } else {
+          l.grp[[i + sim - 1]] <- tmp2[x, "Group"]
+        }
+        x.grp[i + sim - 1] <- paste(x.grp[i + sim - 1], tmp2[x, "Group"], sep = ifelse(x.grp[i + sim - 1] == "[", "", ";"))
+        x.ave[i + sim - 1] <- x.ave[i + sim - 1] + tmp2[x, cond.var]
+      }
     }
   }
   x.grp[i:(i + nrep - 1)] <- paste(x.grp[i:(i + nrep - 1)], "]", sep = "")
