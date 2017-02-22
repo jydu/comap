@@ -46,10 +46,10 @@ knowledge of the CeCILL license and that you accept its terms.
 using namespace std;
 
 // From bpp-core:
-#include <Bpp/App.all>
 #include <Bpp/Io/FileTools.h>
 #include <Bpp/Text/TextTools.h>
 #include <Bpp/Numeric/DataTable.h>
+#include <Bpp/App/BppApplication.h>
 
 // From bpp-seq:
 #include <Bpp/Seq/SiteTools.h>
@@ -58,8 +58,12 @@ using namespace std;
 
 // From bpp-phyl:
 #include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
-#include <Bpp/Phyl/Simulation.all>
 #include <Bpp/Phyl/Likelihood/RASTools.h>
+#include <Bpp/Phyl/Likelihood/MarginalAncestralStateReconstruction.h>
+#include <Bpp/Phyl/Simulation/NonHomogeneousSequenceSimulator.h>
+#include <Bpp/Phyl/Simulation/HomogeneousSequenceSimulator.h>
+#include <Bpp/Phyl/Mapping/WeightedSubstitutionCount.h>
+#include <Bpp/Phyl/AncestralStateReconstruction.h>
 #include <Bpp/Phyl/Distance/DistanceMethod.h>
 #include <Bpp/Phyl/Io/PhylipDistanceMatrixFormat.h>
 #include <Bpp/Phyl/Io/Newick.h>

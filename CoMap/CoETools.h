@@ -52,9 +52,9 @@ knowledge of the CeCILL license and that you accept its terms.
 // From bpp-phyl:
 #include <Bpp/Phyl/Tree.h>
 #include <Bpp/Phyl/Model/SubstitutionModel.h>
-#include <Bpp/Phyl/Likelihood.all>
-#include <Bpp/Phyl/Simulation.all>
-#include <Bpp/Phyl/Mapping.all>
+#include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
+#include <Bpp/Phyl/Mapping/SubstitutionMappingTools.h>
+#include <Bpp/Phyl/Simulation/SequenceSimulator.h>
 
 using namespace bpp;
 

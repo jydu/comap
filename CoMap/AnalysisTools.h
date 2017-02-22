@@ -46,14 +46,13 @@ knowledge of the CeCILL license and that you accept its terms.
 
 #include <Bpp/Numeric/VectorTools.h>
 
-// From SeqLib:
+// From bpp-seq:
 #include <Bpp/Seq/Container/SiteContainer.h>
 
-// From PhylLib:
-#include <Bpp/Phyl/Simulation.all>
-#include <Bpp/Phyl/Model.all>
-#include <Bpp/Phyl/Likelihood.all>
-#include <Bpp/Phyl/Mapping.all>
+// From bpp-phyl:
+#include <Bpp/Phyl/Simulation/NonHomogeneousSequenceSimulator.h>
+#include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
+#include <Bpp/Phyl/Likelihood/DRTreeLikelihood.h>
 
 using namespace bpp;
 

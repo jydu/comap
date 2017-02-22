@@ -42,26 +42,26 @@ knowledge of the CeCILL license and that you accept its terms.
 #include "Domain.h"
 #include "IntervalData.h"
 
-#include <Bpp/Text.all>
+// From bpp-core:
 #include <Bpp/App/ApplicationTools.h>
 #include <Bpp/BppString.h>
 #include <Bpp/Numeric/ParameterExceptions.h>
+#include <Bpp/Text/KeyvalTools.h>
 
 // From bpp-seq:
 #include <Bpp/Seq/SiteTools.h>
 #include <Bpp/Seq/App/SequenceApplicationTools.h>
-#include <Bpp/Seq/AlphabetIndex.all>
 
 // From bpp-phyl:
 #include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
 #include <Bpp/Phyl/PatternTools.h>
 #include <Bpp/Phyl/OptimizationTools.h>
-#include <Bpp/Phyl/Mapping.all>
 #include <Bpp/Phyl/Io/Newick.h>
 #include <Bpp/Phyl/Model/SubstitutionModelSet.h>
 #include <Bpp/Phyl/Model/SubstitutionModelSetTools.h>
 #include <Bpp/Phyl/Likelihood/DRHomogeneousTreeLikelihood.h>
 #include <Bpp/Phyl/Likelihood/DRNonHomogeneousTreeLikelihood.h>
+#include <Bpp/Phyl/Mapping/WeightedSubstitutionCount.h>
 
 using namespace bpp;
 

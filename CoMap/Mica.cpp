@@ -46,13 +46,14 @@ knowledge of the CeCILL license and that you accept its terms.
 using namespace std;
 #include "Domain.h"
 
+// From bpp-core:
 #include <Bpp/Utils/AttributesTools.h>
 #include <Bpp/Io/FileTools.h>
 #include <Bpp/Text/TextTools.h>
 #include <Bpp/App/ApplicationTools.h>
 #include <Bpp/App/BppApplication.h>
-#include <Bpp/Numeric/Prob.all>
 #include <Bpp/Numeric/VectorTools.h>
+#include <Bpp/Numeric/Prob/ConstantDistribution.h>
 
 // From bpp-seq:
 #include <Bpp/Seq/SiteTools.h>
@@ -69,7 +70,9 @@ using namespace std;
 #include <Bpp/Phyl/Io/Newick.h>
 #include <Bpp/Phyl/Simulation/MutationProcess.h>
 #include <Bpp/Phyl/Simulation/HomogeneousSequenceSimulator.h>
-#include <Bpp/Phyl/Mapping.all>
+#include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
+#include <Bpp/Phyl/Mapping/SubstitutionMappingTools.h>
+#include <Bpp/Phyl/Mapping/UniformizationSubstitutionCount.h>
 
 using namespace bpp;
 
