@@ -1,3 +1,9 @@
+21/05/17 -*- Version 1.5.3 -*-
+* New conditional group randomization procedure (R script)
+* Compatibility update with Bio++ 2.3.0
+
+18/09/16 -*- Version 1.5.2 -*-
+
 05/03/15 Julien Dutheil
 * Added norm values in output info files.
 

@@ -1,5 +1,5 @@
 %define _basename comap
-%define _version 1.5.1
+%define _version 1.5.3
 %define _release 1
 %define _prefix /usr
 
@@ -14,28 +14,27 @@ Source: http://biopp.univ-montp2.fr/repos/sources/comap/%{_basename}-%{_version}
 Summary: The CoMap package
 Group: Productivity/Scientific/Other
 
-Requires: libbpp-phyl9 = 2.2.0
-Requires: libbpp-seq9 = 2.2.0
-Requires: libbpp-core2 = 2.2.0
+Requires: libbpp-phyl9 = 2.3.0
+Requires: libbpp-seq9 = 2.3.0
+Requires: libbpp-core2 = 2.3.0
 
 BuildRoot: %{_builddir}/%{_basename}-root
-BuildRequires: cmake >= 2.6.0
-BuildRequires: gcc-c++ >= 4.0.0
+BuildRequires: cmake >= 2.8.11
+BuildRequires: gcc-c++ >= 4.7.0
 BuildRequires: groff
 BuildRequires: texinfo >= 4.0.0
-BuildRequires: libbpp-core2 = 2.2.0
-BuildRequires: libbpp-core-devel = 2.2.0
-BuildRequires: libbpp-seq9 = 2.2.0
-BuildRequires: libbpp-seq-devel = 2.2.0
-BuildRequires: libbpp-phyl9 = 2.2.0
-BuildRequires: libbpp-phyl-devel = 2.2.0
+BuildRequires: libbpp-core2 = 2.3.0
+BuildRequires: libbpp-core-devel = 2.3.0
+BuildRequires: libbpp-seq9 = 2.3.0
+BuildRequires: libbpp-seq-devel = 2.3.0
+BuildRequires: libbpp-phyl9 = 2.3.0
+BuildRequires: libbpp-phyl-devel = 2.3.0
 
 
 AutoReq: yes
 AutoProv: yes
-
-%if 0%{?mandriva_version}
-%if %{mandriva_version} >= 2011
+%if 0%{?mdkversion}
+%if 0%{?mdkversion} >= 201100
 BuildRequires: xz
 %define zipext xz
 %else
@@ -43,14 +42,8 @@ BuildRequires: lzma
 %define zipext lzma
 %endif
 %else
-%if 0%{?distribution:1} && "%{distribution}" == "Mageia"
-BuildRequires: xz
-%define zipext xz
-%else
-#For all other distributions:
 BuildRequires: gzip
 %define zipext gz
-%endif
 %endif
 
 %description
@@ -98,6 +91,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/share/man/man1/mica.1.%{zipext}
 
 %changelog
+* Sun May 21 2017 Julien Dutheil <dutheil@evolbio.mpg.de> 1.5.3-1
+- New conditional group randomization procedure
+- Compatibility update with Bio++ 2.3.0.
 * Thu Oct 09 2014 Julien Dutheil <julien.dutheil@univ-montp2.fr> 1.5.1-1
 - New mapping procedure
 - Simplified interface
