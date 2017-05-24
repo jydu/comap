@@ -25,7 +25,7 @@ SET (comap-targets
 	mica
 	)
 
-FOREACH (target ${bppsuite-targets})
+FOREACH (target ${comap-targets})
   # Link (static or shared)
   IF (BUILD_STATIC)
     TARGET_LINK_LIBRARIES (${target} ${BPP_LIBS_STATIC})

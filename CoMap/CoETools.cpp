@@ -169,7 +169,7 @@ void CoETools::readData(
 
   //Check for saturation:
   double ll = tl->getValue();
-  if (isinf(ll))
+  if (std::isinf(ll))
   {
     ApplicationTools::displayError("!!! Unexpected initial likelihood == 0.");
     if (codonAlphabet)
@@ -177,7 +177,7 @@ void CoETools::readData(
       bool f = false;
       size_t s;
       for (size_t i = 0; i < sites->getNumberOfSites(); i++) {
-        if (isinf(tl->getLogLikelihoodForASite(i))) {
+        if (std::isinf(tl->getLogLikelihoodForASite(i))) {
           const Site& site = sites->getSite(i);
           s = site.size();
           for (size_t j = 0; j < s; j++) {
@@ -205,7 +205,7 @@ void CoETools::readData(
       exit(1);
     } else {
       for (size_t i = sites->getNumberOfSites(); i > 0; --i) {
-        if (isinf(tl->getLogLikelihoodForASite(i - 1))) {
+        if (std::isinf(tl->getLogLikelihoodForASite(i - 1))) {
           ApplicationTools::displayResult("Ignore saturated site", sites->getSite(i - 1).getPosition());
           sites->deleteSite(i - 1);
         }
@@ -214,7 +214,7 @@ void CoETools::readData(
       tl->setData(*sites);
       tl->initialize();
       ll = tl->getValue();
-      if (isinf(ll)) {
+      if (std::isinf(ll)) {
         throw Exception("Likelihood is still 0 after saturated sites are removed! Looks like a bug...");
       }
       ApplicationTools::displayResult("Initial log likelihood", TextTools::toString(-ll, 15));
