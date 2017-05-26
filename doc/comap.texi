@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename comap.info
-@settitle CoMap Manual 1.5.0
+@settitle CoMap Manual 1.5.3
 @afourpaper
 
 @dircategory Science Biology Genetics
@@ -13,15 +13,15 @@
 @c %**end of header
 
 @copying
-This is the manual of CoMap, version 1.5.1.
+This is the manual of CoMap, version 1.5.3.
 
-Copyright @copyright{} 2006-2014 Julien Dutheil
+Copyright @copyright{} 2006-2017 Julien Dutheil
 @end copying
 
 @titlepage
 @title CoMap Manual
 @author Julien Dutheil
-@author @email{julien.dutheil@@univ-montp2.fr}
+@author @email{dutheil@@evolbio.mpg.de}
 
 @c The following two commands start the copyright page.
 @page
@@ -37,7 +37,6 @@ Copyright @copyright{} 2006-2014 Julien Dutheil
 @top CoMap Manual
 
 @insertcopying
-@end ifnottex
 
 @menu
 * Introduction::                Introducing the CoMap program and this manual.                
@@ -52,6 +51,8 @@ Copyright @copyright{} 2006-2014 Julien Dutheil
 * Mica::                        Mutual Information Coevolution Analysis.                            
 
 @end menu
+
+@end ifnottex
 
 @c ------------------------------------------------------------------------------------------------------------------
 
@@ -148,7 +149,7 @@ Where to write the substitution mapping.
 @item nijt = @{Naive|Laplace|Uniformization|Decomposition@}
 The kind of mapping to perform.
 @option{Laplace(trunc=@{int>1@})} option perform exact mapping, as in Dutheil et al. (2005). The @option{trunc} option set where to trunc the series (default to 10). Note that this substitution count is rather slow, the uniformization or decomposition methods are faster and more accurate. This option is only there for legacy purpose.
-@option{Naive(weight=...)} performs a naive mapping, as in Tufféry and Darlu (2000).
+@option{Naive(weight=...)} performs a naive mapping, as in Tuffery and Darlu (2000).
 @option{Uniformization(weight=...)} [default] performs exact mapping, with the uniformization method (See Tataru and Hobolth, 2011).
 @option{Decomposition(weight=...)} performs exact mapping, with the decomposition method (See Tataru and Hobolth, 2011).
 Currently available only for proteins.
@@ -251,7 +252,7 @@ If another option or @option{none} is selected, no pairwise analysis is performe
 The coevolution statistic to use.
 The @option{Correlation} option is to be used in order to perform the MBE 2005 analysis.
 Uses option @option{Compensation} to perform a pairwise analysis with the compensation statistics introduced in the BMC Evol Biol 2007 paper.
-You can also use the @option{Cosubstitution} option to perform Tufféry & Darlu's MBE 2000 analysis.
+You can also use the @option{Cosubstitution} option to perform Tuffery & Darlu's MBE 2000 analysis.
 
 @item statistic.output.file = @{path@}
 Where to write the statistic value for each pair of sites.
