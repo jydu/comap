@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
   cout << endl;
   cout << endl;
   cout << "***********************************************************" << endl;
-  cout << "* This is CoMap        version 1.5.3       date: 25/05/17 *" << endl;
+  cout << "* This is CoMap        version 1.5.4       date: 07/06/17 *" << endl;
   cout << "*     A C++ shell program to detect co-evolving sites.    *" << endl;
   cout << "***********************************************************" << endl;
   cout << endl;

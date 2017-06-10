@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 	cout << endl;
 	cout << endl;
 	cout << "***********************************************************" << endl;
-	cout << "* This is Mica         version 1.0.0       date: 28/03/11 *" << endl;
+	cout << "* This is Mica         version 1.5.4       date: 07/06/17 *" << endl;
 	cout << "*         Mutual Information Coevolution Analysis         *" << endl;
 	cout << "***********************************************************" << endl;
 	cout << endl;

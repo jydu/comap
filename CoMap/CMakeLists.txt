@@ -25,14 +25,15 @@ SET (comap-targets
 	mica
 	)
 
-FOREACH (target ${comap-targets})
+foreach (target ${comap-targets})
   # Link (static or shared)
-  IF (BUILD_STATIC)
-    TARGET_LINK_LIBRARIES (${target} ${BPP_LIBS_STATIC})
-    SET_TARGET_PROPERTIES (${target} LINK_SEARCH_END_STATIC TRUE)
-  ELSE (BUILD_STATIC)
-    TARGET_LINK_LIBRARIES (${target} ${BPP_LIBS_SHARED})
-  ENDIF (BUILD_STATIC)
-ENDFOREACH (target)
+  if (BUILD_STATIC)
+    target_link_libraries (${target} ${BPP_LIBS_STATIC})
+    set_target_properties (${target} LINK_SEARCH_END_STATIC TRUE)
+  else (BUILD_STATIC)
+    target_link_libraries (${target} ${BPP_LIBS_SHARED})
+  endif (BUILD_STATIC)
+endforeach (target)
 
-INSTALL (TARGETS ${comap-targets} DESTINATION bin)
+install (TARGETS ${comap-targets} DESTINATION ${CMAKE_INSTALL_BINDIR})
+
