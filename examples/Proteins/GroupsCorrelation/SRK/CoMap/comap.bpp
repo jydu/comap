@@ -2,7 +2,7 @@
 #                                     Data loading
 # ----------------------------------------------------------------------------------------
 
-# The laphabet to use:
+# The alphabet to use:
 # DNA, RNA or Protein
 alphabet = Protein
 

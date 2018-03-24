@@ -123,21 +123,21 @@ int main(int argc, char *argv[])
 
   ApplicationTools::displayMessage("\n\n-*- Retrieve data and model -*-\n");
 
-  Tree* tmpTree = PhylogeneticsApplicationTools::getTree(comap.getParams());
-  TreeTemplate<Node>* tree1 = new TreeTemplate<Node>(*tmpTree);
-  delete tmpTree;
+  unique_ptr<Tree> tmpTree(PhylogeneticsApplicationTools::getTree(comap.getParams()));
+  shared_ptr<TreeTemplate<Node>> tree1(new TreeTemplate<Node>(*tmpTree));
+  tmpTree.reset();
   ApplicationTools::displayResult("Number of leaves", TextTools::toString(tree1->getNumberOfLeaves()));
   ApplicationTools::displayResult("Number of sons at root", TextTools::toString(tree1->getRootNode()->getNumberOfSons()));
   
   // Get data 1:
   //Tree * tree1 = new Tree(* tree); // Copy tree.
-  Alphabet *alphabet1;
-  GeneticCode *geneticCode1;
-  VectorSiteContainer *allSites1, *sites1;
-  SubstitutionModel *model1;
-  SubstitutionModelSet *modelSet1;
-  DiscreteDistribution *rDist1;
-  DRTreeLikelihood *tl1;
+  shared_ptr<Alphabet> alphabet1;
+  shared_ptr<GeneticCode> geneticCode1;
+  shared_ptr<VectorSiteContainer> allSites1, sites1;
+  shared_ptr<SubstitutionModel> model1;
+  shared_ptr<SubstitutionModelSet> modelSet1;
+  shared_ptr<DiscreteDistribution> rDist1;
+  shared_ptr<DRTreeLikelihood> tl1;
   CoETools::readData(tree1, alphabet1, geneticCode1, allSites1, sites1, model1, modelSet1, rDist1, tl1, comap.getParams(), "");
  
   ApplicationTools::displayResult("Number of sites in file", allSites1->getNumberOfSites());
@@ -150,10 +150,10 @@ int main(int argc, char *argv[])
   ApplicationTools::displayMessage("\n\n-*- Get substitution vectors -*-\n");
 
   // Getting the substitutions count function:
-  SubstitutionCount* substitutionCount1 = PhylogeneticsApplicationTools::getSubstitutionCount(alphabet1, model1, comap.getParams(), "", true, 1);
+  shared_ptr<SubstitutionCount> substitutionCount1(PhylogeneticsApplicationTools::getSubstitutionCount(alphabet1.get(), model1.get(), comap.getParams(), "", true, 1));
     
   // Getting the substitution vectors:
-  ProbabilisticSubstitutionMapping* mapping1 = CoETools::getVectors(*tl1, *substitutionCount1, *sites1, comap.getParams());
+  shared_ptr<ProbabilisticSubstitutionMapping> mapping1(CoETools::getVectors(*tl1, *substitutionCount1, *sites1, comap.getParams()));
 
   // Compute norms:
   size_t nbSites1 = mapping1->getNumberOfSites();
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
   if (reconstruction == "none") {
     //do nothing
   } else if (reconstruction == "marginal") {
-    asr.reset(new MarginalAncestralStateReconstruction(tl1));
+    asr.reset(new MarginalAncestralStateReconstruction(tl1.get()));
   } else
     throw Exception("Unknown ancestral state reconstruction method: " + reconstruction);
 
@@ -201,16 +201,16 @@ int main(int argc, char *argv[])
   else
   {
     // Building a simulator object:
-    SequenceSimulator* seqSim1 = 0;
+    shared_ptr<SequenceSimulator> seqSim1;
     if (modelSet1)
     {
-      seqSim1 = new NonHomogeneousSequenceSimulator(modelSet1, rDist1, tree1);
-      dynamic_cast<NonHomogeneousSequenceSimulator *>(seqSim1)->enableContinuousRates(continuousSim);
+      seqSim1.reset(new NonHomogeneousSequenceSimulator(modelSet1.get(), rDist1.get(), tree1.get()));
+      dynamic_cast<NonHomogeneousSequenceSimulator *>(seqSim1.get())->enableContinuousRates(continuousSim);
     }
     else
     {
-      seqSim1 = new HomogeneousSequenceSimulator(model1, rDist1, tree1);
-      dynamic_cast<HomogeneousSequenceSimulator *>(seqSim1)->enableContinuousRates(continuousSim);
+      seqSim1.reset(new HomogeneousSequenceSimulator(model1.get(), rDist1.get(), tree1.get()));
+      dynamic_cast<HomogeneousSequenceSimulator *>(seqSim1.get())->enableContinuousRates(continuousSim);
     }
 
     // *********************
@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
 
     if (analysis == "pairwise")
     {
-      Statistic* statistic = CoETools::getStatistic(comap.getParams(), alphabet1, substitutionCount1);
+      shared_ptr<Statistic> statistic(CoETools::getStatistic(comap.getParams(), alphabet1.get(), substitutionCount1.get()));
 
       bool computeNullHyp = false;
       computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", comap.getParams(), true, "", false, 1);
@@ -230,11 +230,11 @@ int main(int argc, char *argv[])
       // *******************************************
       if (comap.getParams().find("input.sequence.file2") != comap.getParams().end() && comap.getParams()["input.sequence.file2"] != "none")
       {
-        TreeTemplate<Node>* tree2;
+        shared_ptr<TreeTemplate<Node>> tree2;
         if (comap.getParams().find("input.tree.file2") != comap.getParams().end() && comap.getParams()["input.tree.file2"] != "none")
         {
           unique_ptr<Tree> tmpTree2(PhylogeneticsApplicationTools::getTree(comap.getParams(), "input.", "2", true));
-          tree2 = new TreeTemplate<Node>(*tmpTree2);
+          tree2.reset(new TreeTemplate<Node>(*tmpTree2));
           if (!TreeTools::haveSameTopology(*tree1, *tree2))
             throw Exception("The second tree must have the same topology as the first tree.");
           ApplicationTools::displayResult("# number of leaves", TextTools::toString(tree2->getNumberOfLeaves()));
@@ -243,16 +243,16 @@ int main(int argc, char *argv[])
         }
         else
         {
-          tree2 = new TreeTemplate<Node>(*tree1); // Copy tree.
+          tree2.reset(new TreeTemplate<Node>(*tree1)); // Copy tree.
         }
 
-        Alphabet *alphabet2;
-        GeneticCode *geneticCode2;
-        VectorSiteContainer *allSites2, *sites2;
-        SubstitutionModel *model2;
-        SubstitutionModelSet *modelSet2;
-        DiscreteDistribution *rDist2;
-        DRTreeLikelihood *tl2;
+        shared_ptr<Alphabet> alphabet2;
+        shared_ptr<GeneticCode> geneticCode2;
+        shared_ptr<VectorSiteContainer> allSites2, sites2;
+        shared_ptr<SubstitutionModel> model2;
+        shared_ptr<SubstitutionModelSet> modelSet2;
+        shared_ptr<DiscreteDistribution> rDist2;
+        shared_ptr<DRTreeLikelihood> tl2;
         ApplicationTools::displayMessage("\nLoading second dataset...\n");
         CoETools::readData(tree2, alphabet2, geneticCode2, allSites2, sites2, model2, modelSet2, rDist2, tl2, comap.getParams(), "2");
         ApplicationTools::displayResult("Number of sites in file", allSites2->getNumberOfSites());
@@ -262,20 +262,20 @@ int main(int argc, char *argv[])
         ApplicationTools::displayMessage("\n... and get its substitution vectors.\n");
     
         // Building a simulator object:
-        SequenceSimulator* seqSim2 = 0;
+        shared_ptr<SequenceSimulator> seqSim2;
         if (modelSet2)
         {
-          seqSim2 = new NonHomogeneousSequenceSimulator(modelSet2, rDist2, tree2);
-          dynamic_cast<NonHomogeneousSequenceSimulator *>(seqSim2)->enableContinuousRates(continuousSim);
+          seqSim2.reset(new NonHomogeneousSequenceSimulator(modelSet2.get(), rDist2.get(), tree2.get()));
+          dynamic_cast<NonHomogeneousSequenceSimulator *>(seqSim2.get())->enableContinuousRates(continuousSim);
         }
         else
         {
-          seqSim2 = new HomogeneousSequenceSimulator(model2, rDist2, tree2);
-          dynamic_cast<HomogeneousSequenceSimulator *>(seqSim2)->enableContinuousRates(continuousSim);
+          seqSim2.reset(new HomogeneousSequenceSimulator(model2.get(), rDist2.get(), tree2.get()));
+          dynamic_cast<HomogeneousSequenceSimulator *>(seqSim2.get())->enableContinuousRates(continuousSim);
         }
 
         // Getting the substitutions count function:
-        SubstitutionCount* substitutionCount2 = PhylogeneticsApplicationTools::getSubstitutionCount(alphabet2, model2, comap.getParams());
+        SubstitutionCount* substitutionCount2 = PhylogeneticsApplicationTools::getSubstitutionCount(alphabet2.get(), model2.get(), comap.getParams());
     
         // Getting the substitution vectors:
         ProbabilisticSubstitutionMapping* mapping2 = CoETools::getVectors(*tl2, *substitutionCount2, *sites2, comap.getParams(), "2");
@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
           norms2[i] = SubstitutionMappingTools::computeNormForSite(*mapping2, i);
         }
 
-        CorrectedCorrelationStatistic* cstat = dynamic_cast<CorrectedCorrelationStatistic*>(statistic);
+        CorrectedCorrelationStatistic* cstat = dynamic_cast<CorrectedCorrelationStatistic*>(statistic.get());
         if (cstat) {
           Vdouble mv1(mapping1->getNumberOfBranches());
           //Compute mean vector:
@@ -338,20 +338,11 @@ int main(int argc, char *argv[])
             comap.getParams());
         }
 
-        delete tree2;
-        delete allSites2;
-        delete sites2;
-        if (model2) delete model2;
-        if (modelSet2) delete modelSet2;
-        delete rDist2;
-        delete tl2;
-        delete substitutionCount2;
-        delete seqSim2;
         ApplicationTools::displayTaskDone();
       }
       else
       {
-        CorrectedCorrelationStatistic* cstat = dynamic_cast<CorrectedCorrelationStatistic*>(statistic);
+        CorrectedCorrelationStatistic* cstat = dynamic_cast<CorrectedCorrelationStatistic*>(statistic.get());
         if (cstat) {
           Vdouble mv1(mapping1->getNumberOfBranches());
           //Compute mean vector:
@@ -374,8 +365,6 @@ int main(int argc, char *argv[])
           computeNullHyp,
           comap.getParams());
       }
-
-      delete statistic;
     }
 
 
@@ -417,7 +406,7 @@ int main(int argc, char *argv[])
         }
         else if (distanceMethod == "Compensation" || distanceMethod == "comp")
         {
-          WeightedSubstitutionCount* wsc = dynamic_cast<WeightedSubstitutionCount*>(substitutionCount1);
+          WeightedSubstitutionCount* wsc = dynamic_cast<WeightedSubstitutionCount*>(substitutionCount1.get());
           if (!wsc)
             throw Exception("Compensation distance must be used with a mapping procedure allowing weights, e.g. 'nijt=Uniformization(weight=Diff(index1=Volume, symmetrical=no))'.");
           if (!wsc->hasWeights())
@@ -602,7 +591,7 @@ int main(int argc, char *argv[])
       // *****************************
       // We only deal with the one data set case for now.
     
-      const Statistic* statistic = CoETools::getStatistic(comap.getParams(), alphabet1, substitutionCount1);
+      shared_ptr<const Statistic> statistic(CoETools::getStatistic(comap.getParams(), alphabet1.get(), substitutionCount1.get()));
   
       string groupsPath = ApplicationTools::getAFilePath("candidates.input.file", comap.getParams(), false, true);
       if (groupsPath != "none")
@@ -616,7 +605,7 @@ int main(int argc, char *argv[])
         ApplicationTools::displayResult("Minimum number of simulations", TextTools::toString(minSim));
         unsigned int verbose = ApplicationTools::getParameter<unsigned int>("candidates.null.verbose", comap.getParams(), 1, "", true, true);
         ApplicationTools::displayResult("Verbose level", TextTools::toString(verbose));
-        CandidateGroupSet candidates(statistic, minSim, verbose);
+        CandidateGroupSet candidates(statistic.get(), minSim, verbose);
     
         //Create positions index first:
         map<int, size_t> posIndex;
@@ -626,7 +615,7 @@ int main(int argc, char *argv[])
 
         //Parse file:
         string groupsColumnSep = ApplicationTools::getStringParameter("candidates.input.column_sep", comap.getParams(), "\t", "", true, true);
-        DataTable* table = DataTable::read(groupsFile, groupsColumnSep, true, -1);
+        shared_ptr<DataTable> table(DataTable::read(groupsFile, groupsColumnSep, true, -1));
         groupsFile.close();
         string groupsColumnName = ApplicationTools::getStringParameter("candidates.input.column_name", comap.getParams(), "Group", "", true, true);
         vector<string> groups = table->getColumn(groupsColumnName);
@@ -713,12 +702,7 @@ int main(int argc, char *argv[])
         DataTable::write(*table, outputFile, groupsColumnSep);
         outputFile.close();
         ApplicationTools::displayResult("Wrote results in file", outputPath);
-
-        //Free memory.
-        delete table;
       }
-
-      delete statistic;
     }
 
 
@@ -727,29 +711,12 @@ int main(int argc, char *argv[])
 
 
     else throw Exception("Unknown analysis type: " + analysis);
-    
-    delete seqSim1;
   }
 
   // ***********
   // * The End *
   // ***********
   
-  ApplicationTools::displayTask("Freeing memory");
-  
-  // Dataset 1 memory freeing:
-  delete tree1;
-  delete allSites1;
-  delete sites1;
-  if(model1) delete model1;
-  if(modelSet1) delete modelSet1;
-  delete rDist1;
-  delete tl1;
-  delete substitutionCount1;
-  delete mapping1;
-  
-  ApplicationTools::displayTaskDone();
-
   comap.done();
   
   ApplicationTools::displayMessage("Bye bye ;-)");  

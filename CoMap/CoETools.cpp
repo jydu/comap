@@ -73,40 +73,40 @@ using namespace std;
 /******************************************************************************/
 
 void CoETools::readData(
-  TreeTemplate<Node>*          &tree,
-  Alphabet*                    &alphabet,
-  GeneticCode*                 &geneticCode,
-  VectorSiteContainer*         &allSites,
-  VectorSiteContainer*         &sites,
-  SubstitutionModel*           &model,
-  SubstitutionModelSet*        &modelSet,
-  DiscreteDistribution*        &rDist,
-  DRTreeLikelihood*            &tl,
+  shared_ptr<TreeTemplate<Node>>   tree,
+  shared_ptr<Alphabet>             alphabet,
+  shared_ptr<GeneticCode>          geneticCode,
+  shared_ptr<VectorSiteContainer>  allSites,
+  shared_ptr<VectorSiteContainer>  sites,
+  shared_ptr<SubstitutionModel>      model,
+  shared_ptr<SubstitutionModelSet> modelSet,
+  shared_ptr<DiscreteDistribution> rDist,
+  shared_ptr<DRTreeLikelihood>     tl,
   map<string, string>          &params,
   const string                 &suffix)
 {
-  alphabet = SequenceApplicationTools::getAlphabet(params, suffix, true);
-  allSites = SequenceApplicationTools::getSiteContainer(alphabet, params, suffix, false);
-  sites    = SequenceApplicationTools::getSitesToAnalyse(*allSites, params, suffix, true, true, true);
+  alphabet.reset(SequenceApplicationTools::getAlphabet(params, suffix, true));
+  allSites.reset(SequenceApplicationTools::getSiteContainer(alphabet.get(), params, suffix, false));
+  sites.reset(   SequenceApplicationTools::getSitesToAnalyse(*allSites, params, suffix, true, true, true));
 
-  CodonAlphabet* codonAlphabet = dynamic_cast<CodonAlphabet*>(alphabet);
+  CodonAlphabet* codonAlphabet = dynamic_cast<CodonAlphabet*>(alphabet.get());
   if (codonAlphabet) {
     string codeDesc = ApplicationTools::getStringParameter("genetic_code", params, "Standard", "", true, true);
     ApplicationTools::displayResult("Genetic Code", codeDesc);
       
-    geneticCode = SequenceApplicationTools::getGeneticCode(codonAlphabet->getNucleicAlphabet(), codeDesc);
+    geneticCode.reset(SequenceApplicationTools::getGeneticCode(codonAlphabet->getNucleicAlphabet(), codeDesc));
   }
 
 
   string nhOpt = ApplicationTools::getStringParameter("nonhomogeneous", params, "no", "", true, 1);
   ApplicationTools::displayResult("Heterogeneous model", nhOpt);
 
-  model = 0;
-  modelSet = 0;
+  model.reset();
+  modelSet.reset();
 
   if (nhOpt == "no")
   {  
-    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, geneticCode, sites, params);
+    model.reset(PhylogeneticsApplicationTools::getSubstitutionModel(alphabet.get(), geneticCode.get(), sites.get(), params));
     if (model->getNumberOfStates() > model->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
@@ -115,13 +115,13 @@ void CoETools::readData(
     }
     else
     {
-      rDist = PhylogeneticsApplicationTools::getRateDistribution(params);
+      rDist.reset(PhylogeneticsApplicationTools::getRateDistribution(params));
     }
-    tl = new DRHomogeneousTreeLikelihood(*tree, *sites, model, rDist, true, false);
+    tl.reset(new DRHomogeneousTreeLikelihood(*tree, *sites, model.get(), rDist.get(), true, false));
   }
   else if (nhOpt == "one_per_branch")
   {
-    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, geneticCode, sites, params);
+    model.reset(PhylogeneticsApplicationTools::getSubstitutionModel(alphabet.get(), geneticCode.get(), sites.get(), params));
     if (model->getNumberOfStates() > model->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
@@ -130,7 +130,7 @@ void CoETools::readData(
     }
     else
     {
-      rDist = PhylogeneticsApplicationTools::getRateDistribution(params);
+      rDist.reset(PhylogeneticsApplicationTools::getRateDistribution(params));
     }
     vector<double> rateFreqs;
     if (model->getNumberOfStates() != alphabet->getSize())
@@ -141,15 +141,15 @@ void CoETools::readData(
                                                     // we should assume a rate distribution for the root also!!!  
     }
     map<string, string> sharedParams;
-    FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, geneticCode, sites, params, sharedParams, rateFreqs);
+    shared_ptr<FrequenciesSet> rootFreqs(PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet.get(), geneticCode.get(), sites.get(), params, sharedParams, rateFreqs));
     vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", params, ',', "", "", true, 1);
-    modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, sharedParams, globalParameters); 
-    model = modelSet->getModel(0)->clone();
-    tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false);
+    modelSet.reset(SubstitutionModelSetTools::createNonHomogeneousModelSet(model.get(), rootFreqs.get(), tree.get(), sharedParams, globalParameters)); 
+    model.reset(modelSet->getSubstitutionModel(0)->clone());
+    tl.reset(new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet.get(), rDist.get(), false));
   }
   else if (nhOpt == "general")
   {
-    modelSet = PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet, geneticCode, 0, params);
+    modelSet.reset(PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet.get(), geneticCode.get(), 0, params));
     if (modelSet->getNumberOfStates() > modelSet->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
@@ -158,10 +158,10 @@ void CoETools::readData(
     }
     else
     {
-      rDist = PhylogeneticsApplicationTools::getRateDistribution(params);
+      rDist.reset(PhylogeneticsApplicationTools::getRateDistribution(params));
     }
-    model = modelSet->getModel(0)->clone();
-    tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false); 
+    model.reset(modelSet->getSubstitutionModel(0)->clone());
+    tl.reset(new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet.get(), rDist.get(), false)); 
   }
   else throw Exception("Unknown option for nonhomogeneous: " + nhOpt);
   
@@ -225,15 +225,14 @@ void CoETools::readData(
   ApplicationTools::displayBooleanResult("Optimization", optimization != "None");
   if (optimization != "None")
   {
-    PhylogeneticsApplicationTools::optimizeParameters(tl, tl->getParameters(), params, suffix, true, true);
+    PhylogeneticsApplicationTools::optimizeParameters(tl.get(), tl->getParameters(), params, suffix, true, true);
     TreeTemplate<Node> *treeOpt = new TreeTemplate<Node>(tl->getTree());
     PhylogeneticsApplicationTools::writeTree(*treeOpt, params, "output.", suffix);
   
     // Actualize tree.
     // Substitution model and rate distribution are actualized automatically by
     // the likelihood function.
-    delete tree;
-    tree = treeOpt;
+    tree.reset(treeOpt);
     
     // Print parameters:
     ApplicationTools::displayResult("Final likelihood, -lnL =", TextTools::toString(tl -> getLogLikelihood(), 20));
@@ -257,17 +256,17 @@ void CoETools::readData(
     if (modelSet)
     {
       modelSet->matchParametersValues(tl->getParameters());
-      PhylogeneticsApplicationTools::printParameters(modelSet, out);
+      PhylogeneticsApplicationTools::printParameters(modelSet.get(), out);
     }
     else
     {
       model->matchParametersValues(tl->getParameters());
-      PhylogeneticsApplicationTools::printParameters(model, out);
+      PhylogeneticsApplicationTools::printParameters(model.get(), out);
     }
     out.endLine();
     (out << "# Rate distribution parameters:").endLine();
     rDist->matchParametersValues(tl->getParameters());
-    PhylogeneticsApplicationTools::printParameters(rDist, out);
+    PhylogeneticsApplicationTools::printParameters(rDist.get(), out);
   }
 
 
@@ -526,7 +525,7 @@ Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* a
       throw Exception("Compensation distance must be used with a mapping procedure with weights, e.g. 'nijt=Uniformization(weight=Diff(index1=Volume, symmetrical=no))'.");
     if (wsc->getWeights()->isSymmetric())
       throw Exception("Compensation distance must be used with a mapping procedure allowing non-symmetric weights, e.g. 'nijt=Uniformization(weight=Diff(index1=Volume, symmetrical=no))'.");
-		return new CompensationStatistic();
+    return new CompensationStatistic();
   }
   else if (name == "MI")
   {
@@ -546,7 +545,7 @@ Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* a
       double threshold = ApplicationTools::getDoubleParameter("threshold", args, 0.99, "", true);
       vector<double> b(3);
       b[0] = 0.; b[1] = threshold; b[2] = 10000.;
-		  return new DiscreteMutualInformationStatistic(b);
+      return new DiscreteMutualInformationStatistic(b);
     } 
   }
   else
@@ -562,7 +561,7 @@ void CoETools::computeIntraStats(
   const SequenceSimulator& seqSim,
   const SiteContainer& completeSites,
   ProbabilisticSubstitutionMapping& mapping,
-	SubstitutionCount& nijt,
+  SubstitutionCount& nijt,
   const Statistic& statistic,
   bool computeNull,
   map<string, string>& params)
@@ -1000,7 +999,7 @@ void CoETools::computePValuesForCandidateGroups(
     DRTreeLikelihood& drtl,
     const SequenceSimulator& seqSim,
     SubstitutionCount& nijt,
-	  map<string, string>& params,
+    map<string, string>& params,
     unsigned int maxTrials)
 {
   unsigned int repRAM = ApplicationTools::getParameter<unsigned int>("candidates.null.nb_rep_RAM", params, 1000, "", true, 1);
@@ -1016,29 +1015,29 @@ void CoETools::computePValuesForCandidateGroups(
     drtl.setData(*sites);
     drtl.initialize();
     ProbabilisticSubstitutionMapping* mapping;
-		if (average)
+    if (average)
     {
-			if (joint)
+      if (joint)
       {
-				mapping = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
-			}
+        mapping = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
+      }
       else
       {
-				mapping = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, nijt, false);
-			}
-		}
+        mapping = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, nijt, false);
+      }
+    }
     else
     {
-			if (joint)
+      if (joint)
       {
-				mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, nijt, false);
-			}
+        mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, nijt, false);
+      }
       else
       {
-				mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, nijt, false);
-			}
-		}
-		test = candidates.analyseSimulations(*mapping) && (candidates.getNumberOfTrials() < maxTrials);
+        mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, nijt, false);
+      }
+    }
+    test = candidates.analyseSimulations(*mapping) && (candidates.getNumberOfTrials() < maxTrials);
 
     delete sites;
     delete mapping;

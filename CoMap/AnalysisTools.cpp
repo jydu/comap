@@ -765,7 +765,7 @@ void AnalysisTools::getNullDistributionIntraWithoutReestimatingCounts(
 {
   // Write header line:
   out << "Stat\tr1\tr2" << endl;
-  TotalSubstitutionRegister reg(seqSim.getSubstitutionModelSet()->getModel(0));
+  TotalSubstitutionRegister reg(seqSim.getSubstitutionModelSet()->getSubstitutionModel(0));
   for (size_t i = 0; i < rep; ++i)
   {
     ApplicationTools::displayGauge(i, rep - 1);

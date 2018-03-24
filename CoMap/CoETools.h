@@ -62,6 +62,7 @@ using namespace bpp;
 #include <map>
 #include <vector>
 #include <deque>
+#include <memory>
 
 using namespace std;
 
@@ -299,15 +300,15 @@ class CoETools
 	public:
 		
 		static void readData(
-			TreeTemplate<Node>*   &tree,
-			Alphabet*             &alphabet,
-			GeneticCode*          &geneticCode,
-			VectorSiteContainer*  &allSites,
-			VectorSiteContainer*  &sites,
-			SubstitutionModel*    &model,
-			SubstitutionModelSet* &modelSet,
-			DiscreteDistribution* &rDist,
-			DRTreeLikelihood*     &tl,
+			shared_ptr<TreeTemplate<Node>>   tree,
+			shared_ptr<Alphabet>             alphabet,
+			shared_ptr<GeneticCode>          geneticCode,
+			shared_ptr<VectorSiteContainer>  allSites,
+			shared_ptr<VectorSiteContainer>  sites,
+			shared_ptr<SubstitutionModel>    model,
+			shared_ptr<SubstitutionModelSet> modelSet,
+			shared_ptr<DiscreteDistribution> rDist,
+			shared_ptr<DRTreeLikelihood>     tl,
 			map<string, string>   &params,
 			const string          &suffix = "");
 

@@ -159,12 +159,12 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-  Alphabet* alphabet = SequenceApplicationTools::getAlphabet(mica.getParams(), "", false);
+  shared_ptr<Alphabet> alphabet(SequenceApplicationTools::getAlphabet(mica.getParams(), "", false));
 
-  VectorSiteContainer* allSites = SequenceApplicationTools::getSiteContainer(alphabet, mica.getParams());
+  shared_ptr<VectorSiteContainer> allSites(SequenceApplicationTools::getSiteContainer(alphabet.get(), mica.getParams()));
   
-  VectorSiteContainer* sites = SequenceApplicationTools::getSitesToAnalyse(* allSites, mica.getParams());
-  delete allSites;
+  shared_ptr<VectorSiteContainer> sites(SequenceApplicationTools::getSitesToAnalyse(*allSites, mica.getParams()));
+  allSites.reset();
 
   bool removeConst = ApplicationTools::getBooleanParameter("input.remove_const", mica.getParams(), true);
   if (removeConst) {
@@ -184,22 +184,22 @@ int main(int argc, char *argv[])
   
 
   //Shall we use a model?
-  TreeTemplate<Node>  * tree     = 0;
-  DRTreeLikelihood    * tl       = 0;
-  SubstitutionModel   * model    = 0;
-  SubstitutionModelSet* modelSet = 0;
-  DiscreteDistribution* rDist    = 0;
-  SubstitutionCount   * simple   = 0;
-  vector<double>      * norms    = 0;
+  shared_ptr<TreeTemplate<Node>>   tree;
+  shared_ptr<DRTreeLikelihood>     tl;
+  shared_ptr<SubstitutionModel>    model;
+  shared_ptr<SubstitutionModelSet> modelSet;
+  shared_ptr<DiscreteDistribution> rDist;
+  shared_ptr<SubstitutionCount>    simple;
+  shared_ptr<vector<double>>       norms;
   bool withModel = ApplicationTools::getBooleanParameter("use_model", mica.getParams(), false, "", true, false);
   
   ApplicationTools::displayBooleanResult("Model of sequence evolution", withModel);
   if (withModel)
   {
     // Get the initial tree
-    Tree* tree_tmp = PhylogeneticsApplicationTools::getTree(mica.getParams());
-    tree = new TreeTemplate<Node>(*tree_tmp);
-    delete tree_tmp;
+    shared_ptr<Tree> treeTmp(PhylogeneticsApplicationTools::getTree(mica.getParams()));
+    tree.reset(new TreeTemplate<Node>(*treeTmp));
+    treeTmp.reset();
     ApplicationTools::displayResult("Number of leaves", TextTools::toString(tree->getNumberOfLeaves()));
 
     string nhOpt = ApplicationTools::getStringParameter("nonhomogeneous", mica.getParams(), "no", "", true, false);
@@ -207,29 +207,29 @@ int main(int argc, char *argv[])
 
     if (nhOpt == "no")
     {  
-      model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, 0, sites, mica.getParams());
-      if(model->getNumberOfStates() > model->getAlphabet()->getSize())
-      {
-        //Markov-modulated Markov model!
-        rDist = new ConstantDistribution(1.);
-      }
-      else
-      {
-        rDist = PhylogeneticsApplicationTools::getRateDistribution(mica.getParams());
-      }
-      tl = new DRHomogeneousTreeLikelihood(*tree, *sites, model, rDist, true, false);
-    }
-    else if(nhOpt == "one_per_branch")
-    {
-      model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, 0, sites, mica.getParams());
+      model.reset(PhylogeneticsApplicationTools::getSubstitutionModel(alphabet.get(), 0, sites.get(), mica.getParams()));
       if (model->getNumberOfStates() > model->getAlphabet()->getSize())
       {
         //Markov-modulated Markov model!
-        rDist = new ConstantDistribution(1.);
+        rDist.reset(new ConstantDistribution(1.));
       }
       else
       {
-        rDist = PhylogeneticsApplicationTools::getRateDistribution(mica.getParams());
+        rDist.reset(PhylogeneticsApplicationTools::getRateDistribution(mica.getParams()));
+      }
+      tl.reset(new DRHomogeneousTreeLikelihood(*tree, *sites, model.get(), rDist.get(), true, false));
+    }
+    else if (nhOpt == "one_per_branch")
+    {
+      model.reset(PhylogeneticsApplicationTools::getSubstitutionModel(alphabet.get(), 0, sites.get(), mica.getParams()));
+      if (model->getNumberOfStates() > model->getAlphabet()->getSize())
+      {
+        //Markov-modulated Markov model!
+        rDist.reset(new ConstantDistribution(1.));
+      }
+      else
+      {
+        rDist.reset(PhylogeneticsApplicationTools::getRateDistribution(mica.getParams()));
       }
       vector<double> rateFreqs;
       if (model->getNumberOfStates() != alphabet->getSize())
@@ -240,32 +240,30 @@ int main(int argc, char *argv[])
                                                      // we should assume a rate distribution for the root also!!!  
       }
       map<string, string> sharedParams;
-      FrequenciesSet* rootFreqs = PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet, 0, sites, mica.getParams(), sharedParams, rateFreqs);
+      shared_ptr<FrequenciesSet> rootFreqs(PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet.get(), 0, sites.get(), mica.getParams(), sharedParams, rateFreqs));
       vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", mica.getParams(), ',', "");
-      modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, tree, sharedParams, globalParameters); 
-      model = modelSet->getModel(0)->clone();
-      tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false);
+      modelSet.reset(SubstitutionModelSetTools::createNonHomogeneousModelSet(model.get(), rootFreqs.get(), tree.get(), sharedParams, globalParameters)); 
+      model.reset(modelSet->getSubstitutionModel(0)->clone());
+      tl.reset(new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet.get(), rDist.get(), false));
     }
     else if (nhOpt == "general")
     {
-      modelSet = PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet, 0, sites, mica.getParams());
+      modelSet.reset(PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet.get(), 0, sites.get(), mica.getParams()));
       if (modelSet->getNumberOfStates() > modelSet->getAlphabet()->getSize())
       {
         //Markov-modulated Markov model!
-        rDist = new ConstantDistribution(1.);
+        rDist.reset(new ConstantDistribution(1.));
       }
       else
       {
-        rDist = PhylogeneticsApplicationTools::getRateDistribution(mica.getParams());
+        rDist.reset(PhylogeneticsApplicationTools::getRateDistribution(mica.getParams()));
       }
-      model = modelSet->getModel(0)->clone();
-      tl = new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false);
+      model.reset(modelSet->getSubstitutionModel(0)->clone());
+      tl.reset(new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet.get(), rDist.get(), false));
     }
     else throw Exception("Unknown option for nonhomogeneous: " + nhOpt);
     tl->initialize();
  
-    delete tree;
-    
     double logL = tl->getValue();
     if (std::isinf(logL))
     {
@@ -292,16 +290,14 @@ int main(int argc, char *argv[])
       ApplicationTools::displayError("!!! 0 values (inf in log) may be due to computer overflow, particularily if datasets are big (>~500 sequences).");
       exit(-1);
     }
-    tree = new TreeTemplate<Node>(tl->getTree());
+    tree.reset(new TreeTemplate<Node>(tl->getTree()));
 
     //Get the substitution mapping in order to compute the rates:
 
-    TotalSubstitutionRegister* reg = new TotalSubstitutionRegister(model);
-    simple = new UniformizationSubstitutionCount(model, reg); 
-    ProbabilisticSubstitutionMapping* mapping = 
-      SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, true);
-    norms = new vector<double>(computeNorms(*mapping));
-    delete mapping;
+    shared_ptr<TotalSubstitutionRegister> reg(new TotalSubstitutionRegister(model.get()));
+    simple.reset(new UniformizationSubstitutionCount(model.get(), reg.get()));
+    shared_ptr<ProbabilisticSubstitutionMapping> mapping(SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, true));
+    norms.reset(new vector<double>(computeNorms(*mapping)));
   }
   
   //Compute all pairwise MI values:
@@ -382,8 +378,8 @@ int main(int argc, char *argv[])
       size_t nbRepCPU = ApplicationTools::getParameter<size_t>("null.nb_rep_CPU", mica.getParams(), 10);
       size_t nbRepRAM = ApplicationTools::getParameter<size_t>("null.nb_rep_RAM", mica.getParams(), 100);
   
-      OutputStream* os = ApplicationTools::warning;
-      ApplicationTools::warning = 0;
+      shared_ptr<OutputStream> os = ApplicationTools::warning;
+      ApplicationTools::warning.reset();
       for (size_t i = 0; i < nbRepCPU; i++)
       {
         //Generate data set:
@@ -442,16 +438,16 @@ int main(int argc, char *argv[])
         throw Exception("You need to specify a model of sequence evolution in order to use a parametric bootstrap approach!");
       bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", mica.getParams(), false, "", true, false);
       ApplicationTools::displayResult("Rate distribution for simulations", (continuousSim ? "continuous" : "discrete"));
-      SequenceSimulator* simulator;
+      shared_ptr<SequenceSimulator> simulator;
       if (modelSet)
       {
-        simulator = new NonHomogeneousSequenceSimulator(modelSet, rDist, tree);
-        dynamic_cast<NonHomogeneousSequenceSimulator *>(simulator)->enableContinuousRates(continuousSim);
+        simulator.reset(new NonHomogeneousSequenceSimulator(modelSet.get(), rDist.get(), tree.get()));
+        dynamic_cast<NonHomogeneousSequenceSimulator *>(simulator.get())->enableContinuousRates(continuousSim);
       }
       else
       {
-        simulator = new HomogeneousSequenceSimulator(model, rDist, tree);
-        dynamic_cast<HomogeneousSequenceSimulator *>(simulator)->enableContinuousRates(continuousSim);
+        simulator.reset(new HomogeneousSequenceSimulator(model.get(), rDist.get(), tree.get()));
+        dynamic_cast<HomogeneousSequenceSimulator *>(simulator.get())->enableContinuousRates(continuousSim);
       }
    
       string simpath = ApplicationTools::getAFilePath("null.output.file", mica.getParams(), false, false);
@@ -469,21 +465,19 @@ int main(int argc, char *argv[])
       size_t nbRepCPU = ApplicationTools::getParameter<size_t>("null.nb_rep_CPU", mica.getParams(), 10);
       size_t nbRepRAM = ApplicationTools::getParameter<size_t>("null.nb_rep_RAM", mica.getParams(), 100);
   
-      OutputStream* os = ApplicationTools::warning;
-      ApplicationTools::warning = 0;
+      shared_ptr<OutputStream> os = ApplicationTools::warning;
+      ApplicationTools::warning.reset();
       for (size_t i = 0; i < nbRepCPU; i++)
       {
         //Generate data set:
-        SiteContainer* sites1 = simulator->simulate(nbRepRAM);
+        shared_ptr<SiteContainer> sites1(simulator->simulate(nbRepRAM));
         tl->setData(*sites1);
         tl->initialize();
         vector<double> norms1;
-        ProbabilisticSubstitutionMapping* mapping1 = 
-           SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, false);
+        shared_ptr<ProbabilisticSubstitutionMapping> mapping1(SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, false));
         norms1 = computeNorms(*mapping1);
-        delete mapping1;
   
-        SiteContainer* sites2 = simulator->simulate(nbRepRAM);
+        shared_ptr<SiteContainer> sites2(simulator->simulate(nbRepRAM));
         tl->setData(*sites2);
         tl->initialize();
         vector<double> norms2;
@@ -513,15 +507,12 @@ int main(int argc, char *argv[])
             *simout << stat << "\t" << hj << "\t" << hm << "\t" << nmin << endl;
         }
   
-        delete sites1;
-        delete sites2;
       }
       ApplicationTools::warning = os;
   
       if (outputToFile)
         simout->close();
       ApplicationTools::displayTaskDone(); 
-      delete simulator;
     }
     else if (nullMethod == "z-score")
     {
@@ -535,8 +526,8 @@ int main(int argc, char *argv[])
       else if (zScoreStat != "MI")
         throw Exception("Unkown statistic, should be 'MI', 'MIp' or 'MIc'.");
       ApplicationTools::displayTask("Computing total distribution", true);
-      OutputStream* os = ApplicationTools::warning;
-      ApplicationTools::warning = 0;
+      shared_ptr<OutputStream> os = ApplicationTools::warning;
+      ApplicationTools::warning.reset();
       size_t c = 0;
       for (size_t i = 0; i < nbSites - 1; i++)
       {
@@ -666,14 +657,6 @@ int main(int argc, char *argv[])
   }
   out.close();
   ApplicationTools::displayTaskDone();
-
-  delete alphabet;
-  delete sites;
-  delete tl;
-  if (model)    delete model;
-  if (modelSet) delete modelSet;
-  delete rDist;
-  delete tree;
 
   if (computePValues) {
     delete simValues;
