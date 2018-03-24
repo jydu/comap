@@ -124,7 +124,7 @@ class IntervalData
 		 * @param value The value to add.
 		 * @throw OutOfRangeException If the value does not belong to the domain of this data set.
 		 */
-		virtual void addValue(double value) throw (OutOfRangeException);
+		virtual void addValue(double value);
 
 		/**
 		 * @return The total number of elements in this data set.

@@ -43,7 +43,7 @@ knowledge of the CeCILL license and that you accept its terms.
 using namespace bpp;
 using namespace std;
 
-Domain::Domain(double a, double b, size_t n) throw (Exception) :
+Domain::Domain(double a, double b, size_t n) :
   bounds_(n + 1), midPoints_(n)
 {
   if (n == 0) throw Exception("Domain::constructor1. Number of classes should be > 0.");
@@ -58,7 +58,7 @@ Domain::Domain(double a, double b, size_t n) throw (Exception) :
   }
 }
 
-Domain::Domain(const Vdouble& bounds) throw (Exception): bounds_(bounds), midPoints_(bounds.size() - 1)
+Domain::Domain(const Vdouble& bounds): bounds_(bounds), midPoints_(bounds.size() - 1)
 {
   size_t n = bounds_.size();
   for (size_t i = 0; i < n - 1; i++)
@@ -70,7 +70,7 @@ Domain::Domain(const Vdouble& bounds) throw (Exception): bounds_(bounds), midPoi
   }
 }
 
-Domain::Domain(const Vdouble& bounds, const Vdouble& midPoints) throw (Exception): bounds_(bounds), midPoints_(midPoints)
+Domain::Domain(const Vdouble& bounds, const Vdouble& midPoints): bounds_(bounds), midPoints_(midPoints)
 {
   if (bounds.size() != midPoints.size() + 1) throw Exception("Domain::Domain(). Number of midpoints must equal number of bounds - 1.");
   
@@ -99,7 +99,7 @@ Domain::Domain(const Vdouble& bounds, const Vdouble& midPoints) throw (Exception
   }
 }
 
-double Domain::getNearestValue(double x) const throw (OutOfRangeException) 
+double Domain::getNearestValue(double x) const
 {
   if(x < getLowerBound() || x >= getUpperBound())
     throw OutOfRangeException("Domain::getNearestValue", x, getLowerBound(), getUpperBound());
@@ -110,7 +110,7 @@ double Domain::getNearestValue(double x) const throw (OutOfRangeException)
   return 0;
 }
 
-size_t Domain::getIndex(double x) const throw (OutOfRangeException)
+size_t Domain::getIndex(double x) const
 {
   if(x < getLowerBound() || x >= getUpperBound())
     throw OutOfRangeException("Domain::getIndex", x, getLowerBound(), getUpperBound());

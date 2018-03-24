@@ -490,7 +490,7 @@ void CoETools::writeInfos(
 
 /******************************************************************************/
 
-Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* alphabet, const SubstitutionCount* nijt) throw (Exception)
+Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* alphabet, const SubstitutionCount* nijt)
 {
   string statistic = ApplicationTools::getStringParameter("statistic", params, "Correlation");
   string name;
@@ -853,7 +853,7 @@ void CoETools::computeInterNullDistribution(
 
 /******************************************************************************/
 
-vector<unsigned int> CandidateGroupSet::nextCandidateSite() const throw (Exception)
+vector<unsigned int> CandidateGroupSet::nextCandidateSite() const
 {
   if (nbCompleted_ == size()) throw Exception("CandidateGroupSet::nextCandidateSite. enough simulations!!");
   //Site increment:
@@ -891,7 +891,7 @@ vector<unsigned int> CandidateGroupSet::nextCandidateSite() const throw (Excepti
 
 /******************************************************************************/
 
-vector<unsigned int> CandidateGroupSet::currentCandidateSite() const throw (Exception)
+vector<unsigned int> CandidateGroupSet::currentCandidateSite() const
 {
   if (nbCompleted_ == size()) throw Exception("CandidateGroupSet::nextCandidateSite. enough simulations!!");
   vector<unsigned int> pos(2);
@@ -951,7 +951,7 @@ bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMappin
 
 /******************************************************************************/
 
-bool CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const VVdouble* v) throw (IndexOutOfBoundsException)
+bool CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int siteIndex, const VVdouble* v)
 {
   if (groupIndex >= simulations_.size())
     throw IndexOutOfBoundsException("CandidateGroupSet::addSimulatedSite. Bad group index.", groupIndex, 0, simulations_.size());

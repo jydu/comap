@@ -71,7 +71,7 @@ class Domain
      * @param n The number of classes.
      * @throw Exception If the number of classes is 0.
      */
-    Domain(double a = 0, double b = 0, size_t n = 1) throw (Exception);
+    Domain(double a = 0, double b = 0, size_t n = 1);
     
     /**
      * @brief Build a new Domain object given the classes bounds.
@@ -81,7 +81,7 @@ class Domain
      * @param bounds The classes bounds.
      * @throw Exception If bound are not in increasing order.
      */
-    Domain(const Vdouble& bounds) throw (Exception);
+    Domain(const Vdouble& bounds);
     
     /**
      * @brief Build a new Domain object given the classes bounds and midpoints.
@@ -92,7 +92,7 @@ class Domain
      * or midpoints are not between corresponding bounds,
      * or number of midpoints is not equal to number of bounds - 1.
      */
-    Domain(const Vdouble& bounds, const Vdouble& midPoints) throw (Exception);
+    Domain(const Vdouble& bounds, const Vdouble& midPoints);
   
     virtual ~Domain() {}
   
@@ -144,14 +144,14 @@ class Domain
      * @param x The value to check.
      * @throw OutOfRangeException if the value is not in the domain interval.
      */
-    virtual double getNearestValue(double x) const throw (OutOfRangeException);
+    virtual double getNearestValue(double x) const;
     
     /**
      * @return The index of the interval/class a given value belong to
      * @param x The value to check.
      * @throw OutOfRangeException if the value is not in the domain interval.
      */
-    virtual size_t getIndex(double x) const throw (OutOfRangeException);
+    virtual size_t getIndex(double x) const;
     
 };
 

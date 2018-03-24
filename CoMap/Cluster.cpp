@@ -51,95 +51,95 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <iostream>
 
 using namespace std;
-	
+  
 TreeTemplate<Node>* SumClustering::getTree() const
 {
-	Node * root = TreeTemplateTools::cloneSubtree<Node>(* dynamic_cast<TreeTemplate<NodeTemplate<ClusterInfos> > *>(tree_) -> getRootNode());
-	return new TreeTemplate<Node>(root);
+  Node * root = TreeTemplateTools::cloneSubtree<Node>(* dynamic_cast<TreeTemplate<NodeTemplate<ClusterInfos> > *>(tree_) -> getRootNode());
+  return new TreeTemplate<Node>(root);
 }
 
-vector<size_t> SumClustering::getBestPair() throw (Exception)
+vector<size_t> SumClustering::getBestPair()
 {
-	vector<size_t> bestPair(2);
-	double distMin = -std::log(0.);
-	for(map<size_t, Node *>::iterator i = currentNodes_.begin(); i != currentNodes_.end(); i++)
+  vector<size_t> bestPair(2);
+  double distMin = -std::log(0.);
+  for(map<size_t, Node *>::iterator i = currentNodes_.begin(); i != currentNodes_.end(); i++)
   {
-		size_t id = i->first;
-		map<size_t, Node *>::iterator j = i;
-		j++;
-		for(; j != currentNodes_.end(); j++)
+    size_t id = i->first;
+    map<size_t, Node *>::iterator j = i;
+    j++;
+    for(; j != currentNodes_.end(); j++)
     {
-			size_t jd = j->first;
-			double dist = matrix_(id, jd);
-			if(dist < distMin)
+      size_t jd = j->first;
+      double dist = matrix_(id, jd);
+      if(dist < distMin)
       {
-				distMin = dist;
-				bestPair[0] = id;
-				bestPair[1] = jd;
-			}
-		}
-	}
-	// actualize vectors:
-	mapping_[bestPair[0]] += mapping_[bestPair[1]];
-	return bestPair;	
+        distMin = dist;
+        bestPair[0] = id;
+        bestPair[1] = jd;
+      }
+    }
+  }
+  // actualize vectors:
+  mapping_[bestPair[0]] += mapping_[bestPair[1]];
+  return bestPair;  
 }
 vector<double> SumClustering::computeBranchLengthsForPair(const vector<size_t>& pair)
 {
-	vector<double> d(2);
-	double dist = matrix_(pair[0], pair[1]) / 2.;
-	d[0] = dist - dynamic_cast<NodeTemplate<ClusterInfos> *>(currentNodes_[pair[0]])->getInfos().length; 
-	d[1] = dist - dynamic_cast<NodeTemplate<ClusterInfos> *>(currentNodes_[pair[1]])->getInfos().length; 
-	//d[0] = dist; 
-	//d[1] = dist; 
-	return d;
+  vector<double> d(2);
+  double dist = matrix_(pair[0], pair[1]) / 2.;
+  d[0] = dist - dynamic_cast<NodeTemplate<ClusterInfos> *>(currentNodes_[pair[0]])->getInfos().length; 
+  d[1] = dist - dynamic_cast<NodeTemplate<ClusterInfos> *>(currentNodes_[pair[1]])->getInfos().length; 
+  //d[0] = dist; 
+  //d[1] = dist; 
+  return d;
 }
 
 double SumClustering::computeDistancesFromPair(const vector<size_t>& pair, const vector<double>& branchLengths, size_t pos)
 {
-	return distance_->getDistanceForPair(mapping_[pos], mapping_[pair[0]]);
+  return distance_->getDistanceForPair(mapping_[pos], mapping_[pair[0]]);
 }
 
 void SumClustering::finalStep(int idRoot)
 {
-	NodeTemplate<ClusterInfos>* root = new NodeTemplate<ClusterInfos>(idRoot);
-	map<size_t, Node*>::iterator it = currentNodes_.begin();
-	size_t i1 = it->first;
-	Node* n1        = it->second;
-	it++;
-	size_t i2 = it->first;
-	Node* n2        = it->second;
-	double d = matrix_(i1, i2) / 2;
-	root->addSon(n1);
-	root->addSon(n2);
-	n1->setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n1)->getInfos().length); 
-	n2->setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n2)->getInfos().length); 
-	//n1->setDistanceToFather(d); 
-	//n2->setDistanceToFather(d); 
-	tree_ = new TreeTemplate< NodeTemplate<ClusterInfos> >(root);
+  NodeTemplate<ClusterInfos>* root = new NodeTemplate<ClusterInfos>(idRoot);
+  map<size_t, Node*>::iterator it = currentNodes_.begin();
+  size_t i1 = it->first;
+  Node* n1        = it->second;
+  it++;
+  size_t i2 = it->first;
+  Node* n2        = it->second;
+  double d = matrix_(i1, i2) / 2;
+  root->addSon(n1);
+  root->addSon(n2);
+  n1->setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n1)->getInfos().length); 
+  n2->setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n2)->getInfos().length); 
+  //n1->setDistanceToFather(d); 
+  //n2->setDistanceToFather(d); 
+  tree_ = new TreeTemplate< NodeTemplate<ClusterInfos> >(root);
 }
 
 Node* SumClustering::getLeafNode(int id, const string& name)
 {
-	ClusterInfos infos;
-	infos.numberOfLeaves = 1;
-	infos.length = 0.;
-	NodeTemplate<ClusterInfos> * leaf = new NodeTemplate<ClusterInfos>(id, name);
-	leaf->setInfos(infos);
-	return leaf;
+  ClusterInfos infos;
+  infos.numberOfLeaves = 1;
+  infos.length = 0.;
+  NodeTemplate<ClusterInfos> * leaf = new NodeTemplate<ClusterInfos>(id, name);
+  leaf->setInfos(infos);
+  return leaf;
 }
 
 Node* SumClustering::getParentNode(int id, Node* son1, Node* son2)
 {
-	ClusterInfos infos;
-	infos.numberOfLeaves = 
-		dynamic_cast<NodeTemplate<ClusterInfos> *>(son1)->getInfos().numberOfLeaves
-	+ dynamic_cast<NodeTemplate<ClusterInfos> *>(son2)->getInfos().numberOfLeaves;
-	infos.length = dynamic_cast<NodeTemplate<ClusterInfos> *>(son1)->getInfos().length + son1->getDistanceToFather();
-	Node * parent = new NodeTemplate<ClusterInfos>(id);
-	dynamic_cast<NodeTemplate<ClusterInfos> *>(parent)->setInfos(infos);
-	parent->addSon(son1);
-	parent->addSon(son2);
-	return parent;
+  ClusterInfos infos;
+  infos.numberOfLeaves = 
+    dynamic_cast<NodeTemplate<ClusterInfos> *>(son1)->getInfos().numberOfLeaves
+  + dynamic_cast<NodeTemplate<ClusterInfos> *>(son2)->getInfos().numberOfLeaves;
+  infos.length = dynamic_cast<NodeTemplate<ClusterInfos> *>(son1)->getInfos().length + son1->getDistanceToFather();
+  Node * parent = new NodeTemplate<ClusterInfos>(id);
+  dynamic_cast<NodeTemplate<ClusterInfos> *>(parent)->setInfos(infos);
+  parent->addSon(son1);
+  parent->addSon(son2);
+  return parent;
 }
 
 //---------------------------------------------------------------------------------------------

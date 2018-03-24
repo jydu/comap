@@ -67,181 +67,177 @@ using namespace std;
  */
 class AnalysisTools
 {
-	public:
-		AnalysisTools();
-		virtual ~AnalysisTools();
-	
-	public:
-		
-		/**
-		 * @brief Read a vector of dimension 2 from an input stream.
-		 *
-		 * @param in The input stream.
-		 * @return A VVdouble object.
-		 */
-		static VVdouble getFromStream(istream & in);
+  public:
+    AnalysisTools();
+    virtual ~AnalysisTools();
+  
+  public:
+    
+    /**
+     * @brief Read a vector of dimension 2 from an input stream.
+     *
+     * @param in The input stream.
+     * @return A VVdouble object.
+     */
+    static VVdouble getFromStream(istream & in);
 
-		/**
-		 * @brief Compute the matrix of scalar products.
-		 *
-		 * The function takes as input a vector of vectors (VVdouble) and computes
-		 * the scalar product of each pair of vectors.
-		 *
-		 * @param vectors A vector of vectors.
-		 * @return The matrix of scalar products.
-		 */
-		static VVdouble computeScalarProductMatrix(const VVdouble & vectors);
+    /**
+     * @brief Compute the matrix of scalar products.
+     *
+     * The function takes as input a vector of vectors (VVdouble) and computes
+     * the scalar product of each pair of vectors.
+     *
+     * @param vectors A vector of vectors.
+     * @return The matrix of scalar products.
+     */
+    static VVdouble computeScalarProductMatrix(const VVdouble & vectors);
 
-		/**
-		 * @brief Compute the matrix of scalar products.
-		 *
-		 * The function takes as input two vectors of vectors (VVdouble) and computes
-		 * the scalar product of each pair of vectors.
-		 * If independantComparisons is set to true, then the two vectors of vectors are
-		 * expected to be of the same length and vectors are compared 2 by 2.
-		 *
-		 * @param vectors1, vectors2 Two vectors of vectors.
-		 * @return The matrix of scalar products.
-		 */
-		static VVdouble computeScalarProductMatrix(
-			const VVdouble & vectors1,
-			const VVdouble & vectors2,
-			bool independantComparisons)
-			throw (DimensionException);
+    /**
+     * @brief Compute the matrix of scalar products.
+     *
+     * The function takes as input two vectors of vectors (VVdouble) and computes
+     * the scalar product of each pair of vectors.
+     * If independantComparisons is set to true, then the two vectors of vectors are
+     * expected to be of the same length and vectors are compared 2 by 2.
+     *
+     * @param vectors1, vectors2 Two vectors of vectors.
+     * @return The matrix of scalar products.
+     */
+    static VVdouble computeScalarProductMatrix(
+      const VVdouble & vectors1,
+      const VVdouble & vectors2,
+      bool independantComparisons);
 
-		/**
-		 * @brief Compute the matrix of cosinus.
-		 *
-		 * The function takes as input a vector of vectors (VVdouble) and computes
-		 * the cosinus of each pair of vectors.
-		 *
-		 * @param vectors A vector of vectors.
-		 * @return The matrix of cosinus.
-		 */
-		static VVdouble computeCosinusMatrix(const VVdouble & vectors);
-		
-		/**
-		 * @brief Compute the matrix of cosinus.
-		 *
-		 * The function takes as input two vectors of vectors (VVdouble) and computes
-		 * the cosinus of each pair of vectors.
-		 * If independantComparisons is set to true, then the two vectors of vectors are
-		 * expected to be of the same length and vectors are compared 2 by 2.
-		 *
-		 * @param vectors1, vectors2 Two vectors of vectors.
-		 * @return The cosinus of scalar products.
-		 */
-		static VVdouble computeCosinusMatrix(
-			const VVdouble & vectors1,
-			const VVdouble & vectors2,
-			bool independantComparisons)
-			throw (DimensionException);
-	
-		/**
-		 * @brief Compute the matrix of correlations.
-		 *
-		 * The function takes as input a vector of vectors (VVdouble) and computes
-		 * the correlation of each pair of vectors.
-		 *
-		 * @param vectors A vector of vectors.
-		 * @return The matrix of correlations.
-		 */
-		static VVdouble computeCorrelationMatrix(const VVdouble & vectors);
+    /**
+     * @brief Compute the matrix of cosinus.
+     *
+     * The function takes as input a vector of vectors (VVdouble) and computes
+     * the cosinus of each pair of vectors.
+     *
+     * @param vectors A vector of vectors.
+     * @return The matrix of cosinus.
+     */
+    static VVdouble computeCosinusMatrix(const VVdouble & vectors);
+    
+    /**
+     * @brief Compute the matrix of cosinus.
+     *
+     * The function takes as input two vectors of vectors (VVdouble) and computes
+     * the cosinus of each pair of vectors.
+     * If independantComparisons is set to true, then the two vectors of vectors are
+     * expected to be of the same length and vectors are compared 2 by 2.
+     *
+     * @param vectors1, vectors2 Two vectors of vectors.
+     * @return The cosinus of scalar products.
+     */
+    static VVdouble computeCosinusMatrix(
+      const VVdouble & vectors1,
+      const VVdouble & vectors2,
+      bool independantComparisons);
+  
+    /**
+     * @brief Compute the matrix of correlations.
+     *
+     * The function takes as input a vector of vectors (VVdouble) and computes
+     * the correlation of each pair of vectors.
+     *
+     * @param vectors A vector of vectors.
+     * @return The matrix of correlations.
+     */
+    static VVdouble computeCorrelationMatrix(const VVdouble & vectors);
 
-		/**
-		 * @brief Compute the matrix of correlations.
-		 *
-		 * The function takes as input two vectors of vectors (VVdouble) and computes
-		 * the correlation of each pair of vectors.
-		 * If independantComparisons is set to true, then the two vectors of vectors are
-		 * expected to be of the same length and vectors are compared 2 by 2.
-		 *
-		 * @param vectors1, vectors2 Two vectors of vectors.
-		 * @return The matrix of correlations.
-		 */
-		static VVdouble computeCorrelationMatrix(
-			const VVdouble & vectors1,
-			const VVdouble & vectors2,
-			bool independantComparisons)
-			throw (DimensionException);
-	
-		/**
-		 * @brief Compute the matrix of covariance.
-		 *
-		 * The function takes as input a vector of vectors (VVdouble) and computes
-		 * the covariance of each pair of vectors.
-		 *
-		 * @param vectors A vector of vectors.
-		 * @return The matrix of covariance.
-		 */
-		static VVdouble computeCovarianceMatrix(const VVdouble & vectors);
+    /**
+     * @brief Compute the matrix of correlations.
+     *
+     * The function takes as input two vectors of vectors (VVdouble) and computes
+     * the correlation of each pair of vectors.
+     * If independantComparisons is set to true, then the two vectors of vectors are
+     * expected to be of the same length and vectors are compared 2 by 2.
+     *
+     * @param vectors1, vectors2 Two vectors of vectors.
+     * @return The matrix of correlations.
+     */
+    static VVdouble computeCorrelationMatrix(
+      const VVdouble & vectors1,
+      const VVdouble & vectors2,
+      bool independantComparisons);
+  
+    /**
+     * @brief Compute the matrix of covariance.
+     *
+     * The function takes as input a vector of vectors (VVdouble) and computes
+     * the covariance of each pair of vectors.
+     *
+     * @param vectors A vector of vectors.
+     * @return The matrix of covariance.
+     */
+    static VVdouble computeCovarianceMatrix(const VVdouble & vectors);
 
-		/**
-		 * @brief Compute the matrix of covariances.
-		 *
-		 * The function takes as input two vectors of vectors (VVdouble) and computes
-		 * the covariance product of each pair of vectors.
-		 * If independantComparisons is set to true, then the two vectors of vectors are
-		 * expected to be of the same length and vectors are compared 2 by 2.
-		 *
-		 * @param vectors1, vectors2 Two vectors of vectors.
-		 * @return The matrix of covariances.
-		 */
-		static VVdouble computeCovarianceMatrix(
-			const VVdouble & vectors1,
-			const VVdouble & vectors2,
-			bool independantComparisons)
-			throw (DimensionException);
-	
-		/**
-		 * @brief Get the norms of each substitution vector.
-		 *
-		 * @param mapping A substitution mapping.
-		 * @return A vector containing the norms of each vector in the list.
-		 */
-		static Vdouble computeNorms(const ProbabilisticSubstitutionMapping& mapping);
-	
-		static void writeMatrix(
-			const VVdouble & matrix,
-			const SiteContainer & sites,
-			ostream & out);
-			
-		static void writeMatrix(
-			const VVdouble & matrix,
-			const SiteContainer & sites1,
-			const SiteContainer & sites2,
-			ostream & out);
-			
-		/**********************************************************************/
-		
-		static vector<IntervalData*> getNullDistributionIntraDR(
+    /**
+     * @brief Compute the matrix of covariances.
+     *
+     * The function takes as input two vectors of vectors (VVdouble) and computes
+     * the covariance product of each pair of vectors.
+     * If independantComparisons is set to true, then the two vectors of vectors are
+     * expected to be of the same length and vectors are compared 2 by 2.
+     *
+     * @param vectors1, vectors2 Two vectors of vectors.
+     * @return The matrix of covariances.
+     */
+    static VVdouble computeCovarianceMatrix(
+      const VVdouble & vectors1,
+      const VVdouble & vectors2,
+      bool independantComparisons);
+  
+    /**
+     * @brief Get the norms of each substitution vector.
+     *
+     * @param mapping A substitution mapping.
+     * @return A vector containing the norms of each vector in the list.
+     */
+    static Vdouble computeNorms(const ProbabilisticSubstitutionMapping& mapping);
+  
+    static void writeMatrix(
+      const VVdouble & matrix,
+      const SiteContainer & sites,
+      ostream & out);
+      
+    static void writeMatrix(
+      const VVdouble & matrix,
+      const SiteContainer & sites1,
+      const SiteContainer & sites2,
+      ostream & out);
+      
+    /**********************************************************************/
+    
+    static vector<IntervalData*> getNullDistributionIntraDR(
       DRTreeLikelihood& drtl,
-			const SequenceSimulator& seqSim,
-			SubstitutionCount& nijt,
-			const Statistic& statistic,
-			const Domain& statDomain,
-			const Domain& rateDomain,
-			size_t repCPU,
+      const SequenceSimulator& seqSim,
+      SubstitutionCount& nijt,
+      const Statistic& statistic,
+      const Domain& statDomain,
+      const Domain& rateDomain,
+      size_t repCPU,
       size_t repRAM,
-			bool average,
-			bool joint,
-			bool verbose = true);
+      bool average,
+      bool joint,
+      bool verbose = true);
 
-		static vector<IntervalData*> getNullDistributionInterDR(
+    static vector<IntervalData*> getNullDistributionInterDR(
       DRTreeLikelihood & drtl1,
       DRTreeLikelihood & drtl2,
-			const SequenceSimulator & seqSim1,
-			const SequenceSimulator & seqSim2,
-			SubstitutionCount & nijt1,
-			SubstitutionCount & nijt2,
-			const Statistic & statistic,
-			const Domain & statDomain,
-			const Domain & rateDomain,
-			size_t repCPU,
+      const SequenceSimulator & seqSim1,
+      const SequenceSimulator & seqSim2,
+      SubstitutionCount & nijt1,
+      SubstitutionCount & nijt2,
+      const Statistic & statistic,
+      const Domain & statDomain,
+      const Domain & rateDomain,
+      size_t repCPU,
       size_t repRAM,
-			bool average,
-			bool joint,
-			bool verbose = true);
+      bool average,
+      bool joint,
+      bool verbose = true);
 
     /**
      * @param out If not 0, where to output simulation results.
@@ -249,43 +245,43 @@ class AnalysisTools
      * @param rateDomain A domain object describing rate categories in order to perform conditional p-value computations.
      *                   If 0 or with one rate class, no rate conditionning will be done.
      */
-		static void getNullDistributionIntraDR(
+    static void getNullDistributionIntraDR(
       DRTreeLikelihood& drtl,
-			const SequenceSimulator& seqSim,
-			SubstitutionCount& nijt,
-			const Statistic& statistic,
-			ostream* out,
+      const SequenceSimulator& seqSim,
+      SubstitutionCount& nijt,
+      const Statistic& statistic,
+      ostream* out,
       vector< vector<double> >* simstats,
       const Domain* rateDomain,
-			size_t repCPU,
+      size_t repCPU,
       size_t repRAM,
-			bool average,
-			bool joint,
-			bool verbose = true);
-			
-		static void getNullDistributionInterDR(
-      DRTreeLikelihood & drtl1,
-      DRTreeLikelihood & drtl2,
-			const SequenceSimulator & seqSim1,
-			const SequenceSimulator & seqSim2,
-			SubstitutionCount & nijt1,
-			SubstitutionCount & nijt2,
-			const Statistic & statistic,
-			ostream & out,
-			size_t repCPU,
+      bool average,
+      bool joint,
+      bool verbose = true);
+      
+    static void getNullDistributionInterDR(
+      DRTreeLikelihood& drtl1,
+      DRTreeLikelihood& drtl2,
+      const SequenceSimulator& seqSim1,
+      const SequenceSimulator& seqSim2,
+      SubstitutionCount& nijt1,
+      SubstitutionCount& nijt2,
+      const Statistic& statistic,
+      ostream& out,
+      size_t repCPU,
       size_t repRAM,
-			bool average,
-			bool joint,
-			bool verbose = true);
+      bool average,
+      bool joint,
+      bool verbose = true);
 
-		static void getNullDistributionIntraWithoutReestimatingCounts(
-			const NonHomogeneousSequenceSimulator& seqSim,
-			const Statistic& statistic,
-			ostream& out,
-			size_t rep,
-			bool verbose = true);
+    static void getNullDistributionIntraWithoutReestimatingCounts(
+      const NonHomogeneousSequenceSimulator& seqSim,
+      const Statistic& statistic,
+      ostream& out,
+      size_t rep,
+      bool verbose = true);
 };
 
 
-#endif	//_ANALYSISTOOLS_H_
+#endif  //_ANALYSISTOOLS_H_
 

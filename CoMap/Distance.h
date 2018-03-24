@@ -63,13 +63,13 @@ using namespace std;
  */
 class Distance
 {
-	public:
-		Distance() {}
-		virtual ~Distance() {}
+  public:
+    Distance() {}
+    virtual ~Distance() {}
 
-	public:
-		virtual double getDistanceForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException) = 0;
-		virtual double getDistanceForGroup(const vector<const VVdouble*>& v) const throw (DimensionException) = 0;
+  public:
+    virtual double getDistanceForPair(const VVdouble& v1, const VVdouble& v2) const = 0;
+    virtual double getDistanceForGroup(const vector<const VVdouble*>& v) const = 0;
     virtual void setWeights(const Vdouble& weights) = 0;
     virtual void deleteWeights() = 0;
     virtual const Vdouble* getWeights() const = 0;
@@ -82,8 +82,8 @@ class AbstractDistance : public Distance
   protected:
     vector<double>* weights_;
     
-	public:
-		AbstractDistance() : weights_(0) {}
+  public:
+    AbstractDistance() : weights_(0) {}
 
     AbstractDistance(const AbstractDistance& ad) : weights_(ad.weights_ ? new vector<double>(*ad.weights_) : 0) {}
     
@@ -93,9 +93,9 @@ class AbstractDistance : public Distance
       weights_ = ad.weights_ ? new vector<double>(*ad.weights_) : 0;
       return *this;
     }
-		virtual ~AbstractDistance() { if (weights_) delete weights_; }
+    virtual ~AbstractDistance() { if (weights_) delete weights_; }
 
-	public:
+  public:
     void setWeights(const Vdouble& weights)
     { 
       if (weights_) delete weights_;
@@ -132,7 +132,7 @@ class AbstractDistance : public Distance
 class AbstractMaximumDistance: public AbstractDistance
 {
   public:
-		double getDistanceForGroup(const vector<const VVdouble*>& v) const throw (DimensionException)
+    double getDistanceForGroup(const vector<const VVdouble*>& v) const
     {
       double maxi = log(0), val = 0;
       for (size_t i = 1; i < v.size(); i++)
@@ -149,27 +149,26 @@ class AbstractMaximumDistance: public AbstractDistance
 
 class EuclidianDistance: public AbstractMaximumDistance
 {
-	public:
-		EuclidianDistance() {}
-		virtual ~EuclidianDistance() {}
+  public:
+    EuclidianDistance() {}
+    virtual ~EuclidianDistance() {}
 
-	public:
-		double getDistanceForPair(const VVdouble& v1, const VVdouble& v2) const
-			throw (DimensionException)
-		{
-			if (v1.size() != v2.size())
+  public:
+    double getDistanceForPair(const VVdouble& v1, const VVdouble& v2) const
+    {
+      if (v1.size() != v2.size())
         throw DimensionException("EuclidianDistance::d(...).", v2.size(), v1.size());
       if (weights_ && weights_->size() != v1.size())
         throw DimensionException("EuclidianDistance::d(...).", v1.size(), weights_->size());
-			double d = 0;
-			for (size_t i = 0; i < v1.size(); i++)
+      double d = 0;
+      for (size_t i = 0; i < v1.size(); i++)
       {
         double sv1 = VectorTools::sum(v1[i]);
         double sv2 = VectorTools::sum(v2[i]);
-				d += (weights_ == 0) ? std::pow(sv2 - sv1, 2) : (*weights_)[i] * std::pow(sv2 - sv1, 2) ;
-			}
-			return sqrt(d);
-		}
+        d += (weights_ == 0) ? std::pow(sv2 - sv1, 2) : (*weights_)[i] * std::pow(sv2 - sv1, 2) ;
+      }
+      return sqrt(d);
+    }
 
 };
 
@@ -177,59 +176,59 @@ class EuclidianDistance: public AbstractMaximumDistance
 class CorrelationDistance: public AbstractDistance
 {
 
-	public:
-		CorrelationDistance() {}
-		virtual ~CorrelationDistance() {}
+  public:
+    CorrelationDistance() {}
+    virtual ~CorrelationDistance() {}
 
-	public:
-		double d(const vector<double> & v1, const vector<double> & v2) const
-			throw (DimensionException)
-		{
+  public:
+    double d(const vector<double> & v1, const vector<double> & v2) const
+      throw (DimensionException)
+    {
       return (_weights == NULL) ? 1. - getCorrelation(v1, v2) : 1. - getWeightedCorrelation(v1, v2);
-		}
+    }
 
   protected:
     double getCorrelation(const vector<double> & v1, const vector<double> & v2) const
-			throw (DimensionException)
+      throw (DimensionException)
     {
-			if(v1.size() != v2.size()) throw DimensionException("CorrelationDistance::getCorrelation(...).", v2.size(), v1.size());
-			double sumx = 0., sumy = 0., sumx2 = 0., sumy2 = 0., sumxy = 0.;
+      if(v1.size() != v2.size()) throw DimensionException("CorrelationDistance::getCorrelation(...).", v2.size(), v1.size());
+      double sumx = 0., sumy = 0., sumx2 = 0., sumy2 = 0., sumxy = 0.;
       for(unsigned int i = 0; i < v1.size(); i++)
       {
-			  sumx += v1[i];
-			  sumy += v2[i];
-			  sumxy += v1[i]*v2[i];
-			  sumx2 += std::pow(v1[i], 2.);
-			  sumy2 += std::pow(v2[i], 2.);
-			}
-			double n = (double)v1.size();
-			double mx = sumx/n;
-			double my = sumy/n;
-			return (sumxy/n - mx * my)
-			  / (
-			     sqrt(sumx2/n - std::pow(mx, 2.))
-				  *sqrt(sumy2/n - std::pow(my, 2.))
-			  );
+        sumx += v1[i];
+        sumy += v2[i];
+        sumxy += v1[i]*v2[i];
+        sumx2 += std::pow(v1[i], 2.);
+        sumy2 += std::pow(v2[i], 2.);
+      }
+      double n = (double)v1.size();
+      double mx = sumx/n;
+      double my = sumy/n;
+      return (sumxy/n - mx * my)
+        / (
+           sqrt(sumx2/n - std::pow(mx, 2.))
+          *sqrt(sumy2/n - std::pow(my, 2.))
+        );
     }
     
     double getWeightedCorrelation(const vector<double> & v1, const vector<double> & v2) const
-			throw (DimensionException)
+      throw (DimensionException)
     {
-			if(v1.size() != v2.size()) throw DimensionException("CorrelationDistance::getWeightedCorrelation(...).", v2.size(), v1.size());
-			double wsumx = 0., wsumy = 0., wsumx2 = 0., wsumy2 = 0., wsumxy = 0.;
+      if(v1.size() != v2.size()) throw DimensionException("CorrelationDistance::getWeightedCorrelation(...).", v2.size(), v1.size());
+      double wsumx = 0., wsumy = 0., wsumx2 = 0., wsumy2 = 0., wsumxy = 0.;
       for(unsigned int i = 0; i < v1.size(); i++)
       {
-			  wsumx += (*_weights)[i] * v1[i];
-			  wsumy += (*_weights)[i] * v2[i];
-			  wsumxy += (*_weights)[i] * v1[i] * v2[i];
-			  wsumx2 += (*_weights)[i] * std::pow(v1[i], 2.);
-			  wsumy2 += (*_weights)[i] * std::pow(v2[i], 2.);
-			}
-			return (wsumxy - wsumx * wsumy)
-			  / (
-			     sqrt(wsumx2 - std::pow(wsumx, 2.))
-				  *sqrt(wsumy2 - std::pow(wsumy, 2.))
-			  );
+        wsumx += (*_weights)[i] * v1[i];
+        wsumy += (*_weights)[i] * v2[i];
+        wsumxy += (*_weights)[i] * v1[i] * v2[i];
+        wsumx2 += (*_weights)[i] * std::pow(v1[i], 2.);
+        wsumy2 += (*_weights)[i] * std::pow(v2[i], 2.);
+      }
+      return (wsumxy - wsumx * wsumy)
+        / (
+           sqrt(wsumx2 - std::pow(wsumx, 2.))
+          *sqrt(wsumy2 - std::pow(wsumy, 2.))
+        );
     }    
 
 };
@@ -237,14 +236,14 @@ class CorrelationDistance: public AbstractDistance
 class SquareCorrelationDistance: public CorrelationDistance
 {
 
-	public:
-		SquareCorrelationDistance() {}
-		virtual ~SquareCorrelationDistance() {}
+  public:
+    SquareCorrelationDistance() {}
+    virtual ~SquareCorrelationDistance() {}
 
-	public:
-		double d(const vector<double> & v1, const vector<double> & v2) const
-			throw (DimensionException)
-		{
+  public:
+    double d(const vector<double> & v1, const vector<double> & v2) const
+      throw (DimensionException)
+    {
       return (_weights == NULL) ?
         1. - std::pow(getCorrelation(v1, v2), 2.) :
         1. - std::pow(getWeightedCorrelation(v1, v2), 2.);
@@ -255,22 +254,22 @@ class SquareCorrelationDistance: public CorrelationDistance
 class CompensationDistance: public AbstractDistance
 {
 
-	public:
-		CompensationDistance() {}
-		virtual ~CompensationDistance() {}
+  public:
+    CompensationDistance() {}
+    virtual ~CompensationDistance() {}
 
-	public:
-		double d(const vector<double> & v1, const vector<double> & v2) const
-			throw (DimensionException)
-		{
+  public:
+    double d(const vector<double> & v1, const vector<double> & v2) const
+      throw (DimensionException)
+    {
       return (_weights == NULL) ? getCompensation(v1, v2) : getWeightedCompensation(v1, v2);
-		}
+    }
 
   protected:
     double getCompensation(const vector<double> & v1, const vector<double> & v2) const
-			throw (DimensionException)
+      throw (DimensionException)
     {
-			if(v1.size() != v2.size()) throw DimensionException("CompensationDistance::getCompensation(...).", v2.size(), v1.size());
+      if(v1.size() != v2.size()) throw DimensionException("CompensationDistance::getCompensation(...).", v2.size(), v1.size());
       double sumsq1 = 0., sumsq2 = 0., sumsq3 = 0.;
       for(unsigned int i = 0; i < v1.size(); i++)
       {
@@ -280,20 +279,20 @@ class CompensationDistance: public AbstractDistance
       }
       return sqrt(sumsq3) / (sqrt(sumsq1) + sqrt(sumsq2));
       
-			//vector<double> v3 = v1 + v2;
+      //vector<double> v3 = v1 + v2;
       //double sumsq = 0.;
       //for(unsigned int i = 0; i < v1.size(); i++)
       //{
-			//  sumsq += pow(v1[i] + v2[i], 2.);
-			//}
-			//double n = (double)v1.size();
-			//return sumsq / n;
+      //  sumsq += pow(v1[i] + v2[i], 2.);
+      //}
+      //double n = (double)v1.size();
+      //return sumsq / n;
     }
     
     double getWeightedCompensation(const vector<double> & v1, const vector<double> & v2) const
-			throw (DimensionException)
+      throw (DimensionException)
     {
-			if(v1.size() != v2.size()) throw DimensionException("CompensationDistance::getWeightedCompensation(...).", v2.size(), v1.size());
+      if(v1.size() != v2.size()) throw DimensionException("CompensationDistance::getWeightedCompensation(...).", v2.size(), v1.size());
       double wsumsq1 = 0., wsumsq2 = 0., wsumsq3 = 0.;
       for(unsigned int i = 0; i < v1.size(); i++)
       {
@@ -307,9 +306,9 @@ class CompensationDistance: public AbstractDistance
       //double wsumsq = 0.;
       //for(unsigned int i = 0; i < v1.size(); i++)
       //{
-			//  wsumsq += (*_weights)[i] * pow(v1[i] + v2[i], 2.);
-			//}
-			//return wsumsq;
+      //  wsumsq += (*_weights)[i] * pow(v1[i] + v2[i], 2.);
+      //}
+      //return wsumsq;
     }
 
 };*/
@@ -332,11 +331,11 @@ class StatisticBasedDistance: public Distance
     virtual ~StatisticBasedDistance() {}
 
   public:
-		double getDistanceForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException)
+    double getDistanceForPair(const VVdouble& v1, const VVdouble& v2) const
     {
       return comp_ - stat_->getValueForPair(v1, v2);
     }
-		double getDistanceForGroup(const vector<const VVdouble*> & v) const throw (DimensionException)
+    double getDistanceForGroup(const vector<const VVdouble*> & v) const
     {
       return comp_ - stat_->getValueForGroup(v);
     }
@@ -380,11 +379,11 @@ class CompensationDistance: public Distance
     virtual ~CompensationDistance() {}
 
   public:
-		double getDistanceForPair(const VVdouble& v1, const VVdouble& v2) const throw (DimensionException)
+    double getDistanceForPair(const VVdouble& v1, const VVdouble& v2) const
     {
       return 1. - stat_.getValueForPair(v1, v2);
     }
-		double getDistanceForGroup(const vector<const VVdouble*>& v) const throw (DimensionException)
+    double getDistanceForGroup(const vector<const VVdouble*>& v) const
     {
       return 1. - stat_.getValueForGroup(v);
     }

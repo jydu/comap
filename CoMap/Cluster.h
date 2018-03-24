@@ -55,16 +55,16 @@ knowledge of the CeCILL license and that you accept its terms.
  */
 class SumClustering : public AbstractAgglomerativeDistanceMethod
 {
-	protected:
-		ProbabilisticSubstitutionMapping mapping_;
-		const Distance* distance_;
-	
-	public:
-		SumClustering(const ProbabilisticSubstitutionMapping& mapping, const Distance* distance, const DistanceMatrix& matrix) throw (Exception) :
+  protected:
+    ProbabilisticSubstitutionMapping mapping_;
+    const Distance* distance_;
+  
+  public:
+    SumClustering(const ProbabilisticSubstitutionMapping& mapping, const Distance* distance, const DistanceMatrix& matrix) :
       AbstractAgglomerativeDistanceMethod(matrix, true, true), mapping_(mapping), distance_(distance)
-		{
-			computeTree();
-		}
+    {
+      computeTree();
+    }
     SumClustering(const SumClustering& sc) :
       AbstractAgglomerativeDistanceMethod(sc), mapping_(sc.mapping_), distance_(sc.distance_) 
     {}
@@ -75,28 +75,28 @@ class SumClustering : public AbstractAgglomerativeDistanceMethod
       distance_ = sc.distance_;
       return *this;
     }
-		virtual ~SumClustering() {}
+    virtual ~SumClustering() {}
 
-	public:
-		TreeTemplate<Node>* getTree() const;
-		void setMapping(const ProbabilisticSubstitutionMapping & mapping)
-		{
-			mapping_ = mapping;
-		}
+  public:
+    TreeTemplate<Node>* getTree() const;
+    void setMapping(const ProbabilisticSubstitutionMapping & mapping)
+    {
+      mapping_ = mapping;
+    }
 
-	protected:
-		/**
-		 * @brief Returns the pair with minimum distance and actualizes the vectors.
-		 *
-		 * The vector at position bestPair[0] is now the sum of vectors bestPair[0] and bestPair[1].
-		 * It is then used for computation of distances.
-		 */
-		vector<size_t> getBestPair() throw (Exception);
-		vector<double> computeBranchLengthsForPair(const vector<size_t> & pair);
-		double computeDistancesFromPair(const vector<size_t> & pair, const vector<double> & branchLengths, size_t pos);
-		void finalStep(int idRoot);	
-		virtual Node * getLeafNode(int id, const string & name);
-		virtual Node * getParentNode(int id, Node * son1, Node * son2);
+  protected:
+    /**
+     * @brief Returns the pair with minimum distance and actualizes the vectors.
+     *
+     * The vector at position bestPair[0] is now the sum of vectors bestPair[0] and bestPair[1].
+     * It is then used for computation of distances.
+     */
+    vector<size_t> getBestPair();
+    vector<double> computeBranchLengthsForPair(const vector<size_t> & pair);
+    double computeDistancesFromPair(const vector<size_t> & pair, const vector<double> & branchLengths, size_t pos);
+    void finalStep(int idRoot);  
+    virtual Node* getLeafNode(int id, const string & name);
+    virtual Node* getParentNode(int id, Node * son1, Node * son2);
 };
 
 #endif //_CLUSTER_H_

@@ -125,12 +125,11 @@ VVdouble AnalysisTools::computeScalarProductMatrix(const VVdouble & vectors)
 VVdouble AnalysisTools::computeScalarProductMatrix (
   const VVdouble & vectors1,
   const VVdouble & vectors2,
-  bool independantComparisons
-) throw (DimensionException)
+  bool independantComparisons)
 {
   size_t nbVectors1 = vectors1.size();
   size_t nbVectors2 = vectors2.size();
-  if(independantComparisons && nbVectors1 != nbVectors2)
+  if (independantComparisons && nbVectors1 != nbVectors2)
   {
     throw DimensionException(
       string("AnalysisTools::computeScalarProductMatrix.\n") +
@@ -186,8 +185,7 @@ VVdouble AnalysisTools::computeCosinusMatrix(const VVdouble & vectors)
 VVdouble AnalysisTools::computeCosinusMatrix(
   const VVdouble & vectors1,
   const VVdouble & vectors2,
-  bool independantComparisons
-) throw (DimensionException)
+  bool independantComparisons)
 {
   size_t nbVectors1 = vectors1.size();
   size_t nbVectors2 = vectors2.size();
@@ -247,8 +245,7 @@ VVdouble AnalysisTools::computeCorrelationMatrix(const VVdouble & vectors)
 VVdouble AnalysisTools::computeCorrelationMatrix(
   const VVdouble & vectors1,
   const VVdouble & vectors2,
-  bool independantComparisons
-) throw (DimensionException)
+  bool independantComparisons)
 {
   size_t nbVectors1 = vectors1.size();
   size_t nbVectors2 = vectors2.size();
@@ -309,11 +306,11 @@ VVdouble AnalysisTools::computeCovarianceMatrix(
   const VVdouble& vectors1,
   const VVdouble& vectors2,
   bool independantComparisons
-) throw (DimensionException)
+)
 {
   size_t nbVectors1 = vectors1.size();
   size_t nbVectors2 = vectors2.size();
-  if(independantComparisons && nbVectors1 != nbVectors2)
+  if (independantComparisons && nbVectors1 != nbVectors2)
   {
     throw DimensionException(
       string("AnalysisTools::computeCovarianceMatrix.\n") +
