@@ -5,7 +5,7 @@
 //
 
 /*
-Copyright or © or Copr. CNRS, (November 16, 2004, 2005, 2006)
+Copyright or © or Copr. CNRS, (November 16, 2004-2018)
 
 This software is a computer program whose purpose is to map substitutions
 on a tree and to detect co-evolving positions in a dataset.
@@ -175,15 +175,19 @@ int main(int argc, char *argv[])
   if (reconstruction == "none") {
     //do nothing
   } else if (reconstruction == "marginal") {
-    asr.reset(new MarginalAncestralStateReconstruction(tl1.get()));
+    //In case there is a site selection, we need to reconstruct sequences for all sites in order to keep coordinates
+    shared_ptr<DRTreeLikelihood> tl1copy(tl1->clone());
+    tl1copy->setData(*allSites1);
+    tl1copy->initialize();
+    asr.reset(new MarginalAncestralStateReconstruction(tl1copy.get()));
   } else
     throw Exception("Unknown ancestral state reconstruction method: " + reconstruction);
 
-  if (asr.get()) {
+  if (asr) {
     unique_ptr<SiteContainer> asSites1(asr->getAncestralSequences());
   
     //Add existing sequence to output:
-    SequenceContainerTools::append(*asSites1.get(), *sites1);
+    SequenceContainerTools::append(*asSites1, *sites1);
 
     //Write output:
     if (ApplicationTools::getStringParameter("output.sequence.file", comap.getParams(), "none", "", true, 1) != "none") {

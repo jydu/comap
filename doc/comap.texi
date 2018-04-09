@@ -15,7 +15,7 @@
 @copying
 This is the manual of CoMap, version 1.5.4.
 
-Copyright @copyright{} 2006-2017 Julien Dutheil
+Copyright @copyright{} 2006-2018 Julien Dutheil
 @end copying
 
 @titlepage
