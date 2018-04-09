@@ -73,21 +73,21 @@ using namespace std;
 /******************************************************************************/
 
 void CoETools::readData(
-  shared_ptr<TreeTemplate<Node>>   tree,
-  shared_ptr<Alphabet>             alphabet,
-  shared_ptr<GeneticCode>          geneticCode,
-  shared_ptr<VectorSiteContainer>  allSites,
-  shared_ptr<VectorSiteContainer>  sites,
-  shared_ptr<SubstitutionModel>      model,
-  shared_ptr<SubstitutionModelSet> modelSet,
-  shared_ptr<DiscreteDistribution> rDist,
-  shared_ptr<DRTreeLikelihood>     tl,
-  map<string, string>          &params,
-  const string                 &suffix)
+  shared_ptr<TreeTemplate<Node>>   & tree,
+  shared_ptr<Alphabet>             & alphabet,
+  shared_ptr<GeneticCode>          & geneticCode,
+  shared_ptr<VectorSiteContainer>  & allSites,
+  shared_ptr<VectorSiteContainer>  & sites,
+  shared_ptr<SubstitutionModel>    & model,
+  shared_ptr<SubstitutionModelSet> & modelSet,
+  shared_ptr<DiscreteDistribution> & rDist,
+  shared_ptr<DRTreeLikelihood>     & tl,
+  map<string, string>              & params,
+  const string                     & suffix)
 {
   alphabet.reset(SequenceApplicationTools::getAlphabet(params, suffix, true));
   allSites.reset(SequenceApplicationTools::getSiteContainer(alphabet.get(), params, suffix, false));
-  sites.reset(   SequenceApplicationTools::getSitesToAnalyse(*allSites, params, suffix, true, true, true));
+  sites   .reset(SequenceApplicationTools::getSitesToAnalyse(*allSites, params, suffix, true, true, true));
 
   CodonAlphabet* codonAlphabet = dynamic_cast<CodonAlphabet*>(alphabet.get());
   if (codonAlphabet) {
