@@ -172,11 +172,12 @@ int main(int argc, char *argv[])
   ApplicationTools::displayResult("Ancestral state reconstruction method", reconstruction);
 
   unique_ptr<AncestralStateReconstruction> asr;
+  unique_ptr<DRTreeLikelihood> tl1copy;
   if (reconstruction == "none") {
     //do nothing
   } else if (reconstruction == "marginal") {
     //In case there is a site selection, we need to reconstruct sequences for all sites in order to keep coordinates
-    shared_ptr<DRTreeLikelihood> tl1copy(tl1->clone());
+    tl1copy.reset(tl1->clone());
     tl1copy->setData(*allSites1);
     tl1copy->initialize();
     asr.reset(new MarginalAncestralStateReconstruction(tl1copy.get()));
@@ -187,7 +188,7 @@ int main(int argc, char *argv[])
     unique_ptr<SiteContainer> asSites1(asr->getAncestralSequences());
   
     //Add existing sequence to output:
-    SequenceContainerTools::append(*asSites1, *sites1);
+    SequenceContainerTools::append(*asSites1, *allSites1);
 
     //Write output:
     if (ApplicationTools::getStringParameter("output.sequence.file", comap.getParams(), "none", "", true, 1) != "none") {
