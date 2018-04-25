@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename comap.info
-@settitle CoMap Manual 1.5.4
+@settitle CoMap Manual 1.5.5
 @afourpaper
 
 @dircategory Science Biology Genetics
@@ -13,7 +13,7 @@
 @c %**end of header
 
 @copying
-This is the manual of CoMap, version 1.5.4.
+This is the manual of CoMap, version 1.5.5.
 
 Copyright @copyright{} 2006-2018 Julien Dutheil
 @end copying
