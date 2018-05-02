@@ -11,7 +11,7 @@ alphabet = Protein
 
 # The sequence file to use (sequences must be aligned!)
 input.sequence.file   = Myoglobin.aln.sel.mase
-input.sequence.format = Mase(siteSelection = Gblocks)
+input.sequence.format = Mase
 
 #Sites to use:
 # all => all sites, gaps will be considered as unknown chars.
@@ -50,18 +50,11 @@ output.tree.file = Myo.LG.dnd
 output.infos = Myo_sites.csv
 
 # ----------------------------------------------------------------------------------------
-#                                     Clustering Analysis
+#                                     Coevolution Analysis
 # ----------------------------------------------------------------------------------------
 
-analysis = clustering
-
-clustering.distance = Compensation
-clustering.method = complete
-clustering.output.groups.file = Myo_stats.csv
-
-clustering.null = yes
-clustering.null.number = 1000
-clustering.null.output.file = Myo_null.csv
+# Only output files for visualization, assuming we have candidate positions already
+analysis = none
 
 # ----------------------------------------------------------------------------------------
 #                                     Additional files for visualization
@@ -69,7 +62,7 @@ clustering.null.output.file = Myo_null.csv
 # ----------------------------------------------------------------------------------------
 
 asr.method = marginal
-output.sequence.file = Myo_ancestors.bpp
+output.sequence.file = Myo_ancestors.fasta
 output.sequence.format = Fasta
 output.tags.file = Myo_tags.dnd
 output.tags.translation = Myo_tags_translation.txt
