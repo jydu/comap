@@ -92,13 +92,13 @@ plot.mapping<-function(mapping, sites, drawing = "tree", top = -1,
   } else {
     b <- counts$Branches[t]
   }
-
+  # Get tree index:
+  index<-attr(mapping, "index")
+  
   if (drawing == "tree") {
     tree <- attr(mapping, "tree")
     if (root) tree <- midpoint(tree)
     tree <- as.treedata(tree)
-    # Get tree index:
-    index<-attr(mapping, "index")
     # Get the corresponding vector:
     pp <- list()
     for (site in sites) {
