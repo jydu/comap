@@ -71,28 +71,26 @@ attach.sequences<-function(mapping, seqfile, ...) {
 plot.mapping<-function(mapping, sites, drawing = "tree", top = -1,
                        show.states = TRUE, show.branch.labels = FALSE, root = FALSE,
                        nsim = 100, threshold = -1, ...) {
-  counts<-mapping[,paste("Site", sites, sep = "")]
   s<-paste("Site", sites, sep="")
-  vec<-subset(counts, select = s)
-  vec$Branches <- mapping$Branches
-  vec$BrLen <- mapping$Mean
+  counts<-subset(mapping, select = c("Branches", s))
+  counts$BrLen <- mapping$Mean
 
   # We scale colors according to the selected positions only
-  mx<-max(abs(range(counts)))
+  mx<-max(abs(range(counts[, s])))
   # Compute compensation coefficient for each branch:
-  sumvec <- data.frame(Branches = vec$Branches, Sum = apply(vec[, s], 1, sum), SumAbs = apply(abs(vec[, s]), 1, sum), stringsAsFactors = FALSE)
+  sumvec <- data.frame(Branches = counts$Branches, Sum = apply(counts[, s], 1, sum), SumAbs = apply(abs(counts[, s]), 1, sum), stringsAsFactors = FALSE)
   cc <- with(sumvec, abs(Sum) / SumAbs)
   # Sort branches according to compensation signal
-  vec <- vec[order(cc),]
+  counts <- counts[order(cc),]
   sumvec <- sumvec[order(cc),]
-  vec$Branches <- ordered(vec$Branches, levels = vec$Branches)
+  counts$Branches <- ordered(counts$Branches, levels = counts$Branches)
   sumvec$Branches <- ordered(sumvec$Branches, levels = sumvec$Branches)
   # Select branches for display:
-  t <- apply(abs(vec[, s]), 1, max) >= threshold;
+  t <- apply(abs(counts[, s]), 1, max) >= threshold;
   if (top > 0) {
-    b <- vec$Branches[t][1:top]
+    b <- counts$Branches[t][1:top]
   } else {
-    b <- vec$Branches[t]
+    b <- counts$Branches[t]
   }
 
   if (drawing == "tree") {
@@ -107,7 +105,7 @@ plot.mapping<-function(mapping, sites, drawing = "tree", top = -1,
       si <- paste("Site", site, sep="")
       cat("Mapping", si, "\n")
       vec<-subset(counts, select = si)
-      dd <- data.frame(node = mapping$Branches, count = vec)
+      dd <- data.frame(node = getIds(counts$Branches, index), count = vec, stringsAsFactors = FALSE)
       names(dd) <- c("node", "count")
       p <- ggplot(tree) %<+% dd
       p <- p + geom_tree(aes(col = count))
@@ -131,21 +129,21 @@ plot.mapping<-function(mapping, sites, drawing = "tree", top = -1,
       k <- which(names(mapping) %in% s) - 2 #2 first columns in counts are "Branches" and "Mean"
       ids <- row.names(attr(mapping, "sequences"))
       # The "To" states are directly given by the node ids (top nodes)
-      statesTo <- as.data.frame(toupper(attr(mapping, "sequences")[as.character(vec$Branches), k]), stringsAsFactors = FALSE)
+      statesTo <- as.data.frame(toupper(attr(mapping, "sequences")[as.character(counts$Branches), k]), stringsAsFactors = FALSE)
       names(statesTo) <- s
       statesTo <- melt(statesTo, measure.vars = 1:length(sites), variable.name = "Sites", value.name = "ToState")
       # The "From" states are given by the id of the parent node (bottom nodes),
       # which we first need to retrieve:
-      ids <- getIds(as.character(vec$Branches), attr(mapping, "index"))
+      ids <- getIds(as.character(counts$Branches), index)
       parent.ids <- numeric(length = length(ids))
       for (i in 1:length(parent.ids)) {
         parent.ids[i] <- tree$edge[which(tree$edge[,2] == ids[i]), 1]
       }
-      statesFrom <- as.data.frame(toupper(attr(mapping, "sequences")[attr(mapping, "index")[parent.ids], k]), stringsAsFactors = FALSE)
+      statesFrom <- as.data.frame(toupper(attr(mapping, "sequences")[index[parent.ids], k]), stringsAsFactors = FALSE)
       names(statesFrom) <- s
       statesFrom <- melt(statesFrom, measure.vars = 1:length(sites), variable.name = "Sites", value.name = "FromState")
     }
-    vec2 <- melt(vec, id.vars = c("Branches", "BrLen"), variable.name = "Sites", value.name = "Count")
+    vec2 <- melt(counts, id.vars = c("Branches", "BrLen"), variable.name = "Sites", value.name = "Count")
     if (show.states) {
       vec2 <- cbind(vec2, statesTo, statesFrom)
     }
@@ -176,7 +174,7 @@ plot.mapping<-function(mapping, sites, drawing = "tree", top = -1,
     pb <- txtProgressBar(1, 100, style = 3)
     for (i in 1:100) {
       setTxtProgressBar(pb, i)
-      sim <- vec
+      sim <- counts
       for (j in s) sim[, j] <- sample(sim[, j], replace = FALSE)
       sumsim <- data.frame(Branches = sim$Branches,
                            Sum = apply(sim[, s], 1, sum),

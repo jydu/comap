@@ -11,12 +11,12 @@ counts <- attach.sequences(counts, "Myo_ancestors.fasta", format="fasta")
 
 plot.candidate <- function(counts, sites, threshold, top, nrow = 1) {
 
-  p.treelst <- plot(counts, sites, drawing = "tree", root = TRUE, show.states = FALSE, show.tip.label = FALSE)
+  p.treelst <- plot(counts, sites, drawing = "tree", root = FALSE, show.states = FALSE, show.tip.label = FALSE)
   p.heatmap <- plot(counts, sites, drawing = "heatmap", top = top, threshold = threshold, show.branch.labels = FALSE)
   p.dotplot <- plot(counts, sites, drawing = "compensogram", top = top, threshold = threshold, show.branch.labels = FALSE)
 
   for (i in 1:length(p.treelst)) {
-    p.treelst[[i]] <- p.treelst[[1]] + theme_tree(bgcolor = "grey30", plot.title = element_text(hjust = 0.5))
+    p.treelst[[i]] <- p.treelst[[i]] + theme_tree(bgcolor = "grey30", plot.title = element_text(hjust = 0.5))
   }
   p.trees <- plot_grid(plotlist = p.treelst, nrow = 1)
 
@@ -31,11 +31,13 @@ plot.candidate <- function(counts, sites, threshold, top, nrow = 1) {
 }
 
 # Visualizing significant groups (cf ../Simple/ProteinGroupCompensation/Myo_stats_pvalues.csv)
-p <- plot.candidate(counts, sites=c(193, 260), threshold = 10, top = 20)
+p <- plot.candidate(counts, sites=c(193, 260), threshold = 10, top = 20, nrow = 2)
 p
 
-p <- plot.candidate(counts, sites=c(295, 313), threshold = 10, top = 20)
+p <- plot.candidate(counts, sites=c(295, 313), threshold = 10, top = 20, nrow = 2)
 p
 
 p <- plot.candidate(counts, sites=c(304, 341, 345), threshold = 10, top = 5, nrow = 2)
 p
+
+ggsave(p, filename = "CoevolutionMap.png", width=8, height=8)
