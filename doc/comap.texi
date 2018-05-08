@@ -50,6 +50,8 @@ Copyright @copyright{} 2006-2018 Julien Dutheil
 * Pvalue::                      Using the R scripts to compute p-values.                            
 * Mica::                        Mutual Information Coevolution Analysis.                            
 
+
+
 @end menu
 
 @end ifnottex
@@ -134,7 +136,7 @@ The tree can however contain multifurcations (WARNING: not fully tested, please 
 @node Mapping, Pairwise, Estimation, Top
 @chapter Substitution mapping
 
-Here come the CoMap specific part!
+Options described in this part are specific to CoMap.
 Options in this chapter are for the computation of substitution vectors.
 
 @table @command
@@ -220,9 +222,9 @@ Columns are: IsComplete (yes if the site has no missing data), IsConstant (yes i
 @section Ancestral sequences reconstruction
 
 CoMap can also perform ancestral sequence reconstruction.
-Ancestral sequences are not used in the analysis, but can be usefull for interpreting results.
-Marginal reconstruction is performed, for more advanced technics and options, consider the bppAncestor
-program from the Bio++ Program Suite.
+Ancestral sequences are not used in the analysis, but can be useful for interpreting results.
+Marginal reconstruction is performed, for more advanced techniques and options, consider the bppAncestor
+program from the Bio++ Program Suite. Note that ancestral states are output for analyzed positions only.
 
 @table @command
 
@@ -236,6 +238,23 @@ Where to write reconstructed sequences, together with extant sequences.
 All Bio++ format are supported.
 
 @end table
+
+@section Output node ids
+
+Nodes and branches are automatically labeled by CoMap, and the resulting ids are used to report substitution counts and ancestral sequences.
+These ids can be output in the form of a tree file, with nodes at leaves as leaf names and inner nodes as "bootstrap" values.
+
+@table @command
+
+@item output.tags.file = @{path@}
+Where to write the annotated tree, in newick format.
+
+@item output.tags.translation = @{string@}
+Write a text file displaying the leaf ids and the corresponding orginal sequence names.
+
+@end table
+
+These files are required for visualization of candidate groups (see the example/Visualization folder in source distribution).
 
 @c ------------------------------------------------------------------------------------------------------------------
 
