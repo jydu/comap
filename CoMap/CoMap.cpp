@@ -445,7 +445,7 @@ int main(int argc, char *argv[])
         {
           //Write out matrix to a file, in Phylip format:
           PhylipDistanceMatrixFormat phylip;
-          phylip.write(*mat, matrixFile, true);
+          phylip.writeDistanceMatrix(*mat, matrixFile, true);
           ApplicationTools::displayResult("Wrote matrix to file", matrixFile);
         }
   
@@ -557,7 +557,7 @@ int main(int argc, char *argv[])
           // First we retranslate leaves names:
           ClusterTools::translate(clusteringTree, siteNames);
           Newick newick;
-          newick.write(clusteringTree, treeFile, true);
+          newick.writeTree(clusteringTree, treeFile, true);
           ApplicationTools::displayResult("Wrote tree to file", treeFile);
         }
     

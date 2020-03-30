@@ -44,6 +44,7 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From bpp-core:
 #include <Bpp/App/ApplicationTools.h>
+#include <Bpp/App/NumCalcApplicationTools.h>
 #include <Bpp/BppString.h>
 #include <Bpp/Numeric/ParameterExceptions.h>
 #include <Bpp/Text/KeyvalTools.h>
@@ -141,8 +142,44 @@ void CoETools::readData(
                                                     // we should assume a rate distribution for the root also!!!  
     }
     map<string, string> sharedParams;
-    shared_ptr<FrequenciesSet> rootFreqs(PhylogeneticsApplicationTools::getRootFrequenciesSet(alphabet.get(), geneticCode.get(), sites.get(), params, sharedParams, rateFreqs));
-    vector<string> globalParameters = ApplicationTools::getVectorParameter<string>("nonhomogeneous_one_per_branch.shared_parameters", params, ',', "", "", true, 1);
+    shared_ptr<FrequencySet> rootFreqs(PhylogeneticsApplicationTools::getRootFrequencySet(alphabet.get(), geneticCode.get(), sites.get(), params, sharedParams, rateFreqs));
+    
+    
+    string descGlobal = ApplicationTools::getStringParameter("nonhomogeneous_one_per_branch.shared_parameters", params, "", "", true, 1);
+
+    NestedStringTokenizer nst(descGlobal, "[", "]", ",");
+    const deque<string>& descGlobalParameters = nst.getTokens();
+
+    map<string, vector<Vint> > globalParameters;
+    for (const auto& desc:descGlobalParameters)
+    {
+      size_t post = desc.rfind("_");
+      if (post == std::string::npos || post == desc.size() - 1 || desc[post + 1] != '[')
+        globalParameters[desc]={};
+      else
+      {
+        string key = desc.substr(0,post);
+        Vint sint = NumCalcApplicationTools::seqFromString(desc.substr(post + 2, desc.size() - post - 3));
+        if (globalParameters.find(key) == globalParameters.end())
+          globalParameters[key] = vector<Vint>(1, sint);
+        else
+          globalParameters[key].push_back(sint);
+      }
+    }
+
+    for (const auto& globpar:globalParameters)
+    {
+      ApplicationTools::displayResult("Global parameter", globpar.first);
+      if (globpar.second.size()==0)
+      {
+        string all="All nodes";
+        ApplicationTools::displayResult(" shared between nodes", all);
+      }
+      else
+        for (const auto& vint:globpar.second)
+          ApplicationTools::displayResult(" shared between nodes", VectorTools::paste(vint,","));
+    }
+ 
     modelSet.reset(SubstitutionModelSetTools::createNonHomogeneousModelSet(model.get(), rootFreqs.get(), tree.get(), sharedParams, globalParameters)); 
     model.reset(modelSet->getSubstitutionModel(0)->clone());
     tl.reset(new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet.get(), rDist.get(), false));
@@ -300,7 +337,7 @@ void CoETools::readData(
     }
     Newick newick;
     newick.enableExtendedBootstrapProperty("name");
-    newick.write(treeCopy, tags, true);
+    newick.writeTree(treeCopy, tags, true);
   }
 
   bool removeConst = ApplicationTools::getBooleanParameter("input.remove_const", params, true, "", false, 1);
