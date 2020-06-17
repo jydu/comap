@@ -7,7 +7,7 @@
 alphabet = Protein
 
 # The sequence file to use (sequences must be aligned!)
-input.sequence.file   = ../Sequences/2MAT_BLAST100.mase
+input.sequence.file   = ../../../../Data/Proteins/MAP/2MAT_BLAST100.mase
 input.sequence.format = Mase
 
 #Sites to use:
@@ -25,7 +25,7 @@ input.sequence.file2 = none
 input.remove_const = yes
 
 # The tree file to use. Branch lengths are optional.
-input.tree.file = ../Phylogeny/MAP.dnd
+input.tree.file = ../../../../Data/Proteins/MAP/MAP.dnd
 input.tree.format = Newick
 
 # ----------------------------------------------------------------------------------------

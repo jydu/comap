@@ -7,7 +7,7 @@
 alphabet = Protein
 
 # The sequence file to use (sequences must be aligned!)
-input.sequence.file   = ../Sequences/SRK.mase
+input.sequence.file   = ../../../../Data/Proteins/SRK/SRK.mase
 input.sequence.format = Mase(site_selection=SelectedSites)
 
 #Sites to use:
@@ -25,7 +25,7 @@ input.sequence.file2 = none
 # The default is to use options of file1 for file2.
 
 # The tree file to use. Branch lengths are optional.
-input.tree.file = ../Phylogeny/SRK.dnd
+input.tree.file = ../../../../Data/Proteins/SRK/SRK.dnd
 input.tree.format = Newick
 
 # ----------------------------------------------------------------------------------------

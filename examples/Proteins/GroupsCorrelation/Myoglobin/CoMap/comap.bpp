@@ -7,7 +7,7 @@
 alphabet = Protein
 
 # The sequence file to use (sequences must be aligned!)
-input.sequence.file   = ../Sequences/Myoglobin.aln.sel.mase
+input.sequence.file   = ../../../../Data/Proteins/Myoglobin/Myoglobin.aln.sel.mase
 input.sequence.format = Mase
 
 #Sites to use:
@@ -25,7 +25,7 @@ input.sequence.file2 = none
 input.remove_const = yes
 
 # The tree file to use. Branch lengths are optional.
-input.tree.file = ../Phylogeny/Myo.dnd
+input.tree.file = ../../../../Data/Proteins/Myoglobin/Myo.dnd
 input.tree.format = Newick
 
 # ----------------------------------------------------------------------------------------
