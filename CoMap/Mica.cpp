@@ -130,35 +130,163 @@ vector<double> computeNorms(const ProbabilisticSubstitutionMapping& mapping)
 
 /******************************************************************************/
 
+class CoevolutionStatistic
+{
+  public:
+    CoevolutionStatistic() {}
+    virtual ~CoevolutionStatistic() {}
+
+    virtual shared_ptr<CoevolutionStatistic> clone(shared_ptr<const SiteContainer> newSites) const = 0;
+
+  public:
+    virtual size_t getNumberOfStatistics() const = 0;
+    virtual vector<string> getStatisticsNames() const = 0;
+    virtual string getMainStatisticsName() const = 0; //Several statistics can be computed, say which one is the main one (for computing pvalues, etc.).
+    virtual double getValue(size_t site1, size_t site2, const string& statName) const = 0;
+    virtual double getValue(size_t site1, size_t site2) const = 0; //call main statistic by default
+    virtual double getRate(size_t site) const = 0;
+    virtual const vector<double>& getRates() const = 0;
+    virtual double getMinRate(size_t site1, size_t site2) const = 0;
+};
+
+
+class AbstractCoevolutionStatistic:
+    public virtual CoevolutionStatistic
+{
+  protected:
+    shared_ptr<const SiteContainer> sites_;
+    size_t nbSites_;
+    mutable map<string, size_t> statNames_;
+    bool storeResults_;
+    mutable map<size_t, vector<double> > statistics_;
+    vector<double> rates_;
+
+  public:
+    AbstractCoevolutionStatistic(shared_ptr<const SiteContainer> sites, const vector<string>& statNames, bool storeResults = true):
+         sites_(sites), nbSites_(sites->getNumberOfSites()), statNames_(), storeResults_(storeResults), statistics_(), rates_(sites->getNumberOfSites())
+    {
+      for (size_t i = 0; i < statNames.size(); ++i) {
+	statNames_[statNames[i]] = i;
+      }
+    }
+
+    virtual ~AbstractCoevolutionStatistic() {}
+
+  public:
+    size_t getNumberOfStatistics() const { return statNames_.size(); }
+
+    vector<string> getStatisticsNames() const { return MapTools::getKeys(statNames_); }
+
+    double getValue(size_t site1, size_t site2, const string& statName) const { 
+      auto iter = statNames_.find(statName);
+      if (iter != statNames_.end()) {
+        size_t key = site1 + (site2 * nbSites_);
+        auto iter2 = statistics_.find(key);
+	if (iter2 != statistics_.end()) {
+	  return iter2->second[iter->second];
+	} else {
+	  if (!storeResults_) {
+            //We remove any previous calculation for other site pairs to save memory
+	    statistics_.clear();
+	  }
+          computeStatistics_(site1, site2);
+	  return statistics_[key][iter->second];
+	}
+      } else {
+        throw Exception("CoevolutionStatistic. Statistic not found: " + statName);
+      }
+    }
+    double getValue(size_t site1, size_t site2) const {
+      return getValue(site1, site2, getMainStatisticsName());
+    }
+    
+    double getRate(size_t site) const { return rates_[site]; }
+    const vector<double>& getRates() const { return rates_; }
+    double getMinRate(size_t site1, size_t site2) const { return min(rates_[site1], rates_[site2]); }
+
+  protected:
+    virtual void computeStatistics_(size_t site1, size_t site2) const = 0;
+};
+
+class MiCoevolutionStatistic:
+   public virtual AbstractCoevolutionStatistic
+{
+  public:
+    MiCoevolutionStatistic(shared_ptr<const SiteContainer> sites):
+        AbstractCoevolutionStatistic(sites, {"MI", "Hjoint", "Hmin"})
+    {
+      computeEntropies_();
+    }
+    
+    ~MiCoevolutionStatistic() {}
+    
+    shared_ptr<CoevolutionStatistic> clone(shared_ptr<const SiteContainer> newSites) const {
+      return(shared_ptr<MiCoevolutionStatistic>(new MiCoevolutionStatistic(newSites)));
+    }
+
+  public:
+    string getMainStatisticsName() const { return "MI"; }
+    
+    void computeStatistics_(size_t site1, size_t site2) const {
+      size_t key = site1 + (site2 * nbSites_);
+      statistics_[key].resize(3);
+      statistics_[key][statNames_["MI"]]     = SiteTools::mutualInformation(sites_->getSite(site1), sites_->getSite(site2), true);
+      statistics_[key][statNames_["Hjoint"]] = SiteTools::jointEntropy(sites_->getSite(site1), sites_->getSite(site2), true);
+      statistics_[key][statNames_["Hmin"]]   = std::min(rates_[site1], rates_[site2]);
+    }
+
+  private:
+    //We use the entropy of a site as a measure of its rate:
+    void computeEntropies_() {
+      for (size_t i = 0; i < nbSites_; ++i) {
+        rates_[i] = SiteTools::entropy(sites_->getSite(i), true);
+      }
+    }
+};
+
+//TODO: biochemical compensation statistic, with given biochemical property.
+
+
+vector<size_t> getRandomIndex(size_t sampleSize, size_t sizeMax) {
+  vector<size_t> sample(sampleSize);
+  for (size_t i = 0; i < sampleSize; ++i) {
+    sample[i] = RandomTools::giveIntRandomNumberBetweenZeroAndEntry(sizeMax);
+  }
+  return sample;
+}
+
+
+/******************************************************************************/
+
 /**
  * @brief The main function.
  */
 int main(int argc, char *argv[])
 {
-	cout << endl;
-	cout << endl;
-	cout << "***********************************************************" << endl;
-	cout << "* This is Mica         version 1.5.4       date: 07/06/17 *" << endl;
-	cout << "*         Mutual Information Coevolution Analysis         *" << endl;
-	cout << "***********************************************************" << endl;
-	cout << endl;
+  cout << endl;
+  cout << endl;
+  cout << "***********************************************************" << endl;
+  cout << "* This is Mica         version 1.5.4       date: 07/06/17 *" << endl;
+  cout << "*         Mutual Information Coevolution Analysis         *" << endl;
+  cout << "***********************************************************" << endl;
+  cout << endl;
   
-	try
+  try
   {
   
   BppApplication mica(argc, argv, "Mica");
   mica.startTimer();
 
-	// **************************
-	// * Retrieving parameters: *
-	// **************************
-	
-	if (argc == 1)
+  // **************************
+  // * Retrieving parameters: *
+  // **************************
+  
+  if (argc == 1)
   { 
     // No argument, show display some help and leave.
-		help();
-		exit(-1);
-	}
+    help();
+    exit(-1);
+  }
 
   shared_ptr<Alphabet> alphabet(SequenceApplicationTools::getAlphabet(mica.getParams(), "", false));
 
@@ -236,7 +364,7 @@ int main(int argc, char *argv[])
       if (model->getNumberOfStates() != alphabet->getSize())
       {
         //Markov-Modulated Markov Model...
-        size_t n =(size_t)(model->getNumberOfStates() / alphabet->getSize());
+        size_t n = (size_t)(model->getNumberOfStates() / alphabet->getSize());
         rateFreqs = vector<double>(n, 1./(double)n); // Equal rates assumed for now, may be changed later (actually, in the most general case,
                                                      // we should assume a rate distribution for the root also!!!  
       }
@@ -329,6 +457,7 @@ int main(int argc, char *argv[])
     tree.reset(new TreeTemplate<Node>(tl->getTree()));
 
     //Get the substitution mapping in order to compute the rates:
+    //TODO: we could use a weighted vector here, eventually...
 
     shared_ptr<TotalSubstitutionRegister> reg(new TotalSubstitutionRegister(model.get()));
     simple.reset(new UniformizationSubstitutionCount(model.get(), reg.get()));
@@ -336,33 +465,43 @@ int main(int argc, char *argv[])
     norms.reset(new vector<double>(computeNorms(*mapping)));
   }
   
+
+  //Get the statistic to use:
+  string coevStatDesc = ApplicationTools::getStringParameter("coevolution_statistic", mica.getParams(), "MI", "", true, 1);
+  unique_ptr<CoevolutionStatistic> coevStat;
+  if (coevStatDesc == "MI") {
+    coevStat.reset(new MiCoevolutionStatistic(sites));
+  } else {
+    throw Exception("Unknown statistic: " + coevStatDesc);
+  }
+
+
+ 
+ //Note: I guess this is needed for APC correction only, right? Can this be generalized for other measures as well? 
   //Compute all pairwise MI values:
   
   string path = ApplicationTools::getAFilePath("output.file", mica.getParams(), true, false);
   ApplicationTools::displayResult("Output file", path);
 
-  vector<double> averageMI;
-  vector<double> entropy;
-  ApplicationTools::displayTask("Computing average MIs", true);
+  vector<double> rates = coevStat->getRates();
+  vector<double> averageStat;
+  ApplicationTools::displayTask("Computing average statistics for every site", true);
   for (size_t i = 0; i < nbSites; ++i) {
-    const Site* site1 =  &sites->getSite(i);
     ApplicationTools::displayGauge(i, nbSites - 1);
     double sum = 0;
     for (size_t j = 0; j < nbSites; ++j) {
       if (j != i) {
-        const Site* site2 =  &sites->getSite(j);
-        sum += SiteTools::mutualInformation(*site1, *site2, true); 
+        sum += coevStat->getValue(i, j);
       }
     }
-    entropy.push_back(SiteTools::entropy(*site1, true));
-    averageMI.push_back(sum / static_cast<double>(nbSites - 1));
+    averageStat.push_back(sum / static_cast<double>(nbSites - 1));
   }
   ApplicationTools::displayTaskDone();
-  double fullAverageMI = VectorTools::mean<double, double>(averageMI);
+  double fullAverageStat = VectorTools::mean<double, double>(averageStat);
 
   //Some variables we'll need:
   const Site *site1, *site2;
-  double stat, apc, rcw, nmin = 0, hj, hm, perm;
+  double stat, minRate, apc, rcw, nmin = 0, perm;
   size_t maxNbPermutations = 0;
 
   //Get the null distribution of MI values:
@@ -391,7 +530,7 @@ int main(int argc, char *argv[])
       if (withModel)
         rateDomain = new Domain(0, VectorTools::max(*norms), nbRateClasses);
       else
-        rateDomain = new Domain(0, VectorTools::max(entropy), nbRateClasses);
+        rateDomain = new Domain(0, VectorTools::max(rates), nbRateClasses);
       simValues = new vector< vector<double> >(nbRateClasses);
     }
 
@@ -405,7 +544,12 @@ int main(int argc, char *argv[])
       if (outputToFile) {
         ApplicationTools::displayResult("Null output file", simpath);
         simout.reset(new ofstream(simpath.c_str(), ios::out));
-        *simout << "MI\tHjoint\tHmin";
+	vector<string> statNames = coevStat->getStatisticsNames();
+	for (size_t i = 0; i < statNames.size(); ++i) {
+          *simout << statNames[i];
+	  if (i < statNames.size() - 1)
+            *simout << "\t";
+	}
         if (withModel)
           *simout << "\tNmin";
         *simout << endl;
@@ -419,25 +563,24 @@ int main(int argc, char *argv[])
       for (size_t i = 0; i < nbRepCPU; i++)
       {
         //Generate data set:
-        vector<size_t> index1;
-        SiteContainer* sites1 = SiteContainerTools::sampleSites(*sites, nbRepRAM, &index1);
-  
-        vector<size_t> index2;
-        SiteContainer* sites2 = SiteContainerTools::sampleSites(*sites, nbRepRAM, &index2);
+        vector<size_t> index1 = getRandomIndex(nbRepRAM, nbSites);
+        vector<size_t> index2 = getRandomIndex(nbRepRAM, nbSites);
   
         for (size_t j = 0; j < nbRepRAM; j++)
         {
           ApplicationTools::displayGauge(i * nbRepRAM + j, nbRepCPU * nbRepRAM - 1, '>');
-          site1 = &sites1->getSite(j);
-          site2 = &sites2->getSite(j);
-          stat  = SiteTools::mutualInformation(*site1, *site2, true);
-          hj    = SiteTools::jointEntropy(*site1, *site2, true);
-          hm    = std::min(entropy[index1[j]], entropy[index2[j]]);
-  
-          if (outputToFile)
-            *simout << stat << "\t" << hj << "\t" << hm;
+          if (outputToFile) {
+	    for (size_t k = 0; k < coevStat->getNumberOfStatistics(); ++k) {
+              string statName = coevStat->getStatisticsNames()[k];
+              stat = coevStat->getValue(index1[j], index2[j], statName);
+              *simout << stat;
+	      if (k != coevStat->getNumberOfStatistics())
+	        *simout << "\t";
+	    }
+	  }
+	  stat = coevStat->getValue(index1[j], index2[j]);
           if (withModel) {
-            nmin  = min((*norms)[index1[j]], (*norms)[index2[j]]);
+            nmin = min((*norms)[index1[j]], (*norms)[index2[j]]);
             if (outputToFile)
               *simout << "\t" << nmin;
             if (computePValues) {
@@ -449,7 +592,8 @@ int main(int argc, char *argv[])
           } else {
             if (computePValues) {
               try {
-                size_t cat = rateDomain->getIndex(hm);
+		minRate = coevStat->getMinRate(index1[j], index2[j]);
+                size_t cat = rateDomain->getIndex(minRate);
                 (*simValues)[cat].push_back(stat);
               } catch (OutOfRangeException& oore) {}
             }
@@ -457,9 +601,6 @@ int main(int argc, char *argv[])
           if (outputToFile)
             *simout << endl;
         }
-  
-        delete sites1;
-        delete sites2;
       }
       ApplicationTools::warning = os;
   
@@ -494,8 +635,13 @@ int main(int argc, char *argv[])
       if (outputToFile) {
         ApplicationTools::displayResult("Null output file", simpath);
         simout.reset(new ofstream(simpath.c_str(), ios::out));
-    
-        *simout << "MI\tHjoint\tHmin\tNmin" << endl;
+	vector<string> statNames = coevStat->getStatisticsNames();
+	for (size_t i = 0; i < statNames.size(); ++i) {
+          *simout << statNames[i];
+	  if (i < statNames.size() - 1)
+            *simout << "\t";
+	}
+        *simout << "\tNmin" << endl;
       }
 
       size_t nbRepCPU = ApplicationTools::getParameter<size_t>("null.nb_rep_CPU", mica.getParams(), 10);
@@ -505,32 +651,36 @@ int main(int argc, char *argv[])
       ApplicationTools::warning.reset();
       for (size_t i = 0; i < nbRepCPU; i++)
       {
-        //Generate data set:
-        shared_ptr<SiteContainer> sites1(simulator->simulate(nbRepRAM));
-        tl->setData(*sites1);
+	cout << "ok0" << endl;
+        //Generate data set. We simulate two times nbRepRAM and study all pairs (j, nbRepRAM +j), with 0 < j < nbRepRAM.
+        shared_ptr<SiteContainer> simSites(simulator->simulate(2 * nbRepRAM));
+	cout << "ok1" << endl;
+        tl->setData(*simSites);
+	cout << "ok2" << endl;
         tl->initialize();
-        vector<double> norms1;
-        shared_ptr<ProbabilisticSubstitutionMapping> mapping1(SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, false));
-        norms1 = computeNorms(*mapping1);
-  
-        shared_ptr<SiteContainer> sites2(simulator->simulate(nbRepRAM));
-        tl->setData(*sites2);
-        tl->initialize();
-        vector<double> norms2;
-        ProbabilisticSubstitutionMapping* mapping2 = 
-           SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, false);
-        norms2 = computeNorms(*mapping2);
-        delete mapping2;
-  
+	cout << "ok3" << endl;
+	cout << tl->getValue() << endl;
+        unique_ptr<ProbabilisticSubstitutionMapping> simMapping(SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, false));
+	cout << "ok4" << endl;
+        vector<double> simNorms = computeNorms(*simMapping);
+        shared_ptr<CoevolutionStatistic> simStat = coevStat->clone(simSites);
         for (size_t j = 0; j < nbRepRAM; j++)
         {
           ApplicationTools::displayGauge(i * nbRepRAM + j, nbRepCPU * nbRepRAM - 1, '>');
-          site1 = &sites1->getSite(j);
-          site2 = &sites2->getSite(j);
-          stat  = SiteTools::mutualInformation(*site1, *site2, true);
-          hj    = SiteTools::jointEntropy(*site1, *site2, true);
-          hm    = std::min(entropy[i], entropy[j]);
-          nmin  = min(norms1[j], norms2[j]);
+
+          if (outputToFile) {
+	    for (size_t k = 0; k < simStat->getNumberOfStatistics(); ++k) {
+              string statName = simStat->getStatisticsNames()[k];
+              stat = simStat->getValue(j, nbRepRAM + j, statName);
+              *simout << stat;
+	      if (k != simStat->getNumberOfStatistics())
+	        *simout << "\t";
+	    }
+	  }
+	  stat = coevStat->getValue(j, nbRepRAM + j);
+          nmin = min(simNorms[j], simNorms[nbRepRAM + j]);
+          if (outputToFile)
+            *simout << "\t" << nmin << endl;
   
           if (computePValues) {
             try {
@@ -539,8 +689,6 @@ int main(int argc, char *argv[])
             } catch(OutOfRangeException& oore) {}
           }
 
-          if (outputToFile)
-            *simout << stat << "\t" << hj << "\t" << hm << "\t" << nmin << endl;
         }
   
       }
@@ -555,55 +703,40 @@ int main(int argc, char *argv[])
       string zScoreStat = ApplicationTools::getStringParameter("null.method_zscore.stat", mica.getParams(), "MIp", "", true, false);
       ApplicationTools::displayResult("Compute p-value for", zScoreStat);
       short correctStat = 0;
-      if (zScoreStat == "MIp")
+      if (zScoreStat == "MIp" || zScoreStat == "APC")
         correctStat = 1;
-      else if (zScoreStat == "MIc")
+      else if (zScoreStat == "MIc" || zScoreStat == "RWC")
         correctStat = 2;
-      else if (zScoreStat != "MI")
-        throw Exception("Unkown statistic, should be 'MI', 'MIp' or 'MIc'.");
+      else if (zScoreStat != "MI" || zScoreStat == "Raw")
+        throw Exception("Unkown statistic, should be 'MI'/'Raw', 'MIp'/'APC' or 'MIc'/'RWC'.");
       ApplicationTools::displayTask("Computing total distribution", true);
       shared_ptr<OutputStream> os = ApplicationTools::warning;
       ApplicationTools::warning.reset();
       size_t c = 0;
       for (size_t i = 0; i < nbSites - 1; i++)
       {
-        site1 = &sites->getSite(i);
         for (size_t j = i + 1; j < nbSites; j++)
         {
-          site2 = &sites->getSite(j);
           ApplicationTools::displayGauge(c++, nbSites * (nbSites - 1) / 2 - 1, '>');
-          stat  = SiteTools::mutualInformation(*site1, *site2, true);
-          hj    = SiteTools::jointEntropy(*site1, *site2, true);
-          hm    = std::min(entropy[i], entropy[j]);
+          stat = coevStat->getValue(i, j);
   
           if (withModel) {
-            nmin  = min((*norms)[i], (*norms)[j]);
-            try {
-              size_t cat = rateDomain->getIndex(nmin);
-              if (correctStat == 1) {
-                apc = averageMI[i] * averageMI[j] / fullAverageMI;
-                (*simValues)[cat].push_back(stat - apc);
-              } else if (correctStat == 2) {
-                rcw = averageMI[i] * averageMI[j] / 2.;
-                (*simValues)[cat].push_back(stat / rcw);
-              } else {
-                (*simValues)[cat].push_back(stat);
-              }
-            } catch (OutOfRangeException& oore) {}
-          } else {
-            try {
-              size_t cat = rateDomain->getIndex(hm);
-              if (correctStat == 1) {
-                apc = averageMI[i] * averageMI[j] / fullAverageMI;
-                (*simValues)[cat].push_back(stat - apc);
-              } else if (correctStat == 2) {
-                rcw = averageMI[i] * averageMI[j] / 2.;
-                (*simValues)[cat].push_back(stat / rcw);
-              } else {
-                (*simValues)[cat].push_back(stat);
-              }
-            } catch (OutOfRangeException& oore) {}
-          }
+            minRate  = min((*norms)[i], (*norms)[j]);
+	  } else {
+	    minRate = coevStat->getMinRate(i, j);
+	  }
+          try {
+            size_t cat = rateDomain->getIndex(minRate);
+            if (correctStat == 1) {
+              apc = averageStat[i] * averageStat[j] / fullAverageStat;
+              (*simValues)[cat].push_back(stat - apc);
+            } else if (correctStat == 2) {
+              rcw = averageStat[i] * averageStat[j] / 2.;
+              (*simValues)[cat].push_back(stat / rcw);
+            } else {
+              (*simValues)[cat].push_back(stat);
+            }
+          } catch (OutOfRangeException& oore) {}
         }
       }
       ApplicationTools::warning = os;
@@ -636,7 +769,12 @@ int main(int argc, char *argv[])
   ApplicationTools::displayTask("Computing all MI scores", true);
 
   ofstream out(path.c_str(), ios::out);
-  out << "Group\tMI\tAPC\tRCW\tHjoint\tHmin";
+  out << "Group";
+
+  for (auto statName: coevStat->getStatisticsNames()) {
+    out << "\t" << statName;
+  }
+  out << "\tAPC\tRCW";
   if (withModel)
     out << "\tNmin";
   if (maxNbPermutations > 0)
@@ -656,16 +794,20 @@ int main(int argc, char *argv[])
       site2 = &sites->getSite(j);
       miTest(*site1, *site2, maxNbPermutations, stat, perm, nbPerm);
 
-      out << "[" << site1->getPosition() << ";" << site2->getPosition() << "]\t" << stat << "\t";
-      apc = averageMI[i] * averageMI[j] / fullAverageMI;
-      rcw = averageMI[i] * averageMI[j] / 2.;
-      hj  = SiteTools::jointEntropy(*site1, *site2, true);
-      hm  = std::min(entropy[i], entropy[j]);
-      out << apc << "\t" << rcw << "\t" << hj << "\t" << hm;
+      out << "[" << site1->getPosition() << ";" << site2->getPosition() << "]";
+      for (auto statName: coevStat->getStatisticsNames()) {
+        out << "\t" << coevStat->getValue(i, j, statName);
+      }
+      apc = averageStat[i] * averageStat[j] / fullAverageStat;
+      rcw = averageStat[i] * averageStat[j] / 2.;
+      out << "\t" << apc << "\t" << rcw;
       
       if (withModel) {
         nmin = min((*norms)[i], (*norms)[j]);
         out << "\t" << nmin;
+	minRate = nmin;
+      } else {
+        minRate = coevStat->getMinRate(i, j);
       }
       //Permutations p-value:
       if (maxNbPermutations > 0)
@@ -675,7 +817,7 @@ int main(int argc, char *argv[])
       if (computePValues) {
         //Bootstrap:
         try {
-          size_t cat = withModel ? rateDomain->getIndex(nmin) : rateDomain->getIndex(hm);
+          size_t cat = rateDomain->getIndex(minRate);
           size_t nsim = (*simValues)[cat].size();
           size_t count;
           for (count = 0; count < nsim && (*simValues)[cat][count] < stat; ++count) {}
