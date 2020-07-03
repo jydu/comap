@@ -54,5 +54,5 @@ null.method=nonparametric-bootstrap
 null.compute_pvalues=yes
 null.nb_rate_classes=10
 null.output.file=$(DATA).MI.null.csv
-null.nb_rep_CPU = 100
+null.nb_rep_CPU = 1000
 null.nb_rep_RAM = 1000

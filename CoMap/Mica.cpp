@@ -47,9 +47,9 @@ using namespace std;
 #include "Domain.h"
 
 // From bpp-core:
-#include <Bpp/Utils/AttributesTools.h>
 #include <Bpp/Io/FileTools.h>
 #include <Bpp/Text/TextTools.h>
+#include <Bpp/Text/KeyvalTools.h>
 #include <Bpp/App/ApplicationTools.h>
 #include <Bpp/App/NumCalcApplicationTools.h>
 #include <Bpp/App/BppApplication.h>
@@ -244,7 +244,89 @@ class MiCoevolutionStatistic:
     }
 };
 
-//TODO: biochemical compensation statistic, with given biochemical property.
+
+
+class IndexCorrelationCoevolutionStatistic:
+   public virtual AbstractCoevolutionStatistic
+{
+  protected:
+    shared_ptr<const AlphabetIndex1> index_;
+    VVdouble recodedSites_; //Convert the alignment into a matrix of index values
+    char test_; //0: positive, 1: negative, 2 (or anything else): both
+
+  public:
+    IndexCorrelationCoevolutionStatistic(shared_ptr<const SiteContainer> sites, shared_ptr<const AlphabetIndex1> index, char test = 0):
+        AbstractCoevolutionStatistic(sites, {"Cor", "MinVar"}), index_(index), test_(test)
+    {
+      if (test != 0 && test != 1) {
+        statNames_["Sign"] = 2;
+      }
+      computeRecodedSites_();
+      computeVariances_();
+    }
+    
+    ~IndexCorrelationCoevolutionStatistic() {}
+    
+    shared_ptr<CoevolutionStatistic> clone(shared_ptr<const SiteContainer> newSites) const {
+      return(shared_ptr<IndexCorrelationCoevolutionStatistic>(new IndexCorrelationCoevolutionStatistic(newSites, index_)));
+    }
+
+  public:
+    string getMainStatisticsName() const { return "Cor"; }
+    
+    void computeStatistics_(size_t site1, size_t site2) const {
+      size_t key = site1 + (site2 * nbSites_);
+      double val = VectorTools::cor<double, double>(recodedSites_[site1], recodedSites_[site2]);
+      if (isnan(val)) val = 1; //This happens when variances equal 0. Then the proterties are conserved and the sites are perfectly correlated.
+      if (test_ == 0) {
+        statistics_[key].resize(2);
+        statistics_[key][statNames_["Cor"]] = val;
+      } else if (test_ == 1) {
+        statistics_[key].resize(2);
+        statistics_[key][statNames_["Cor"]] = -val;
+      } else {
+        statistics_[key].resize(3);
+        statistics_[key][statNames_["Cor"]] = abs(val);
+	int s = 0;
+	if (val < 0) s = -1;
+	else if (val > 0) s = 1;
+        statistics_[key][statNames_["Sign"]] = s;
+      }
+      statistics_[key][statNames_["MinVar"]] = min(rates_[site1],rates_[site2]);
+    }
+
+  private:
+    void computeRecodedSites_() {
+      size_t nbSeqs = sites_->getNumberOfSequences();
+      recodedSites_.resize(nbSites_);
+      ApplicationTools::displayTask("Converting Aln. according to ppty");
+      ApplicationTools::message->endLine();
+      int state;
+      vector<int> states;
+      double v;
+      for (size_t i = 0; i < nbSites_; ++i) {
+        ApplicationTools::displayGauge(i + 1, nbSites_);
+	recodedSites_[i].resize(nbSeqs);
+	for (size_t j = 0; j < nbSeqs; ++j) {
+	  state = ((*sites_)(j, i));
+	  states = sites_->getAlphabet()->getAlias(state);
+          v = 0;
+	  for (auto x : states) {
+	    v += index_->getIndex(x);
+	  }
+          recodedSites_[i][j] = v / static_cast<double>(states.size()); //Average over all compatible states
+	}
+      }
+      ApplicationTools::displayTaskDone();
+    }
+
+    //We use the variance of a site as a measure of its rate:
+    void computeVariances_() {
+      for (size_t i = 0; i < nbSites_; ++i) {
+        rates_[i] = VectorTools::var<double, double>(recodedSites_[i]);
+      }
+    }
+};
 
 
 vector<size_t> getRandomIndex(size_t sampleSize, size_t sizeMax) {
@@ -266,8 +348,12 @@ int main(int argc, char *argv[])
   cout << endl;
   cout << endl;
   cout << "***********************************************************" << endl;
-  cout << "* This is Mica         version 1.5.4       date: 07/06/17 *" << endl;
+  cout << "* This is Mica+        version 1.5.5b      date: 02/07/20 *" << endl;
+  cout << "*                                                         *" << endl;
   cout << "*         Mutual Information Coevolution Analysis         *" << endl;
+  cout << "*                 (+ other statistics)                    *" << endl;
+  cout << "*                                                         *" << endl;
+  cout << "* Author: Julien Y. Dutheil                               *" << endl;
   cout << "***********************************************************" << endl;
   cout << endl;
   
@@ -459,26 +545,42 @@ int main(int argc, char *argv[])
     //Get the substitution mapping in order to compute the rates:
     //TODO: we could use a weighted vector here, eventually...
 
-    shared_ptr<TotalSubstitutionRegister> reg(new TotalSubstitutionRegister(model.get()));
-    simple.reset(new UniformizationSubstitutionCount(model.get(), reg.get()));
+    TotalSubstitutionRegister* reg = new TotalSubstitutionRegister(model.get());
+    simple.reset(new UniformizationSubstitutionCount(model.get(), reg));
     shared_ptr<ProbabilisticSubstitutionMapping> mapping(SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, true));
     norms.reset(new vector<double>(computeNorms(*mapping)));
   }
   
 
   //Get the statistic to use:
-  string coevStatDesc = ApplicationTools::getStringParameter("coevolution_statistic", mica.getParams(), "MI", "", true, 1);
+  string coevStatDesc = ApplicationTools::getStringParameter("coevolution_statistic", mica.getParams(), "MI", "", true, 0);
+  string coevStatName;
+  map<string, string> coevStatArgs;
+  KeyvalTools::parseProcedure(coevStatDesc, coevStatName, coevStatArgs);
   unique_ptr<CoevolutionStatistic> coevStat;
-  if (coevStatDesc == "MI") {
+  ApplicationTools::displayResult("Coevolution statistic:", coevStatName);
+  if (coevStatName == "MI") {
     coevStat.reset(new MiCoevolutionStatistic(sites));
+  } else if (coevStatName == "Correlation") {
+    // This is Neher's approach
+    string indexDesc = ApplicationTools::getStringParameter("index", coevStatArgs, "GranthamVolume");
+    shared_ptr<const AlphabetIndex1> aaIndex(SequenceApplicationTools::getAlphabetIndex1(alphabet.get(), indexDesc, "Biochemical property:", true));
+    
+    string altDesc = ApplicationTools::getStringParameter("alternative", coevStatArgs, "both");
+    char test;
+    if (altDesc == "positive") test = 0;
+    else if (altDesc == "negative") test = 1;
+    else if (altDesc == "both") test = 2;
+    else throw Exception("ERROR: 'alternative' should be either 'positive', 'negative' or 'both'.");
+
+    coevStat.reset(new IndexCorrelationCoevolutionStatistic(sites, aaIndex, test));
   } else {
-    throw Exception("Unknown statistic: " + coevStatDesc);
+    throw Exception("Unknown statistic: " + coevStatName);
   }
 
 
  
- //Note: I guess this is needed for APC correction only, right? Can this be generalized for other measures as well? 
-  //Compute all pairwise MI values:
+  //Compute all pairwise statistics values:
   
   string path = ApplicationTools::getAFilePath("output.file", mica.getParams(), true, false);
   ApplicationTools::displayResult("Output file", path);
@@ -504,7 +606,7 @@ int main(int argc, char *argv[])
   double stat, minRate, apc, rcw, nmin = 0, perm;
   size_t maxNbPermutations = 0;
 
-  //Get the null distribution of MI values:
+  //Get the null distribution of statistics:
   string nullMethod = ApplicationTools::getStringParameter("null.method", mica.getParams(), "none", "", true, false);
   ApplicationTools::displayResult("Null distribution", nullMethod);
 
@@ -651,17 +753,11 @@ int main(int argc, char *argv[])
       ApplicationTools::warning.reset();
       for (size_t i = 0; i < nbRepCPU; i++)
       {
-	cout << "ok0" << endl;
         //Generate data set. We simulate two times nbRepRAM and study all pairs (j, nbRepRAM +j), with 0 < j < nbRepRAM.
         shared_ptr<SiteContainer> simSites(simulator->simulate(2 * nbRepRAM));
-	cout << "ok1" << endl;
         tl->setData(*simSites);
-	cout << "ok2" << endl;
         tl->initialize();
-	cout << "ok3" << endl;
-	cout << tl->getValue() << endl;
         unique_ptr<ProbabilisticSubstitutionMapping> simMapping(SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, false));
-	cout << "ok4" << endl;
         vector<double> simNorms = computeNorms(*simMapping);
         shared_ptr<CoevolutionStatistic> simStat = coevStat->clone(simSites);
         for (size_t j = 0; j < nbRepRAM; j++)
@@ -677,7 +773,7 @@ int main(int argc, char *argv[])
 	        *simout << "\t";
 	    }
 	  }
-	  stat = coevStat->getValue(j, nbRepRAM + j);
+	  stat = simStat->getValue(j, nbRepRAM + j);
           nmin = min(simNorms[j], simNorms[nbRepRAM + j]);
           if (outputToFile)
             *simout << "\t" << nmin << endl;
@@ -766,7 +862,7 @@ int main(int argc, char *argv[])
   }
 
   //here comes the real stuff:
-  ApplicationTools::displayTask("Computing all MI scores", true);
+  ApplicationTools::displayTask("Computing all statistics", true);
 
   ofstream out(path.c_str(), ios::out);
   out << "Group";

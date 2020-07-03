@@ -31,7 +31,7 @@ all.sim.files[["Polarity"]]  <-"../CoMap/Polarity/Myo_simulations.csv"
 all.sim.files[["Charge"]]    <-"../CoMap/Charge/Myo_simulations.csv"
 
 # 3) Output files:
-output.file1<-"Myo_predictions_pvalues.csv"
+output.file<-"Myo_predictions_pvalues.csv"
 
 #Sliding windows sizes:
 window.Nmin<-0.2
