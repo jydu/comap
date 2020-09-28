@@ -728,7 +728,7 @@ int main(int argc, char *argv[])
   ApplicationTools::displayMessage("Bye bye ;-)");  
 
   }
-  catch(Exception e)
+  catch(Exception& e)
   {
     cout << e.what() << endl;
     exit(-1);
