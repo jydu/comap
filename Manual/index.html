@@ -1,0 +1,824 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.8, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!-- This is the manual of CoMap, version 1.5.5.
+
+Copyright (C) 2006-2018 Julien Dutheil -->
+<title>CoMap Manual 1.5.5</title>
+
+<meta name="description" content="CoMap Manual 1.5.5">
+<meta name="keywords" content="CoMap Manual 1.5.5">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="#Top" rel="start" title="Top">
+<link href="#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="dir.html#Top" rel="up" title="(dir)">
+<link href="#Introduction" rel="next" title="Introduction">
+<link href="dir.html#Top" rel="prev" title="(dir)">
+<style type="text/css">
+<!--
+a.copiable-anchor {visibility: hidden; text-decoration: none; line-height: 0em}
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+span:hover a.copiable-anchor {visibility: visible}
+ul.no-bullet {list-style: none}
+-->
+</style>
+<link rel="stylesheet" type="text/css" href="http://www.w3.org/StyleSheets/Core/Steely">
+
+
+</head>
+
+<body lang="en">
+<h1 class="settitle" align="center">CoMap Manual 1.5.5</h1>
+
+
+
+
+
+
+<div class="top" id="Top">
+<div class="header">
+<p>
+Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a>, Previous: <a href="dir.html#Top" accesskey="p" rel="prev">(dir)</a>, Up: <a href="dir.html#Top" accesskey="u" rel="up">(dir)</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<span id="CoMap-Manual"></span><h1 class="top">CoMap Manual</h1>
+
+<p>This is the manual of CoMap, version 1.5.5.
+</p>
+<p>Copyright &copy; 2006-2018 Julien Dutheil
+</p>
+
+
+
+<div class="Contents_element" id="SEC_Contents">
+<h2 class="contents-heading">Table of Contents</h2>
+
+<div class="contents">
+
+<ul class="no-bullet">
+  <li><a id="toc-Introduction-1" href="#Introduction">1 Introduction</a></li>
+  <li><a id="toc-Data-loading" href="#Data">2 Data loading</a></li>
+  <li><a id="toc-Model-specification" href="#Model">3 Model specification</a></li>
+  <li><a id="toc-Numerical-parameters-estimation" href="#Estimation">4 Numerical parameters estimation</a></li>
+  <li><a id="toc-Substitution-mapping" href="#Mapping">5 Substitution mapping</a>
+  <ul class="no-bullet">
+    <li><a id="toc-Optional-commands" href="#Optional-commands">5.1 Optional commands</a></li>
+    <li><a id="toc-Site-specific-statistics" href="#Site-specific-statistics">5.2 Site specific statistics</a></li>
+    <li><a id="toc-Ancestral-sequences-reconstruction" href="#Ancestral-sequences-reconstruction">5.3 Ancestral sequences reconstruction</a></li>
+    <li><a id="toc-Output-node-ids" href="#Output-node-ids">5.4 Output node ids</a></li>
+  </ul></li>
+  <li><a id="toc-Pairwise-analysis" href="#Pairwise">6 Pairwise analysis</a>
+  <ul class="no-bullet">
+    <li><a id="toc-Performing-inter_002dgene-comparisons" href="#Performing-inter_002dgene-comparisons">6.1 Performing inter-gene comparisons</a></li>
+    <li><a id="toc-Optional-commands-1" href="#Optional-commands-1">6.2 Optional commands</a></li>
+  </ul></li>
+  <li><a id="toc-Clustering-analysis" href="#Clustering">7 Clustering analysis</a></li>
+  <li><a id="toc-Candidate-groups-analysis" href="#Candidates">8 Candidate groups analysis</a></li>
+  <li><a id="toc-Output-format-and-P_002dvalue-computation" href="#Pvalue">9 Output format and P-value computation</a>
+  <ul class="no-bullet">
+    <li><a id="toc-Output-format" href="#Output-format">9.1 Output format</a></li>
+    <li><a id="toc-Available-R-scripts" href="#Available-R-scripts">9.2 Available R scripts</a></li>
+  </ul></li>
+  <li><a id="toc-Mica_003a-Mutual-Information-Coevolution-Analysis" href="#Mica">10 Mica: Mutual Information Coevolution Analysis</a>
+  <ul class="no-bullet">
+    <li><a id="toc-Input-data_002e" href="#Input-data_002e">10.1 Input data.</a></li>
+    <li><a id="toc-Output-results_002e" href="#Output-results_002e">10.2 Output results.</a></li>
+    <li><a id="toc-Assessing-significance-of-the-coevolution-statistics_002e" href="#Assessing-significance-of-the-coevolution-statistics_002e">10.3 Assessing significance of the coevolution statistics.</a>
+    <ul class="no-bullet">
+      <li><a id="toc-Rate-conditioning" href="#Rate-conditioning">10.3.1 Rate conditioning</a></li>
+    </ul></li>
+  </ul></li>
+</ul>
+</div>
+</div>
+<hr>
+<div class="chapter" id="Introduction">
+<div class="header">
+<p>
+Next: <a href="#Data" accesskey="n" rel="next">Data loading</a>, Previous: <a href="#Top" accesskey="p" rel="prev">CoMap Manual</a>, Up: <a href="#Top" accesskey="u" rel="up">CoMap Manual</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<span id="Introduction-1"></span><h2 class="chapter">1 Introduction</h2>
+
+<p>CoMap performs two kinds of tasks:
+</p><dl compact="compact">
+<dt><span><em>(Weighted) Probabilistic substitution mapping</em></span></dt>
+<dd><p>Compute all (weighted) number of substitutions occurring on each branch of a tree,
+for each site of an alignment.
+</p>
+</dd>
+<dt><span><em>Co-evolution analysis</em></span></dt>
+<dd><p>Using the substitution mapping, look for significantly groups of sites
+departing the null hypothesis of independence.
+Two kind of analyzes are provided: a pairwise analysis, presented in
+Dutheil et al. (2005), and a clustering analysis in Dutheil and Galtier (2007).
+In both cases, a parametric bootstrap approach is used to evaluate the
+significance of groups. Simulation results are written to separate
+files, a statistics software like R is required to look for the
+significance.
+For the clustering analysis, we provide R script to perform theses
+computations.
+No preliminary knowledge of the R language is required, although it is recommended.
+</p>
+</dd>
+</dl>
+
+<p>CoMap is a command line program, written in C++ using the Bio++
+libraries. It uses the Bio++ syntax, so that arguments may be passed
+as parameter=value options, either directly to the command line or
+using an option file. For more information about this very general syntax, please read the Bio++ Program Suite manual, available online at <a href="http://home.gna.org/bppsuite">http://home.gna.org/bppsuite</a>. You can also download a PDF version here <a href="http://home.gna.org/bppsuite">http://home.gna.org/bppsuite</a>.
+Since it uses the Bio++ libraries, CoMap shares several options with the BppML program, to read sequences and specify models for instance.
+We will only report the difference between CoMap and BppML in this manual. 
+</p>
+
+<hr>
+</div>
+<div class="chapter" id="Data">
+<div class="header">
+<p>
+Next: <a href="#Model" accesskey="n" rel="next">Model specification</a>, Previous: <a href="#Introduction" accesskey="p" rel="prev">Introduction</a>, Up: <a href="#Top" accesskey="u" rel="up">CoMap Manual</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<span id="Data-loading"></span><h2 class="chapter">2 Data loading</h2>
+
+<p>CoMap inputs two kinds of data: a sequence alignment file and a phylogenetic tree. The corresponding options are fully described in the Bio++ Program Suite manual.
+</p>
+<p>CoMap adds an option to remove conserved sites from the analysis. The removal will occur after parameter optimization, if relevent.
+</p>
+
+<hr>
+</div>
+<div class="chapter" id="Model">
+<div class="header">
+<p>
+Next: <a href="#Estimation" accesskey="n" rel="next">Numerical parameters estimation</a>, Previous: <a href="#Data" accesskey="p" rel="prev">Data loading</a>, Up: <a href="#Top" accesskey="u" rel="up">CoMap Manual</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<span id="Model-specification"></span><h2 class="chapter">3 Model specification</h2>
+
+<p>CoMap support all substitution models available in Bio++, including non-homogeneous models. Options for specifying a model are described in full in the Bio++ Program Suite manual.
+</p>
+
+<hr>
+</div>
+<div class="chapter" id="Estimation">
+<div class="header">
+<p>
+Next: <a href="#Mapping" accesskey="n" rel="next">Substitution mapping</a>, Previous: <a href="#Model" accesskey="p" rel="prev">Model specification</a>, Up: <a href="#Top" accesskey="u" rel="up">CoMap Manual</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<span id="Numerical-parameters-estimation"></span><h2 class="chapter">4 Numerical parameters estimation</h2>
+
+<p>CoMap can (re-)estimate numerical parameters for you before any
+analysis.
+These parameters include
+</p><ul>
+<li> Branch lengths
+
+</li><li> Entries of the substitution matrices, included base frequencies.
+values)
+
+</li><li> Parameters of the rate distribution (shape parameter of the gamma law, proportion of invariant sites).
+
+</li></ul>
+<p>The corresponding options are described in the Bio++ Program Suite manual.
+Note however that CoMap do not perform topology estimation.
+The tree topology will is considered to be know prior to the analysis.
+The tree can however contain multifurcations (WARNING: not fully tested, please report any bug you may found!). 
+</p>
+
+
+<hr>
+</div>
+<div class="chapter" id="Mapping">
+<div class="header">
+<p>
+Next: <a href="#Pairwise" accesskey="n" rel="next">Pairwise analysis</a>, Previous: <a href="#Estimation" accesskey="p" rel="prev">Numerical parameters estimation</a>, Up: <a href="#Top" accesskey="u" rel="up">CoMap Manual</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<span id="Substitution-mapping"></span><h2 class="chapter">5 Substitution mapping</h2>
+
+<p>Options described in this part are specific to CoMap.
+Options in this chapter are for the computation of substitution vectors.
+</p>
+<dl compact="compact">
+<dt><span><code>input.vectors.file = {{path}|none}</code></span></dt>
+<dd><p>Restart an analysis by specifying the already computed vectors.
+Otherwise, compute vectors using the following options.
+</p>
+</dd>
+<dt><span><code>output.vectors.file = {{path}|none}</code></span></dt>
+<dd><p>Where to write the substitution mapping.
+</p>
+</dd>
+<dt><span><code>nijt = {Naive|Laplace|Uniformization|Decomposition}</code></span></dt>
+<dd><p>The kind of mapping to perform.
+<samp>Laplace(trunc={int&gt;1})</samp> option perform exact mapping, as in Dutheil et al. (2005). The <samp>trunc</samp> option set where to trunc the series (default to 10). Note that this substitution count is rather slow, the uniformization or decomposition methods are faster and more accurate. This option is only there for legacy purpose.
+<samp>Naive(weight=...)</samp> performs a naive mapping, as in Tuffery and Darlu (2000).
+<samp>Uniformization(weight=...)</samp> [default] performs exact mapping, with the uniformization method (See Tataru and Hobolth, 2011).
+<samp>Decomposition(weight=...)</samp> performs exact mapping, with the decomposition method (See Tataru and Hobolth, 2011).
+Currently available only for proteins.
+</p>
+</dd>
+</dl>
+
+<p>The Naive, Uniformization and Decomposition methods all allow to perform weighted substitution mapping, by taking a <samp>weight</samp> argument. Only two options are available for now:
+</p>
+<dl compact="compact">
+<dt><span><code>None</code></span></dt>
+<dd><p>The default, no weighting is used, all substitution weight the same.
+</p>
+</dd>
+<dt><span><code>AAdist</code></span></dt>
+<dd><p>Amino-acid distance. This option takes further arguments:
+</p>
+<dl compact="compact">
+<dt><span><code>type = {grantham|miyata|grantham.volume|grantham.polarity|charge|klein.charge|user1|user2}</code></span></dt>
+<dd><p>Specify the type of weight to use.
+The <samp>user1</samp> option is for computing a simple distance from a AAIndex1 file, <samp>user2</samp> uses a AAIndex2 distance file.
+</p>
+</dd>
+<dt><span><code>file = {path}</code></span></dt>
+<dd><p>File path toward a AAIndex1 and AAIndex2 file, ignored otherwise.
+</p>
+</dd>
+<dt><span><code>sym = {boolean}</code></span></dt>
+<dd><p>Tell if symmetric matrices must be used.
+This option should be set to &quot;no&quot; for testing compensation.
+</p>
+</dd>
+</dl>
+
+</dd>
+</dl>
+
+<ul class="section-toc">
+<li><a href="#Optional-commands" accesskey="1">Optional commands</a></li>
+<li><a href="#Site-specific-statistics" accesskey="2">Site specific statistics</a></li>
+<li><a href="#Ancestral-sequences-reconstruction" accesskey="3">Ancestral sequences reconstruction</a></li>
+<li><a href="#Output-node-ids" accesskey="4">Output node ids</a></li>
+</ul>
+<div class="section" id="Optional-commands">
+<h3 class="section">5.1 Optional commands</h3>
+
+<dl compact="compact">
+<dt><span><code>nijt.average = {boolean}</code></span></dt>
+<dd><p>Tell if mapping should be averaged over all ancestral states
+(probabilistic mapping).
+Otherwise use ancestral states reconstruction (naive mapping).
+In most case, you should leave the default value (yes).
+NB: only marginal ancestral state reconstruction is implemented. 
+</p>
+</dd>
+<dt><span><code>nijt.joint = {bool}</code></span></dt>
+<dd><p>Tell if joint probabilities are to be use, otherwise use marginal
+probabilities.
+This option is for method comparisons, a &rsquo;yes&rsquo; value is suitable in
+most cases.
+</p>
+</dd>
+</dl>
+
+</div>
+<div class="section" id="Site-specific-statistics">
+<h3 class="section">5.2 Site specific statistics</h3>
+
+<p>Some of the calculations made by CoMap on each site can be output to a file.
+This file can be used for a posteriori analysis or check of results.
+</p>
+<dl compact="compact">
+<dt><span><code>output.infos = {path}</code></span></dt>
+<dd><p>Path of the output file.
+</p>
+</dd>
+</dl>
+
+<p>The output file is tab-separated spreadsheet, with one line per site.
+Site names are identical to the ones output in the coevolution analysis.
+Columns are: IsComplete (yes if the site has no missing data), IsConstant (yes if the site is monomorphic), RC (the rate class, defined as the category with maximal posterior probability), PR (the posterior estimate of the site-specific rate, averaged over all rate classes), N (the norm of the (weighted) substitution vector, logLn (the log-likelihood for the site).
+</p>
+</div>
+<div class="section" id="Ancestral-sequences-reconstruction">
+<h3 class="section">5.3 Ancestral sequences reconstruction</h3>
+
+<p>CoMap can also perform ancestral sequence reconstruction.
+Ancestral sequences are not used in the analysis, but can be useful for interpreting results.
+Marginal reconstruction is performed, for more advanced techniques and options, consider the bppAncestor
+program from the Bio++ Program Suite. Note that ancestral states are output for analyzed positions only.
+</p>
+<dl compact="compact">
+<dt><span><code>asr.method = {none|marginal}</code></span></dt>
+<dd><p>Method to use, only marginal reconstruction is available for now.
+</p>
+</dd>
+<dt><span><code>output.sequence.file = {path}</code></span></dt>
+<dd><p>Where to write reconstructed sequences, together with extant sequences.
+</p>
+</dd>
+<dt><span><code>output.sequence.format = {string}</code></span></dt>
+<dd><p>All Bio++ format are supported.
+</p>
+</dd>
+</dl>
+
+</div>
+<div class="section" id="Output-node-ids">
+<h3 class="section">5.4 Output node ids</h3>
+
+<p>Nodes and branches are automatically labeled by CoMap, and the resulting ids are used to report substitution counts and ancestral sequences.
+These ids can be output in the form of a tree file, with nodes at leaves as leaf names and inner nodes as &quot;bootstrap&quot; values.
+</p>
+<dl compact="compact">
+<dt><span><code>output.tags.file = {path}</code></span></dt>
+<dd><p>Where to write the annotated tree, in newick format.
+</p>
+</dd>
+<dt><span><code>output.tags.translation = {string}</code></span></dt>
+<dd><p>Write a text file displaying the leaf ids and the corresponding orginal sequence names.
+</p>
+</dd>
+</dl>
+
+<p>These files are required for visualization of candidate groups (see the example/Visualization folder in source distribution).
+</p>
+
+<hr>
+</div>
+</div>
+<div class="chapter" id="Pairwise">
+<div class="header">
+<p>
+Next: <a href="#Clustering" accesskey="n" rel="next">Clustering analysis</a>, Previous: <a href="#Mapping" accesskey="p" rel="prev">Substitution mapping</a>, Up: <a href="#Top" accesskey="u" rel="up">CoMap Manual</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<span id="Pairwise-analysis"></span><h2 class="chapter">6 Pairwise analysis</h2>
+
+<dl compact="compact">
+<dt><span><code>analysis = pairwise</code></span></dt>
+<dd><p>Use this option for performing a pairwise analysis.
+If another option or <samp>none</samp> is selected, no pairwise analysis is performed.
+</p>
+</dd>
+<dt><span><code>statistic = {Correlation|Compensation|Cosubstitutions}</code></span></dt>
+<dd><p>The coevolution statistic to use.
+The <samp>Correlation</samp> option is to be used in order to perform the MBE 2005 analysis.
+Uses option <samp>Compensation</samp> to perform a pairwise analysis with the compensation statistics introduced in the BMC Evol Biol 2007 paper.
+You can also use the <samp>Cosubstitution</samp> option to perform Tuffery &amp; Darlu&rsquo;s MBE 2000 analysis.
+</p>
+</dd>
+<dt><span><code>statistic.output.file = {path}</code></span></dt>
+<dd><p>Where to write the statistic value for each pair of sites.
+</p>
+</dd>
+<dt><span><code>statistic.null = {boolean}</code></span></dt>
+<dd><p>Tell is the null distribution of the statistic must be computed, using
+parametric bootstrap.
+The number of simulations performed is the product of two numbers,
+adjusting the amount of CPU and RAM to use.
+</p>
+</dd>
+<dt><span><code>statistic.null.nb_rep_CPU = {int&gt;0}</code></span></dt>
+<dd><p>Increase this parameter to take less memory (slow the program)
+</p>
+</dd>
+<dt><span><code>statistic.null.nb_rep_RAM = {int&gt;0}</code></span></dt>
+<dd><p>Increase this parameter to speed the program (need more memory)
+</p>
+</dd>
+<dt><span><code>statistic.null.output_file = {path}</code></span></dt>
+<dd><p>Where to write the null distribution
+</p>
+</dd>
+<dt><span><code>statistic.null.compute_pvalue = {bool} (statistic.null=yes)</code></span></dt>
+<dd><p>Shall we use the null distribution to compute p-values?
+From version 1.4.0, CoMap can now compute built-in p-values, without relying on an external R-script.
+</p>
+</dd>
+<dt><span><code>statistic.null.nb_rate_classes = {int} (statistic.null.compute_pvalue = yes)</code></span></dt>
+<dd><p>Specifies how many classes should be used when conditioning of pairs rate.
+A value of 0 or 1 implies no conditionning.
+</p>
+</dd>
+</dl>
+
+<ul class="section-toc">
+<li><a href="#Performing-inter_002dgene-comparisons" accesskey="1">Performing inter-gene comparisons</a></li>
+<li><a href="#Optional-commands-1" accesskey="2">Optional commands</a></li>
+</ul>
+<div class="section" id="Performing-inter_002dgene-comparisons">
+<h3 class="section">6.1 Performing inter-gene comparisons</h3>
+
+<p>It is possible to compare all sites from one data set with all sites
+from a second data set (inter-gene analysis).
+</p>
+<dl compact="compact">
+<dt><span><code>sequence.file2 = {{path}|none}</code></span></dt>
+<dd><p>The path toward the second file. 
+All previous options can be set up for second file, just append &rsquo;2&rsquo; at option names.
+The default is to use options of file1 for file2.
+</p>
+</dd>
+</dl>
+
+</div>
+<div class="section" id="Optional-commands-1">
+<h3 class="section">6.2 Optional commands</h3>
+
+<dl compact="compact">
+<dt><span><code>statistic.min = {float}</code></span></dt>
+<dd><p>Write only pairs with a statistic greater or equal to this value.
+</p>
+</dd>
+<dt><span><code>statistic.min_rate = {float&gt;0}</code></span></dt>
+<dd><p>Write only pairs with a posterior rate greater or equal to this value.
+</p>
+</dd>
+<dt><span><code>statistic.min_rate_class = {int&gt;0}</code></span></dt>
+<dd><p>Write only pairs with a minimum rate class greater or equal to this
+value (first class is 0).
+</p>
+</dd>
+<dt><span><code>statistic.max_rate_diff = {float}</code></span></dt>
+<dd><p>Write only pairs with rates that do not differ more than this value  (-1 -&gt;
+write all pairs).
+</p>
+</dd>
+<dt><span><code>statistic.max_rate_class_diff = {int}</code></span></dt>
+<dd><p>Write only pairs with rate classes that do not differ more than this
+value (-1 -&gt; write all pairs).
+</p>
+</dd>
+<dt><span><code>statistic.null.cumul = {boolean}</code></span></dt>
+<dd><p>[deprecated] Tell if an histogram of the distribution should be returned instead of
+printing all simulated pairs.
+</p>
+</dd>
+<dt><span><code>statistic.null.lower = {float}</code></span></dt>
+<dd><p>[deprecated] Lower bound of histogram.
+</p>
+</dd>
+<dt><span><code>statistic.null.upper = {float}</code></span></dt>
+<dd><p>[deprecated] Upper bound of histogram.
+</p>
+</dd>
+<dt><span><code>statistic.null.nb_int = {int&lt;0}</code></span></dt>
+<dd><p>[deprecated] Number of intervals in histogram.
+</p>
+</dd>
+</dl>
+
+
+<hr>
+</div>
+</div>
+<div class="chapter" id="Clustering">
+<div class="header">
+<p>
+Next: <a href="#Candidates" accesskey="n" rel="next">Candidate groups analysis</a>, Previous: <a href="#Pairwise" accesskey="p" rel="prev">Pairwise analysis</a>, Up: <a href="#Top" accesskey="u" rel="up">CoMap Manual</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<span id="Clustering-analysis"></span><h2 class="chapter">7 Clustering analysis</h2>
+
+<dl compact="compact">
+<dt><span><code>analysis = clustering</code></span></dt>
+<dd><p>Use this option for performing a clustering.
+If another option or <samp>none</samp> is selected, no pairwise analysis is performed.
+</p>
+</dd>
+<dt><span><code>clustering.distance = {cor|euclidian|comp|none}</code></span></dt>
+<dd><p>Distance to use: cor (correlation), euclidean, comp (compensation) or none (no clustering).
+</p>
+</dd>
+<dt><span><code>clustering.method = {complete}</code></span></dt>
+<dd><p>Clustering algorithm: complete linkage. Other linkage types are available, but the complete one gives the better results.
+</p>
+</dd>
+<dt><span><code>clustering.output.matrix.file = {{path}|none}</code></span></dt>
+<dd><p>Where to write the distance matrix (in phylip format).
+</p>
+</dd>
+<dt><span><code>clustering.output.tree.file = {{path}|none}</code></span></dt>
+<dd><p>Where to write the clustering tree (newick format).
+</p>
+</dd>
+<dt><span><code>clustering.output.groups.file = {{path}|none}</code></span></dt>
+<dd><p>Where to write the clusters (CSV format).
+</p>
+</dd>
+<dt><span><code>clustering.null = {boolean}</code></span></dt>
+<dd><p>Tell if the null distribution of clusters must be computed.
+</p>
+</dd>
+<dt><span><code>clustering.null.number = {int&gt;0}</code></span></dt>
+<dd><p>Number of data sets to simulate.
+</p>
+</dd>
+<dt><span><code>clustering.null.output.file = {path}</code></span></dt>
+<dd><p>Where to write the simulated clusters (CSV format).
+</p>
+</dd>
+</dl>
+
+
+<hr>
+</div>
+<div class="chapter" id="Candidates">
+<div class="header">
+<p>
+Next: <a href="#Pvalue" accesskey="n" rel="next">Output format and P-value computation</a>, Previous: <a href="#Clustering" accesskey="p" rel="prev">Clustering analysis</a>, Up: <a href="#Top" accesskey="u" rel="up">CoMap Manual</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<span id="Candidate-groups-analysis"></span><h2 class="chapter">8 Candidate groups analysis</h2>
+
+<p>This method is used to test candidate groups of sites.
+It perform a more powerful test by taking into account the precise rate of each site,
+and no longer relies on the minimum rate of the group as in the pairwise or clustering method.
+As a consequence, it is much slower, and should therefore only be used when some candidate groups are to be tested.
+It can&rsquo;t be used in an exhaustive manner.
+</p>
+<p>Important note: This method does not require the R scripts to be used! It directly outputs p-values :)
+</p>
+<dl compact="compact">
+<dt><span><code>candidates.input.file = {path}</code></span></dt>
+<dd><p>The file to read. It must be in CSV-like format, with one group per line, and column names.
+</p></dd>
+<dt><span><code>candidates.input.column_name = {string}</code></span></dt>
+<dd><p>The name of the column that will contain groups. Groups should be described as [pos1;pos2;etc], refering to alignment positions, starting at 1.
+</p></dd>
+<dt><span><code>candidates.input.column_sep = {char}</code></span></dt>
+<dd><p>The character used to separate columns in the input file.
+</p></dd>
+<dt><span><code>candidates.omega = {float}</code></span></dt>
+<dd><p>The width of the window for telling whether two sites have similar rates or not. A value of 0.2 is usually good enough. The smaller the value, the more precise the computations, but the slower the execution time.
+</p></dd>
+<dt><span><code>candidates.null.min = {int&gt;0}</code></span></dt>
+<dd><p>Minimum number of simulations to perform for each group.
+</p></dd>
+<dt><span><code>candidates.null.nb_rep_RAM = {int&gt;0}</code></span></dt>
+<dd><p>Controles the number of sites to simulate at a time. The higher the value, the faster the execution, but at the expense of more memory usage.
+</p></dd>
+<dt><span><code>candidates.null.verbose = {int&gt;=0}</code></span></dt>
+<dd><p>Controles the amount of output to terminal.
+</p></dd>
+<dt><span><code>candidates.output.file = {path}</code></span></dt>
+<dd><p>The file to write, identical to the input one but with extra columns, in CSV format.
+</p></dd>
+<dt><span><code>candidates.output.column_sep = {char}</code></span></dt>
+<dd><p>The column separator for output file.
+</p></dd>
+</dl>
+
+
+<hr>
+</div>
+<div class="chapter" id="Pvalue">
+<div class="header">
+<p>
+Next: <a href="#Mica" accesskey="n" rel="next">Mica: Mutual Information Coevolution Analysis</a>, Previous: <a href="#Candidates" accesskey="p" rel="prev">Candidate groups analysis</a>, Up: <a href="#Top" accesskey="u" rel="up">CoMap Manual</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<span id="Output-format-and-P_002dvalue-computation"></span><h2 class="chapter">9 Output format and P-value computation</h2>
+
+<p>CoMap computes built-in p-values for the pairwise and candidate group analyses.
+For group detections, p-value computation is performed by two R scripts, distributed along with the
+program.
+The reason for this is that there are different ways to compute p-values, depending on the null-hypothesis to test.
+Getting the simulation result being the most expensive in terms of computer resources, I preferred to store them in files, and then play with R to get the p-values. It also allows to visualize the null-distribution and get more &ldquo;feeling&rdquo; about the data.
+</p>
+<ul class="section-toc">
+<li><a href="#Output-format" accesskey="1">Output format</a></li>
+<li><a href="#Available-R-scripts" accesskey="2">Available R scripts</a></li>
+</ul>
+<div class="section" id="Output-format">
+<h3 class="section">9.1 Output format</h3>
+
+<p>With the pairwise and clustering analysis, CoMap outputs two files, one for the real data, and one for simulations.
+The two files are in the same format, a simple text file with columns separated by tabs. Each row stands for one group. The available columns are:
+</p>
+<dl compact="compact">
+<dt><span><code>Stat</code></span></dt>
+<dd><p>Contains the value of the statistic for the group.
+</p>
+</dd>
+<dt><span><code>Nmin</code></span></dt>
+<dd><p>Contains the minimum norm of the group.
+The norm of the substitution vector is a general evolutionary rate measure (See Dutheil 2008, JME for more information). 
+</p>
+</dd>
+</dl>
+
+<p>The output file for real data contains an additional column, <code>Group</code>, which describes the corresponding sites in the alignment.
+It is a text string, beginning with &ldquo;[&rdquo; and ending with &ldquo;]&rdquo;, with site positions separated by semi-colons. Site numbering begins with 1, and is according to the original alignment, accounting for any gap or ignored positions in the analysis.
+</p>
+<p>For the clustering analysis, the column <code>Size</code> also contains the size of the group, that is the number of sites, and the column <code>Dmax</code> contains the height of the supporting node in the clustering tree.
+The simulation output for clustering also contains an additional column named <code>Rep</code> that contains the index of the simulated data set.
+</p>
+<p>Additional columns, not used to compute p-values:
+</p>
+<dl compact="compact">
+<dt><span><code>RCmin</code></span></dt>
+<dd><p>Contains the minimum rate class for the group. the number of classes depends on the option specified as input.
+</p>
+</dd>
+<dt><span><code>PRmin</code></span></dt>
+<dd><p>Similar to <code>RCmin</code>, but with the posterior rate instead of the rate class.
+</p>
+</dd>
+<dt><span><code>Const</code></span></dt>
+<dd><p>Tell if the group contains at least a totally conserved (=constant) site.
+</p>
+</dd>
+</dl>
+
+</div>
+<div class="section" id="Available-R-scripts">
+<h3 class="section">9.2 Available R scripts</h3>
+
+<p>The script <samp>CoMapFunctions.R</samp> contains several functions
+performing the computation.
+The script <samp>computePValues.R</samp> is the one to launch.
+It calls the previous one, so they must be in the same directory.
+</p>
+<p>Edit the first section of the <samp>computePValues.R</samp> so that is
+matches your files, and then run it with the command
+</p><table class="cartouche" border="1"><tr><td>
+<div class="example">
+<pre class="example">R --vanilla &lt; computePValues.R
+</pre></div>
+</td></tr></table>
+
+
+<hr>
+</div>
+</div>
+<div class="chapter" id="Mica">
+<div class="header">
+<p>
+Previous: <a href="#Pvalue" accesskey="p" rel="prev">Output format and P-value computation</a>, Up: <a href="#Top" accesskey="u" rel="up">CoMap Manual</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<span id="Mica_003a-Mutual-Information-Coevolution-Analysis"></span><h2 class="chapter">10 Mica: Mutual Information Coevolution Analysis</h2>
+
+<p>The Mica program performs several standard mutual information (MI) analyses.
+Basically, it computes the MI value for all pairs of sites in an alignment, and optionally compute the MI value on randomized data.
+The resulting values can be compared in R in order to get a simple p-value.
+Mica also computes various rate measures, so that the CoMap R scripts and algorithms can be used with Mica&rsquo;s output.
+Mica can generate replicates using either parametric bootstrap, like CoMap, or non-parametric bootstrap like in Caporaso et al (2008).
+It can also compute corrected MI (MIp from Gloor et al), and the associated p-values using a Z-score approach. 
+</p>
+<ul class="section-toc">
+<li><a href="#Input-data_002e" accesskey="1">Input data.</a></li>
+<li><a href="#Output-results_002e" accesskey="2">Output results.</a></li>
+<li><a href="#Assessing-significance-of-the-coevolution-statistics_002e" accesskey="3">Assessing significance of the coevolution statistics.</a></li>
+</ul>
+<div class="section" id="Input-data_002e">
+<h3 class="section">10.1 Input data.</h3>
+
+<p>Mica needs a sequence alignment, which can be read as in CoMap, with the same formats available. It works with all types of alphabets.
+Optionally, Mica can also take a phylogenetic tree and a substitution model. Here again, all models supported in CoMap are supported by Mica.
+If such model and tree are provided, Mica will perform substitution mapping and compute the norm of the substitution vector for each site, a better measure of evolutionary rate than the Shannon entropy.
+Such a model is also required in order to perform parametric bootstrap.
+The argument <code>use_model = yes</code> (no by default) enables the use of a substitution model (Jukes-Cantor by default).
+</p>
+</div>
+<div class="section" id="Output-results_002e">
+<h3 class="section">10.2 Output results.</h3>
+
+<p>Mica outputs a CSV file with all tested pairs, with various statistics, including:
+</p>
+<dl compact="compact">
+<dt><span><code>MI</code></span></dt>
+<dd><p>The mutal information for the site.
+</p>
+</dd>
+<dt><span><code>APC</code></span></dt>
+<dd><p>The average product correction of Dunn et al (2008). MIp can be computed using the formula <em class='math'>MI - APC</em>.
+</p>
+</dd>
+<dt><span><code>RCW</code></span></dt>
+<dd><p>The row-column weighting, of Gouveia-Oliveira (2007). The corrected MI is computed using the formula <em class='math'>MI/RCW</em>.
+</p>
+</dd>
+<dt><span><code>Hjoint</code></span></dt>
+<dd><p>The joint entroy of the two sites.
+</p>
+</dd>
+<dt><span><code>Hmin</code></span></dt>
+<dd><p>The minimum entropy of the two sites, <em class='math'>Hmin = \min(H_i, H_j)</em>.
+</p>
+</dd>
+</dl>
+
+<p>If a model and a phylogenetic tree were set up, the following extra information will also be available:
+</p>
+<dl compact="compact">
+<dt><span><code>Nmin</code></span></dt>
+<dd><p>The minimum norm of substitution vector for the pair.
+</p>
+</dd>
+</dl>
+
+</div>
+<div class="section" id="Assessing-significance-of-the-coevolution-statistics_002e">
+<h3 class="section">10.3 Assessing significance of the coevolution statistics.</h3>
+
+<p>Mica implements four possible ways to compute a significance value (p-value), which is specified by the command <code>null.method</code>.
+This command accepts 5 options:
+</p>
+<dl compact="compact">
+<dt><span><code>none</code></span></dt>
+<dd><p>Will disable the computation of the null distribution.
+</p>
+</dd>
+<dt><span><code>permutations</code></span></dt>
+<dd><p>Use simple permutations to compute p-values. This method does not account for shared ancestry and should only be used for didactic reasons.
+This option will add two colums, namely <code>Perm.p.value</code> and <code>Perm.nb</code>, with similar meaning as the bootstrap columns. 
+</p>
+</dd>
+<dt><span><code>nonparametric-bootstrap</code></span></dt>
+<dd><p>Will sample sites from the original data set.
+</p>
+</dd>
+<dt><span><code>parametric-bootstrap</code></span></dt>
+<dd><p>Performs simulations using the tree and model set as input.
+</p>
+</dd>
+<dt><span><code>z-score</code></span></dt>
+<dd><p>Use the set of all pairs in the original data set as a null distribution.
+</p>
+</dd>
+</dl>
+
+<p>When a bootstrap analysis is performed, the following options are available:
+</p>
+<dl compact="compact">
+<dt><span><code>null.nb_rep_CPU = {int &gt; 0}, null.nb_rep_RAM = {int &gt; 0}</code></span></dt>
+<dd><p>will perform CPU * RAM replicates in total. Increasing the RAM components will be faster but require more memory, while increasing CPU will demand more CPU time, but will use less memory.
+</p>
+</dd>
+<dt><span><code>null.output.file = {path}</code></span></dt>
+<dd><p>The file where all samples from the null distribution should be written. Setting <code>none</code> will disable output.
+The output file can be used for making the p-value computation by hand, using the R software for instance. 
+</p>
+</dd>
+<dt><span><code>null.compute_pvalues = {bool}</code></span></dt>
+<dd><p>Tells if p-values should be computed from the null distribution.
+If set to yes, then two columns will be added to the output file: <code>Bs.p.value</code>, which stores the actual computed p-value, and <code>Bs.nb</code>, storing the number of replicates on which the computation is based.
+This number of replicates is the specified one when no rate comditioning is performed (see below). Otherwise it depends on the number of classes used.
+P-values are always computed when Z-scores are used.
+</p></dd>
+</dl>
+
+<p>The bootstrap analyses will only be used for assessing the significance of MI.
+A Z-score approach is to be used for computing the p-value associated to the corrected MIs. One therefore specifies what is the statistic for wich p-value should be computed:
+</p>
+<dl compact="compact">
+<dt><span><code>null.method_zscore.stat = {MI|MIp|MIc}</code></span></dt>
+<dd><p>The statistic for which p-values should be computed.
+</p></dd>
+</dl>
+
+<ul class="section-toc">
+<li><a href="#Rate-conditioning" accesskey="1">Rate conditioning</a></li>
+</ul>
+<div class="subsection" id="Rate-conditioning">
+<h4 class="subsection">10.3.1 Rate conditioning</h4>
+
+<p>For all approaches but permutations, more specific null distributions can be obtained by conditioning over the evolutionary rate: 
+</p>
+<dl compact="compact">
+<dt><span><code>null.nb_rate_classes = {int &gt; 0}</code></span></dt>
+<dd><p>If greater than 1, enables rate conditioning when computing the p-value.
+The classes are computed by cutting the interval [0, max observation] into the specified number of categories.
+By default, the minimum entropy is used as a rate measure. If a model is specified, the the minimum norm is used instead.
+</p>
+</dd>
+</dl>
+
+<p>Additional option for the permutation analysis:
+</p><dl compact="compact">
+<dt><span><code>max_number_of_permutations = {int &gt;= 0 }</code></span></dt>
+<dd><p>Set the number of permutations that can be performed. The minimal p-value that will be obtained is obtained by <em class='math'>1/(n+1)</em>.
+For speeding up computations, the p-value of the pairs that are far from the tail of the distribution (and therefore most-likely non-significant) will be computed from less observations (the computation will stop when at least 5 points from the null distribution with a higher statistic than the observed one are found).
+</p></dd>
+</dl>
+
+
+
+
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+</body>
+</html>
