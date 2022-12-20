@@ -164,25 +164,15 @@ The Naive, Uniformization and Decomposition methods all allow to perform weighte
 @item None
 The default, no weighting is used, all substitution weight the same.
 
-@item AAdist
-Amino-acid distance. This option takes further arguments:
+@item Grantham, Miyata
+Amino-acid distance, as a 2-dimensional index. See the BppSuite manual for a list of supported options.
 
-@table @command
-
-@item type = @{grantham|miyata|grantham.volume|grantham.polarity|charge|klein.charge|user1|user2@}
-Specify the type of weight to use.
-The @option{user1} option is for computing a simple distance from a AAIndex1 file, @option{user2} uses a AAIndex2 distance file.
-
-@item file = @{path@}
-File path toward a AAIndex1 and AAIndex2 file, ignored otherwise.
-
-@item sym = @{boolean@}
-Tell if symmetric matrices must be used.
-This option should be set to "no" for testing compensation.
+@item Diff(index1=@{index type@})
+Use a 1-dimensional index and computes the difference. Options include GranthamVolume, GranthamPolarity, Charge or user defined. See the BppSuite manual for a list of supported options.
 
 @end table
 
-@end table
+All methods further accept a @{symmetrical=[boolean]@} argument, forcing the weights to be symmetric (so that wxy = wyx). This option should be set to "no" for testing compensation.
 
 @section Optional commands
 
