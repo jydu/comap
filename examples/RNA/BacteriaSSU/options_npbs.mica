@@ -37,7 +37,7 @@ with_model = no
 #                                     Mutual Information Analysis
 # ----------------------------------------------------------------------------------------
 
-output.file          = Bacteria_SSU.MI_NPBS.csv
+output.file          = Bacteria_SSU.MI_NPBS.sged
 null.method          = nonparametric-bootstrap
 null.compute_pvalues = yes
 null.nb_rate_classes = 10

@@ -37,7 +37,7 @@ with_model = no
 #                                     Mutual Information Analysis
 # ----------------------------------------------------------------------------------------
 
-output.file                = Bacteria_SSU.MI_zscore.csv
+output.file                = Bacteria_SSU.MI_zscore.sged
 null.method                = z-score
 null.method_z-score.stat   = MIp
 null.nb_rate_classes       = 10
