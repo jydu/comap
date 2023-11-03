@@ -44,12 +44,12 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/Numeric/Number.h>
 #include <Bpp/Numeric/VectorTools.h>
 
-// From SeqLib:
+// From bpp-seq:
 #include <Bpp/Seq/Container/VectorSiteContainer.h>
 
-// From PhylLib:
-#include <Bpp/Phyl/Likelihood/DRHomogeneousTreeLikelihood.h>
-#include <Bpp/Phyl/Mapping/SubstitutionMappingTools.h>
+// From bpp-phyl:
+#include <Bpp/Phyl/Legacy/Likelihood/DRHomogeneousTreeLikelihood.h>
+#include <Bpp/Phyl/Legacy/Mapping/SubstitutionMappingTools.h>
 
 #include <iostream>
 #include <fstream>
@@ -198,17 +198,17 @@ vector<Group> ClusterTools::getGroupsWithSize(const TreeTemplate<Node>& tree, si
 }
 
 void ClusterTools::computeGlobalDistanceDistribution(
-  DRTreeLikelihood& drtl,
-  const SequenceSimulator& simulator,
-	SubstitutionCount& nijt,
+  shared_ptr<DRTreeLikelihoodInterface> drtl,
+  const SequenceSimulatorInterface& simulator,
+  shared_ptr<SubstitutionCountInterface> nijt,
   const Distance& distance,
-  AgglomerativeDistanceMethod& clustering,
+  AgglomerativeDistanceMethodInterface& clustering,
   size_t sizeOfDataSet,
   size_t nrep,
   size_t maxGroupSize,
   ofstream* out)
 {
-  size_t nbTypes = nijt.getNumberOfSubstitutionTypes();
+  size_t nbTypes = nijt->getNumberOfSubstitutionTypes();
   vector<string> siteNames(sizeOfDataSet);
   for (size_t i = 0; i < sizeOfDataSet; i++)
   {
@@ -221,17 +221,17 @@ void ClusterTools::computeGlobalDistanceDistribution(
   for (size_t k = 0; k < nrep; k++)
   {
     ApplicationTools::displayGauge(k, nrep-1, '>');
-    unique_ptr<SiteContainer> sites(simulator.simulate(sizeOfDataSet));
-    drtl.setData(*sites);
-    drtl.initialize();
-    unique_ptr<ProbabilisticSubstitutionMapping> mapping(SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false));
+    auto sites = simulator.simulate(sizeOfDataSet);
+    drtl->setData(*sites);
+    drtl->initialize();
+    auto mapping = LegacySubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
     size_t nbBranches = mapping->getNumberOfBranches();
     
     //Mean vector:
     vector<double> meanVector(nbBranches);
     for (size_t j = 0; j < nbBranches; j++)
     {
-		  double sum = 0;
+      double sum = 0;
       for (size_t i = 0; i < sizeOfDataSet; i++)
         for (size_t t = 0; t < nbTypes; t++)
           sum += (*mapping)(j, i, t);
@@ -259,7 +259,7 @@ void ClusterTools::computeGlobalDistanceDistribution(
     
     clustering.setDistanceMatrix(*mat);
     clustering.computeTree();
-    TreeTemplate<Node> clusteringTree(*clustering.getTree());
+    TreeTemplate<Node> clusteringTree(clustering.tree());
 
     //Add information to tree:
     computeNormProperties(clusteringTree, *mapping);
@@ -293,18 +293,18 @@ void ClusterTools::computeGlobalDistanceDistribution(
   ApplicationTools::message->endLine();
 }
 
-void ClusterTools::computeNormProperties(TreeTemplate<Node>& tree, const ProbabilisticSubstitutionMapping & mapping)
+void ClusterTools::computeNormProperties(TreeTemplate<Node>& tree, const LegacyProbabilisticSubstitutionMapping& mapping)
 {
   double min;
   computeNormProperties_(tree.getRootNode(), mapping, min);
 }
     
-void ClusterTools::computeNormProperties_(Node* node, const ProbabilisticSubstitutionMapping& mapping, double & minNorm)
+void ClusterTools::computeNormProperties_(Node* node, const LegacyProbabilisticSubstitutionMapping& mapping, double & minNorm)
 {
   minNorm = -log(0.);
   if (node->isLeaf())
   {
-    minNorm = SubstitutionMappingTools::computeNormForSite(mapping, TextTools::to<size_t>(node->getName()));
+    minNorm = LegacySubstitutionMappingTools::computeNormForSite(mapping, TextTools::to<size_t>(node->getName()));
   }
   else
   {

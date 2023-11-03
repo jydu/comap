@@ -3,7 +3,11 @@
 # Created: 22/08/2009
 
 # Global parameters
+<<<<<<< HEAD
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
+=======
+CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
+>>>>>>> 6e35b8272a6dabcd2f5666deeeaadc0d81dc1d98
 PROJECT(comap CXX)
 
 # Compile options

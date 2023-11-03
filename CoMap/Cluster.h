@@ -56,30 +56,23 @@ knowledge of the CeCILL license and that you accept its terms.
 class SumClustering : public AbstractAgglomerativeDistanceMethod
 {
   protected:
-    ProbabilisticSubstitutionMapping mapping_;
-    const Distance* distance_;
+    LegacyProbabilisticSubstitutionMapping mapping_;
+    shared_ptr<const Distance> distance_;
   
   public:
-    SumClustering(const ProbabilisticSubstitutionMapping& mapping, const Distance* distance, const DistanceMatrix& matrix) :
+    SumClustering(const LegacyProbabilisticSubstitutionMapping& mapping, shared_ptr<const Distance> distance, const DistanceMatrix& matrix) :
       AbstractAgglomerativeDistanceMethod(matrix, true, true), mapping_(mapping), distance_(distance)
     {
       computeTree();
     }
-    SumClustering(const SumClustering& sc) :
-      AbstractAgglomerativeDistanceMethod(sc), mapping_(sc.mapping_), distance_(sc.distance_) 
-    {}
-    SumClustering& operator=(const SumClustering& sc)
-    {
-      AbstractAgglomerativeDistanceMethod::operator=(sc);
-      mapping_ = sc.mapping_;
-      distance_ = sc.distance_;
-      return *this;
-    }
+    SumClustering(const SumClustering& sc) = default;
+
+    SumClustering& operator=(const SumClustering& sc) = default;
+    
     virtual ~SumClustering() {}
 
   public:
-    TreeTemplate<Node>* getTree() const;
-    void setMapping(const ProbabilisticSubstitutionMapping & mapping)
+    void setMapping(const LegacyProbabilisticSubstitutionMapping& mapping)
     {
       mapping_ = mapping;
     }
@@ -93,7 +86,7 @@ class SumClustering : public AbstractAgglomerativeDistanceMethod
      */
     vector<size_t> getBestPair();
     vector<double> computeBranchLengthsForPair(const vector<size_t> & pair);
-    double computeDistancesFromPair(const vector<size_t> & pair, const vector<double> & branchLengths, size_t pos);
+    double computeDistancesFromPair(const vector<size_t>& pair, const vector<double>& branchLengths, size_t pos);
     void finalStep(int idRoot);  
     virtual Node* getLeafNode(int id, const string & name);
     virtual Node* getParentNode(int id, Node * son1, Node * son2);

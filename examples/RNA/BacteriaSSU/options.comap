@@ -62,11 +62,6 @@ input.vectors.file = none
 output.vectors.file = none
 
 # The method to use to compute vectors:
-# One of
-# - laplace: real mapping
-# - simple: naive mapping (1 substitution if x<>y, 0 if x==y)
-# - aadist: weighted mapping (proteins)
-# - prob_one_jump: compute the probability of observing at least one jump.
 nijt = Uniformization
 
 # ----------------------------------------------------------------------------------------
@@ -91,7 +86,7 @@ statistic = Correlation
 # ----------------------------------------------------------------------------------------
 
 # where to write the results:
-statistic.output.file = Bacteria_SSU.sta
+statistic.output.file = Bacteria_SSU.sged
 
 # Compute null distribution of statistics
 statistic.null = true

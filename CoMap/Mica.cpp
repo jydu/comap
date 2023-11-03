@@ -63,17 +63,18 @@ using namespace std;
 
 // From bpp-phyl:
 #include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
-#include <Bpp/Phyl/Likelihood/NonHomogeneousTreeLikelihood.h>
-#include <Bpp/Phyl/Likelihood/DRHomogeneousTreeLikelihood.h>
-#include <Bpp/Phyl/Likelihood/DRNonHomogeneousTreeLikelihood.h>
-#include <Bpp/Phyl/Likelihood/RASTools.h>
-#include <Bpp/Phyl/Model/SubstitutionModelSetTools.h>
+#include <Bpp/Phyl/Legacy/App/PhylogeneticsApplicationTools.h>
+#include <Bpp/Phyl/Legacy/Likelihood/NonHomogeneousTreeLikelihood.h>
+#include <Bpp/Phyl/Legacy/Likelihood/DRHomogeneousTreeLikelihood.h>
+#include <Bpp/Phyl/Legacy/Likelihood/DRNonHomogeneousTreeLikelihood.h>
+#include <Bpp/Phyl/Legacy/Likelihood/RASTools.h>
+#include <Bpp/Phyl/Legacy/Model/SubstitutionModelSetTools.h>
 #include <Bpp/Phyl/Io/Newick.h>
 #include <Bpp/Phyl/Simulation/MutationProcess.h>
-#include <Bpp/Phyl/Simulation/HomogeneousSequenceSimulator.h>
-#include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
-#include <Bpp/Phyl/Mapping/SubstitutionMappingTools.h>
+#include <Bpp/Phyl/Legacy/Simulation/NonHomogeneousSequenceSimulator.h>
 #include <Bpp/Phyl/Mapping/UniformizationSubstitutionCount.h>
+#include <Bpp/Phyl/Legacy/Mapping/ProbabilisticSubstitutionMapping.h>
+#include <Bpp/Phyl/Legacy/Mapping/SubstitutionMappingTools.h>
 
 using namespace bpp;
 
@@ -119,12 +120,12 @@ void miTest(const Site& site1, const Site& site2, size_t maxNbPermutations, doub
 /******************************************************************************/
 
 
-vector<double> computeNorms(const ProbabilisticSubstitutionMapping& mapping)
+vector<double> computeNorms(const LegacyProbabilisticSubstitutionMapping& mapping)
 {
   size_t nbVectors = mapping.getNumberOfSites();
   vector<double> vect(nbVectors);
   for (size_t i = 0; i < nbVectors; i++)
-    vect[i] = SubstitutionMappingTools::computeNormForSite(mapping, i);
+    vect[i] = LegacySubstitutionMappingTools::computeNormForSite(mapping, i);
   return vect;
 }
 
@@ -135,43 +136,43 @@ vector<double> computeNorms(const ProbabilisticSubstitutionMapping& mapping)
  */
 int main(int argc, char *argv[])
 {
-	cout << endl;
-	cout << endl;
-	cout << "***********************************************************" << endl;
-	cout << "* This is Mica         version 1.5.4       date: 07/06/17 *" << endl;
-	cout << "*         Mutual Information Coevolution Analysis         *" << endl;
-	cout << "***********************************************************" << endl;
-	cout << endl;
+  cout << endl;
+  cout << endl;
+  cout << "***********************************************************" << endl;
+  cout << "* This is Mica         version 1.6.0       date: 01/11/23 *" << endl;
+  cout << "*         Mutual Information Coevolution Analysis         *" << endl;
+  cout << "***********************************************************" << endl;
+  cout << endl;
   
-	try
+  try
   {
   
   BppApplication mica(argc, argv, "Mica");
   mica.startTimer();
 
-	// **************************
-	// * Retrieving parameters: *
-	// **************************
-	
-	if (argc == 1)
+  // **************************
+  // * Retrieving parameters: *
+  // **************************
+  
+  if (argc == 1)
   { 
     // No argument, show display some help and leave.
-		help();
-		exit(-1);
-	}
+    help();
+    exit(-1);
+  }
 
   shared_ptr<Alphabet> alphabet(SequenceApplicationTools::getAlphabet(mica.getParams(), "", false));
 
-  shared_ptr<VectorSiteContainer> allSites(SequenceApplicationTools::getSiteContainer(alphabet.get(), mica.getParams()));
+  auto allSites = SequenceApplicationTools::getSiteContainer(alphabet, mica.getParams());
   
-  shared_ptr<VectorSiteContainer> sites(SequenceApplicationTools::getSitesToAnalyse(*allSites, mica.getParams()));
+  shared_ptr<SiteContainerInterface> sites = SequenceApplicationTools::getSitesToAnalyse(*allSites, mica.getParams());
   allSites.reset();
 
   bool removeConst = ApplicationTools::getBooleanParameter("input.remove_const", mica.getParams(), true);
   if (removeConst) {
     size_t n = sites->getNumberOfSites();
     for (size_t i = n; i > 0; --i) {
-      if (SiteTools::isConstant(sites->getSite(i - 1), true))
+      if (SiteTools::isConstant(sites->site(i - 1), true))
         sites->deleteSite(i - 1);
     }
     ApplicationTools::displayResult("Number of conserved sites ignored", n - sites->getNumberOfSites());
@@ -185,20 +186,20 @@ int main(int argc, char *argv[])
   
 
   //Shall we use a model?
-  shared_ptr<TreeTemplate<Node>>   tree;
-  shared_ptr<DRTreeLikelihood>     tl;
-  shared_ptr<SubstitutionModel>    model;
-  shared_ptr<SubstitutionModelSet> modelSet;
-  shared_ptr<DiscreteDistribution> rDist;
-  shared_ptr<SubstitutionCount>    simple;
-  shared_ptr<vector<double>>       norms;
+  shared_ptr<TreeTemplate<Node>>         tree;
+  shared_ptr<DRTreeLikelihoodInterface>  tl;
+  shared_ptr<SubstitutionModelInterface> model;
+  shared_ptr<SubstitutionModelSet>       modelSet;
+  shared_ptr<DiscreteDistribution>       rDist;
+  shared_ptr<SubstitutionCountInterface> simple;
+  shared_ptr<vector<double>>             norms;
   bool withModel = ApplicationTools::getBooleanParameter("use_model", mica.getParams(), false, "", true, false);
   
   ApplicationTools::displayBooleanResult("Model of sequence evolution", withModel);
   if (withModel)
   {
     // Get the initial tree
-    shared_ptr<Tree> treeTmp(PhylogeneticsApplicationTools::getTree(mica.getParams()));
+    shared_ptr<Tree> treeTmp = PhylogeneticsApplicationTools::getTree(mica.getParams());
     tree.reset(new TreeTemplate<Node>(*treeTmp));
     treeTmp.reset();
     ApplicationTools::displayResult("Number of leaves", TextTools::toString(tree->getNumberOfLeaves()));
@@ -207,30 +208,32 @@ int main(int argc, char *argv[])
     ApplicationTools::displayResult("Heterogeneous model", nhOpt);
 
     if (nhOpt == "no")
-    {  
-      model.reset(PhylogeneticsApplicationTools::getSubstitutionModel(alphabet.get(), 0, sites.get(), mica.getParams()));
-      if (model->getNumberOfStates() > model->getAlphabet()->getSize())
+    {
+      map<string, string> sharedParams;
+      model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, nullptr, sites, mica.getParams(), sharedParams);
+      if (model->getNumberOfStates() > model->alphabet().getSize())
       {
         //Markov-modulated Markov model!
         rDist.reset(new ConstantDistribution(1.));
       }
       else
       {
-        rDist.reset(PhylogeneticsApplicationTools::getRateDistribution(mica.getParams()));
+        rDist = PhylogeneticsApplicationTools::getRateDistribution(mica.getParams());
       }
-      tl.reset(new DRHomogeneousTreeLikelihood(*tree, *sites, model.get(), rDist.get(), true, false));
+      tl.reset(new DRHomogeneousTreeLikelihood(*tree, *sites, model, rDist, true, false));
     }
     else if (nhOpt == "one_per_branch")
     {
-      model.reset(PhylogeneticsApplicationTools::getSubstitutionModel(alphabet.get(), 0, sites.get(), mica.getParams()));
-      if (model->getNumberOfStates() > model->getAlphabet()->getSize())
+      map<string, string> sharedParams;
+      model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, nullptr, sites, mica.getParams(), sharedParams);
+      if (model->getNumberOfStates() > model->alphabet().getSize())
       {
         //Markov-modulated Markov model!
         rDist.reset(new ConstantDistribution(1.));
       }
       else
       {
-        rDist.reset(PhylogeneticsApplicationTools::getRateDistribution(mica.getParams()));
+        rDist = PhylogeneticsApplicationTools::getRateDistribution(mica.getParams());
       }
       vector<double> rateFreqs;
       if (model->getNumberOfStates() != alphabet->getSize())
@@ -240,15 +243,14 @@ int main(int argc, char *argv[])
         rateFreqs = vector<double>(n, 1./(double)n); // Equal rates assumed for now, may be changed later (actually, in the most general case,
                                                      // we should assume a rate distribution for the root also!!!  
       }
-      map<string, string> sharedParams;
-      shared_ptr<FrequencySet> rootFreqs(PhylogeneticsApplicationTools::getRootFrequencySet(alphabet.get(), 0, sites.get(), mica.getParams(), sharedParams, rateFreqs));
+      shared_ptr<FrequencySetInterface> rootFreqs = PhylogeneticsApplicationTools::getRootFrequencySet(alphabet, nullptr, *sites, mica.getParams(), sharedParams, rateFreqs);
       
       string descGlobal = ApplicationTools::getStringParameter("nonhomogeneous_one_per_branch.shared_parameters", mica.getParams(), "", "", true, 1);
 
       NestedStringTokenizer nst(descGlobal, "[", "]", ",");
       const deque<string>& descGlobalParameters = nst.getTokens();
 
-      map<string, vector<Vint> > globalParameters;
+      map<string, vector<Vint>> globalParameters;
       for (const auto& desc:descGlobalParameters)
       {
         size_t post = desc.rfind("_");
@@ -278,24 +280,24 @@ int main(int argc, char *argv[])
             ApplicationTools::displayResult(" shared between nodes", VectorTools::paste(vint,","));
       }
 
-      modelSet.reset(SubstitutionModelSetTools::createNonHomogeneousModelSet(model.get(), rootFreqs.get(), tree.get(), sharedParams, globalParameters)); 
-      model.reset(modelSet->getSubstitutionModel(0)->clone());
-      tl.reset(new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet.get(), rDist.get(), false));
+      modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, *tree, sharedParams, globalParameters); 
+      model.reset(modelSet->substitutionModel(0).clone());
+      tl.reset(new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false));
     }
     else if (nhOpt == "general")
     {
-      modelSet.reset(PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet.get(), 0, sites.get(), mica.getParams()));
-      if (modelSet->getNumberOfStates() > modelSet->getAlphabet()->getSize())
+      modelSet = LegacyPhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet, nullptr, sites, mica.getParams());
+      if (modelSet->getNumberOfStates() > modelSet->alphabet().getSize())
       {
         //Markov-modulated Markov model!
         rDist.reset(new ConstantDistribution(1.));
       }
       else
       {
-        rDist.reset(PhylogeneticsApplicationTools::getRateDistribution(mica.getParams()));
+        rDist = PhylogeneticsApplicationTools::getRateDistribution(mica.getParams());
       }
-      model.reset(modelSet->getSubstitutionModel(0)->clone());
-      tl.reset(new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet.get(), rDist.get(), false));
+      model.reset(modelSet->substitutionModel(0).clone());
+      tl.reset(new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false));
     }
     else throw Exception("Unknown option for nonhomogeneous: " + nhOpt);
     tl->initialize();
@@ -321,18 +323,18 @@ int main(int argc, char *argv[])
       ApplicationTools::displayError("!!! Looking at each site:");
       for (size_t i = 0; i < sites->getNumberOfSites(); i++)
       {
-        (*ApplicationTools::error << "Site " << sites->getSite(i).getPosition() << "\tlog likelihood = " << tl->getLogLikelihoodForASite(i)).endLine();
+        (*ApplicationTools::error << "Site " << sites->site(i).getCoordinate() << "\tlog likelihood = " << tl->getLogLikelihoodForASite(i)).endLine();
       }
       ApplicationTools::displayError("!!! 0 values (inf in log) may be due to computer overflow, particularily if datasets are big (>~500 sequences).");
       exit(-1);
     }
-    tree.reset(new TreeTemplate<Node>(tl->getTree()));
+    tree.reset(new TreeTemplate<Node>(tl->tree()));
 
     //Get the substitution mapping in order to compute the rates:
 
-    shared_ptr<TotalSubstitutionRegister> reg(new TotalSubstitutionRegister(model.get()));
-    simple.reset(new UniformizationSubstitutionCount(model.get(), reg.get()));
-    shared_ptr<ProbabilisticSubstitutionMapping> mapping(SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, true));
+    auto reg = make_shared<TotalSubstitutionRegister>(model->getStateMap());
+    simple.reset(new UniformizationSubstitutionCount(model, reg));
+    auto mapping = LegacySubstitutionMappingTools::computeSubstitutionVectors(tl, simple, true);
     norms.reset(new vector<double>(computeNorms(*mapping)));
   }
   
@@ -345,23 +347,22 @@ int main(int argc, char *argv[])
   vector<double> entropy;
   ApplicationTools::displayTask("Computing average MIs", true);
   for (size_t i = 0; i < nbSites; ++i) {
-    const Site* site1 =  &sites->getSite(i);
+    auto& site1 =  sites->site(i);
     ApplicationTools::displayGauge(i, nbSites - 1);
     double sum = 0;
     for (size_t j = 0; j < nbSites; ++j) {
       if (j != i) {
-        const Site* site2 =  &sites->getSite(j);
-        sum += SiteTools::mutualInformation(*site1, *site2, true); 
+        auto& site2 =  sites->site(j);
+        sum += SiteTools::mutualInformation(site1, site2, true); 
       }
     }
-    entropy.push_back(SiteTools::entropy(*site1, true));
+    entropy.push_back(SiteTools::entropy(site1, true));
     averageMI.push_back(sum / static_cast<double>(nbSites - 1));
   }
   ApplicationTools::displayTaskDone();
   double fullAverageMI = VectorTools::mean<double, double>(averageMI);
 
   //Some variables we'll need:
-  const Site *site1, *site2;
   double stat, apc, rcw, nmin = 0, hj, hm, perm;
   size_t maxNbPermutations = 0;
 
@@ -419,25 +420,25 @@ int main(int argc, char *argv[])
       for (size_t i = 0; i < nbRepCPU; i++)
       {
         //Generate data set:
-        vector<size_t> index1;
-        SiteContainer* sites1 = SiteContainerTools::sampleSites(*sites, nbRepRAM, &index1);
+        auto index1 = make_shared<vector<size_t>>();
+         auto sites1 = SiteContainerTools::sampleSites(*sites, nbRepRAM, index1);
   
-        vector<size_t> index2;
-        SiteContainer* sites2 = SiteContainerTools::sampleSites(*sites, nbRepRAM, &index2);
+        auto index2 = make_shared<vector<size_t>>();
+        auto sites2 = SiteContainerTools::sampleSites(*sites, nbRepRAM, index2);
   
         for (size_t j = 0; j < nbRepRAM; j++)
         {
           ApplicationTools::displayGauge(i * nbRepRAM + j, nbRepCPU * nbRepRAM - 1, '>');
-          site1 = &sites1->getSite(j);
-          site2 = &sites2->getSite(j);
-          stat  = SiteTools::mutualInformation(*site1, *site2, true);
-          hj    = SiteTools::jointEntropy(*site1, *site2, true);
-          hm    = std::min(entropy[index1[j]], entropy[index2[j]]);
+          auto& site1 = sites1->site(j);
+          auto& site2 = sites2->site(j);
+          stat  = SiteTools::mutualInformation(site1, site2, true);
+          hj    = SiteTools::jointEntropy(site1, site2, true);
+          hm    = std::min(entropy[(*index1)[j]], entropy[(*index2)[j]]);
   
           if (outputToFile)
             *simout << stat << "\t" << hj << "\t" << hm;
           if (withModel) {
-            nmin  = min((*norms)[index1[j]], (*norms)[index2[j]]);
+            nmin  = min((*norms)[(*index1)[j]], (*norms)[(*index2)[j]]);
             if (outputToFile)
               *simout << "\t" << nmin;
             if (computePValues) {
@@ -457,9 +458,6 @@ int main(int argc, char *argv[])
           if (outputToFile)
             *simout << endl;
         }
-  
-        delete sites1;
-        delete sites2;
       }
       ApplicationTools::warning = os;
   
@@ -474,16 +472,16 @@ int main(int argc, char *argv[])
         throw Exception("You need to specify a model of sequence evolution in order to use a parametric bootstrap approach!");
       bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", mica.getParams(), false, "", true, false);
       ApplicationTools::displayResult("Rate distribution for simulations", (continuousSim ? "continuous" : "discrete"));
-      shared_ptr<SequenceSimulator> simulator;
+      shared_ptr<NonHomogeneousSequenceSimulator> simulator;
       if (modelSet)
       {
-        simulator.reset(new NonHomogeneousSequenceSimulator(modelSet.get(), rDist.get(), tree.get()));
-        dynamic_cast<NonHomogeneousSequenceSimulator *>(simulator.get())->enableContinuousRates(continuousSim);
+        simulator.reset(new NonHomogeneousSequenceSimulator(modelSet, rDist, tree));
+        simulator->enableContinuousRates(continuousSim);
       }
       else
       {
-        simulator.reset(new HomogeneousSequenceSimulator(model.get(), rDist.get(), tree.get()));
-        dynamic_cast<HomogeneousSequenceSimulator *>(simulator.get())->enableContinuousRates(continuousSim);
+        simulator.reset(new NonHomogeneousSequenceSimulator(model, rDist, tree));
+        simulator->enableContinuousRates(continuousSim);
       }
    
       string simpath = ApplicationTools::getAFilePath("null.output.file", mica.getParams(), false, false);
@@ -506,29 +504,27 @@ int main(int argc, char *argv[])
       for (size_t i = 0; i < nbRepCPU; i++)
       {
         //Generate data set:
-        shared_ptr<SiteContainer> sites1(simulator->simulate(nbRepRAM));
+        auto sites1 = simulator->simulate(nbRepRAM);
         tl->setData(*sites1);
         tl->initialize();
         vector<double> norms1;
-        shared_ptr<ProbabilisticSubstitutionMapping> mapping1(SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, false));
+        auto mapping1 = LegacySubstitutionMappingTools::computeSubstitutionVectors(tl, simple, false);
         norms1 = computeNorms(*mapping1);
   
-        shared_ptr<SiteContainer> sites2(simulator->simulate(nbRepRAM));
+        auto sites2 = simulator->simulate(nbRepRAM);
         tl->setData(*sites2);
         tl->initialize();
         vector<double> norms2;
-        ProbabilisticSubstitutionMapping* mapping2 = 
-           SubstitutionMappingTools::computeSubstitutionVectors(*tl, *simple, false);
+        auto mapping2 = LegacySubstitutionMappingTools::computeSubstitutionVectors(tl, simple, false);
         norms2 = computeNorms(*mapping2);
-        delete mapping2;
   
         for (size_t j = 0; j < nbRepRAM; j++)
         {
           ApplicationTools::displayGauge(i * nbRepRAM + j, nbRepCPU * nbRepRAM - 1, '>');
-          site1 = &sites1->getSite(j);
-          site2 = &sites2->getSite(j);
-          stat  = SiteTools::mutualInformation(*site1, *site2, true);
-          hj    = SiteTools::jointEntropy(*site1, *site2, true);
+          auto& site1 = sites1->site(j);
+          auto& site2 = sites2->site(j);
+          stat  = SiteTools::mutualInformation(site1, site2, true);
+          hj    = SiteTools::jointEntropy(site1, site2, true);
           hm    = std::min(entropy[i], entropy[j]);
           nmin  = min(norms1[j], norms2[j]);
   
@@ -567,13 +563,13 @@ int main(int argc, char *argv[])
       size_t c = 0;
       for (size_t i = 0; i < nbSites - 1; i++)
       {
-        site1 = &sites->getSite(i);
+        auto& site1 = sites->site(i);
         for (size_t j = i + 1; j < nbSites; j++)
         {
-          site2 = &sites->getSite(j);
+          auto& site2 = sites->site(j);
           ApplicationTools::displayGauge(c++, nbSites * (nbSites - 1) / 2 - 1, '>');
-          stat  = SiteTools::mutualInformation(*site1, *site2, true);
-          hj    = SiteTools::jointEntropy(*site1, *site2, true);
+          stat  = SiteTools::mutualInformation(site1, site2, true);
+          hj    = SiteTools::jointEntropy(site1, site2, true);
           hm    = std::min(entropy[i], entropy[j]);
   
           if (withModel) {
@@ -649,17 +645,17 @@ int main(int argc, char *argv[])
   size_t c = 0;
   for (size_t i = 0; i < nbSites - 1; ++i)
   {
-    site1 = &sites->getSite(i);
+    auto& site1 = sites->site(i);
     for (size_t j = i + 1; j < nbSites; ++j)
     {
       ApplicationTools::displayGauge(c++, (nbSites - 1) * (nbSites) / 2 - 1);
-      site2 = &sites->getSite(j);
-      miTest(*site1, *site2, maxNbPermutations, stat, perm, nbPerm);
+      auto& site2 = sites->site(j);
+      miTest(site1, site2, maxNbPermutations, stat, perm, nbPerm);
 
-      out << "[" << site1->getPosition() << ";" << site2->getPosition() << "]\t" << stat << "\t";
+      out << "[" << site1.getCoordinate() << ";" << site2.getCoordinate() << "]\t" << stat << "\t";
       apc = averageMI[i] * averageMI[j] / fullAverageMI;
       rcw = averageMI[i] * averageMI[j] / 2.;
-      hj  = SiteTools::jointEntropy(*site1, *site2, true);
+      hj  = SiteTools::jointEntropy(site1, site2, true);
       hm  = std::min(entropy[i], entropy[j]);
       out << apc << "\t" << rcw << "\t" << hj << "\t" << hm;
       

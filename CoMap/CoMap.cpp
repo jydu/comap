@@ -58,12 +58,11 @@ using namespace std;
 
 // From bpp-phyl:
 #include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
-#include <Bpp/Phyl/Likelihood/RASTools.h>
-#include <Bpp/Phyl/Likelihood/MarginalAncestralStateReconstruction.h>
-#include <Bpp/Phyl/Simulation/NonHomogeneousSequenceSimulator.h>
-#include <Bpp/Phyl/Simulation/HomogeneousSequenceSimulator.h>
+#include <Bpp/Phyl/Legacy/Likelihood/RASTools.h>
+#include <Bpp/Phyl/Legacy/Likelihood/MarginalAncestralStateReconstruction.h>
+#include <Bpp/Phyl/Legacy/Simulation/NonHomogeneousSequenceSimulator.h>
 #include <Bpp/Phyl/Mapping/WeightedSubstitutionCount.h>
-#include <Bpp/Phyl/AncestralStateReconstruction.h>
+#include <Bpp/Phyl/Legacy/AncestralStateReconstruction.h>
 #include <Bpp/Phyl/Distance/DistanceMethod.h>
 #include <Bpp/Phyl/Io/PhylipDistanceMatrixFormat.h>
 #include <Bpp/Phyl/Io/Newick.h>
@@ -99,8 +98,8 @@ int main(int argc, char *argv[])
   cout << endl;
   cout << endl;
   cout << "***********************************************************" << endl;
-  cout << "* This is CoMap        version 1.5.5       date: 25/04/18 *" << endl;
-  cout << "*     A C++ shell program to detect co-evolving sites.    *" << endl;
+  cout << "* This is CoMap        version 1.6.0       date: 01/11/23 *" << endl;
+  cout << "*     Coevolution Detection Using Substitution Mapping    *" << endl;
   cout << "***********************************************************" << endl;
   cout << endl;
   
@@ -134,15 +133,15 @@ int main(int argc, char *argv[])
   shared_ptr<Alphabet> alphabet1;
   shared_ptr<GeneticCode> geneticCode1;
   shared_ptr<VectorSiteContainer> allSites1, sites1;
-  shared_ptr<SubstitutionModel> model1;
+  shared_ptr<SubstitutionModelInterface> model1;
   shared_ptr<SubstitutionModelSet> modelSet1;
   shared_ptr<DiscreteDistribution> rDist1;
-  shared_ptr<DRTreeLikelihood> tl1;
+  shared_ptr<DRTreeLikelihoodInterface> tl1;
   CoETools::readData(tree1, alphabet1, geneticCode1, allSites1, sites1, model1, modelSet1, rDist1, tl1, comap.getParams(), "");
  
   ApplicationTools::displayResult("Number of sites in file", allSites1->getNumberOfSites());
   ApplicationTools::displayResult("Number of sites to analyse", sites1->getNumberOfSites());
-  ApplicationTools::displayResult("Number of site patterns", tl1->getLikelihoodData()->getNumberOfDistinctSites());
+  ApplicationTools::displayResult("Number of site patterns", tl1->likelihoodData().getNumberOfDistinctSites());
   
   bool continuousSim = ApplicationTools::getBooleanParameter("simulations.continuous", comap.getParams(), false, "", true, 1);
   ApplicationTools::displayResult("Rate distribution for simulations", (continuousSim ? "continuous" : "discrete"));
@@ -150,17 +149,17 @@ int main(int argc, char *argv[])
   ApplicationTools::displayMessage("\n\n-*- Get substitution vectors -*-\n");
 
   // Getting the substitutions count function:
-  shared_ptr<SubstitutionCount> substitutionCount1(PhylogeneticsApplicationTools::getSubstitutionCount(alphabet1.get(), model1.get(), comap.getParams(), "", true, 1));
+  shared_ptr<SubstitutionCountInterface> substitutionCount1 = PhylogeneticsApplicationTools::getSubstitutionCount(alphabet1, model1, comap.getParams(), "", true, 1);
     
   // Getting the substitution vectors:
-  shared_ptr<ProbabilisticSubstitutionMapping> mapping1(CoETools::getVectors(*tl1, *substitutionCount1, *sites1, comap.getParams()));
+  shared_ptr<LegacyProbabilisticSubstitutionMapping> mapping1 = CoETools::getVectors(tl1, substitutionCount1, *sites1, comap.getParams());
 
   // Compute norms:
   size_t nbSites1 = mapping1->getNumberOfSites();
   vector<double> norms1(nbSites1);
   for (size_t i = 0; i < nbSites1; i++)
   {
-    norms1[i] = SubstitutionMappingTools::computeNormForSite(*mapping1, i);
+    norms1[i] = LegacySubstitutionMappingTools::computeNormForSite(*mapping1, i);
   }
   CoETools::writeInfos(*sites1, *tl1, norms1, comap.getParams());
 
@@ -171,8 +170,8 @@ int main(int argc, char *argv[])
   string reconstruction = ApplicationTools::getStringParameter("asr.method", comap.getParams(), "none", "", true, 1);
   ApplicationTools::displayResult("Ancestral state reconstruction method", reconstruction);
 
-  unique_ptr<AncestralStateReconstruction> asr;
-  unique_ptr<DRTreeLikelihood> tl1copy;
+  unique_ptr<LegacyAncestralStateReconstruction> asr;
+  shared_ptr<DRTreeLikelihoodInterface> tl1copy;
   if (reconstruction == "none") {
     //do nothing
   } else if (reconstruction == "marginal") {
@@ -181,12 +180,12 @@ int main(int argc, char *argv[])
     tl1copy.reset(tl1->clone());
     tl1copy->setData(*sites1);
     tl1copy->initialize();
-    asr.reset(new MarginalAncestralStateReconstruction(tl1copy.get()));
+    asr.reset(new LegacyMarginalAncestralStateReconstruction(tl1copy));
   } else
     throw Exception("Unknown ancestral state reconstruction method: " + reconstruction);
 
   if (asr) {
-    unique_ptr<SiteContainer> asSites1(asr->getAncestralSequences());
+    auto asSites1 = asr->getAncestralSequences();
   
     //Add existing sequence to output:
     SequenceContainerTools::append(*asSites1, *sites1);
@@ -207,16 +206,16 @@ int main(int argc, char *argv[])
   else
   {
     // Building a simulator object:
-    shared_ptr<SequenceSimulator> seqSim1;
+    shared_ptr<NonHomogeneousSequenceSimulator> seqSim1;
     if (modelSet1)
     {
-      seqSim1.reset(new NonHomogeneousSequenceSimulator(modelSet1.get(), rDist1.get(), tree1.get()));
-      dynamic_cast<NonHomogeneousSequenceSimulator *>(seqSim1.get())->enableContinuousRates(continuousSim);
+      seqSim1.reset(new NonHomogeneousSequenceSimulator(modelSet1, rDist1, tree1));
+      seqSim1->enableContinuousRates(continuousSim);
     }
     else
     {
-      seqSim1.reset(new HomogeneousSequenceSimulator(model1.get(), rDist1.get(), tree1.get()));
-      dynamic_cast<HomogeneousSequenceSimulator *>(seqSim1.get())->enableContinuousRates(continuousSim);
+      seqSim1.reset(new NonHomogeneousSequenceSimulator(model1, rDist1, tree1));
+      seqSim1->enableContinuousRates(continuousSim);
     }
 
     // *********************
@@ -225,7 +224,7 @@ int main(int argc, char *argv[])
 
     if (analysis == "pairwise")
     {
-      shared_ptr<Statistic> statistic(CoETools::getStatistic(comap.getParams(), alphabet1.get(), substitutionCount1.get()));
+      shared_ptr<Statistic> statistic = CoETools::getStatistic(comap.getParams(), alphabet1, substitutionCount1);
 
       bool computeNullHyp = false;
       computeNullHyp = ApplicationTools::getBooleanParameter("statistic.null", comap.getParams(), true, "", false, 1);
@@ -255,43 +254,43 @@ int main(int argc, char *argv[])
         shared_ptr<Alphabet> alphabet2;
         shared_ptr<GeneticCode> geneticCode2;
         shared_ptr<VectorSiteContainer> allSites2, sites2;
-        shared_ptr<SubstitutionModel> model2;
+        shared_ptr<SubstitutionModelInterface> model2;
         shared_ptr<SubstitutionModelSet> modelSet2;
         shared_ptr<DiscreteDistribution> rDist2;
-        shared_ptr<DRTreeLikelihood> tl2;
+        shared_ptr<DRTreeLikelihoodInterface> tl2;
         ApplicationTools::displayMessage("\nLoading second dataset...\n");
         CoETools::readData(tree2, alphabet2, geneticCode2, allSites2, sites2, model2, modelSet2, rDist2, tl2, comap.getParams(), "2");
         ApplicationTools::displayResult("Number of sites in file", allSites2->getNumberOfSites());
         ApplicationTools::displayResult("Number of sites to analyse", sites2->getNumberOfSites());
-        ApplicationTools::displayResult("Number of site patterns", tl2->getLikelihoodData()->getNumberOfDistinctSites());
+        ApplicationTools::displayResult("Number of site patterns", tl2->likelihoodData().getNumberOfDistinctSites());
 
         ApplicationTools::displayMessage("\n... and get its substitution vectors.\n");
     
         // Building a simulator object:
-        shared_ptr<SequenceSimulator> seqSim2;
+        shared_ptr<NonHomogeneousSequenceSimulator> seqSim2;
         if (modelSet2)
         {
-          seqSim2.reset(new NonHomogeneousSequenceSimulator(modelSet2.get(), rDist2.get(), tree2.get()));
-          dynamic_cast<NonHomogeneousSequenceSimulator *>(seqSim2.get())->enableContinuousRates(continuousSim);
+          seqSim2.reset(new NonHomogeneousSequenceSimulator(modelSet2, rDist2, tree2));
+          seqSim2->enableContinuousRates(continuousSim);
         }
         else
         {
-          seqSim2.reset(new HomogeneousSequenceSimulator(model2.get(), rDist2.get(), tree2.get()));
-          dynamic_cast<HomogeneousSequenceSimulator *>(seqSim2.get())->enableContinuousRates(continuousSim);
+          seqSim2.reset(new NonHomogeneousSequenceSimulator(model2, rDist2, tree2));
+          seqSim2->enableContinuousRates(continuousSim);
         }
 
         // Getting the substitutions count function:
-        SubstitutionCount* substitutionCount2 = PhylogeneticsApplicationTools::getSubstitutionCount(alphabet2.get(), model2.get(), comap.getParams());
+        shared_ptr<SubstitutionCountInterface> substitutionCount2 = PhylogeneticsApplicationTools::getSubstitutionCount(alphabet2, model2, comap.getParams());
     
         // Getting the substitution vectors:
-        ProbabilisticSubstitutionMapping* mapping2 = CoETools::getVectors(*tl2, *substitutionCount2, *sites2, comap.getParams(), "2");
+        auto mapping2 = CoETools::getVectors(tl2, substitutionCount2, *sites2, comap.getParams(), "2");
  
         // Compute norms:
         size_t nbSites2 = mapping1->getNumberOfSites();
         vector<double> norms2(nbSites2);
         for (size_t i = 0; i < nbSites2; i++)
         {
-          norms2[i] = SubstitutionMappingTools::computeNormForSite(*mapping2, i);
+          norms2[i] = LegacySubstitutionMappingTools::computeNormForSite(*mapping2, i);
         }
 
         CorrectedCorrelationStatistic* cstat = dynamic_cast<CorrectedCorrelationStatistic*>(statistic.get());
@@ -299,13 +298,13 @@ int main(int argc, char *argv[])
           Vdouble mv1(mapping1->getNumberOfBranches());
           //Compute mean vector:
           for (size_t i = 0; i < mapping1->getNumberOfSites(); ++i) {
-            mv1 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSitePerBranch(*mapping1, i);
+            mv1 += LegacySubstitutionMappingTools::computeTotalSubstitutionVectorForSitePerBranch(*mapping1, i);
           }
           mv1 /= static_cast<double>(mapping1->getNumberOfSites());
           Vdouble mv2(mapping2->getNumberOfBranches());
           //Compute mean vector:
           for (size_t i = 0; i < mapping2->getNumberOfSites(); ++i) {
-            mv2 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSitePerBranch(*mapping2, i);
+            mv2 += LegacySubstitutionMappingTools::computeTotalSubstitutionVectorForSitePerBranch(*mapping2, i);
           }
           mv2 /= static_cast<double>(mapping2->getNumberOfSites());
           cstat->setMeanVectors(mv1, mv2);
@@ -334,12 +333,12 @@ int main(int argc, char *argv[])
         if (computeNullHyp)
         {
           CoETools::computeInterNullDistribution(
-            *tl1,
-            *tl2,
+            tl1,
+            tl2,
             *seqSim1,
             *seqSim2,
-            *substitutionCount1,
-            *substitutionCount2,
+            substitutionCount1,
+            substitutionCount2,
             *statistic,
             comap.getParams());
         }
@@ -353,7 +352,7 @@ int main(int argc, char *argv[])
           Vdouble mv1(mapping1->getNumberOfBranches());
           //Compute mean vector:
           for (size_t i = 0; i < mapping1->getNumberOfSites(); ++i) {
-            mv1 += SubstitutionMappingTools::computeTotalSubstitutionVectorForSitePerBranch(*mapping1, i);
+            mv1 += LegacySubstitutionMappingTools::computeTotalSubstitutionVectorForSitePerBranch(*mapping1, i);
           }
           mv1 /= static_cast<double>(mapping1->getNumberOfSites());
           cstat->setMeanVector(mv1);
@@ -366,7 +365,7 @@ int main(int argc, char *argv[])
           *seqSim1,
           *sites1,
           *mapping1,
-          *substitutionCount1,
+          substitutionCount1,
           *statistic,
           computeNullHyp,
           comap.getParams());
@@ -393,7 +392,7 @@ int main(int argc, char *argv[])
         vector<string> siteNames(nbSites1);
         for (size_t i = 0; i < nbSites1; i++)
         {
-          string siteName = TextTools::toString(sites1->getSite(i).getPosition());
+          string siteName = TextTools::toString(sites1->site(i).getCoordinate());
           siteNames[i] = siteName; 
         }
   
@@ -458,7 +457,7 @@ int main(int argc, char *argv[])
           matNames[i] = TextTools::toString(i);
         mat->setNames(matNames);
    
-        unique_ptr<AgglomerativeDistanceMethod> clustering;
+        unique_ptr<AgglomerativeDistanceMethodInterface> clustering;
         if (clusteringMethod == "complete")
         {
           clustering.reset(new HierarchicalClustering(HierarchicalClustering::COMPLETE, *mat, false));
@@ -483,7 +482,7 @@ int main(int argc, char *argv[])
         ApplicationTools::displayResult("Clustering method", clusteringMethod);
   
         // Build tree:
-        TreeTemplate<Node> clusteringTree(* clustering->getTree());
+        TreeTemplate<Node> clusteringTree(clustering->tree());
 
         // Add information to tree:
         ClusterTools::computeNormProperties(clusteringTree, *mapping1);
@@ -503,10 +502,10 @@ int main(int argc, char *argv[])
         DataTable groupsData(colNames);
 
         // A few infos we will need:
-        vector<double> rates = tl1->getPosteriorRateOfEachSite();
+        vector<double> rates = tl1->getPosteriorRatePerSite();
         vector<bool> isConst(nbSites1);
         for (size_t i = 0; i < nbSites1; ++i)
-          isConst[i] = SiteTools::isConstant(sites1->getSite(i), true);
+          isConst[i] = SiteTools::isConstant(sites1->site(i), true);
   
         vector<Group> groups = ClusterTools::getGroups(&clusteringTree);
         //vector<double> minNorms(groups.size());
@@ -575,7 +574,7 @@ int main(int argc, char *argv[])
           ofstream* out = 0;
           if (simPath != "none") out = new ofstream(simPath.c_str(), ios::out);
           ApplicationTools::displayTask("Simulating groups", true);
-          ClusterTools::computeGlobalDistanceDistribution(*tl1, *seqSim1, *substitutionCount1, *dist, *clustering, nbSites1, nrep, maxGroupSize, out);
+          ClusterTools::computeGlobalDistanceDistribution(tl1, *seqSim1, substitutionCount1, *dist, *clustering, nbSites1, nrep, maxGroupSize, out);
           ApplicationTools::displayTaskDone();
           if (out) out->close();
         }
@@ -597,7 +596,7 @@ int main(int argc, char *argv[])
       // *****************************
       // We only deal with the one data set case for now.
     
-      shared_ptr<const Statistic> statistic(CoETools::getStatistic(comap.getParams(), alphabet1.get(), substitutionCount1.get()));
+      shared_ptr<const Statistic> statistic(CoETools::getStatistic(comap.getParams(), alphabet1, substitutionCount1));
   
       string groupsPath = ApplicationTools::getAFilePath("candidates.input.file", comap.getParams(), false, true);
       if (groupsPath != "none")
@@ -615,7 +614,7 @@ int main(int argc, char *argv[])
     
         //Create positions index first:
         map<int, size_t> posIndex;
-        vector<int> positions = sites1->getSitePositions();
+        vector<int> positions = sites1->getSiteCoordinates();
         for (size_t i = 0; i < positions.size(); i++)
           posIndex[positions[i]] = i;
 
@@ -685,7 +684,7 @@ int main(int argc, char *argv[])
 
         //Now compute p-values:
         unsigned int nbMaxTrials = ApplicationTools::getParameter<unsigned int>("candidates.nb_max_trials", comap.getParams(), 10, "", true, true);
-        CoETools::computePValuesForCandidateGroups(candidates, *tl1, *seqSim1, *substitutionCount1, comap.getParams(), nbMaxTrials);
+        CoETools::computePValuesForCandidateGroups(candidates, tl1, *seqSim1, substitutionCount1, comap.getParams(), nbMaxTrials);
 
         //Now fill data table:
         vector<string> stats(table->getNumberOfRows()), pvalues(table->getNumberOfRows());

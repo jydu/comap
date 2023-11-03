@@ -50,8 +50,13 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/Seq/Container/SiteContainer.h>
 
 // From bpp-phyl:
+<<<<<<< HEAD
 #include <Bpp/Phyl/Simulation/SimpleSubstitutionProcessSiteSimulator.h>
 #include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
+=======
+#include <Bpp/Phyl/Legacy/Simulation/NonHomogeneousSequenceSimulator.h>
+#include <Bpp/Phyl/Legacy/Mapping/ProbabilisticSubstitutionMapping.h>
+>>>>>>> 6e35b8272a6dabcd2f5666deeeaadc0d81dc1d98
 #include <Bpp/Phyl/Legacy/Likelihood/DRTreeLikelihood.h>
 
 using namespace bpp;
@@ -79,7 +84,7 @@ class AnalysisTools
      * @param in The input stream.
      * @return A VVdouble object.
      */
-    static VVdouble getFromStream(istream & in);
+    static VVdouble getFromStream(istream& in);
 
     /**
      * @brief Compute the matrix of scalar products.
@@ -90,7 +95,7 @@ class AnalysisTools
      * @param vectors A vector of vectors.
      * @return The matrix of scalar products.
      */
-    static VVdouble computeScalarProductMatrix(const VVdouble & vectors);
+    static VVdouble computeScalarProductMatrix(const VVdouble& vectors);
 
     /**
      * @brief Compute the matrix of scalar products.
@@ -104,8 +109,8 @@ class AnalysisTools
      * @return The matrix of scalar products.
      */
     static VVdouble computeScalarProductMatrix(
-      const VVdouble & vectors1,
-      const VVdouble & vectors2,
+      const VVdouble& vectors1,
+      const VVdouble& vectors2,
       bool independantComparisons);
 
     /**
@@ -117,7 +122,7 @@ class AnalysisTools
      * @param vectors A vector of vectors.
      * @return The matrix of cosinus.
      */
-    static VVdouble computeCosinusMatrix(const VVdouble & vectors);
+    static VVdouble computeCosinusMatrix(const VVdouble& vectors);
     
     /**
      * @brief Compute the matrix of cosinus.
@@ -131,8 +136,8 @@ class AnalysisTools
      * @return The cosinus of scalar products.
      */
     static VVdouble computeCosinusMatrix(
-      const VVdouble & vectors1,
-      const VVdouble & vectors2,
+      const VVdouble& vectors1,
+      const VVdouble& vectors2,
       bool independantComparisons);
   
     /**
@@ -144,7 +149,7 @@ class AnalysisTools
      * @param vectors A vector of vectors.
      * @return The matrix of correlations.
      */
-    static VVdouble computeCorrelationMatrix(const VVdouble & vectors);
+    static VVdouble computeCorrelationMatrix(const VVdouble& vectors);
 
     /**
      * @brief Compute the matrix of correlations.
@@ -158,8 +163,8 @@ class AnalysisTools
      * @return The matrix of correlations.
      */
     static VVdouble computeCorrelationMatrix(
-      const VVdouble & vectors1,
-      const VVdouble & vectors2,
+      const VVdouble& vectors1,
+      const VVdouble& vectors2,
       bool independantComparisons);
   
     /**
@@ -171,7 +176,7 @@ class AnalysisTools
      * @param vectors A vector of vectors.
      * @return The matrix of covariance.
      */
-    static VVdouble computeCovarianceMatrix(const VVdouble & vectors);
+    static VVdouble computeCovarianceMatrix(const VVdouble& vectors);
 
     /**
      * @brief Compute the matrix of covariances.
@@ -185,8 +190,8 @@ class AnalysisTools
      * @return The matrix of covariances.
      */
     static VVdouble computeCovarianceMatrix(
-      const VVdouble & vectors1,
-      const VVdouble & vectors2,
+      const VVdouble& vectors1,
+      const VVdouble& vectors2,
       bool independantComparisons);
   
     /**
@@ -195,25 +200,25 @@ class AnalysisTools
      * @param mapping A substitution mapping.
      * @return A vector containing the norms of each vector in the list.
      */
-    static Vdouble computeNorms(const ProbabilisticSubstitutionMapping& mapping);
+    static Vdouble computeNorms(const LegacyProbabilisticSubstitutionMapping& mapping);
   
     static void writeMatrix(
-      const VVdouble & matrix,
-      const SiteContainer & sites,
-      ostream & out);
+      const VVdouble& matrix,
+      const SiteContainerInterface& sites,
+      ostream& out);
       
     static void writeMatrix(
-      const VVdouble & matrix,
-      const SiteContainer & sites1,
-      const SiteContainer & sites2,
-      ostream & out);
+      const VVdouble& matrix,
+      const SiteContainerInterface& sites1,
+      const SiteContainerInterface& sites2,
+      ostream& out);
       
     /**********************************************************************/
     
     static vector<IntervalData*> getNullDistributionIntraDR(
-      DRTreeLikelihood& drtl,
-      const SequenceSimulator& seqSim,
-      SubstitutionCount& nijt,
+      shared_ptr<DRTreeLikelihoodInterface> drtl,
+      const SequenceSimulatorInterface& seqSim,
+      shared_ptr<SubstitutionCountInterface> nijt,
       const Statistic& statistic,
       const Domain& statDomain,
       const Domain& rateDomain,
@@ -224,15 +229,15 @@ class AnalysisTools
       bool verbose = true);
 
     static vector<IntervalData*> getNullDistributionInterDR(
-      DRTreeLikelihood & drtl1,
-      DRTreeLikelihood & drtl2,
-      const SequenceSimulator & seqSim1,
-      const SequenceSimulator & seqSim2,
-      SubstitutionCount & nijt1,
-      SubstitutionCount & nijt2,
-      const Statistic & statistic,
-      const Domain & statDomain,
-      const Domain & rateDomain,
+      shared_ptr<DRTreeLikelihoodInterface> drtl1,
+      shared_ptr<DRTreeLikelihoodInterface> drtl2,
+      const SequenceSimulatorInterface& seqSim1,
+      const SequenceSimulatorInterface& seqSim2,
+      shared_ptr<SubstitutionCountInterface> nijt1,
+      shared_ptr<SubstitutionCountInterface> nijt2,
+      const Statistic& statistic,
+      const Domain& statDomain,
+      const Domain& rateDomain,
       size_t repCPU,
       size_t repRAM,
       bool average,
@@ -246,12 +251,12 @@ class AnalysisTools
      *                   If 0 or with one rate class, no rate conditionning will be done.
      */
     static void getNullDistributionIntraDR(
-      DRTreeLikelihood& drtl,
-      const SequenceSimulator& seqSim,
-      SubstitutionCount& nijt,
+      shared_ptr<DRTreeLikelihoodInterface> drtl,
+      const SequenceSimulatorInterface& seqSim,
+      shared_ptr<SubstitutionCountInterface> nijt,
       const Statistic& statistic,
       ostream* out,
-      vector< vector<double> >* simstats,
+      VVdouble* simstats,
       const Domain* rateDomain,
       size_t repCPU,
       size_t repRAM,
@@ -260,12 +265,12 @@ class AnalysisTools
       bool verbose = true);
       
     static void getNullDistributionInterDR(
-      DRTreeLikelihood& drtl1,
-      DRTreeLikelihood& drtl2,
-      const SequenceSimulator& seqSim1,
-      const SequenceSimulator& seqSim2,
-      SubstitutionCount& nijt1,
-      SubstitutionCount& nijt2,
+      shared_ptr<DRTreeLikelihoodInterface> drtl1,
+      shared_ptr<DRTreeLikelihoodInterface> drtl2,
+      const SequenceSimulatorInterface& seqSim1,
+      const SequenceSimulatorInterface& seqSim2,
+      shared_ptr<SubstitutionCountInterface> nijt1,
+      shared_ptr<SubstitutionCountInterface> nijt2,
       const Statistic& statistic,
       ostream& out,
       size_t repCPU,
