@@ -50,13 +50,8 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/Seq/Container/SiteContainer.h>
 
 // From bpp-phyl:
-<<<<<<< HEAD
-#include <Bpp/Phyl/Simulation/SimpleSubstitutionProcessSiteSimulator.h>
-#include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
-=======
 #include <Bpp/Phyl/Legacy/Simulation/NonHomogeneousSequenceSimulator.h>
 #include <Bpp/Phyl/Legacy/Mapping/ProbabilisticSubstitutionMapping.h>
->>>>>>> 6e35b8272a6dabcd2f5666deeeaadc0d81dc1d98
 #include <Bpp/Phyl/Legacy/Likelihood/DRTreeLikelihood.h>
 
 using namespace bpp;
