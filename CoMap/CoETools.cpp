@@ -58,10 +58,10 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/Phyl/PatternTools.h>
 #include <Bpp/Phyl/OptimizationTools.h>
 #include <Bpp/Phyl/Io/Newick.h>
-#include <Bpp/Phyl/Model/SubstitutionModelSet.h>
-#include <Bpp/Phyl/Model/SubstitutionModelSetTools.h>
-#include <Bpp/Phyl/Likelihood/DRHomogeneousTreeLikelihood.h>
-#include <Bpp/Phyl/Likelihood/DRNonHomogeneousTreeLikelihood.h>
+#include <Bpp/Phyl/Legacy/Model/SubstitutionModelSet.h>
+#include <Bpp/Phyl/Legacy/Model/SubstitutionModelSetTools.h>
+#include <Bpp/Phyl/Legacy/Likelihood/DRHomogeneousTreeLikelihood.h>
+#include <Bpp/Phyl/Legacy/Likelihood/DRNonHomogeneousTreeLikelihood.h>
 #include <Bpp/Phyl/Mapping/WeightedSubstitutionCount.h>
 
 using namespace bpp;

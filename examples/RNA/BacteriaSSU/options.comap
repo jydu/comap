@@ -67,7 +67,7 @@ output.vectors.file = none
 # - simple: naive mapping (1 substitution if x<>y, 0 if x==y)
 # - aadist: weighted mapping (proteins)
 # - prob_one_jump: compute the probability of observing at least one jump.
-nijt = simple
+nijt = Uniformization
 
 # ----------------------------------------------------------------------------------------
 #                                     Coevolution analysis

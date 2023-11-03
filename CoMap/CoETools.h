@@ -50,7 +50,7 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/Seq/Container/VectorSiteContainer.h>
 
 // From bpp-phyl:
-#include <Bpp/Phyl/Tree.h>
+#include <Bpp/Phyl/Tree/Tree.h>
 #include <Bpp/Phyl/Model/SubstitutionModel.h>
 #include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
 #include <Bpp/Phyl/Mapping/SubstitutionMappingTools.h>

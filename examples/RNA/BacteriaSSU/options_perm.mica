@@ -39,5 +39,5 @@ with_model = no
 
 null.method                     = permutations
 null.max_number_of_permutations = 1000
-output.file                     = Bacteria_SSU.MI_perm.csv
+output.file                     = Bacteria_SSU.MI_perm.sged
 
