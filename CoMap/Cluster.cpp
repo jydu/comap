@@ -42,9 +42,9 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/Numeric/VectorTools.h>
 
 // From PhylLib:
-#include <Bpp/Phyl/NodeTemplate.h>
-#include <Bpp/Phyl/Tree.h>
-#include <Bpp/Phyl/TreeTemplate.h>
+#include <Bpp/Phyl/Tree/NodeTemplate.h>
+#include <Bpp/Phyl/Tree/Tree.h>
+#include <Bpp/Phyl/Tree/TreeTemplate.h>
 
 // From the STL:
 #include <cmath>
@@ -52,12 +52,6 @@ knowledge of the CeCILL license and that you accept its terms.
 
 using namespace std;
   
-TreeTemplate<Node>* SumClustering::getTree() const
-{
-  Node * root = TreeTemplateTools::cloneSubtree<Node>(* dynamic_cast<TreeTemplate<NodeTemplate<ClusterInfos> > *>(tree_) -> getRootNode());
-  return new TreeTemplate<Node>(root);
-}
-
 vector<size_t> SumClustering::getBestPair()
 {
   vector<size_t> bestPair(2);
@@ -115,7 +109,7 @@ void SumClustering::finalStep(int idRoot)
   n2->setDistanceToFather(d - dynamic_cast<NodeTemplate<ClusterInfos> *>(n2)->getInfos().length); 
   //n1->setDistanceToFather(d); 
   //n2->setDistanceToFather(d); 
-  tree_ = new TreeTemplate< NodeTemplate<ClusterInfos> >(root);
+  tree_.reset(new TreeTemplate<NodeTemplate<ClusterInfos>>(root));
 }
 
 Node* SumClustering::getLeafNode(int id, const string& name)

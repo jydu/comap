@@ -50,10 +50,12 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/Seq/Container/VectorSiteContainer.h>
 
 // From bpp-phyl:
-#include <Bpp/Phyl/Tree.h>
+#include <Bpp/Phyl/Tree/Tree.h>
 #include <Bpp/Phyl/Model/SubstitutionModel.h>
-#include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
-#include <Bpp/Phyl/Mapping/SubstitutionMappingTools.h>
+#include <Bpp/Phyl/Legacy/Model/SubstitutionModelSet.h>
+#include <Bpp/Phyl/Legacy/Likelihood/DRTreeLikelihood.h>
+#include <Bpp/Phyl/Legacy/Mapping/ProbabilisticSubstitutionMapping.h>
+#include <Bpp/Phyl/Legacy/Mapping/SubstitutionMappingTools.h>
 #include <Bpp/Phyl/Simulation/SequenceSimulator.h>
 
 using namespace bpp;
@@ -101,26 +103,26 @@ class CandidateGroup
   public:
     double getStatisticValue() const { return statistic_; }
     void setStatisticValue(double value) { statistic_ = value; }
-    void computeStatisticValue(const Statistic& stat, const ProbabilisticSubstitutionMapping& mapping)
+    void computeStatisticValue(const Statistic& stat, const LegacyProbabilisticSubstitutionMapping& mapping)
     {
       if (!analysable_) throw Exception("CandidateGroup::computeStatisticValue. Group is not analysable.");
       if (sites_.size() == 0) throw Exception("CandidateGroup::computeStatisticValue. Group is empty!");
-      vector<const VVdouble*> group;
+      vector<const VVdouble*> group(sites_.size());
       for (size_t i = 0; i < sites_.size(); i++)
       {
         size_t index = sites_[i].getIndex();
-        group.push_back(&mapping[index]);
+	group[i] = &mapping[index];
       }
       statistic_ = stat.getValueForGroup(group);
     }
-    void computeNormRanges(double omega, const ProbabilisticSubstitutionMapping& mapping)
+    void computeNormRanges(double omega, const LegacyProbabilisticSubstitutionMapping& mapping)
     {
       if (!analysable_) throw Exception("CandidateGroup::computeNormRanges. Group is not analyzable.");
       if (sites_.size() == 0) throw Exception("CandidateGroup::computeNormRanges. Group is empty!");
       for (size_t i = 0; i < sites_.size(); i++)
       {
         //double norm = VectorTools::norm<double, double>(mapping[sites_[i].getIndex()]);
-        double norm = SubstitutionMappingTools::computeNormForSite(mapping, sites_[i].getIndex());
+        double norm = LegacySubstitutionMappingTools::computeNormForSite(mapping, sites_[i].getIndex());
         sites_[i].setNormRange(norm - omega, norm + omega);
       }
     }
@@ -213,7 +215,7 @@ class CandidateGroupSet
      * @param simMap Simulated sites.
      * @eturn true if the minimum number of simulations is reached for every group.
      */
-    bool analyseSimulations(const ProbabilisticSubstitutionMapping& simMap);
+    bool analyseSimulations(const LegacyProbabilisticSubstitutionMapping& simMap);
 
     void addCandidate(const CandidateGroup& group)
     {
@@ -300,24 +302,24 @@ class CoETools
   public:
     
     static void readData(
-      shared_ptr<TreeTemplate<Node>>   & tree,
-      shared_ptr<Alphabet>             & alphabet,
-      shared_ptr<GeneticCode>          & geneticCode,
-      shared_ptr<VectorSiteContainer>  & allSites,
-      shared_ptr<VectorSiteContainer>  & sites,
-      shared_ptr<SubstitutionModel>    & model,
-      shared_ptr<SubstitutionModelSet> & modelSet,
-      shared_ptr<DiscreteDistribution> & rDist,
-      shared_ptr<DRTreeLikelihood>     & tl,
-      map<string, string>              & params,
-      const string                     & suffix = "");
+      shared_ptr<TreeTemplate<Node>>         & tree,
+      shared_ptr<Alphabet>                   & alphabet,
+      shared_ptr<GeneticCode>                & geneticCode,
+      shared_ptr<VectorSiteContainer>        & allSites,
+      shared_ptr<VectorSiteContainer>        & sites,
+      shared_ptr<SubstitutionModelInterface> & model,
+      shared_ptr<SubstitutionModelSet>       & modelSet,
+      shared_ptr<DiscreteDistribution>       & rDist,
+      shared_ptr<DRTreeLikelihoodInterface>  & tl,
+      map<string, string>                    & params,
+      const string                           & suffix = "");
 
-    static ProbabilisticSubstitutionMapping* getVectors(
-      const DRTreeLikelihood & drtl, 
-      SubstitutionCount      & substitutionCount,
-      const SiteContainer    & completeSites,
-      map<string, string>    & params,
-      const string           & suffix = "");
+    static std::unique_ptr<LegacyProbabilisticSubstitutionMapping> getVectors(
+      std::shared_ptr<const DRTreeLikelihoodInterface> drtl, 
+      std::shared_ptr<SubstitutionCountInterface> substitutionCount,
+      const SiteContainerInterface    & completeSites,
+      map<string, string>             & params,
+      const string                    & suffix = "");
       
     /**
       * This write a file with some information for each site in the selected alignment
@@ -332,8 +334,8 @@ class CoETools
      * - constant [boolean (0 = false)]
      */
     static void writeInfos(
-      const SiteContainer& completeSites,
-      const DiscreteRatesAcrossSitesTreeLikelihood& ras,
+      const SiteContainerInterface& completeSites,
+      const DiscreteRatesAcrossSitesTreeLikelihoodInterface& ras,
       const std::vector<double>& norms,
       map<string, string>& params,
       const string& suffix = "");
@@ -350,55 +352,58 @@ class CoETools
     
     static bool haveToPerformIndependantComparisons(map<string, string>& params);
     
-    static Statistic* getStatistic(map<string, string>& params, const Alphabet* alphabet, const SubstitutionCount* nijt);
+    static unique_ptr<Statistic> getStatistic(
+	map<string, string>& params,
+       	shared_ptr<const Alphabet> alphabet,
+       	shared_ptr<const SubstitutionCountInterface> nijt);
     
     /**
      * This subroutine will call computeIntraNullDistribution on request.
      */
     static void computeIntraStats(
-      const DRTreeLikelihood& tl,
-      const SequenceSimulator& seqSim,
-      const SiteContainer& completeSites,
-      ProbabilisticSubstitutionMapping& mapping,
-      SubstitutionCount& nijt,
+      const DRTreeLikelihoodInterface& tl,
+      const SequenceSimulatorInterface& seqSim,
+      const SiteContainerInterface& completeSites,
+      LegacyProbabilisticSubstitutionMapping& mapping,
+      shared_ptr<SubstitutionCountInterface> nijt,
       const Statistic& statistic,
       bool computeNull,
       map<string, string>& params);
 
     static void computeInterStats(
-      const DiscreteRatesAcrossSitesTreeLikelihood & tl1,
-      const DiscreteRatesAcrossSitesTreeLikelihood & tl2,
-      const SiteContainer & completeSites1,
-      const SiteContainer & completeSites2,
-      ProbabilisticSubstitutionMapping & mapping1,
-      ProbabilisticSubstitutionMapping & mapping2,
-      const Statistic & statistic,
-      map<string, string> & params);
+      const DiscreteRatesAcrossSitesTreeLikelihoodInterface& tl1,
+      const DiscreteRatesAcrossSitesTreeLikelihoodInterface& tl2,
+      const SiteContainerInterface& completeSites1,
+      const SiteContainerInterface& completeSites2,
+      LegacyProbabilisticSubstitutionMapping& mapping1,
+      LegacyProbabilisticSubstitutionMapping& mapping2,
+      const Statistic& statistic,
+      map<string, string>& params);
     
     static vector< vector<double> >* computeIntraNullDistribution(
-        DRTreeLikelihood& drtl,
+        shared_ptr<DRTreeLikelihoodInterface> drtl,
         const Domain* rateDomain,
-        const SequenceSimulator& seqSim,
-        SubstitutionCount& nijt,
+        const SequenceSimulatorInterface& seqSim,
+        shared_ptr<SubstitutionCountInterface> nijt,
         const Statistic& statistic,
         map<string, string>& params);
   
     static void computeInterNullDistribution(
-        DRTreeLikelihood & drtl1,
-        DRTreeLikelihood & drtl2,
-        const SequenceSimulator& seqSim1,
-        const SequenceSimulator& seqSim2,
-        SubstitutionCount & nijt1,
-        SubstitutionCount & nijt2,
-        const Statistic & statistic,
-        map<string, string> & params);
+        shared_ptr<DRTreeLikelihoodInterface> drtl1,
+        shared_ptr<DRTreeLikelihoodInterface> drtl2,
+        const SequenceSimulatorInterface& seqSim1,
+        const SequenceSimulatorInterface& seqSim2,
+        shared_ptr<SubstitutionCountInterface> nijt1,
+        shared_ptr<SubstitutionCountInterface> nijt2,
+        const Statistic& statistic,
+        map<string, string>& params);
 
     static void computePValuesForCandidateGroups(
-        CandidateGroupSet & candidates,
-        DRTreeLikelihood & drtl,
-        const SequenceSimulator& seqSim,
-        SubstitutionCount & nijt,
-        map<string, string> & params,
+        CandidateGroupSet& candidates,
+        shared_ptr<DRTreeLikelihoodInterface> drtl,
+        const SequenceSimulatorInterface& seqSim,
+        shared_ptr<SubstitutionCountInterface> nijt,
+        map<string, string>& params,
         unsigned int maxTrials);
   
 };

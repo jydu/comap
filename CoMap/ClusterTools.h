@@ -45,12 +45,12 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/Numeric/Prob/DiscreteDistribution.h>
 
 // From Phylib:
-#include <Bpp/Phyl/TreeTemplate.h>
-#include <Bpp/Phyl/Likelihood/DRTreeLikelihood.h>
+#include <Bpp/Phyl/Tree/TreeTemplate.h>
+#include <Bpp/Phyl/Legacy/Likelihood/DRTreeLikelihood.h>
 #include <Bpp/Phyl/Simulation/SequenceSimulator.h>
 #include <Bpp/Phyl/Distance/DistanceMethod.h>
 #include <Bpp/Phyl/Mapping/SubstitutionCount.h>
-#include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
+#include <Bpp/Phyl/Legacy/Mapping/ProbabilisticSubstitutionMapping.h>
 
 using namespace bpp;
 
@@ -152,39 +152,39 @@ class ClusterTools
 
     static vector<Group> getGroups(const TreeTemplate<Node> * tree);
 
-    static vector<const Node *> getSubtreesWithSize(const TreeTemplate<Node> & tree, size_t size);
+    static vector<const Node *> getSubtreesWithSize(const TreeTemplate<Node>& tree, size_t size);
 
-    static vector<Group> getGroupsWithSize(const TreeTemplate<Node> & tree, size_t size);
+    static vector<Group> getGroupsWithSize(const TreeTemplate<Node>& tree, size_t size);
     
     static void computeGlobalDistanceDistribution(
-        DRTreeLikelihood & drtl,
-        const SequenceSimulator & simulator,
-	      SubstitutionCount & nijt,
-        const Distance & distance,
-        AgglomerativeDistanceMethod & clustering,
+        shared_ptr<DRTreeLikelihoodInterface> drtl,
+        const SequenceSimulatorInterface& simulator,
+	shared_ptr<SubstitutionCountInterface> nijt,
+        const Distance& distance,
+        AgglomerativeDistanceMethodInterface& clustering,
         size_t sizeOfDataSet,
         size_t nrep,
         size_t maxGroupSize,
         ofstream* out = 0);
 
-    static void translate(TreeTemplate<Node> & tree, const vector<string> & tln)
+    static void translate(TreeTemplate<Node>& tree, const vector<string>& tln)
     {
       translate(tree.getRootNode(), tln);
     }
 
     //Only min norm for now.
-    static void computeNormProperties(TreeTemplate<Node> & tree, const ProbabilisticSubstitutionMapping & mapping);
+    static void computeNormProperties(TreeTemplate<Node>& tree, const LegacyProbabilisticSubstitutionMapping& mapping);
     
   private:
-    static Group getGroups(const Node & subtree, vector<Group> & groups);
-    static Group getGroup(const Node & subtree);
-    static size_t getSubtreesWithSize(const Node * subtree, size_t size, vector<const Node *> & subtrees);
+    static Group getGroups(const Node& subtree, vector<Group>& groups);
+    static Group getGroup(const Node& subtree);
+    static size_t getSubtreesWithSize(const Node * subtree, size_t size, vector<const Node *>& subtrees);
     static void translate(Node * node, const vector<string> & tln)
     {
       if(node->isLeaf()) node->setName(tln[TextTools::to<size_t>(node->getName())]);
       for(size_t i = 0; i < node->getNumberOfSons(); i++) translate(node->getSon(i), tln);
     }
-    static void computeNormProperties_(Node * node, const ProbabilisticSubstitutionMapping & mapping, double & minNorm);
+    static void computeNormProperties_(Node * node, const LegacyProbabilisticSubstitutionMapping & mapping, double & minNorm);
 
 };
 

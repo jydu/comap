@@ -55,14 +55,16 @@ knowledge of the CeCILL license and that you accept its terms.
 
 // From bpp-phyl:
 #include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
+#include <Bpp/Phyl/Legacy/App/PhylogeneticsApplicationTools.h>
 #include <Bpp/Phyl/PatternTools.h>
 #include <Bpp/Phyl/OptimizationTools.h>
 #include <Bpp/Phyl/Io/Newick.h>
-#include <Bpp/Phyl/Model/SubstitutionModelSet.h>
-#include <Bpp/Phyl/Model/SubstitutionModelSetTools.h>
-#include <Bpp/Phyl/Likelihood/DRHomogeneousTreeLikelihood.h>
-#include <Bpp/Phyl/Likelihood/DRNonHomogeneousTreeLikelihood.h>
+#include <Bpp/Phyl/Legacy/Model/SubstitutionModelSet.h>
+#include <Bpp/Phyl/Legacy/Model/SubstitutionModelSetTools.h>
+#include <Bpp/Phyl/Legacy/Likelihood/DRHomogeneousTreeLikelihood.h>
+#include <Bpp/Phyl/Legacy/Likelihood/DRNonHomogeneousTreeLikelihood.h>
 #include <Bpp/Phyl/Mapping/WeightedSubstitutionCount.h>
+#include <Bpp/Phyl/Tree/PhyloTreeTools.h>
 
 using namespace bpp;
 
@@ -74,28 +76,28 @@ using namespace std;
 /******************************************************************************/
 
 void CoETools::readData(
-  shared_ptr<TreeTemplate<Node>>   & tree,
-  shared_ptr<Alphabet>             & alphabet,
-  shared_ptr<GeneticCode>          & geneticCode,
-  shared_ptr<VectorSiteContainer>  & allSites,
-  shared_ptr<VectorSiteContainer>  & sites,
-  shared_ptr<SubstitutionModel>    & model,
-  shared_ptr<SubstitutionModelSet> & modelSet,
-  shared_ptr<DiscreteDistribution> & rDist,
-  shared_ptr<DRTreeLikelihood>     & tl,
-  map<string, string>              & params,
-  const string                     & suffix)
+  shared_ptr<TreeTemplate<Node>>         & tree,
+  shared_ptr<Alphabet>                   & alphabet,
+  shared_ptr<GeneticCode>                & geneticCode,
+  shared_ptr<VectorSiteContainer>        & allSites,
+  shared_ptr<VectorSiteContainer>        & sites,
+  shared_ptr<SubstitutionModelInterface> & model,
+  shared_ptr<SubstitutionModelSet>       & modelSet,
+  shared_ptr<DiscreteDistribution>       & rDist,
+  shared_ptr<DRTreeLikelihoodInterface>  & tl,
+  map<string, string>                    & params,
+  const string                           & suffix)
 {
-  alphabet.reset(SequenceApplicationTools::getAlphabet(params, suffix, true));
-  allSites.reset(SequenceApplicationTools::getSiteContainer(alphabet.get(), params, suffix, false));
-  sites   .reset(SequenceApplicationTools::getSitesToAnalyse(*allSites, params, suffix, true, true, true));
+  alphabet = SequenceApplicationTools::getAlphabet(params, suffix, true);
+  allSites = SequenceApplicationTools::getSiteContainer(alphabet, params, suffix, false);
+  sites    = SequenceApplicationTools::getSitesToAnalyse(*allSites, params, suffix, true, true, true);
 
-  CodonAlphabet* codonAlphabet = dynamic_cast<CodonAlphabet*>(alphabet.get());
+  auto codonAlphabet = dynamic_pointer_cast<CodonAlphabet>(alphabet);
   if (codonAlphabet) {
     string codeDesc = ApplicationTools::getStringParameter("genetic_code", params, "Standard", "", true, true);
     ApplicationTools::displayResult("Genetic Code", codeDesc);
       
-    geneticCode.reset(SequenceApplicationTools::getGeneticCode(codonAlphabet->getNucleicAlphabet(), codeDesc));
+    geneticCode = SequenceApplicationTools::getGeneticCode(codonAlphabet->getNucleicAlphabet(), codeDesc);
   }
 
 
@@ -107,7 +109,8 @@ void CoETools::readData(
 
   if (nhOpt == "no")
   {  
-    model.reset(PhylogeneticsApplicationTools::getSubstitutionModel(alphabet.get(), geneticCode.get(), sites.get(), params));
+    map<string, string> unparsedParams;
+    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, geneticCode, sites, params,unparsedParams);
     if (model->getNumberOfStates() > model->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
@@ -116,13 +119,14 @@ void CoETools::readData(
     }
     else
     {
-      rDist.reset(PhylogeneticsApplicationTools::getRateDistribution(params));
+      rDist = PhylogeneticsApplicationTools::getRateDistribution(params);
     }
-    tl.reset(new DRHomogeneousTreeLikelihood(*tree, *sites, model.get(), rDist.get(), true, false));
+    tl.reset(new DRHomogeneousTreeLikelihood(*tree, *sites, model, rDist, true, false));
   }
   else if (nhOpt == "one_per_branch")
   {
-    model.reset(PhylogeneticsApplicationTools::getSubstitutionModel(alphabet.get(), geneticCode.get(), sites.get(), params));
+    map<string, string> unparsedParams;
+    model = PhylogeneticsApplicationTools::getSubstitutionModel(alphabet, geneticCode, sites, params, unparsedParams);
     if (model->getNumberOfStates() > model->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
@@ -131,7 +135,7 @@ void CoETools::readData(
     }
     else
     {
-      rDist.reset(PhylogeneticsApplicationTools::getRateDistribution(params));
+      rDist = PhylogeneticsApplicationTools::getRateDistribution(params);
     }
     vector<double> rateFreqs;
     if (model->getNumberOfStates() != alphabet->getSize())
@@ -142,7 +146,7 @@ void CoETools::readData(
                                                     // we should assume a rate distribution for the root also!!!  
     }
     map<string, string> sharedParams;
-    shared_ptr<FrequencySet> rootFreqs(PhylogeneticsApplicationTools::getRootFrequencySet(alphabet.get(), geneticCode.get(), sites.get(), params, sharedParams, rateFreqs));
+    shared_ptr<FrequencySetInterface> rootFreqs = PhylogeneticsApplicationTools::getRootFrequencySet(alphabet, geneticCode, *sites, params, sharedParams, rateFreqs);
     
     
     string descGlobal = ApplicationTools::getStringParameter("nonhomogeneous_one_per_branch.shared_parameters", params, "", "", true, 1);
@@ -180,13 +184,13 @@ void CoETools::readData(
           ApplicationTools::displayResult(" shared between nodes", VectorTools::paste(vint,","));
     }
  
-    modelSet.reset(SubstitutionModelSetTools::createNonHomogeneousModelSet(model.get(), rootFreqs.get(), tree.get(), sharedParams, globalParameters)); 
+    modelSet = SubstitutionModelSetTools::createNonHomogeneousModelSet(model, rootFreqs, *tree, sharedParams, globalParameters); 
     model.reset(modelSet->getSubstitutionModel(0)->clone());
-    tl.reset(new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet.get(), rDist.get(), false));
+    tl.reset(new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false));
   }
   else if (nhOpt == "general")
   {
-    modelSet.reset(PhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet.get(), geneticCode.get(), 0, params));
+    modelSet = LegacyPhylogeneticsApplicationTools::getSubstitutionModelSet(alphabet, geneticCode, 0, params);
     if (modelSet->getNumberOfStates() > modelSet->getAlphabet()->getSize())
     {
       //Markov-modulated Markov model!
@@ -195,10 +199,10 @@ void CoETools::readData(
     }
     else
     {
-      rDist.reset(PhylogeneticsApplicationTools::getRateDistribution(params));
+      rDist = PhylogeneticsApplicationTools::getRateDistribution(params);
     }
     model.reset(modelSet->getSubstitutionModel(0)->clone());
-    tl.reset(new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet.get(), rDist.get(), false)); 
+    tl.reset(new DRNonHomogeneousTreeLikelihood(*tree, *sites, modelSet, rDist, false)); 
   }
   else throw Exception("Unknown option for nonhomogeneous: " + nhOpt);
   
@@ -215,11 +219,11 @@ void CoETools::readData(
       size_t s;
       for (size_t i = 0; i < sites->getNumberOfSites(); i++) {
         if (std::isinf(tl->getLogLikelihoodForASite(i))) {
-          const Site& site = sites->getSite(i);
+          const Site& site = sites->site(i);
           s = site.size();
           for (size_t j = 0; j < s; j++) {
             if (geneticCode->isStop(site.getValue(j))) {
-              (*ApplicationTools::error << "Stop Codon at site " << site.getPosition() << " in sequence " << sites->getSequence(j).getName()).endLine();
+              (*ApplicationTools::error << "Stop Codon at site " << site.getCoordinate() << " in sequence " << sites->sequence(j).getName()).endLine();
               f = true;
             }
           }
@@ -233,7 +237,7 @@ void CoETools::readData(
       ofstream debug ("DEBUG_likelihoods.txt", ios::out);
       for (size_t i = 0; i < sites->getNumberOfSites(); i++)
       {
-        debug << "Position " << sites->getSite(i).getPosition() << " = " << tl->getLogLikelihoodForASite(i) << endl; 
+        debug << "Position " << sites->site(i).getCoordinate() << " = " << tl->getLogLikelihoodForASite(i) << endl; 
       }
       debug.close();
       ApplicationTools::displayError("!!! Site-specific likelihood have been written in file DEBUG_likelihoods.txt .");
@@ -243,7 +247,7 @@ void CoETools::readData(
     } else {
       for (size_t i = sites->getNumberOfSites(); i > 0; --i) {
         if (std::isinf(tl->getLogLikelihoodForASite(i - 1))) {
-          ApplicationTools::displayResult("Ignore saturated site", sites->getSite(i - 1).getPosition());
+          ApplicationTools::displayResult("Ignore saturated site", sites->site(i - 1).getCoordinate());
           sites->deleteSite(i - 1);
         }
       }
@@ -262,8 +266,8 @@ void CoETools::readData(
   ApplicationTools::displayBooleanResult("Optimization", optimization != "None");
   if (optimization != "None")
   {
-    PhylogeneticsApplicationTools::optimizeParameters(tl.get(), tl->getParameters(), params, suffix, true, true);
-    TreeTemplate<Node> *treeOpt = new TreeTemplate<Node>(tl->getTree());
+    LegacyPhylogeneticsApplicationTools::optimizeParameters(tl, tl->getParameters(), params, suffix, true, true);
+    TreeTemplate<Node> *treeOpt = new TreeTemplate<Node>(tl->tree());
     PhylogeneticsApplicationTools::writeTree(*treeOpt, params, "output.", suffix);
   
     // Actualize tree.
@@ -280,7 +284,7 @@ void CoETools::readData(
   ApplicationTools::displayResult("Output estimates to file", parametersFile);
   if (parametersFile != "none")
   {
-    StlOutputStream out(new ofstream(parametersFile.c_str(), ios::out));
+    StlOutputStream out(make_unique<ofstream>(parametersFile.c_str(), ios::out));
     out << "# Log likelihood = ";
     out.setPrecision(20) << (-tl->getValue());
     out.endLine();
@@ -293,17 +297,17 @@ void CoETools::readData(
     if (modelSet)
     {
       modelSet->matchParametersValues(tl->getParameters());
-      PhylogeneticsApplicationTools::printParameters(modelSet.get(), out);
+      LegacyPhylogeneticsApplicationTools::printParameters(modelSet.get(), out);
     }
     else
     {
       model->matchParametersValues(tl->getParameters());
-      PhylogeneticsApplicationTools::printParameters(model.get(), out);
+      PhylogeneticsApplicationTools::printParameters(*model, out);
     }
     out.endLine();
     (out << "# Rate distribution parameters:").endLine();
     rDist->matchParametersValues(tl->getParameters());
-    PhylogeneticsApplicationTools::printParameters(rDist.get(), out);
+    PhylogeneticsApplicationTools::printParameters(*rDist, out);
   }
 
 
@@ -346,7 +350,7 @@ void CoETools::readData(
     size_t n = sites->getNumberOfSites();
     for (size_t i = n; i > 0; --i) {
       ApplicationTools::displayGauge(n - i, n - 1, '=');
-      if (SiteTools::isConstant(sites->getSite(i - 1), true))
+      if (SiteTools::isConstant(sites->site(i - 1), true))
         sites->deleteSite(i - 1);
     }
     ApplicationTools::message->endLine();
@@ -359,24 +363,25 @@ void CoETools::readData(
   
 /******************************************************************************/
   
-ProbabilisticSubstitutionMapping* CoETools::getVectors(
-  const DRTreeLikelihood& drtl,
-  SubstitutionCount     & substitutionCount,
-  const SiteContainer   & completeSites,
-  map<string, string>   & params,
-  const string          & suffix)
+unique_ptr<LegacyProbabilisticSubstitutionMapping> CoETools::getVectors(
+  std::shared_ptr<const DRTreeLikelihoodInterface> drtl,
+  std::shared_ptr<SubstitutionCountInterface> substitutionCount,
+  const SiteContainerInterface     & completeSites,
+  map<string, string>              & params,
+  const string                     & suffix)
 {
-  ProbabilisticSubstitutionMapping* substitutions = 0;
+  unique_ptr<LegacyProbabilisticSubstitutionMapping> substitutions;
   string inputVectorsFilePath = ApplicationTools::getAFilePath("input.vectors.file", params, false, true, suffix, false, "none", 1);
 
   if (inputVectorsFilePath != "none")
   {
     //We try to load the substitution vector directly from file:
-    size_t nbSites = drtl.getNumberOfSites();
+    size_t nbSites = drtl->getNumberOfSites();
     ApplicationTools::displayResult("Substitution mapping in file:", inputVectorsFilePath);
     ifstream sc(inputVectorsFilePath.c_str(), ios::in);
-    substitutions = new ProbabilisticSubstitutionMapping(drtl.getTree(), &substitutionCount, nbSites);
-    SubstitutionMappingTools::readFromStream(sc, *substitutions, 0);
+    substitutions.reset(new LegacyProbabilisticSubstitutionMapping(
+	drtl->tree(), substitutionCount, nbSites));
+    LegacySubstitutionMappingTools::readFromStream(sc, *substitutions, 0);
   }
   else
   {
@@ -389,20 +394,20 @@ ProbabilisticSubstitutionMapping* CoETools::getVectors(
     bool joint   = ApplicationTools::getBooleanParameter("nijt.joint"  , params, true, "", true, 4);
     if (average) {
       if (joint) {
-        substitutions = SubstitutionMappingTools::computeSubstitutionVectors(drtl, substitutionCount, 0);
+        substitutions = LegacySubstitutionMappingTools::computeSubstitutionVectors(drtl, substitutionCount, 0);
       } else {
-        substitutions = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, substitutionCount, 0);
+        substitutions = LegacySubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, substitutionCount, 0);
       }
     } else {
       if (joint) {
-        substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, substitutionCount, 0);
+        substitutions = LegacySubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, substitutionCount, 0);
       } else {
-        substitutions = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, substitutionCount, 0);
+        substitutions = LegacySubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, substitutionCount, 0);
       }
     }
     if (outputVectorsFilePath != "none" && outputVectorsFilePath != "None") {
       ofstream outputVectors(outputVectorsFilePath.c_str(), ios::out);
-      SubstitutionMappingTools::writeToStream(*substitutions, completeSites, 0, outputVectors);
+      LegacySubstitutionMappingTools::writeToStream(*substitutions, completeSites, 0, outputVectors);
       outputVectors.close();
     }
 
@@ -489,8 +494,8 @@ bool CoETools::haveToPerformIndependantComparisons(map<string, string>& params)
 /******************************************************************************/
 
 void CoETools::writeInfos(
-  const SiteContainer& completeSites,
-  const DiscreteRatesAcrossSitesTreeLikelihood& ras,
+  const SiteContainerInterface& completeSites,
+  const DiscreteRatesAcrossSitesTreeLikelihoodInterface& ras,
   const vector<double>& norms,
   map<string, string>& params,
   const string& suffix)
@@ -499,10 +504,10 @@ void CoETools::writeInfos(
   if (outFile == "none") return;
 
   // Get the rate class with maximum posterior probability:
-  vector<size_t> classes = ras.getRateClassWithMaxPostProbOfEachSite();
+  vector<size_t> classes = ras.getRateClassWithMaxPostProbPerSite();
   // Get the posterior rate, i.e. rate averaged over all posterior probabilities:
-  Vdouble rates = ras.getPosteriorRateOfEachSite();
-  Vdouble logLn = ras.getLogLikelihoodForEachSite();
+  Vdouble rates = ras.getPosteriorRatePerSite();
+  Vdouble logLn = ras.getLogLikelihoodPerSite();
 
   ApplicationTools::displayResult("Alignment information logfile", outFile);
 
@@ -511,10 +516,10 @@ void CoETools::writeInfos(
 
   for (size_t i = 0; i < completeSites.getNumberOfSites(); i++)
   {
-    const Site* currentSite = &completeSites.getSite(i);
-    int currentSitePosition = currentSite->getPosition();
-    int isCompl = (SiteTools::isComplete(* currentSite) ? 1 : 0);
-    int isConst = (SiteTools::isConstant(* currentSite, true) ? 1 : 0);
+    const Site& currentSite = completeSites.site(i);
+    int currentSitePosition = currentSite.getCoordinate();
+    int isCompl = (SiteTools::isComplete(currentSite) ? 1 : 0);
+    int isConst = (SiteTools::isConstant(currentSite, true) ? 1 : 0);
     out << "[" << currentSitePosition << "]\t";
     out << isCompl << "\t";
     out << isConst << "\t";
@@ -527,7 +532,10 @@ void CoETools::writeInfos(
 
 /******************************************************************************/
 
-Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* alphabet, const SubstitutionCount* nijt)
+unique_ptr<Statistic> CoETools::getStatistic(
+    map<string, string>& params,
+    std::shared_ptr<const Alphabet> alphabet,
+    std::shared_ptr<const SubstitutionCountInterface> nijt)
 {
   string statistic = ApplicationTools::getStringParameter("statistic", params, "Correlation");
   string name;
@@ -535,34 +543,34 @@ Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* a
   KeyvalTools::parseProcedure(statistic, name, args);
   if (name == "Cosinus")
   {
-    return new CosinusStatistic();
+    return make_unique<CosinusStatistic>();
   }
   else if (name == "Correlation")
   {
-    return new CorrelationStatistic();
+    return make_unique<CorrelationStatistic>();
   }
   else if (name == "CorrectedCorrelation")
   {
-    return new CorrectedCorrelationStatistic();
+    return make_unique<CorrectedCorrelationStatistic>();
   }
   else if (name == "Covariance")
   {
-    return new CovarianceStatistic();
+    return make_unique<CovarianceStatistic>();
   }
   else if (name == "Cosubstitution")
   {
-    return new CosubstitutionNumberStatistic();
+    return make_unique<CosubstitutionNumberStatistic>();
   }
   else if (name == "Compensation")
   {
-    const WeightedSubstitutionCount* wsc = dynamic_cast<const WeightedSubstitutionCount*>(nijt);
+    auto wsc = dynamic_pointer_cast<const WeightedSubstitutionCount>(nijt);
     if (!wsc)
       throw Exception("Compensation distance must be used with a mapping procedure allowing weights, e.g. 'nijt=Uniformization(weight=Diff(index1=Volume, symmetrical=no))'.");
     if (!wsc->hasWeights())
       throw Exception("Compensation distance must be used with a mapping procedure with weights, e.g. 'nijt=Uniformization(weight=Diff(index1=Volume, symmetrical=no))'.");
     if (wsc->getWeights()->isSymmetric())
       throw Exception("Compensation distance must be used with a mapping procedure allowing non-symmetric weights, e.g. 'nijt=Uniformization(weight=Diff(index1=Volume, symmetrical=no))'.");
-    return new CompensationStatistic();
+    return make_unique<CompensationStatistic>();
   }
   else if (name == "MI")
   {
@@ -577,12 +585,12 @@ Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* a
       b[0] = -0.5;
       for (unsigned int i = 0; i < n + 1; ++i)
         b[i + 1] = b [i] + 1;
-      return new DiscreteMutualInformationStatistic(b);  
+      return make_unique<DiscreteMutualInformationStatistic>(b);  
     } else {
       double threshold = ApplicationTools::getDoubleParameter("threshold", args, 0.99, "", true);
       vector<double> b(3);
       b[0] = 0.; b[1] = threshold; b[2] = 10000.;
-      return new DiscreteMutualInformationStatistic(b);
+      return make_unique<DiscreteMutualInformationStatistic>(b);
     } 
   }
   else
@@ -594,11 +602,11 @@ Statistic* CoETools::getStatistic(map<string, string>& params, const Alphabet* a
 /******************************************************************************/
 
 void CoETools::computeIntraStats(
-  const DRTreeLikelihood& tl,
-  const SequenceSimulator& seqSim,
-  const SiteContainer& completeSites,
-  ProbabilisticSubstitutionMapping& mapping,
-  SubstitutionCount& nijt,
+  const DRTreeLikelihoodInterface& tl,
+  const SequenceSimulatorInterface& seqSim,
+  const SiteContainerInterface& completeSites,
+  LegacyProbabilisticSubstitutionMapping& mapping,
+  shared_ptr<SubstitutionCountInterface> nijt,
   const Statistic& statistic,
   bool computeNull,
   map<string, string>& params)
@@ -630,9 +638,9 @@ void CoETools::computeIntraStats(
     nbRateClasses = ApplicationTools::getParameter<unsigned int>("statistic.null.nb_rate_classes", params, 10, "", false, 1);
     ApplicationTools::displayResult("Number of sub-distributions", nbRateClasses);
     rateDomain.reset(new Domain(0, VectorTools::max(norms), nbRateClasses));
-    unique_ptr<DRTreeLikelihood> tlCopy(tl.clone());
+    shared_ptr<DRTreeLikelihoodInterface> tlCopy(tl.clone());
     simValues = computeIntraNullDistribution(
-        *tlCopy,
+        tlCopy,
         rateDomain.get(),
         seqSim,
         nijt,
@@ -658,8 +666,8 @@ void CoETools::computeIntraStats(
 
   ApplicationTools::displayTask("Analyse each site pair", true);
   
-  vector<size_t> classes = tl.getRateClassWithMaxPostProbOfEachSite();
-  Vdouble rates = tl.getPosteriorRateOfEachSite();
+  vector<size_t> classes = tl.getRateClassWithMaxPostProbPerSite();
+  Vdouble rates = tl.getPosteriorRatePerSite();
 
   for (size_t i = 0; i < nbSites; i++)
   {
@@ -688,9 +696,9 @@ void CoETools::computeIntraStats(
 
       //Then print to file:
       statOut << "[";
-      statOut << completeSites.getSite(i).getPosition();
+      statOut << completeSites.site(i).getCoordinate();
       statOut << ";";
-      statOut << completeSites.getSite(j).getPosition();
+      statOut << completeSites.site(j).getCoordinate();
       statOut << "]\t";
       statOut << stat;
       statOut << "\t";
@@ -722,12 +730,12 @@ void CoETools::computeIntraStats(
 /******************************************************************************/
 
 void CoETools::computeInterStats(
-  const DiscreteRatesAcrossSitesTreeLikelihood& tl1,
-  const DiscreteRatesAcrossSitesTreeLikelihood& tl2,
-  const SiteContainer& completeSites1,
-  const SiteContainer& completeSites2,
-  ProbabilisticSubstitutionMapping& mapping1,
-  ProbabilisticSubstitutionMapping& mapping2,
+  const DiscreteRatesAcrossSitesTreeLikelihoodInterface& tl1,
+  const DiscreteRatesAcrossSitesTreeLikelihoodInterface& tl2,
+  const SiteContainerInterface& completeSites1,
+  const SiteContainerInterface& completeSites2,
+  LegacyProbabilisticSubstitutionMapping& mapping1,
+  LegacyProbabilisticSubstitutionMapping& mapping2,
   const Statistic& statistic,
   map<string, string>& params)
 {
@@ -770,10 +778,10 @@ void CoETools::computeInterStats(
 
   ApplicationTools::displayTask("Analyse each site pair", true);
     
-  vector<size_t> classes1 = tl1.getRateClassWithMaxPostProbOfEachSite();
-  vector<size_t> classes2 = tl2.getRateClassWithMaxPostProbOfEachSite();
-  Vdouble rates1   = tl1.getPosteriorRateOfEachSite();
-  Vdouble rates2   = tl2.getPosteriorRateOfEachSite();
+  vector<size_t> classes1 = tl1.getRateClassWithMaxPostProbPerSite();
+  vector<size_t> classes2 = tl2.getRateClassWithMaxPostProbPerSite();
+  Vdouble rates1   = tl1.getPosteriorRatePerSite();
+  Vdouble rates2   = tl2.getPosteriorRatePerSite();
 
   for (size_t i = 0; i < nbSites1; i++)
   {
@@ -804,9 +812,9 @@ void CoETools::computeInterStats(
 
       //Then print to file:
       statOut << "[";
-      statOut << completeSites1.getSite(i).getPosition();
+      statOut << completeSites1.site(i).getCoordinate();
       statOut << ";";
-      statOut << completeSites2.getSite(j).getPosition();
+      statOut << completeSites2.site(j).getCoordinate();
       statOut << "]\t";
       statOut << stat;
       statOut << "\t";
@@ -825,11 +833,11 @@ void CoETools::computeInterStats(
 
 /******************************************************************************/
 
-vector< vector<double> >* CoETools::computeIntraNullDistribution(
-    DRTreeLikelihood& drtl,
+vector<vector<double>>* CoETools::computeIntraNullDistribution(
+    shared_ptr<DRTreeLikelihoodInterface> drtl,
     const Domain* rateDomain,
-    const SequenceSimulator& seqSim,
-    SubstitutionCount& nijt,
+    const SequenceSimulatorInterface& seqSim,
+    shared_ptr<SubstitutionCountInterface> nijt,
     const Statistic& statistic,
     map<string, string>& params)
 {
@@ -866,12 +874,12 @@ vector< vector<double> >* CoETools::computeIntraNullDistribution(
 /******************************************************************************/
 
 void CoETools::computeInterNullDistribution(
-    DRTreeLikelihood& drtl1,
-    DRTreeLikelihood& drtl2,
-    const SequenceSimulator& seqSim1,
-    const SequenceSimulator& seqSim2,
-    SubstitutionCount& nijt1,
-    SubstitutionCount& nijt2,
+    shared_ptr<DRTreeLikelihoodInterface> drtl1,
+    shared_ptr<DRTreeLikelihoodInterface> drtl2,
+    const SequenceSimulatorInterface& seqSim1,
+    const SequenceSimulatorInterface& seqSim2,
+    shared_ptr<SubstitutionCountInterface> nijt1,
+    shared_ptr<SubstitutionCountInterface> nijt2,
     const Statistic& statistic,
     map<string, string>& params)
 {
@@ -939,7 +947,7 @@ vector<unsigned int> CandidateGroupSet::currentCandidateSite() const
 
 /******************************************************************************/
 
-bool CandidateGroupSet::analyseSimulations(const ProbabilisticSubstitutionMapping& mapping)
+bool CandidateGroupSet::analyseSimulations(const LegacyProbabilisticSubstitutionMapping& mapping)
 {
   Vdouble norms = AnalysisTools::computeNorms(mapping);
   //Analyse each site in the set:
@@ -1033,9 +1041,9 @@ bool CandidateGroupSet::addSimulatedSite(unsigned int groupIndex, unsigned int s
 
 void CoETools::computePValuesForCandidateGroups(
     CandidateGroupSet& candidates,
-    DRTreeLikelihood& drtl,
-    const SequenceSimulator& seqSim,
-    SubstitutionCount& nijt,
+    shared_ptr<DRTreeLikelihoodInterface> drtl,
+    const SequenceSimulatorInterface& seqSim,
+    shared_ptr<SubstitutionCountInterface> nijt,
     map<string, string>& params,
     unsigned int maxTrials)
 {
@@ -1048,36 +1056,33 @@ void CoETools::computePValuesForCandidateGroups(
   {
     if (candidates.getVerbose() >= 2)
       ApplicationTools::displayResult("Simulate ", TextTools::toString(repRAM) + " sites.");
-    SiteContainer* sites = seqSim.simulate(repRAM);
-    drtl.setData(*sites);
-    drtl.initialize();
-    ProbabilisticSubstitutionMapping* mapping;
+    auto sites = seqSim.simulate(repRAM);
+    drtl->setData(*sites);
+    drtl->initialize();
+    unique_ptr<LegacyProbabilisticSubstitutionMapping> mapping;
     if (average)
     {
       if (joint)
       {
-        mapping = SubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
+        mapping = LegacySubstitutionMappingTools::computeSubstitutionVectors(drtl, nijt, false);
       }
       else
       {
-        mapping = SubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, nijt, false);
+        mapping = LegacySubstitutionMappingTools::computeSubstitutionVectorsMarginal(drtl, nijt, false);
       }
     }
     else
     {
       if (joint)
       {
-        mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, nijt, false);
+        mapping = LegacySubstitutionMappingTools::computeSubstitutionVectorsNoAveraging(drtl, nijt, false);
       }
       else
       {
-        mapping = SubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, nijt, false);
+        mapping = LegacySubstitutionMappingTools::computeSubstitutionVectorsNoAveragingMarginal(drtl, nijt, false);
       }
     }
     test = candidates.analyseSimulations(*mapping) && (candidates.getNumberOfTrials() < maxTrials);
-
-    delete sites;
-    delete mapping;
   }
 }
 

@@ -46,10 +46,10 @@ knowledge of the CeCILL license and that you accept its terms.
 #include <Bpp/Numeric/VectorExceptions.h>
 #include <Bpp/Numeric/VectorTools.h>
 
-// From PhylLib:
-#include <Bpp/Phyl/Node.h>
-#include <Bpp/Phyl/Mapping/ProbabilisticSubstitutionMapping.h>
-#include <Bpp/Phyl/Mapping/SubstitutionMappingTools.h>
+// From bpp-phyl:
+#include <Bpp/Phyl/Tree/Node.h>
+#include <Bpp/Phyl/Legacy/Mapping/ProbabilisticSubstitutionMapping.h>
+#include <Bpp/Phyl/Legacy/Mapping/SubstitutionMappingTools.h>
 
 using namespace bpp;
 
@@ -74,7 +74,7 @@ class Distance
     virtual void deleteWeights() = 0;
     virtual const Vdouble* getWeights() const = 0;
     virtual bool hasWeights() const = 0;
-    virtual void setStatisticAsProperty(Node& node, const ProbabilisticSubstitutionMapping& mapping) const = 0;
+    virtual void setStatisticAsProperty(Node& node, const LegacyProbabilisticSubstitutionMapping& mapping) const = 0;
 };
 
 class AbstractDistance : public Distance 
@@ -106,14 +106,14 @@ class AbstractDistance : public Distance
     void deleteWeights() { delete weights_; weights_ = 0; }
     const Vdouble* getWeights() const { return weights_; }
     bool hasWeights() const { return weights_ != 0; }
-    void setStatisticAsProperty(Node& node, const ProbabilisticSubstitutionMapping& mapping) const
+    void setStatisticAsProperty(Node& node, const LegacyProbabilisticSubstitutionMapping& mapping) const
     {
       setStatisticAsProperty_(node, mapping);
     }
 
   protected:
     //Use statistic from the tree:
-    double setStatisticAsProperty_(Node& node, const ProbabilisticSubstitutionMapping& mapping) const
+    double setStatisticAsProperty_(Node& node, const LegacyProbabilisticSubstitutionMapping& mapping) const
     {
       double height = 0;
       if(!node.isLeaf())
@@ -343,7 +343,7 @@ class StatisticBasedDistance: public Distance
     void deleteWeights() { stat_->deleteWeights(); }
     const vector<double> * getWeights() const { return stat_->getWeights(); }
     bool hasWeights() const { return stat_->hasWeights(); }
-    void setStatisticAsProperty(Node & node, const ProbabilisticSubstitutionMapping & mapping) const
+    void setStatisticAsProperty(Node & node, const LegacyProbabilisticSubstitutionMapping & mapping) const
     {
       setStatisticAsProperty_(node, mapping);
     }
@@ -352,7 +352,7 @@ class StatisticBasedDistance: public Distance
     const Statistic * getStatistic() const { return stat_; }
     
   protected:
-    double setStatisticAsProperty_(Node & node, const ProbabilisticSubstitutionMapping & mapping) const
+    double setStatisticAsProperty_(Node & node, const LegacyProbabilisticSubstitutionMapping & mapping) const
     {
       double height = 0;
       if(!node.isLeaf())
@@ -387,7 +387,7 @@ class CompensationDistance: public Distance
     {
       return 1. - stat_.getValueForGroup(v);
     }
-    void setStatisticAsProperty(Node & node, const ProbabilisticSubstitutionMapping & mapping) const
+    void setStatisticAsProperty(Node & node, const LegacyProbabilisticSubstitutionMapping & mapping) const
     {
       Vdouble sigma(mapping.getNumberOfBranches(), 0.);
       double sumNorms = 0;
@@ -400,12 +400,12 @@ class CompensationDistance: public Distance
     virtual bool hasWeights() const { return stat_.hasWeights(); }
 
   protected:
-    void setStatisticAsProperty_(Node & node, const ProbabilisticSubstitutionMapping& mapping, Vdouble& sigma, double & sumNorms) const
+    void setStatisticAsProperty_(Node & node, const LegacyProbabilisticSubstitutionMapping& mapping, Vdouble& sigma, double & sumNorms) const
     {
       if (node.isLeaf())
       {
-        sigma = SubstitutionMappingTools::computeTotalSubstitutionVectorForSitePerBranch(mapping, TextTools::to<unsigned int>(node.getName()));
-        sumNorms = SubstitutionMappingTools::computeNormForSite(mapping, TextTools::to<unsigned int>(node.getName()));
+        sigma = LegacySubstitutionMappingTools::computeTotalSubstitutionVectorForSitePerBranch(mapping, TextTools::to<unsigned int>(node.getName()));
+        sumNorms = LegacySubstitutionMappingTools::computeNormForSite(mapping, TextTools::to<unsigned int>(node.getName()));
       }
       else
       {

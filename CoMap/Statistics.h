@@ -77,7 +77,7 @@ class Statistic
      * @return The value of the statistic for this group.
      * @throw DimensionException If the two vectors do not have the same dimension or do not match the dimension of the weights if set up. 
      */
-    virtual double getValueForGroup(const vector<const VVdouble*> & v) const = 0;
+    virtual double getValueForGroup(const vector<const VVdouble*>& v) const = 0;
 
     /**
      * @brief Set weights for this statistic.
@@ -118,7 +118,7 @@ class AbstractMinimumStatistic: public Statistic
     virtual ~AbstractMinimumStatistic() { if (weight_s) delete weight_s; }
 
   public:
-    virtual double getValueForGroup(const vector<const VVdouble*>& v) const
+    virtual double getValueForGroup(const vector<const VVdouble*>& v) const override
     {
       double mini = -log(0), val = 0.;
       for (size_t i = 1; i < v.size(); ++i)
@@ -132,24 +132,24 @@ class AbstractMinimumStatistic: public Statistic
       return mini;
     }
 
-    void setWeights(const Vdouble& w)
+    void setWeights(const Vdouble& w) override
     { 
       if(weight_s) delete weight_s;
       weight_s = new Vdouble(w);
       *weight_s /= VectorTools::sum(w);
     }
 
-    void deleteWeights()
+    void deleteWeights() override
     {
       if (weight_s) delete weight_s;
       weight_s = 0;
     }
 
-    bool hasWeights() const
+    bool hasWeights() const override
     {
       return weight_s != 0;
     }
-    const Vdouble* getWeights() const { return weight_s; }
+    const Vdouble* getWeights() const override { return weight_s; }
 
     static Vdouble getUD(const VVdouble& v, unsigned int type) {
       Vdouble u(v.size());
@@ -247,7 +247,7 @@ class CosubstitutionNumberStatistic: public AbstractMinimumStatistic
 class CompensationStatistic: public AbstractMinimumStatistic
 {
   public:
-    double getValueForPair(const VVdouble& v1, const VVdouble& v2) const
+    double getValueForPair(const VVdouble& v1, const VVdouble& v2) const override
     {
        if (v1.size() != v2.size())
         throw DimensionException("CompensationStatistic::getValueForPair.", v2.size(), v1.size());
@@ -264,7 +264,7 @@ class CompensationStatistic: public AbstractMinimumStatistic
       return 1. - sqrt(sumsq3) / (sqrt(sumsq1) + sqrt(sumsq2));
     }
 
-    double getValueForGroup(const vector<const VVdouble*>& v) const
+    double getValueForGroup(const vector<const VVdouble*>& v) const override
     {
       for (size_t j = 1; j < v.size(); j++)
       {
