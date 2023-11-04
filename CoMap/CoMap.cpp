@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
   cout << endl;
   cout << endl;
   cout << "***********************************************************" << endl;
-  cout << "* This is CoMap        version 1.6.0       date: 01/11/23 *" << endl;
+  cout << "* This is CoMap        version 1.6.0a      date: 01/11/23 *" << endl;
   cout << "*     Coevolution Detection Using Substitution Mapping    *" << endl;
   cout << "***********************************************************" << endl;
   cout << endl;
