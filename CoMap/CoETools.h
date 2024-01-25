@@ -302,17 +302,17 @@ class CoETools
   public:
     
     static void readData(
-      shared_ptr<TreeTemplate<Node>>         & tree,
-      shared_ptr<Alphabet>                   & alphabet,
-      shared_ptr<GeneticCode>                & geneticCode,
-      shared_ptr<VectorSiteContainer>        & allSites,
-      shared_ptr<VectorSiteContainer>        & sites,
-      shared_ptr<SubstitutionModelInterface> & model,
-      shared_ptr<SubstitutionModelSet>       & modelSet,
-      shared_ptr<DiscreteDistribution>       & rDist,
-      shared_ptr<DRTreeLikelihoodInterface>  & tl,
-      map<string, string>                    & params,
-      const string                           & suffix = "");
+      shared_ptr<TreeTemplate<Node>>            & tree,
+      shared_ptr<Alphabet>                      & alphabet,
+      shared_ptr<GeneticCode>                   & geneticCode,
+      shared_ptr<VectorSiteContainer>           & allSites,
+      shared_ptr<VectorSiteContainer>           & sites,
+      shared_ptr<SubstitutionModelInterface>    & model,
+      shared_ptr<SubstitutionModelSet>          & modelSet,
+      shared_ptr<DiscreteDistributionInterface> & rDist,
+      shared_ptr<DRTreeLikelihoodInterface>     & tl,
+      map<string, string>                       & params,
+      const string                              & suffix = "");
 
     static std::unique_ptr<LegacyProbabilisticSubstitutionMapping> getVectors(
       std::shared_ptr<const DRTreeLikelihoodInterface> drtl, 

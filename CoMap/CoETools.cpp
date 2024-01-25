@@ -76,17 +76,17 @@ using namespace std;
 /******************************************************************************/
 
 void CoETools::readData(
-  shared_ptr<TreeTemplate<Node>>         & tree,
-  shared_ptr<Alphabet>                   & alphabet,
-  shared_ptr<GeneticCode>                & geneticCode,
-  shared_ptr<VectorSiteContainer>        & allSites,
-  shared_ptr<VectorSiteContainer>        & sites,
-  shared_ptr<SubstitutionModelInterface> & model,
-  shared_ptr<SubstitutionModelSet>       & modelSet,
-  shared_ptr<DiscreteDistribution>       & rDist,
-  shared_ptr<DRTreeLikelihoodInterface>  & tl,
-  map<string, string>                    & params,
-  const string                           & suffix)
+  shared_ptr<TreeTemplate<Node>>            & tree,
+  shared_ptr<Alphabet>                      & alphabet,
+  shared_ptr<GeneticCode>                   & geneticCode,
+  shared_ptr<VectorSiteContainer>           & allSites,
+  shared_ptr<VectorSiteContainer>           & sites,
+  shared_ptr<SubstitutionModelInterface>    & model,
+  shared_ptr<SubstitutionModelSet>          & modelSet,
+  shared_ptr<DiscreteDistributionInterface> & rDist,
+  shared_ptr<DRTreeLikelihoodInterface>     & tl,
+  map<string, string>                       & params,
+  const string                              & suffix)
 {
   alphabet = SequenceApplicationTools::getAlphabet(params, suffix, true);
   allSites = SequenceApplicationTools::getSiteContainer(alphabet, params, suffix, false);

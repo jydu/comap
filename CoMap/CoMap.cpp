@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
   shared_ptr<VectorSiteContainer> allSites1, sites1;
   shared_ptr<SubstitutionModelInterface> model1;
   shared_ptr<SubstitutionModelSet> modelSet1;
-  shared_ptr<DiscreteDistribution> rDist1;
+  shared_ptr<DiscreteDistributionInterface> rDist1;
   shared_ptr<DRTreeLikelihoodInterface> tl1;
   CoETools::readData(tree1, alphabet1, geneticCode1, allSites1, sites1, model1, modelSet1, rDist1, tl1, comap.getParams(), "");
  
@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
         shared_ptr<VectorSiteContainer> allSites2, sites2;
         shared_ptr<SubstitutionModelInterface> model2;
         shared_ptr<SubstitutionModelSet> modelSet2;
-        shared_ptr<DiscreteDistribution> rDist2;
+        shared_ptr<DiscreteDistributionInterface> rDist2;
         shared_ptr<DRTreeLikelihoodInterface> tl2;
         ApplicationTools::displayMessage("\nLoading second dataset...\n");
         CoETools::readData(tree2, alphabet2, geneticCode2, allSites2, sites2, model2, modelSet2, rDist2, tl2, comap.getParams(), "2");

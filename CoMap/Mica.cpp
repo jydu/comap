@@ -186,13 +186,13 @@ int main(int argc, char *argv[])
   
 
   //Shall we use a model?
-  shared_ptr<TreeTemplate<Node>>         tree;
-  shared_ptr<DRTreeLikelihoodInterface>  tl;
-  shared_ptr<SubstitutionModelInterface> model;
-  shared_ptr<SubstitutionModelSet>       modelSet;
-  shared_ptr<DiscreteDistribution>       rDist;
-  shared_ptr<SubstitutionCountInterface> simple;
-  shared_ptr<vector<double>>             norms;
+  shared_ptr<TreeTemplate<Node>>            tree;
+  shared_ptr<DRTreeLikelihoodInterface>     tl;
+  shared_ptr<SubstitutionModelInterface>    model;
+  shared_ptr<SubstitutionModelSet>          modelSet;
+  shared_ptr<DiscreteDistributionInterface> rDist;
+  shared_ptr<SubstitutionCountInterface>    simple;
+  shared_ptr<vector<double>>                norms;
   bool withModel = ApplicationTools::getBooleanParameter("use_model", mica.getParams(), false, "", true, false);
   
   ApplicationTools::displayBooleanResult("Model of sequence evolution", withModel);
