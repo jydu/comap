@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
         rateFreqs = vector<double>(n, 1./(double)n); // Equal rates assumed for now, may be changed later (actually, in the most general case,
                                                      // we should assume a rate distribution for the root also!!!  
       }
-      shared_ptr<FrequencySetInterface> rootFreqs = PhylogeneticsApplicationTools::getRootFrequencySet(alphabet, nullptr, *sites, mica.getParams(), sharedParams, rateFreqs);
+      shared_ptr<FrequencySetInterface> rootFreqs = PhylogeneticsApplicationTools::getRootFrequencySet(alphabet, nullptr, sites, mica.getParams(), sharedParams, rateFreqs);
       
       string descGlobal = ApplicationTools::getStringParameter("nonhomogeneous_one_per_branch.shared_parameters", mica.getParams(), "", "", true, 1);
 

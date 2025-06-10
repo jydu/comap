@@ -146,7 +146,7 @@ void CoETools::readData(
                                                     // we should assume a rate distribution for the root also!!!  
     }
     map<string, string> sharedParams;
-    shared_ptr<FrequencySetInterface> rootFreqs = PhylogeneticsApplicationTools::getRootFrequencySet(alphabet, geneticCode, *sites, params, sharedParams, rateFreqs);
+    shared_ptr<FrequencySetInterface> rootFreqs = PhylogeneticsApplicationTools::getRootFrequencySet(alphabet, geneticCode, sites, params, sharedParams, rateFreqs);
     
     
     string descGlobal = ApplicationTools::getStringParameter("nonhomogeneous_one_per_branch.shared_parameters", params, "", "", true, 1);
@@ -297,7 +297,7 @@ void CoETools::readData(
     if (modelSet)
     {
       modelSet->matchParametersValues(tl->getParameters());
-      LegacyPhylogeneticsApplicationTools::printParameters(modelSet.get(), out);
+      LegacyPhylogeneticsApplicationTools::printParameters(*modelSet, out);
     }
     else
     {

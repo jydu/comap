@@ -3,11 +3,11 @@
 # Created: 22/08/2009
 
 # Global parameters
-CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
-PROJECT(comap CXX)
+cmake_minimum_required (VERSION 3.10)
+project (comap CXX)
 
 # Compile options
-SET (CMAKE_CXX_FLAGS "-std=c++14 -Wall -Weffc++ -Wshadow -Wconversion")
+add_compile_options(-std=c++14 -Wall -Weffc++ -Wshadow -Wconversion)
 
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
@@ -22,7 +22,7 @@ IF(NOT NO_DEP_CHECK)
 ENDIF(NOT NO_DEP_CHECK)
 
 IF(NO_DEP_CHECK)
-  MESSAGE("-- Dependencies checking disabled. Only distribution can be built.")
+  MESSAGE(STATUS "Dependencies checking disabled. Only distribution can be built.")
 ELSE(NO_DEP_CHECK)
 
 #static linkage?
@@ -32,8 +32,8 @@ IF(NOT BUILD_STATIC)
       FORCE)
 ENDIF()
 IF(BUILD_STATIC)
-  MESSAGE("-- Static linkage requested.")
-  SET(CMAKE_CXX_FLAGS "-static -static-libgcc -static-libstdc++ ${CMAKE_CXX_FLAGS}")
+  message(STATUS "Static linkage requested.")
+  add_compile_options(-static -static-libgcc -static-libstdc++)
 ENDIF()
 
 IF (CMAKE_INSTALL_PREFIX)

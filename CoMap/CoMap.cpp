@@ -55,6 +55,7 @@ using namespace std;
 #include <Bpp/Seq/SiteTools.h>
 #include <Bpp/Seq/App/SequenceApplicationTools.h>
 #include <Bpp/Seq/Container/SequenceContainerTools.h>
+#include <Bpp/Seq/Io/PhylipDistanceMatrixFormat.h>
 
 // From bpp-phyl:
 #include <Bpp/Phyl/App/PhylogeneticsApplicationTools.h>
@@ -64,7 +65,6 @@ using namespace std;
 #include <Bpp/Phyl/Mapping/WeightedSubstitutionCount.h>
 #include <Bpp/Phyl/Legacy/AncestralStateReconstruction.h>
 #include <Bpp/Phyl/Distance/DistanceMethod.h>
-#include <Bpp/Phyl/Io/PhylipDistanceMatrixFormat.h>
 #include <Bpp/Phyl/Io/Newick.h>
 
 using namespace bpp;
