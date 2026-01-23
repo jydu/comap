@@ -13,9 +13,9 @@
 @c %**end of header
 
 @copying
-This is the manual of CoMap, version 1.5.5.
+This is the manual of CoMap, version 1.6.0.
 
-Copyright @copyright{} 2006-2018 Julien Dutheil
+Copyright @copyright{} 2006-2026 Julien Dutheil
 @end copying
 
 @titlepage
@@ -128,8 +128,7 @@ Parameters of the rate distribution (shape parameter of the gamma law, proportio
 The corresponding options are described in the Bio++ Program Suite manual.
 Note however that CoMap do not perform topology estimation.
 The tree topology will is considered to be know prior to the analysis.
-The tree can however contain multifurcations (WARNING: not fully tested, please report any bug you may found!). 
-
+The tree can however contain multifurcations.
 
 @c ------------------------------------------------------------------------------------------------------------------
 
