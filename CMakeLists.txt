@@ -8,14 +8,8 @@ project(comap CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
 # Compile options
-add_compile_options(
-    -Wall
-    -Weffc++
-    -Wshadow
-    -Wconversion
-)
+add_compile_options(-Wall -Weffc++ -Wshadow -Wconversion)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE
@@ -48,10 +42,6 @@ else(NO_DEP_CHECK)
     if(BUILD_STATIC)
         message(STATUS "Static linkage requested.")
     endif()
-
-    if(CMAKE_INSTALL_PREFIX)
-        set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}" ${CMAKE_PREFIX_PATH})
-    endif(CMAKE_INSTALL_PREFIX)
 
     # Check compression program
     # COMPRESS_PROGRAM controls the choice of program
@@ -88,7 +78,7 @@ else(NO_DEP_CHECK)
         # Generate command line args (always add -c to output compressed file to stdout)
         if(${COMPRESS_PROGRAM} STREQUAL "gzip")
             # -n for no timestamp in files (reproducible builds)
-            set(COMPRESS_ARGS -c -n)
+            set(COMPRESS_ARGS -c -n -9)
         else()
             set(COMPRESS_ARGS -c)
         endif()
